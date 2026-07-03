@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 
@@ -33,12 +33,12 @@ $multiPolygonPattern = "MULTIPOLYGON( )\(" . $polygonPattern . "(,( )*" . $polyg
 $anyPolygonPattern = "(" . $singlePolygonPattern . ")|(" . $multiPolygonPattern . ")";
 $pattern = "/" . $anyPolygonPattern . "(;" . $anyPolygonPattern . ")*/";
 
-if (!preg_match($pattern, $polygonList)) {
+if (!preg_match($pattern, (string) $polygonList)) {
 	echo "not a polygon.";
 	die();
 }
 
-$polygonArray = explode(";", $polygonList);
+$polygonArray = explode(";", (string) $polygonList);
 
 $sql = "SELECT astext(multi(st_union(geom))) FROM (";
 
@@ -52,10 +52,10 @@ for ($i = 0; $i < count($polygonArray); $i++) {
 $sql .= ") as a";
 $res = db_query($sql);    
 
-$polygonArray = array();
+$polygonArray = [];
 $row = db_fetch_array($res);
 
-$data = array("polygon" => $row[0]);
+$data = ["polygon" => $row[0]];
 
 $output = $json->encode($data);
 

@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="filteredUser_Gui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -124,7 +124,7 @@ function updateMail(list, all){
 <body>
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 
 $fieldHeight = 20;
 
@@ -136,7 +136,7 @@ $cnt_gui_group = 0;
 $exists = false;
 $cnt_gui_user = 0;
 $cnt_gui_logged_user = 0;
-$gui_id_array = array();
+$gui_id_array = [];
 
 $logged_user_name = Mapbender::session()->get("mb_user_name");
 $logged_user_id = Mapbender::session()->get("mb_user_id");
@@ -147,14 +147,14 @@ if($insert){
 		for($i=0; $i<count($selected_gui); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from gui_mb_user where fkey_mb_user_id = $1 and fkey_gui_id = $2";
-			$v = array($selected_user,$selected_gui[$i]);
-			$t = array('i','s');
+			$v = [$selected_user, $selected_gui[$i]];
+			$t = ['i', 's'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
     			$sql_insert = "INSERT INTO gui_mb_user(fkey_mb_user_id, fkey_gui_id) VALUES($1, $2);";
-    			$v = array($selected_user,$selected_gui[$i]);
-    			$t = array('i','s');
+    			$v = [$selected_user, $selected_gui[$i]];
+    			$t = ['i', 's'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -164,8 +164,8 @@ if($remove){
 	if(count($remove_gui)>0){
 		for($i=0; $i<count($remove_gui); $i++){
 			$sql_remove = "DELETE FROM gui_mb_user WHERE fkey_gui_id = $1 and fkey_mb_user_id = $2";
-			$v = array($remove_gui[$i],$selected_user);
-			$t = array('s','i');
+			$v = [$remove_gui[$i], $selected_user];
+			$t = ['s', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -174,8 +174,8 @@ if($remove){
 /*get owner user **********************************************************************************/
 
 $sql_user = "SELECT * FROM mb_user WHERE mb_user_owner = $1 ORDER BY mb_user_name";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 $res_user = db_prep_query($sql_user,$v,$t);
 while($row = db_fetch_array($res_user)){
 	$user_id[$cnt_user] = $row["mb_user_id"];
@@ -201,9 +201,9 @@ $sql_user_mb_gui .= "INNER JOIN gui ON gui_mb_user.fkey_gui_id = gui.gui_id ";
 $sql_user_mb_gui .= "WHERE gui_mb_user.fkey_mb_user_id = $1 ";
 $sql_user_mb_gui .= " ORDER BY gui.gui_name";
 
-if(!$selected_user){$v = array($user_id[0]);}
-if($selected_user){$v = array($selected_user);}
-$t = array('i');
+if(!$selected_user){$v = [$user_id[0]];}
+if($selected_user){$v = [$selected_user];}
+$t = ['i'];
 
 $res_user_mb_gui = db_prep_query($sql_user_mb_gui,$v,$t);
 while($row = db_fetch_array($res_user_mb_gui)){

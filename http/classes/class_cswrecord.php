@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_user.php");
-require_once(dirname(__FILE__)."/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_user.php");
+require_once(__DIR__."/class_administration.php");
 
 /**
  * CSW main class to hold catalog object
@@ -29,17 +29,17 @@ require_once(dirname(__FILE__)."/class_administration.php");
  */
 class cswrecord{
 	
-	var $getrecords_status;
-	var $getrecords_exception;
-	var $getrecords_exception_text;
-	var $elementSet;
-	var $numberOfRecordsMatched;
+	public $getrecords_status;
+	public $getrecords_exception;
+	public $getrecords_exception_text;
+	public $elementSet;
+	public $numberOfRecordsMatched;
 	
 	//Store GetRecords response XML for future caching needs
-	var $getRecordsDoc;
+	public $getRecordsDoc;
 	
 	//Array of cswSummaryRecord Objects
-	var $SummaryRecordsArray = array();
+	public $SummaryRecordsArray = [];
 	
 	//Constructor
 	function __construct(){
@@ -96,14 +96,14 @@ class cswrecord{
 			$this->getrecords_status=true;
 		}
 		//check if returned string has an exeption defined
-		$testException = strpos($data, "ows:Exception");
+		$testException = strpos((string) $data, "ows:Exception");
 		if ($testException === false) {
 			
 		}
 		else {
 			$this->getrecords_status=true;
 			$this->getrecords_exception=true;
-			$this->getrecords_exception_text = urlencode($data);
+			$this->getrecords_exception_text = urlencode((string) $data);
 			$e = new mb_exception("CAT getrecords returned an ows:exception!");
 			return false;
 		}
@@ -125,7 +125,7 @@ class cswrecord{
 		xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 		xml_parser_set_option($parser,XML_OPTION_SKIP_WHITE,1);
 		xml_parser_set_option($parser,XML_OPTION_TARGET_ENCODING,CHARSET);
-		xml_parse_into_struct($parser,$data,$value_array,$index_array);
+		xml_parse_into_struct($parser,(string) $data,$value_array,$index_array);
 		
 		//echo "values:".print_r($value_array);
 		//echo "index:".print_r($vindex_array);
@@ -142,12 +142,12 @@ class cswrecord{
 			//Version 2.0.2
 			//@todo: handle other profiles
 			
-			if((mb_strtoupper($element['tag']) == "CSW:SEARCHRESULTS" OR mb_strtoupper($element['tag']) == "SEARCHRESULTS") && $element['type'] == "open"){
-				$this->elementSet = $element['attributes'][elementSet];
-				$this->numberOfRecordsMatched = $element['attributes'][numberOfRecordsMatched];
+			if((mb_strtoupper((string) $element['tag']) == "CSW:SEARCHRESULTS" OR mb_strtoupper((string) $element['tag']) == "SEARCHRESULTS") && $element['type'] == "open"){
+				$this->elementSet = $element['attributes']["ELEMENTSET"];
+				$this->numberOfRecordsMatched = $element['attributes']["NUMBEROFRECORDSMATCHED"];
 			}
 			
-			if((mb_strtoupper($element['tag']) == "CSW:SUMMARYRECORD" OR mb_strtoupper($element['tag']) == "SUMMARYRECORD") && $element['type'] == "open"){
+			if((mb_strtoupper((string) $element['tag']) == "CSW:SUMMARYRECORD" OR mb_strtoupper((string) $element['tag']) == "SUMMARYRECORD") && $element['type'] == "open"){
 				//Create SummaryRecords Object
 				$summaryObj = new cswSummaryRecord();
 			}
@@ -155,41 +155,41 @@ class cswrecord{
 			//SummaryRecord elements
 			
 			//ID
-			if((mb_strtoupper($element['tag']) == "DC:IDENTIFIER" OR mb_strtoupper($element['tag']) == "IDENTIFIER")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:IDENTIFIER" OR mb_strtoupper((string) $element['tag']) == "IDENTIFIER")){
 				$summaryObj->identifier = $element['value'];
 			}
 			//Title
-			if((mb_strtoupper($element['tag']) == "DC:TITLE" OR mb_strtoupper($element['tag']) == "TITLE")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:TITLE" OR mb_strtoupper((string) $element['tag']) == "TITLE")){
 				$summaryObj->title = $element['value'];
 			}
 			
 			//@todo handle multiple subject elements
 			//Subject
-			if((mb_strtoupper($element['tag']) == "DC:SUBJECT" OR mb_strtoupper($element['tag']) == "SUBJECT")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:SUBJECT" OR mb_strtoupper((string) $element['tag']) == "SUBJECT")){
 				$summaryObj->subject = $element['value'];
 			}
 			
 			//Abstract
-			if((mb_strtoupper($element['tag']) == "DC:ABSTRACT" OR mb_strtoupper($element['tag']) == "ABSTRACT" OR mb_strtoupper($element['tag']) == "DCT:ABSTRACT")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:ABSTRACT" OR mb_strtoupper((string) $element['tag']) == "ABSTRACT" OR mb_strtoupper((string) $element['tag']) == "DCT:ABSTRACT")){
 				$summaryObj->abstract = $element['value'];
 			}
 			
 			//Modified
-			if((mb_strtoupper($element['tag']) == "DC:MODIFIED" OR mb_strtoupper($element['tag']) == "MODIFIED")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:MODIFIED" OR mb_strtoupper((string) $element['tag']) == "MODIFIED")){
 				$summaryObj->modified = $element['value'];
 			}
 			
 			//Type
-			if((mb_strtoupper($element['tag']) == "DC:TYPE" OR mb_strtoupper($element['tag']) == "TYPE")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:TYPE" OR mb_strtoupper((string) $element['tag']) == "TYPE")){
 				$summaryObj->type = $element['value'];
 			}
 			
 			//Format
-			if((mb_strtoupper($element['tag']) == "DC:FORMAT" OR mb_strtoupper($element['tag']) == "FORMAT")){
+			if((mb_strtoupper((string) $element['tag']) == "DC:FORMAT" OR mb_strtoupper((string) $element['tag']) == "FORMAT")){
 				$summaryObj->format = $element['value'];
 			}
 			
-			if((mb_strtoupper($element['tag']) == "CSW:SUMMARYRECORD" OR mb_strtoupper($element['tag']) == "SUMMARYRECORD") && $element['type'] == "close"){
+			if((mb_strtoupper((string) $element['tag']) == "CSW:SUMMARYRECORD" OR mb_strtoupper((string) $element['tag']) == "SUMMARYRECORD") && $element['type'] == "close"){
 				//{ush SummaryRecords Object to Array
 				array_push($this->SummaryRecordsArray,$summaryObj);
 			}
@@ -216,7 +216,7 @@ class cswrecord{
 	 * @return unknown_type
 	 */
 	function stripEndlineAndCarriageReturn($string) {
-	  	return preg_replace("/\n/", "", preg_replace("/\r/", " ", $string));
+	  	return preg_replace("/\n/", "", preg_replace("/\r/", " ", (string) $string));
 	}
 	
 }
@@ -230,13 +230,13 @@ class cswrecord{
 class cswSummaryRecord{
 	
 	//Vars
-	var $identifier;
-	var $title;
-	var $subject;
-	var $abstract;
-	var $modified;
-	var $type;
-	var $format;
+	public $identifier;
+	public $title;
+	public $subject;
+	public $abstract;
+	public $modified;
+	public $type;
+	public $format;
 	
 	//Constructor
 	function __construct(){
@@ -267,7 +267,7 @@ class cswSummaryRecord{
 	
 	//return abstract
 	public function getAbstract(){
-		$this->abstract = substr($this->abstract,0,150)."...";
+		$this->abstract = substr((string) $this->abstract,0,150)."...";
 		return $this->abstract;
 		
 	}

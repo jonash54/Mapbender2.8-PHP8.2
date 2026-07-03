@@ -2,6 +2,6 @@
 //
 // wrappers to cover version dependent functions
 //
-require_once dirname(__FILE__) . "/mbw_split.php";
+require_once __DIR__ . "/mbw_split.php";
 
 ?>

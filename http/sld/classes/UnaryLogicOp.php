@@ -26,13 +26,6 @@
 class UnaryLogicOp
 {
 	/**
-	 * Defines the type of logical operation.
-	 * Possible value: not
-	 * @var string
-	 */
-	var $name = "";
-	
-	/**
 	 * Array containing the operations of this filter
 	 * @see UnaryLogicOp
 	 * @see BinaryLogicOp
@@ -42,28 +35,33 @@ class UnaryLogicOp
 	 * @see PropertyIsBetween
 	 * @var array
 	 */
-	var $operations = array();
+	public $operations = [];
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * constructor tha directly fills the $name variable
 	 * @param string $name the type of this logical operation
 	 */
-	function UnaryLogicOp($name)
-	{
-		$this->name = $name;
-	}
+	function __construct(
+     /**
+      * Defines the type of logical operation.
+      * Possible value: not
+      */
+     public $name
+ )
+ {
+ }
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -102,7 +100,7 @@ class UnaryLogicOp
 		$temp .= $offset."  <input type=\"hidden\" name=\"".$id."_name\" value=\"".$this->name."\">\n";
 		$temp .= $offset."  ".$this->name."<br>\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."   <a class=\"edit\" href=\"?function=deleteoperation&id=".$this->parent."&number=".$number."\">";
 		$temp .= "<img src='./img/minus.gif' border='0'>&nbsp;l&ouml;schen</a>\n";

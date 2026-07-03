@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 echo "var mod_scaleHint_target = '".$e_target[0]."';";
 echo "var mod_scaleHint_min = '".$e_target[1]."';";

@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_3.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_gml_factory.php");
+require_once(__DIR__."/../classes/class_gml_3.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 /**
  * Creates GML 3 objects from a GML documents.
@@ -36,7 +36,7 @@ class Gml_3_Factory extends GmlFactory {
 	 * @return Gml_3
 	 * @param $geoJson String
 	 */
-	public function createFromGeoJson ($geoJson) {
+	public function createFromGeoJson ($geoJson, $gml) {
 		$gml3 = new Gml_3();
 		
 		return parent::createFromGeoJson($geoJson, $gml3);
@@ -48,10 +48,14 @@ class Gml_3_Factory extends GmlFactory {
 	 * @return Gml_3
 	 * @param $xml String
 	 */
-	public function createFromXml ($xml, $wfsConf, $myWfs=false, $myFeatureType=false, $geomColumnName=false) {
-		$gml3 = new Gml_3();
+	// LSP-compatible signature: parent::createFromXml takes ($xml, $wfsConf,
+	// $gml, $myWfs, $myFeatureType, $geomColumnName). The third arg is
+	// internal here (always a fresh Gml_3) so it stays parameter-positional
+	// but ignored, instead of breaking PHP 8 strict signature checks.
+	public function createFromXml ($xml, $wfsConf, $gml = null, $myWfs=false, $myFeatureType=false, $geomColumnName=false) {
+		$gml3 = $gml instanceof Gml_3 ? $gml : new Gml_3();
 		return parent::createFromXml($xml, $wfsConf, $gml3, $myWfs, $myFeatureType, $geomColumnName);
-	}	
+	}
 
 	public static function getDimensionFromNode ($domNode) {
 		if (!$domNode->hasAttribute("srsDimension")) {
@@ -65,8 +69,8 @@ class Gml_3_Factory extends GmlFactory {
 	}
 	
 	function findNameSpace($s){
-		list($ns,$FeaturePropertyName) = explode(":",$s);
-		$nodeName = array('ns' => $ns, 'value' => $FeaturePropertyName);
+		[$ns, $FeaturePropertyName] = explode(":",(string) $s);
+		$nodeName = ['ns' => $ns, 'value' => $FeaturePropertyName];
 		return $nodeName;
 	}
 
@@ -113,7 +117,7 @@ class Gml_3_Factory extends GmlFactory {
 			$coordsDom = dom_import_simplexml($Coords);
 			
 			$dim = self::getDimensionFromNode($coordsDom);
-			$coordArray = explode(' ', trim($coordsDom->nodeValue));
+			$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 			for ($i = 0; $i < count($coordArray); $i += $dim) {
 				$x = $coordArray[$i];
 				$y = $coordArray[$i+1];
@@ -131,7 +135,7 @@ class Gml_3_Factory extends GmlFactory {
 					$coordsDom = dom_import_simplexml($coordinate);
 						
 					$dim = self::getDimensionFromNode($coordsDom);
-					$coordArray = explode(' ', trim($coordsDom->nodeValue));
+					$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 					for ($i = 0; $i < count($coordArray); $i += $dim) {
 						$x = $coordArray[$i];
 						$y = $coordArray[$i+1];
@@ -159,12 +163,12 @@ class Gml_3_Factory extends GmlFactory {
 		$cnt=0;
 		foreach ($allCoords as $Coords) {
 			
-			$gmlMultiLine->lineArray[$cnt] = array();
+			$gmlMultiLine->lineArray[$cnt] = [];
 			
 			$coordsDom = dom_import_simplexml($Coords);
 				
 			$dim = self::getDimensionFromNode($coordsDom);
-			$coordArray = explode(' ', trim($coordsDom->nodeValue));
+			$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 			for ($i = 0; $i < count($coordArray); $i += $dim) {
 				$x = $coordArray[$i];
 				$y = $coordArray[$i+1];
@@ -192,7 +196,7 @@ class Gml_3_Factory extends GmlFactory {
 			$coordsDom = dom_import_simplexml($Coords);
 				
 			$dim = self::getDimensionFromNode($coordsDom);
-			$coordArray = explode(' ', trim($coordsDom->nodeValue));
+			$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 			for ($i = 0; $i < count($coordArray); $i += $dim) {
 				$x = $coordArray[$i];
 				$y = $coordArray[$i+1];
@@ -218,12 +222,12 @@ class Gml_3_Factory extends GmlFactory {
 		$cnt=0;
 		foreach ($allCoords as $Coords) {
 			
-			$gmlMultiLine->lineArray[$cnt] = array();
+			$gmlMultiLine->lineArray[$cnt] = [];
 			
 			$coordsDom = dom_import_simplexml($Coords);
 
 			$dim = self::getDimensionFromNode($coordsDom);
-			$coordArray = explode(' ', trim($coordsDom->nodeValue));
+			$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 			for ($i = 0; $i < count($coordArray); $i += $dim) {
 				$x = $coordArray[$i];
 				$y = $coordArray[$i+1];
@@ -249,22 +253,22 @@ class Gml_3_Factory extends GmlFactory {
 		$cnt=0;
 		foreach ($allPolygons as $polygon) {
 			$allCoords = $polygon->xpath("gml:exterior/gml:LinearRing/gml:posList");
-				
-			$gmlMultiPolygon->polygonArray[$cnt] = array();
+
+			$gmlMultiPolygon->polygonArray[$cnt] = [];
 			foreach ($allCoords as $Coords) {
-				
+
 				$coordsDom = dom_import_simplexml($Coords);
 
 				$dim = self::getDimensionFromNode($coordsDom);
-				$coordArray = explode(' ', trim($coordsDom->nodeValue));
+				$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 				for ($i = 0; $i < count($coordArray); $i += $dim) {
 					$x = $coordArray[$i];
 					$y = $coordArray[$i+1];
 					$gmlMultiPolygon->addPoint($x, $y, $cnt);
 				}
 			}
-			
-			$gmlMultiPolygon->innerRingArray[$cnt] = array();
+
+			$gmlMultiPolygon->innerRingArray[$cnt] = [];
 			$innerRingNodeArray = $polygon->xpath("gml:interior");
 			if ($innerRingNodeArray) {
 				$ringCount = 0;
@@ -274,9 +278,9 @@ class Gml_3_Factory extends GmlFactory {
 						$coordinates = $node->xpath("gml:posList");
 						foreach ($coordinates as $coordinate) {
 							$coordsDom = dom_import_simplexml($coordinate);
-								
+
 							$dim = self::getDimensionFromNode($coordsDom);
-							$coordArray = explode(' ', trim($coordsDom->nodeValue));
+							$coordArray = explode(' ', trim((string) $coordsDom->nodeValue));
 							for ($i = 0; $i < count($coordArray); $i += $dim) {
 								$x = $coordArray[$i];
 								$y = $coordArray[$i+1];
@@ -284,7 +288,7 @@ class Gml_3_Factory extends GmlFactory {
 							}
 						}
 						$ringCount++;
-						
+
 					}
 				}
 			}

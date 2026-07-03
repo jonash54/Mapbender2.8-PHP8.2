@@ -4,8 +4,8 @@
 # This program is dual licensed under the GNU General Public License
 # and Simplified BSD license.
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_administration.php";
 /*
  * Simple webservice to resolve spatial_dataset_identifiers for layer_ids from the mapbender registry
  */
@@ -14,7 +14,7 @@ if (isset($_REQUEST["layerIds"]) & $_REQUEST["layerIds"] != "") {
     //validate to csv integer list
     $testMatch = $_REQUEST["layerIds"];
     $pattern = '/^[\d,]*$/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         //echo 'resourceIds: <b>'.$testMatch.'</b> is not valid.<br/>';
         echo 'Parameter <b>layerIds</b> is not valid (integer or cs integer list).<br/>';
         die();
@@ -23,9 +23,9 @@ if (isset($_REQUEST["layerIds"]) & $_REQUEST["layerIds"] != "") {
     $testMatch = NULL;
 }
 //transform to array
-$layerIdsArray = explode(',' ,$layerIds);
-$v = array();
-$t = array();
+$layerIdsArray = explode(',' ,(string) $layerIds);
+$v = [];
+$t = [];
 $sql = "SELECT metadata_id, uuid, datasetid, datasetid_codespace from mb_metadata WHERE ";
 $sql .= "metadata_id IN (SELECT fkey_metadata_id FROM ows_relation_metadata WHERE fkey_layer_id IN ";
 $sql .= "(";
@@ -37,7 +37,7 @@ for($i=0; $i<count($layerIdsArray); $i++){
 }
 $sql .= ")) AND searchable IS TRUE";
 $res = db_prep_query($sql, $v, $t);
-$datasetIdentifier = array();
+$datasetIdentifier = [];
 while($row = db_fetch_array($res)){
     $orgaInfo = $admin->getOrgaInfoFromRegistry('metadata', $row['metadata_id'], 0);
     $codespace = $admin->getIdentifierCodespaceFromRegistry($orgaInfo, $row);

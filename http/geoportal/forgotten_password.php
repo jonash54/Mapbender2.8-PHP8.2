@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_user.php");
 
 extract($_GET, EXTR_OVERWRITE);extract($_POST, EXTR_OVERWRITE);
 
@@ -9,7 +9,7 @@ function forgotten_password() {
 	if(
 		!isset($_REQUEST["Benutzername"]) || !isset($_REQUEST["EMail"]) || ($_REQUEST["Benutzername"] == 'guest') || 
 		empty($_REQUEST["Benutzername"]) || empty($_REQUEST["EMail"]) || 
-		!(bool)trim($_REQUEST["Benutzername"]) || !(bool)trim($_REQUEST["EMail"])
+		!(bool)trim((string) $_REQUEST["Benutzername"]) || !(bool)trim((string) $_REQUEST["EMail"])
 	) {
 		return -1;
 	}
@@ -19,8 +19,8 @@ function forgotten_password() {
 	}
 
 	$administration = new administration();
-	define("USER_NAME", trim($_REQUEST["Benutzername"]));
-	define("USER_EMAIL",trim($_REQUEST["EMail"]));
+	define("USER_NAME", trim((string) $_REQUEST["Benutzername"]));
+	define("USER_EMAIL",trim((string) $_REQUEST["EMail"]));
 
 	if(
 		!$administration->getUserIdByUserName(USER_NAME) || 

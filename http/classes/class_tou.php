@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 class tou{
  	private $id;
@@ -20,7 +20,7 @@ class tou{
  		$id = false;
 		$this->json = new Mapbender_JSON();
 
-		$resultObject = array();
+		$resultObject = [];
  		new mb_notice("mapbender tou instantiated ... ");
  	}
 
@@ -28,23 +28,17 @@ class tou{
 		if (!Mapbender::session()->exists("acceptedTou")) {
 			//create one initially
 			$acceptedTou = new stdClass;
-			$acceptedTou = (object) array(
-				'wms' => array(),
-				'wfs' => array()
-				);
+			$acceptedTou = (object) ['wms' => [], 'wfs' => []];
 			
 			$acceptedTou->{$serviceType}[0] = $serviceId;
 			$acceptedTouJson = $this->json->encode($acceptedTou);
 			Mapbender::session()->set("acceptedTou",$acceptedTouJson);
-			$resultObj = array(
-				"setTou" => 1,
-				"message" => "New session var acceptedTou generated"
-			);
+			$resultObj = ["setTou" => 1, "message" => "New session var acceptedTou generated"];
 			return $resultObj;
 		} else {
 			//tou has been set before - add an element to the corresponding list
 			$acceptedTou = Mapbender::session()->get("acceptedTou");
-			$acceptedTou = json_decode($acceptedTou);
+			$acceptedTou = json_decode((string) $acceptedTou);
 			#print_r($acceptedTou);
 			$serviceIdArray = $acceptedTou->{$serviceType};
 			//check if id is defined in array already if not append it
@@ -52,15 +46,9 @@ class tou{
 				array_push($acceptedTou->{$serviceType},$serviceId);
 				$acceptedTouJson = $this->json->encode($acceptedTou);
 				Mapbender::session()->set("acceptedTou",$acceptedTouJson);
-				$resultObj = array(
-					"setTou" => 1,
-					"message" => "Id appended to existing session var acceptedTou"
-				);
+				$resultObj = ["setTou" => 1, "message" => "Id appended to existing session var acceptedTou"];
 			} else {
-				$resultObj = array(
-					"setTou" => 0,
-					"message" => "Id was set before, don't append to session var acceptedTou"
-				);
+				$resultObj = ["setTou" => 0, "message" => "Id was set before, don't append to session var acceptedTou"];
 			}
 			return $resultObj;
 		}
@@ -68,28 +56,19 @@ class tou{
 
 	function check($serviceType, $serviceId) {
 		if (!Mapbender::session()->exists("acceptedTou")) {
-			$resultObj = array(
-				"accepted" => 0,
-				"message" => "No session var acceptedTou exists til now"
-			);	
+			$resultObj = ["accepted" => 0, "message" => "No session var acceptedTou exists til now"];	
 			return $resultObj;
 		} else {		
 			$acceptedTou = Mapbender::session()->get("acceptedTou");
-			$acceptedTou = json_decode($acceptedTou);
+			$acceptedTou = json_decode((string) $acceptedTou);
 			//read out service part
 			$serviceIdArray = $acceptedTou->{$serviceType};
 			#print_r($serviceIdArray);
 			if (in_array($serviceId,$serviceIdArray)) {
-				$resultObj = array(
-					"accepted" => 1,
-					"message" => "Session var acceptedTou found - id was set before - don't show tou anymore"
-				);
+				$resultObj = ["accepted" => 1, "message" => "Session var acceptedTou found - id was set before - don't show tou anymore"];
 				return $resultObj;
 			} else {
-				$resultObj = array(
-					"accepted" => 0,
-					"message" => "Session var acceptedTou found - id was not set before - show tou before load resource"
-				);	
+				$resultObj = ["accepted" => 0, "message" => "Session var acceptedTou found - id was not set before - show tou before load resource"];	
 				return $resultObj;
 			}
 		}

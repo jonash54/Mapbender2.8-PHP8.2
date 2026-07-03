@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require(__DIR__."/../classes/class_wfs_conf.php");
 ?>
 <html>
 <head>
@@ -70,13 +70,13 @@ if(isset($_REQUEST["save"])){
 	global $DBSERVER,$DB,$OWNER,$PW;
 	$con = db_connect($DBSERVER,$OWNER,$PW);
 	db_select_db($DB,$con);
-	
+
 	$sql = "INSERT INTO gazetteer (gazetteer_abstract, fkey_wfs_id, ";
 	$sql .= "fkey_featuretype_id, g_label, g_label_id, g_button, ";
 	$sql .= "g_button_id, g_style, g_buffer, g_res_style, g_use_wzgraphics) ";
 	$sql .= "VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);";
-	$v = array($_REQUEST["gazetteer_abstract"], $_REQUEST["wfs"], $_REQUEST["featuretype"], $_REQUEST["g_label"], $_REQUEST["g_label_id"], $_REQUEST["g_button"], $_REQUEST["g_button_id"], $_REQUEST["g_style"], $_REQUEST["g_buffer"], $_REQUEST["g_res_style"], $_REQUEST["g_use_wzgraphics"]);
-	$t = array("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "i");
+	$v = [$_REQUEST["gazetteer_abstract"], $_REQUEST["wfs"], $_REQUEST["featuretype"], $_REQUEST["g_label"], $_REQUEST["g_label_id"], $_REQUEST["g_button"], $_REQUEST["g_button_id"], $_REQUEST["g_style"], $_REQUEST["g_buffer"], $_REQUEST["g_res_style"], $_REQUEST["g_use_wzgraphics"]];
+	$t = ["s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "i"];
 	$res = db_prep_query($sql, $v, $t);		
 	$wfsID = db_insert_id($con);
 	for($i=0; $i<count($_REQUEST["f_id"]); $i++){
@@ -84,8 +84,8 @@ if(isset($_REQUEST["save"])){
 		$sql .= "f_id, f_search, f_pos, f_style_id, f_toupper, f_label, ";
 		$sql .= "f_label_id, f_show, f_respos) VALUES (";
 		$sql .= "$1, $2, $3, $4, $5, $6, $7, $8, $9, $10);";
-		$v = array($wfsID, $_REQUEST["f_id"][$i], $_REQUEST["f_search"][$i], $_REQUEST["f_pos"][$i], $_REQUEST["f_style_id"][$i], $_REQUEST["f_toupper"][$i], $_REQUEST["f_label"][$i], $_REQUEST["f_label_id"][$i], $_REQUEST["f_show"][$i], $_REQUEST["f_respos"][$i]);
-		$t = array("s", "s", "s", "s", "s", "s", "s", "s", "s", "s");
+		$v = [$wfsID, $_REQUEST["f_id"][$i], $_REQUEST["f_search"][$i], $_REQUEST["f_pos"][$i], $_REQUEST["f_style_id"][$i], $_REQUEST["f_toupper"][$i], $_REQUEST["f_label"][$i], $_REQUEST["f_label_id"][$i], $_REQUEST["f_show"][$i], $_REQUEST["f_respos"][$i]];
+		$t = ["s", "s", "s", "s", "s", "s", "s", "s", "s", "s"];
 		$res = db_prep_query($sql, $v, $t);
 	}		
 }
@@ -117,7 +117,7 @@ echo "";
 /* select featuretype */
 
 if(isset($_REQUEST["wfs"])){
-	
+
 	for($i=0; $i<count($aWFS->wfs_id);$i++){
 		if($aWFS->wfs_id[$i] == $_REQUEST["wfs"]){
 			echo "<table>";
@@ -131,7 +131,7 @@ if(isset($_REQUEST["wfs"])){
 			echo "</table>";
 		}
 	}
-	
+
 	$aWFS->getfeatures($_REQUEST["wfs"]);
 	echo "<table>";
 	for($i=0; $i<count($aWFS->features->featuretype_id); $i++){
@@ -151,14 +151,14 @@ if(isset($_REQUEST["wfs"])){
 
 /* configure elements */
 if(isset($_REQUEST["featuretype"])){
-	
-	
+
+
 	for($i=0; $i<count($aWFS->features->featuretype_id); $i++){
 		if($_REQUEST["featuretype"] == $aWFS->features->featuretype_id[$i]){
 			echo "<hr>SRS: ".$aWFS->features->featuretype_srs[$i];
 		}
 	}
-	
+
 	/* set featuretype options */
 	echo "<table>";
 	echo "<tr><td>Abstract:</td><td><input type='text' name='gazetteer_abstract'></td></tr>" ;
@@ -171,8 +171,8 @@ if(isset($_REQUEST["featuretype"])){
 	echo "<tr><td>ResultStye:</td><td><textarea cols=50 rows=5 name='g_res_style'></textarea></td></tr>" ;
 	echo "<tr><td>WZ-Graphics:</td><td><input name='g_use_wzgraphics' type='checkbox'></td></tr>";
 	echo "</table>";
-	
-	
+
+
 	/* set element options */
 	$aWFS->getelements($_REQUEST["featuretype"]);
 	echo "<table border='1'>";
@@ -189,7 +189,7 @@ if(isset($_REQUEST["featuretype"])){
 		echo "<td>show</td>";
 		echo "<td>position</td>";
 	echo "</tr>";
-	
+
 	for($i=0; $i<count($aWFS->elements->element_id); $i++){
 		echo "<tr>";
 		echo "<td>".$aWFS->elements->element_id[$i]."<input type='hidden' name='f_id[]' value='".$aWFS->elements->element_id[$i]."'></td>";

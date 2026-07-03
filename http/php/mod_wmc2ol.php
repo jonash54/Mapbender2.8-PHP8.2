@@ -15,9 +15,9 @@
 #http://www.geoportal.rlp.de/mapbender/php/mod_wmc2ol.php?wmc_id=45_1291218568&withDigitize=1&xID=xCoord&yID=yCoord&LayerSwitcher=1
 #http://www.geoportal.rlp.de/mapbender/php/mod_wmc2ol.php?wmc_id=45_1291218568&GEORSS=1&LayerSwitcher=1
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $user = new User();
 $admin = new administration();
@@ -30,7 +30,7 @@ if(!isset($_GET["wmc_id"])){
 }
 
 function _e ($str) {
-	return htmlentities($str, ENT_QUOTES, CHARSET);
+	return htmlentities((string) $str, ENT_QUOTES, CHARSET);
 }
 
 if (!$userId) {
@@ -41,7 +41,7 @@ if (isset($_REQUEST["wmc_id"]) & $_REQUEST["wmc_id"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["wmc_id"];
 	$pattern = '/^[0-9_]*$/';
-	if (!preg_match($pattern,$testMatch)){ 
+	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'wmc_id: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>wmc_id</b> is not valid (integer_integer or integer).<br/>'; 
 		die(); 		
@@ -58,7 +58,7 @@ if (isset($_REQUEST["pointRadius"]) & $_REQUEST["pointRadius"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["pointRadius"];
 	$pattern = '/^[0-9]{2}|^[1-9]{1}$/';		
-	if (!preg_match($pattern,$testMatch)){
+	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'pointRadius: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>pointRadius</b> is not valid (integer).<br/>'; 
 		die();
@@ -72,7 +72,7 @@ if (isset($_REQUEST["fillColor"]) & $_REQUEST["fillColor"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["fillColor"];
 	$pattern = '/^#[0-9a-f]{3}|#[0-9a-f]{6}$/';
-	if (!preg_match($pattern,$testMatch)){
+	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'fillColor: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>fillColor<b> is not valid (html color code).<br/>'; 
 		die(); 
@@ -85,7 +85,7 @@ if (isset($_REQUEST["markerUrl"]) & $_REQUEST["markerUrl"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["markerUrl"];
 	$pattern = '/^[\d,]*$/';
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'markerUrl: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter </b>markerUrl</b> is not valid.<br/>'; 
 		die(); 
@@ -98,8 +98,8 @@ if (isset($_REQUEST["markerUrl"]) & $_REQUEST["markerUrl"] != "") {
 //functions which may be integrated from class_administration
 function getWmsGetMapUrl($wmsId){
 	$sql = "SELECT wms_getmap FROM wms WHERE wms_id =$1";
-	$v = array($wmsId);
-	$t = array("i");
+	$v = [$wmsId];
+	$t = ["i"];
 	$res = db_prep_query($sql,$v,$t);
 	if ($row = db_fetch_array($res)){
 		return $row['wms_getmap'];
@@ -111,8 +111,8 @@ function getWmsGetMapUrl($wmsId){
 //Function to pull layer names from database. They may have been updated since the wmc have been saved!
 function getLayerNames($wmsId){
 	$sql = "SELECT layer_id, layer_name FROM layer WHERE fkey_wms_id = $1";
-	$v = array($wmsId);
-	$t = array("i");
+	$v = [$wmsId];
+	$t = ["i"];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		$layerNames[$row["layer_id"]] = $row["layer_name"];
@@ -136,12 +136,12 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 	global $admin;
 	//Get WMC out of mb Database
 	$sql = "SELECT wmc, wmc_serial_id FROM mb_user_wmc WHERE wmc_serial_id = $1";
-	$res = db_prep_query($sql, array($wmc_id), array("s"));
+	$res = db_prep_query($sql, [$wmc_id], ["s"]);
 	$wmc = db_fetch_row($res);
 	//control if wmc was found else use old wmc_id
 	if (!$wmc[0]) {
 		$sql = "SELECT wmc, wmc_serial_id FROM mb_user_wmc WHERE wmc_id = $1";
-		$res = db_prep_query($sql, array($wmc_id), array("s"));
+		$res = db_prep_query($sql, [$wmc_id], ["s"]);
 		$wmc = db_fetch_row($res);
 		//echo "Wmc with this id was not found in Database!<br>";
 		//die;
@@ -152,7 +152,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 	//$updatedWmc = $myWmc->updateUrlsFromDb();//TODO: check why this functions need a session??
 	
 	//Read out WMC into XML object
-	$xml=simplexml_load_string($wmc[0], "SimpleXMLElement", LIBXML_NOBLANKS);
+	$xml=simplexml_load_string((string) $wmc[0], "SimpleXMLElement", LIBXML_NOBLANKS);
 	if ($_REQUEST['withoutBody'] == '1') { 
 
 	} else {
@@ -220,7 +220,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 	//begin part for javascript code
 	$html.="<script type='text/javascript'>\n";
 	//check for queryable layers
-	$layer_array_queryable=array();
+	$layer_array_queryable=[];
 	$layer_array=$xml->LayerList->Layer;
 	if(isset($_REQUEST["withDigitize"])){
 		if($_REQUEST["withDigitize"]=='1'){
@@ -307,7 +307,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 	//Check for given mb_myBBOX
 	if(isset($_REQUEST["mb_myBBOX"])){
 		//Check for numerical values for BBOX
-		$array_bbox=explode(',',$_REQUEST["mb_myBBOX"]);
+		$array_bbox=explode(',',(string) $_REQUEST["mb_myBBOX"]);
 		if ((is_numeric($array_bbox[0])) and (is_numeric($array_bbox[1])) and (is_numeric($array_bbox[2])) and (is_numeric($array_bbox[3])) ) {
 			$minx_new=$array_bbox[0];
 			$miny_new=$array_bbox[1];
@@ -335,7 +335,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 					$text_bbox = db_fetch_row($res);
 					$e = new mb_notice("mod_wms2ol.php: text_bbox=".$text_bbox[0]);
 					$pattern = '~LINESTRING\((.*)\)~i';
-					preg_match($pattern, $text_bbox[0], $subpattern);
+					preg_match($pattern, (string) $text_bbox[0], $subpattern);
 					$e = new mb_notice("mod_wms2ol.php: subpattern=".$subpattern[1]);
 					//exchange blancspaces
 					$new_bbox = str_replace(" ", ",", $subpattern[1]);
@@ -392,7 +392,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 		$has_permission=$admin->getLayerPermission($wms_id, $layer_name, $userId);
 		if ($has_permission || $layer_id==''){
 			$getMapUrl = $xml->LayerList->Layer[$i]->Server->OnlineResource->attributes('http://www.w3.org/1999/xlink')->href;
-			if (strpos($getMapUrl, OWSPROXY) === false) {
+			if (!str_contains($getMapUrl, OWSPROXY)) {
 				if (getWmsGetMapUrl($wms_id) != false) {
 					$e = new mb_notice("mod_wmc2ol.php: update GetMap found in database - change url to :".$getMapUrl);
 					$getMapUrl = getWmsGetMapUrl($wms_id);
@@ -451,7 +451,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 	//featurecollections - maybe base 64 encoded
 	$kmls = $xml->General->Extension->children('http://www.mapbender.org/context')->kmls;
 	//$e = new mb_exception($kmls);
-	if (substr( $kmls , 0, 7 ) == 'base64_') {
+	if (str_starts_with($kmls, 'base64_')) {
 	    //remove base 64 and decode
 	    $kmls = str_replace('base64_', '', $kmls);
 	    $kmls = base64_decode($kmls);
@@ -495,7 +495,7 @@ function createOlFromWMC_id($wmc_id, $pointRadius, $fillColor){
 			($layer_id=='' && $xml->LayerList->Layer[$i]->attributes()->hidden=='0')){
 			$html.="	layer".$i." = new OpenLayers.Layer.WMS( \"".$xml->LayerList->Layer[$i]->Title."\",\n";
 			$getMapUrl = $xml->LayerList->Layer[$i]->Server->OnlineResource->attributes('http://www.w3.org/1999/xlink')->href;
-			if (strpos($getMapUrl, OWSPROXY) === false) {
+			if (!str_contains($getMapUrl, OWSPROXY)) {
 				if (getWmsGetMapUrl($wms_id) != false) {
 					$e = new mb_notice("mod_wmc2ol.php: update GetMap found in database - change url to :".$getMapUrl);
 					$getMapUrl = getWmsGetMapUrl($wms_id);
@@ -789,7 +789,7 @@ XML;
 			$html.="	feature.popup.destroy();\n";
 			$html.=" 	feature.popup = null;\n";
 			$html.="}\n"; 
-			
+
 			$html.="function createFeaturesFromGeoRSS() {\n";
 			$e = new mb_exception("georss: " . $georssFromGeojson);
 			//First check if some georss is send in the request variable GEORSS
@@ -797,7 +797,7 @@ XML;
 			    if ($hasGeojson) {
 			        $georssXml = simplexml_load_string($georssFromGeojson);
 			    } else {
-				    $georssXml = simplexml_load_string(stripslashes($_REQUEST['GEORSS']));
+				    $georssXml = simplexml_load_string(stripslashes((string) $_REQUEST['GEORSS']));
 			    }
 				if($georssXml===FALSE) {
 					//It was not a XML string
@@ -832,7 +832,7 @@ XML;
 								$pointNew = db_fetch_row($res);
 								$e = new mb_notice("mod_wms2ol.php: pointNew=".$pointNew[0]);
 								$pattern = '~POINT\((.*)\)~i';
-								preg_match($pattern, $pointNew[0], $subpattern);
+								preg_match($pattern, (string) $pointNew[0], $subpattern);
 								$e = new mb_notice("mod_wms2ol.php: subpattern=".$subpattern[1]);
 								$coords = explode(' ',$subpattern[1]);
 							} else {
@@ -854,7 +854,7 @@ XML;
 								$html .= "			 pointRadius: \"".$pointRadius."\",\n";
 							}
 							$html .= "	 		 externalGraphic: \"$imageUrl\"";
-							
+
 						} else {
 							$html .= "			 pointRadius: \"".$pointRadius."\",\n";
 							$html.="   			 fillColor: \"".$fillColor."\"\n";
@@ -864,7 +864,7 @@ XML;
 						$html.="	var point = new OpenLayers.Geometry.Point(";
 						$html.="".$coords[0].",".$coords[1].");\n";
 						$html.="	pointFeatures[".$i."] = new OpenLayers.Feature.Vector(point, {title: \"".$georssXml->entry[$i]->title."\", description : \"".str_replace("\"", "'",$georssXml->entry[$i]->content)."\", link : \"".$georssXml->entry[$i]->link->attributes()->href."\"}, pointStyle);\n";
-						
+
 					}
 					$html.="	return pointFeatures;\n"; 
 					$html.="}\n"; 
@@ -901,7 +901,7 @@ XML;
 								$pointNew = db_fetch_row($res);
 								$e = new mb_notice("mod_wms2ol.php: pointNew=".$pointNew[0]);
 								$pattern = '~POINT\((.*)\)~i';
-								preg_match($pattern, $pointNew[0], $subpattern);
+								preg_match($pattern, (string) $pointNew[0], $subpattern);
 								$e = new mb_notice("mod_wms2ol.php: subpattern=".$subpattern[1]);
 								$coords = explode(' ',$subpattern[1]);
 							} else {
@@ -922,7 +922,7 @@ XML;
 								$html .= "			 pointRadius: \"".$pointRadius."\",\n";
 							}
 							$html .= "	 		 externalGraphic: \"$imageUrl\"";
-							
+
 						} else {
 							$html .= "			 pointRadius: \"".$pointRadius."\",\n";
 							$html.="   			 fillColor: \"".$fillColor."\"\n";
@@ -934,12 +934,12 @@ XML;
 					}
 					//***Generate Dummy Point for testing //no styles given
 					$html.="	var point = new OpenLayers.Geometry.Point(2594468.92,5530693.03);\n";
-				
+
 					$html.="	pointFeatures[".$featureCount."] = new OpenLayers.Feature.Vector(point, {description : \"Testbeschreibung\", link : \"Testlink\"});\n"; 
 
 					$html.="	return pointFeatures;\n"; 
 					$html.="}\n"; 
-				
+
 				} else {
 					$html.="	alert('No GeoRSS found - use only dummy point!');\n";
 					$html.="	var point = new OpenLayers.Geometry.Point(2594468.92,5530693.03);\n";
@@ -1007,7 +1007,7 @@ XML;
 
 createOlfromWMC_id($_GET["wmc_id"], $pointRadius, $fillColor);
 
-if (strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']) === false) {
+if (!str_contains((string) $_SERVER['HTTP_REFERER'], (string) $_SERVER['HTTP_HOST'])) {
 	$admin->logClientUsage($_SERVER['HTTP_REFERER'], $wmc_id, 1);
 }
 ?>

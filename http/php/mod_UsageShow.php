@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $con = db_connect($DBSERVER,$OWNER,$PW);
 db_select_db(DB,$con);
@@ -88,12 +88,12 @@ if (!isset($_REQUEST['userid'])){
 $sql = "SELECT distinct fkey_mb_user_id, mb_user_name, mb_user_email, mb_user_phone from mb_proxy_log, mb_user ";
 $sql .= " WHERE fkey_w".$serviceTypeAbbr."s_id = $1 AND fkey_mb_user_id = mb_user_id";
 
-$v = array($serviceId);
-$t = array('i');
+$v = [$serviceId];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 $cnt = 0;
 
-$str = "<span style='font-size:30'>Usage for W".strtoupper($serviceTypeAbbr)."S: </span><hr><br>\n";
+$str = "<span style='font-size:30'>Usage for W".strtoupper((string) $serviceTypeAbbr)."S: </span><hr><br>\n";
 switch ($serviceType) {
 	case 'wms':
 		$serviceTitle = $admin->getWmsTitleByWmsId($serviceId);
@@ -140,8 +140,8 @@ else {
 //Get infos about specific user
 $sql = "SELECT mb_user_id, mb_user_name, mb_user_email, mb_user_phone from mb_user ";
 $sql .= " WHERE mb_user_id = $1";
-$v = array($_REQUEST['userid']);
-$t = array('i');
+$v = [$_REQUEST['userid']];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 $row = db_fetch_array($res);
 
@@ -155,8 +155,8 @@ switch ($serviceType) {
 	break;
 }
 
-$v = array($serviceId, $_REQUEST['userid']);
-$t = array('i','i');
+$v = [$serviceId, $_REQUEST['userid']];
+$t = ['i', 'i'];
 $res = db_prep_query($sql,$v,$t);
 $row = db_fetch_array($res);
 
@@ -164,7 +164,7 @@ $sumrequests = $row["sumrequests"];
 $sumelements = $row["sumelements"];
 $lastAccess = $row["lastaccess"];
 
-$str = "<span style='font-size:30'>Usage of Secured W".strtoupper($serviceTypeAbbr)."S: </span><hr><br>\n";
+$str = "<span style='font-size:30'>Usage of Secured W".strtoupper((string) $serviceTypeAbbr)."S: </span><hr><br>\n";
 $str .= "<b>" . $serviceId . "</b><br>" . $serviceTitle . "<br><br><br>\n";
 $str .= "<hr><b>for User: ".$row['mb_user_name']."</b><br><br>";
 $str .= "UserID: ".$_REQUEST['userid']."<br>UserEmail: ".$row['mb_user_email']."<br>UserPhone: ".$row['mb_user_phone']."<br>Last Access: <b>".$lastAccess."</b><br>";
@@ -178,8 +178,8 @@ if (($_REQUEST['requests']) & ($_REQUEST['requests']) == 1 ) {
 	
 	$sql = "SELECT proxy_log_timestamp, pixel, features, request FROM mb_proxy_log where fkey_mb_user_id=$2 AND fkey_w".$serviceTypeAbbr."s_id=$1 ORDER BY proxy_log_timestamp DESC LIMIT ".$maxRequests;
 	
-	$v = array($serviceId, $_REQUEST['userid']);
-	$t = array('i','i');
+	$v = [$serviceId, $_REQUEST['userid']];
+	$t = ['i', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt=0;
 	$str .= "<hr><br><b>Last ".$maxRequests." Requests:</b><br>";

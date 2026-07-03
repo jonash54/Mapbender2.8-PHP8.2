@@ -1,17 +1,17 @@
 <?php
 #http://localhost/mapbender/geoportal/mod_readOpenSearchResultsDetail.php?osid=1&...
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 #$con = db_connect(DBSERVER,OWNER,PW);
 #db_select_db(DB,$con);
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf";
+require_once(__DIR__."/../classes/class_connector.php");
+require_once __DIR__ . "/../../tools/wms_extent/extent_service.conf";
 $languageCode = "de";
 $layout = "tabs";
 //get language parameter out of mapbender session if it is set else set default language to de_DE
 if (isset($_SESSION['mb_lang']) && ($_SESSION['mb_lang']!='')) {
 	$e = new mb_notice("mod_readOpenSearchResultsDetail.php: language found in session: ".$_SESSION['mb_lang']);
 	$language = $_SESSION["mb_lang"];
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -44,7 +44,7 @@ if(!isset($_REQUEST["docuuid"])) {
 }
 
 function getExtentGraphic($layer_4326_box) {
-		$rlp_4326_box = array(6.05,48.9,8.6,50.96);
+		$rlp_4326_box = [6.05, 48.9, 8.6, 50.96];
 		if ($layer_4326_box[0] <= $rlp_4326_box[0] || $layer_4326_box[2] >= $rlp_4326_box[2] || $layer_4326_box[1] <= $rlp_4326_box[1] || $layer_4326_box[3] >= $rlp_4326_box[3]) {
 			if ($layer_4326_box[0] < $rlp_4326_box[0]) {
 				$rlp_4326_box[0] = $layer_4326_box[0]; 
@@ -79,7 +79,7 @@ function getExtentGraphic($layer_4326_box) {
 
 
 function display_text($string) {
-    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     $string = preg_replace("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     $string = preg_replace("\n", "<br>", $string);
     return $string;
@@ -90,7 +90,7 @@ function guid(){
         return com_create_guid();
     }else{
         mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
-        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $charid = strtoupper(md5(uniqid(random_int(0, mt_getrandmax()), true)));
         $hyphen = chr(45);// "-"
         $uuid = chr(123)// "{"
                 .substr($charid, 0, 8).$hyphen
@@ -112,14 +112,12 @@ function validateInspireMetadataFromData($iso19139Xml){
 	$validatorInterfaceObject->set('httpType','POST');
 	$validatorInterfaceObject->set('httpContentType','multipart/form-data'); # maybe given automatically
 	//first test with data from ram - doesn't function :-(
-	$fields = array(
-		'dataFile'=>urlencode($iso19139Xml)
-		);
+	$fields = ['dataFile'=>urlencode((string) $iso19139Xml)];
 	//generate file identifier:
 	$fileId = guid();
 	//generate temporary file under tmp
 	 if($h = fopen(TMPDIR."/".$fileId."iso19139_validate_tmp.xml","w")){
-		if(!fwrite($h,$iso19139Xml)){
+		if(!fwrite($h,(string) $iso19139Xml)){
 			$e = new mb_exception("geoportal/mod_readOpenSearchResultsDetail.php: cannot write to file: ".TMPDIR."iso19139_validate_tmp.xml");
 		}
 	fclose($h);
@@ -139,579 +137,203 @@ function validateInspireMetadataFromData($iso19139Xml){
 }
 
 //INSPIRE Mapping
-$md_ident = array(
-//Metadata Identifier - not neccessary?
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "unique resource identifier",
-		inspiremandatory => "false",
-		iso_name => "fileIdentifier",
-		html => _mb("Metadata identifier"),
-		value => "",
-		category => "identification",
-		description => _mb("A value uniquely identifying the resource. The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner, and a character string namespace uniquely identifying the context of the identifier code (for example, the data owner).")
-	),
-//B 1.1
-	array(	ibus => "rtitle",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "resource title",
-		inspiremandatory => "true",
-		iso_name => "type",
-		html => _mb("Resource title"),
-		value => "",
-		category => "identification",
-		description => _mb("This a characteristic, and often unique, name by which the resource is known. The value domain of this metadata element is free text.")
-	),
-//B 1.2
-	array(	ibus => "abstract",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "resource abstract",
-		inspiremandatory => "true",
-		iso_name => "description",
-		html => _mb("Resource abstract"),
-		value => "",
-		category => "identification",
-		description => _mb("This is a brief narrative summary of the content of the resource.")
-	),
-//B 1.3
-	array(	ibus => "rtype",
-		iso19139 => "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "resource type",
-		inspiremandatory => "true",
-		iso_name => "type",
-		html => _mb("Resource type"),
-		value => "",
-		category => "identification",
-		description => _mb("This is the type of resource being described by the metadata.")
-	),
-//B 1.4
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL",
-		iso19139explode => "false" ,
-		inspire => "unique resource locator",
-		inspiremandatory => "true",
-		iso_name => "resourceLocator",
-		html => _mb("Resource locator"),
-		value => "",
-		category => "identification",
-		description => _mb("The resource locator defines the link(s) to the resource and/or the link to additional information about the resource. The value domain of this metadata element is a character string, commonly expressed as uniform resource locator (URL).")
-	),
-//B 1.5 - Identifier of dataset!
-//Part 1 id
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:RS_Identifier/gmd:code/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "unique resource identifier namespace",
-		inspiremandatory => "true",
-		iso_name => "dataset id",
-		html => _mb("Unique resource identifier id"),
-		value => "",
-		category => "identification",
-		description => _mb("A value uniquely identifying the resource. The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner.")
-	),
-//Part 2 - namespace
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:RS_Identifier/gmd:codeSpace/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "unique resource identifier namespace",
-		inspiremandatory => "true",
-		iso_name => "dataset namespace",
-		html => _mb("Unique resource identifier namespace"),
-		value => "",
-		category => "identification",
-		description => _mb("A character string namespace uniquely identifying the context of the identifier code (for example, the data owner)")
-	),
-//B 1.6 Coupled resource
-//NOTICE: simplexml has problems with namespaced attributes! So we choose a alias for xlink:href which is xlinkhref and exchange this attributes from xml before parsing the xml!
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/srv:operatesOn/@xlinkhref",
-		iso19139explode => "false" ,
-		inspire => "coupled resource",
-		inspiremandatory => "true",
-		iso_name => "coupled resource",
-		html => _mb("Coupled resource"),
-		value => "",
-		category => "identification",
-		description => _mb("If the resource is a spatial data service, this metadata element identifies, where relevant, the target spatial data set(s) of the service through their unique resource identifiers (URI). The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner, and a character string namespace uniquely identifying the context of the identifier code (for example, the data owner).")
-	),
-//B 1.7 Language dataset
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:language/gmd:LanguageCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "Language",
-		inspiremandatory => "true",
-		iso_name => "language",
-		html => _mb("Language"),
-		value => "",
-		category => "identification",
-		description => _mb("The language(s) used within the resource. The value domain of this metadata element is limited to the languages defined in ISO 639-2.")
-	),
-//B 2.1 Topic category
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode",
-		iso19139explode => "true" ,
-		inspire => "topic category",
-		inspiremandatory => "true",
-		iso_name => "topic category",
-		html => _mb("Topic category"),
-		value => "",
-		category => "classification",
-		description => _mb("The topic category is a high-level classification scheme to assist in the grouping and topic-based search of available spatial data resources. The value domain of this metadata element is defined in Part D.2.")
-	),
-//B 2.2 Spatial data service type
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:serviceType/gco:LocalName",
-		iso19139explode => "false" ,
-		inspire => "spatial data service type",
-		inspiremandatory => "true",
-		iso_name => "topic category",
-		html => _mb("Spatial data service type"),
-		value => "",
-		category => "classification",
-		description => _mb("This is a classification to assist in the search of available spatial data services. A specific service shall be categorised in only one category. The value domain of this metadata element is defined in Part D.3.")
-	),
-//B3 Keyword
-//B 3.1 keyword value dataset
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString",
-		iso19139explode => "true" ,
-		inspire => "keyword value",
-		inspiremandatory => "true",
-		iso_name => "keywordValue",
-		html => _mb("Keyword value"),
-		value => "",
-		category => "keyword",
-		description => _mb("If the resource is a spatial data service, at least one keyword from Part D.4 shall be provided. If a resource is a spatial data set or spatial data set series, at least one keyword shall be provided from the general environmental multilingual thesaurus (GEMET) describing the relevant spatial data theme as defined in Annex I, II or III to Directive 2007/2/EC.")
-	),
-//B 4 Geographic Location
-//B 4.1 Geographic bounding box
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/*/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/*/gco:Decimal",
-		iso19139explode => "true" ,
-		inspire => "geographic bounding box",
-		inspiremandatory => "true",
-		iso_name => "geographic bounding box",
-		html => _mb("Geographic bounding box"),
-		value => "",
-		category => "location",
-		description => _mb("This is the extent of the resource in the geographic space, given as a bounding box. The bounding box shall be expressed with westbound and eastbound longitudes, and southbound and northbound latitudes in decimal degrees, with a precision of at least two decimals.")
-	),
-//B 5. Temporal reference
-//B 5.1 Temporal extent
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_EX_TemporalExtent/gmd:extent/gml:TimePeriod/*",
-		iso19139explode => "false" ,
-		inspire => "temporal extent",
-		inspiremandatory => "false",
-		iso_name => "Temporal extent",
-		html => _mb("Temporal extent"),
-		value => "",
-		category => "actuality",
-		description => _mb("The temporal extent defines the time period covered by the content of the resource. This time period may be expressed as any of the following: - an individual date, - an interval of dates expressed through the starting date and end date of the interval, - a mix of individual dates and intervals of dates.")
-	),
-//B 5.2 Date of publication
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='publication']/gmd:date/*",
-		iso19139explode => "false" ,
-		inspire => "date of publication",
-		inspiremandatory => "true",
-		iso_name => "date of publication",
-		html => _mb("Date of publication"),
-		value => "",
-		category => "actuality",
-		description => _mb("This is the date of publication of the resource when available, or the date of entry into force. There may be more than one date of publication.")
-	),
-//B 5.3 Date of last revision
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='revision']/gmd:date/*",
-		iso19139explode => "false" ,
-		inspire => "date of last revision",
-		inspiremandatory => "true",
-		iso_name => "date of last revision",
-		html => _mb("Date of last revision"),
-		value => "",
-		category => "actuality",
-		description => _mb("This is the date of last revision of the resource, if the resource has been revised. There shall not be more than one date of last revision.")
-	),
-//B 5.4 Date of creation
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='creation']/gmd:date/*",
-		iso19139explode => "false" ,
-		inspire => "date of creation",
-		inspiremandatory => "true",
-		iso_name => "date of creation",
-		html => _mb("Date of creation"),
-		value => "",
-		category => "actuality",
-		description => _mb("This is the date of creation of the resource. There shall not be more than one date of creation.")
-	),
-//B 6. Quality and validity
-//B 6.1 Lineage
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "lineage",
-		inspiremandatory => "true",
-		iso_name => "lineage",
-		html => _mb("Lineage"),
-		value => "",
-		category => "quality",
-		description => _mb("This is a statement on process history and/or overall quality of the spatial data set. Where appropriate it may include a statement whether the data set has been validated or quality assured, whether it is the official version (if multiple versions exist), and whether it has legal validity.")
-	),
-
-//B 6.2 Spatial Resolution
-//B 6.2.1 equivalent scale 
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer",
-		iso19139explode => "false" ,
-		inspire => "equivalent scale",
-		inspiremandatory => "true",
-		iso_name => "equivalent scale",
-		html => _mb("Equivalent scale"),
-		value => "",
-		category => "resolution",
-		description => _mb("An equivalent scale is generally expressed as an integer value expressing the scale denominator.")
-	),
-//B 6.2.2 ground distance
-//B 6.2.2.1 ground distance value
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distancegco:Distance",
-		iso19139explode => "false" ,
-		inspire => "ground distance value",
-		inspiremandatory => "true",
-		iso_name => "groundDistanceValue",
-		html => _mb("Ground Distance Value"),
-		value => "",
-		category => "resolution",
-		description => _mb("A resolution distance shall be expressed as a numerical value associated with a unit of length.")
-	),
-//B 6.2.2.1 ground distance value
-//TODO maybe everytime m? or parse the href ...
-//B 7. Conformity
-//B 7.1. Specification
-//B 7.1.1 Title
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "Specification title",
-		inspiremandatory => "true",
-		iso_name => "Specification title",
-		html => _mb("Specification title"),
-		value => "",
-		category => "quality",
-		description => _mb("This is a citation of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification to which a particular resource conforms. A resource may conform to more than one implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. This citation shall include at least the title and a reference date (date of publication, date of last revision or of creation) of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or of the specification.")
-	),
-//B 7.1.2 Reference Date
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/*",
-		iso19139explode => "false" ,
-		inspire => "specification reference date",
-		inspiremandatory => "true",
-		iso_name => "Specification reference date",
-		html => _mb("Specification reference date"),
-		value => "",
-		category => "quality",
-		description => _mb("This is a citation of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification to which a particular resource conforms. A resource may conform to more than one implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. This citation shall include at least the title and a reference date (date of publication, date of last revision or of creation) of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or of the specification.")
-	),
-//B 7.2. Degree
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:pass/gco:Boolean",
-		iso19139explode => "false" ,
-		inspire => "deegree of conformance",
-		inspiremandatory => "true",
-		iso_name => "Degree of conformance",
-		html => _mb("Degree of conformance"),
-		value => "",
-		category => "quality",
-		description => _mb("This is the degree of conformity of the resource to the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. The value domain of this metadata element is defined in Part D.")
-	),
-//B 8. Constraints related to access and use
-//B 8.1. Conditions applying to access and use
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "conditions applying to access and use",
-		inspiremandatory => "true",
-		iso_name => "conditions applying to access and use",
-		html => _mb("Conditions applying to access and use"),
-		value => "",
-		category => "useconstraints",
-		description => _mb("A set of conditions applying to access and use.")
-	),
-//B 8.2. Limitations on public access
-//B 8.2.1 access constraints codelist
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "access constraints code",
-		inspiremandatory => "true",
-		iso_name => "access constraints code",
-		html => _mb("Access constraints code"),
-		value => "",
-		category => "useconstraints",
-		description => _mb("Code for access constraints")
-	),
-
-//B 8.2.2 other constraints
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "other constraints",
-		inspiremandatory => "true",
-		iso_name => "other constraints",
-		html => _mb("Other constraints"),
-		value => "",
-		category => "useconstraints",
-		description => _mb("Other constraints")
-	),
-//B 9. Organisations responsible for the establishment, management, maintance and distribution of spatial data sets and services
-//B 9.1. Responsible party
-//B 9.1.1 Responsible party name
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "responsible party name",
-		inspiremandatory => "true",
-		iso_name => "responsible party name",
-		html => _mb("Responsible party name"),
-		value => "",
-		category => "contact",
-		description => _mb("The name of the organisation as free text.")
-	),
-//B 9.1.2 Responsible party email
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "responsible party email",
-		inspiremandatory => "true",
-		iso_name => "responsible party email",
-		html => _mb("Responsible party email"),
-		value => "",
-		category => "contact",
-		description => _mb("A contact e-mail address as a character string.")
-	),
-//B 9.2 Responsible party role
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "responsible party role",
-		inspiremandatory => "true",
-		iso_name => "responsible party role",
-		html => _mb("Responsible party role"),
-		value => "",
-		category => "contact",
-		description => _mb("This is the role of the responsible organisation. The value domain of this metadata element is defined in Part D.")
-	),
-//TODO some more translations
-//B 10 Metadata on metadata
-//B 10.1. Metadata point of contact
-//B 10.1.1 Metadata point of contact name
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "metadata point of contact name",
-		inspiremandatory => "true",
-		iso_name => "Metadata point of contact name",
-		html => _mb("Metadata point of contact name"),
-		value => "",
-		category => "contact",
-		description => _mb("The name of the organisation as free text.")
-	),
-//B 10.1.2 Metadata point of contact email
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "metadata point of contact email",
-		inspiremandatory => "true",
-		iso_name => "Metadata point of contact email",
-		html => _mb("Metadata point of contact email"),
-		value => "",
-		category => "contact",
-		description => _mb("A contact e-mail address as a character string.")
-	),
-//B 10.2. Metadata date
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:dateStamp/*",
-		iso19139explode => "false" ,
-		inspire => "metadata date",
-		inspiremandatory => "true",
-		iso_name => "Metadata date",
-		html => _mb("Metadata date"),
-		value => "",
-		category => "metadata",
-		description => _mb("The date which specifies when the metadata record was created or updated. This date shall be expressed in conformity with ISO 8601.")
-	),
-//B 10.3. Metadata language
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "metadata language",
-		inspiremandatory => "true",
-		iso_name => "Metadata language",
-		html => _mb("Metadata language"),
-		value => "",
-		category => "metadata",
-		description => _mb("This is the language in which the metadata elements are expressed. The value domain of this metadata element is limited to the official languages of the Community expressed in conformity with ISO 639-2.")
-	),
-
-//Additional Metadata Elements from the Data Specs
-//Metadata required for interoperability
-//TODO!!
-/*
-https://geo-ide.noaa.gov/wiki/index.php?title=ISO_Boilerplate
-<gmd:referenceSystemInfo>
-    <gmd:MD_ReferenceSystem>
-        <gmd:referenceSystemIdentifier>
-            <gmd:RS_Identifier>
-                <gmd:authority>
-                    <gmd:CI_Citation>
-                        <gmd:title>
-                            <gco:CharacterString>European Petroleum Survey Group (EPSG) Geodetic Parameter Registry</gco:CharacterString>
-                        </gmd:title>
-                        <gmd:date>
-                            <gmd:CI_Date>
-                                <gmd:date>
-                                    <gco:Date>2008-11-12</gco:Date>
-                                </gmd:date>
-                                <gmd:dateType>
-                                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
-                                </gmd:dateType>
-                            </gmd:CI_Date>
-                        </gmd:date>
-                        <gmd:citedResponsibleParty>
-                            <gmd:CI_ResponsibleParty>
-                                <gmd:organisationName>
-                                    <gco:CharacterString>European Petroleum Survey Group</gco:CharacterString>
-                                </gmd:organisationName>
-                                <gmd:contactInfo>
-                                    <gmd:CI_Contact>
-                                        <gmd:onlineResource>
-                                            <gmd:CI_OnlineResource>
-                                                <gmd:linkage>
-                                                    <gmd:URL>http://www.epsg-registry.org/</gmd:URL>
-                                                </gmd:linkage>
-                                            </gmd:CI_OnlineResource>
-                                        </gmd:onlineResource>
-                                    </gmd:CI_Contact>
-                                </gmd:contactInfo>
-                                <gmd:role gco:nilReason="missing"/>
-                            </gmd:CI_ResponsibleParty>
-                        </gmd:citedResponsibleParty>                            
-                    </gmd:CI_Citation>
-                </gmd:authority>
-                <gmd:code>
-                    <gco:CharacterString>urn:ogc:def:crs:EPSG:4326</gco:CharacterString>
-                </gmd:code>
-                <gmd:version>
-                    <gco:CharacterString>6.18.3</gco:CharacterString>
-                </gmd:version>
-            </gmd:RS_Identifier>
-        </gmd:referenceSystemIdentifier>
-    </gmd:MD_ReferenceSystem>
-</gmd:referenceSystemInfo>
-*/
-//1. Coordinate Reference System
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:RS_Identifier/gmd:code/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "coordinate reference system",
-		inspiremandatory => "true",
-		iso_name => "coordinate reference system",
-		html => _mb("Coordinate reference system"),
-		value => "",
-		category => "dataspec",
-		description => _mb("Description of the coordinate reference system(s) used in the data set.")
-	),
-/*
-//2. Temporal Reference System - only mandatory if not the standard system!
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "temporal reference system",
-		inspiremandatory => "true",
-		iso_name => "temporal reference system",
-		html => _mb("Temporal reference system"),
-		value => "",
-		category => "dataspec",
-		description => _mb("Description of the temporal reference system(s) used in the data set. This element is mandatory only if the spatial data set contains temporal information that does not refer to the default temporal reference system.")
-	),
-*/
-//3. Encoding
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:MD_DataIdentification/gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/gmd:name/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "encoding",
-		inspiremandatory => "true",
-		iso_name => "encoding",
-		html => _mb("Encoding"),
-		value => "",
-		category => "dataspec",
-		description => _mb("Description of the computer language construct(s) specifying the representation of data objects in a record, file, message, storage device or transmission channel.")
-	),
-/*
-//4. Topological Consistency
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "topological Consistency",
-		inspiremandatory => "true",
-		iso_name => "topological Consistency",
-		html => _mb("Topological Consistency"),
-		value => "",
-		category => "dataspec",
-		description => _mb("Correctness of the explicitly encoded topological characteristics of the data set as described by the scope. This element is mandatory only if the data set includes types from the Generic Network Model and does not assure centreline topology (connectivity of centrelines) for the network.")
-	),
-*/
-//5. Character Encoding
-/*<gmd:characterSet>
-  <gmd:MD_CharacterSetCode
-    codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode"
-    codeListValue="UTF8">UTF8</gmd:MD_CharacterSetCode>
-</gmd:characterSet>
-*/
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue",
-		iso19139explode => "false" ,
-		inspire => "character Encoding",
-		inspiremandatory => "true",
-		iso_name => "character Encoding",
-		html => _mb("Character encoding"),
-		value => "",
-		category => "dataspec",
-		description => _mb("The character encoding used in the data set. This element is mandatory only if an encoding is used that is not based on UTF-8.")
-	),
-
-
-//Preview (36)
-	array(	ibus => "t01_object.obj_id",
-		iso19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString",
-		iso19139explode => "false" ,
-		inspire => "preview",
-		inspiremandatory => "false",
-		iso_name => "graphicOverview",
-		html => _mb("Preview"),
-		value => "",
-		category => "metadata",
-		description => _mb("Graphical overview of the resource.")
-	)
-
-);
+$md_ident = [
+    //Metadata Identifier - not neccessary?
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:fileIdentifier/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "unique resource identifier", \INSPIREMANDATORY => "false", \ISO_NAME => "fileIdentifier", \HTML => _mb("Metadata identifier"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("A value uniquely identifying the resource. The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner, and a character string namespace uniquely identifying the context of the identifier code (for example, the data owner).")],
+    //B 1.1
+    [\IBUS => "rtitle", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "resource title", \INSPIREMANDATORY => "true", \ISO_NAME => "type", \HTML => _mb("Resource title"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("This a characteristic, and often unique, name by which the resource is known. The value domain of this metadata element is free text.")],
+    //B 1.2
+    [\IBUS => "abstract", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "resource abstract", \INSPIREMANDATORY => "true", \ISO_NAME => "description", \HTML => _mb("Resource abstract"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("This is a brief narrative summary of the content of the resource.")],
+    //B 1.3
+    [\IBUS => "rtype", \ISO19139 => "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "resource type", \INSPIREMANDATORY => "true", \ISO_NAME => "type", \HTML => _mb("Resource type"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("This is the type of resource being described by the metadata.")],
+    //B 1.4
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL", \ISO19139EXPLODE => "false", \INSPIRE => "unique resource locator", \INSPIREMANDATORY => "true", \ISO_NAME => "resourceLocator", \HTML => _mb("Resource locator"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("The resource locator defines the link(s) to the resource and/or the link to additional information about the resource. The value domain of this metadata element is a character string, commonly expressed as uniform resource locator (URL).")],
+    //B 1.5 - Identifier of dataset!
+    //Part 1 id
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:RS_Identifier/gmd:code/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "unique resource identifier namespace", \INSPIREMANDATORY => "true", \ISO_NAME => "dataset id", \HTML => _mb("Unique resource identifier id"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("A value uniquely identifying the resource. The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner.")],
+    //Part 2 - namespace
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:RS_Identifier/gmd:codeSpace/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "unique resource identifier namespace", \INSPIREMANDATORY => "true", \ISO_NAME => "dataset namespace", \HTML => _mb("Unique resource identifier namespace"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("A character string namespace uniquely identifying the context of the identifier code (for example, the data owner)")],
+    //B 1.6 Coupled resource
+    //NOTICE: simplexml has problems with namespaced attributes! So we choose a alias for xlink:href which is xlinkhref and exchange this attributes from xml before parsing the xml!
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/srv:operatesOn/@xlinkhref", \ISO19139EXPLODE => "false", \INSPIRE => "coupled resource", \INSPIREMANDATORY => "true", \ISO_NAME => "coupled resource", \HTML => _mb("Coupled resource"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("If the resource is a spatial data service, this metadata element identifies, where relevant, the target spatial data set(s) of the service through their unique resource identifiers (URI). The value domain of this metadata element is a mandatory character string code, generally assigned by the data owner, and a character string namespace uniquely identifying the context of the identifier code (for example, the data owner).")],
+    //B 1.7 Language dataset
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:language/gmd:LanguageCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "Language", \INSPIREMANDATORY => "true", \ISO_NAME => "language", \HTML => _mb("Language"), \VALUE => "", \CATEGORY => "identification", \DESCRIPTION => _mb("The language(s) used within the resource. The value domain of this metadata element is limited to the languages defined in ISO 639-2.")],
+    //B 2.1 Topic category
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode", \ISO19139EXPLODE => "true", \INSPIRE => "topic category", \INSPIREMANDATORY => "true", \ISO_NAME => "topic category", \HTML => _mb("Topic category"), \VALUE => "", \CATEGORY => "classification", \DESCRIPTION => _mb("The topic category is a high-level classification scheme to assist in the grouping and topic-based search of available spatial data resources. The value domain of this metadata element is defined in Part D.2.")],
+    //B 2.2 Spatial data service type
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:serviceType/gco:LocalName", \ISO19139EXPLODE => "false", \INSPIRE => "spatial data service type", \INSPIREMANDATORY => "true", \ISO_NAME => "topic category", \HTML => _mb("Spatial data service type"), \VALUE => "", \CATEGORY => "classification", \DESCRIPTION => _mb("This is a classification to assist in the search of available spatial data services. A specific service shall be categorised in only one category. The value domain of this metadata element is defined in Part D.3.")],
+    //B3 Keyword
+    //B 3.1 keyword value dataset
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString", \ISO19139EXPLODE => "true", \INSPIRE => "keyword value", \INSPIREMANDATORY => "true", \ISO_NAME => "keywordValue", \HTML => _mb("Keyword value"), \VALUE => "", \CATEGORY => "keyword", \DESCRIPTION => _mb("If the resource is a spatial data service, at least one keyword from Part D.4 shall be provided. If a resource is a spatial data set or spatial data set series, at least one keyword shall be provided from the general environmental multilingual thesaurus (GEMET) describing the relevant spatial data theme as defined in Annex I, II or III to Directive 2007/2/EC.")],
+    //B 4 Geographic Location
+    //B 4.1 Geographic bounding box
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/*/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/*/gco:Decimal", \ISO19139EXPLODE => "true", \INSPIRE => "geographic bounding box", \INSPIREMANDATORY => "true", \ISO_NAME => "geographic bounding box", \HTML => _mb("Geographic bounding box"), \VALUE => "", \CATEGORY => "location", \DESCRIPTION => _mb("This is the extent of the resource in the geographic space, given as a bounding box. The bounding box shall be expressed with westbound and eastbound longitudes, and southbound and northbound latitudes in decimal degrees, with a precision of at least two decimals.")],
+    //B 5. Temporal reference
+    //B 5.1 Temporal extent
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_EX_TemporalExtent/gmd:extent/gml:TimePeriod/*", \ISO19139EXPLODE => "false", \INSPIRE => "temporal extent", \INSPIREMANDATORY => "false", \ISO_NAME => "Temporal extent", \HTML => _mb("Temporal extent"), \VALUE => "", \CATEGORY => "actuality", \DESCRIPTION => _mb("The temporal extent defines the time period covered by the content of the resource. This time period may be expressed as any of the following: - an individual date, - an interval of dates expressed through the starting date and end date of the interval, - a mix of individual dates and intervals of dates.")],
+    //B 5.2 Date of publication
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='publication']/gmd:date/*", \ISO19139EXPLODE => "false", \INSPIRE => "date of publication", \INSPIREMANDATORY => "true", \ISO_NAME => "date of publication", \HTML => _mb("Date of publication"), \VALUE => "", \CATEGORY => "actuality", \DESCRIPTION => _mb("This is the date of publication of the resource when available, or the date of entry into force. There may be more than one date of publication.")],
+    //B 5.3 Date of last revision
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='revision']/gmd:date/*", \ISO19139EXPLODE => "false", \INSPIRE => "date of last revision", \INSPIREMANDATORY => "true", \ISO_NAME => "date of last revision", \HTML => _mb("Date of last revision"), \VALUE => "", \CATEGORY => "actuality", \DESCRIPTION => _mb("This is the date of last revision of the resource, if the resource has been revised. There shall not be more than one date of last revision.")],
+    //B 5.4 Date of creation
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='creation']/gmd:date/*", \ISO19139EXPLODE => "false", \INSPIRE => "date of creation", \INSPIREMANDATORY => "true", \ISO_NAME => "date of creation", \HTML => _mb("Date of creation"), \VALUE => "", \CATEGORY => "actuality", \DESCRIPTION => _mb("This is the date of creation of the resource. There shall not be more than one date of creation.")],
+    //B 6. Quality and validity
+    //B 6.1 Lineage
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "lineage", \INSPIREMANDATORY => "true", \ISO_NAME => "lineage", \HTML => _mb("Lineage"), \VALUE => "", \CATEGORY => "quality", \DESCRIPTION => _mb("This is a statement on process history and/or overall quality of the spatial data set. Where appropriate it may include a statement whether the data set has been validated or quality assured, whether it is the official version (if multiple versions exist), and whether it has legal validity.")],
+    //B 6.2 Spatial Resolution
+    //B 6.2.1 equivalent scale
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer", \ISO19139EXPLODE => "false", \INSPIRE => "equivalent scale", \INSPIREMANDATORY => "true", \ISO_NAME => "equivalent scale", \HTML => _mb("Equivalent scale"), \VALUE => "", \CATEGORY => "resolution", \DESCRIPTION => _mb("An equivalent scale is generally expressed as an integer value expressing the scale denominator.")],
+    //B 6.2.2 ground distance
+    //B 6.2.2.1 ground distance value
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distancegco:Distance", \ISO19139EXPLODE => "false", \INSPIRE => "ground distance value", \INSPIREMANDATORY => "true", \ISO_NAME => "groundDistanceValue", \HTML => _mb("Ground Distance Value"), \VALUE => "", \CATEGORY => "resolution", \DESCRIPTION => _mb("A resolution distance shall be expressed as a numerical value associated with a unit of length.")],
+    //B 6.2.2.1 ground distance value
+    //TODO maybe everytime m? or parse the href ...
+    //B 7. Conformity
+    //B 7.1. Specification
+    //B 7.1.1 Title
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "Specification title", \INSPIREMANDATORY => "true", \ISO_NAME => "Specification title", \HTML => _mb("Specification title"), \VALUE => "", \CATEGORY => "quality", \DESCRIPTION => _mb("This is a citation of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification to which a particular resource conforms. A resource may conform to more than one implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. This citation shall include at least the title and a reference date (date of publication, date of last revision or of creation) of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or of the specification.")],
+    //B 7.1.2 Reference Date
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/*", \ISO19139EXPLODE => "false", \INSPIRE => "specification reference date", \INSPIREMANDATORY => "true", \ISO_NAME => "Specification reference date", \HTML => _mb("Specification reference date"), \VALUE => "", \CATEGORY => "quality", \DESCRIPTION => _mb("This is a citation of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification to which a particular resource conforms. A resource may conform to more than one implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. This citation shall include at least the title and a reference date (date of publication, date of last revision or of creation) of the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or of the specification.")],
+    //B 7.2. Degree
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:pass/gco:Boolean", \ISO19139EXPLODE => "false", \INSPIRE => "deegree of conformance", \INSPIREMANDATORY => "true", \ISO_NAME => "Degree of conformance", \HTML => _mb("Degree of conformance"), \VALUE => "", \CATEGORY => "quality", \DESCRIPTION => _mb("This is the degree of conformity of the resource to the implementing rules adopted under Article 7(1) of Directive 2007/2/EC or other specification. The value domain of this metadata element is defined in Part D.")],
+    //B 8. Constraints related to access and use
+    //B 8.1. Conditions applying to access and use
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "conditions applying to access and use", \INSPIREMANDATORY => "true", \ISO_NAME => "conditions applying to access and use", \HTML => _mb("Conditions applying to access and use"), \VALUE => "", \CATEGORY => "useconstraints", \DESCRIPTION => _mb("A set of conditions applying to access and use.")],
+    //B 8.2. Limitations on public access
+    //B 8.2.1 access constraints codelist
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "access constraints code", \INSPIREMANDATORY => "true", \ISO_NAME => "access constraints code", \HTML => _mb("Access constraints code"), \VALUE => "", \CATEGORY => "useconstraints", \DESCRIPTION => _mb("Code for access constraints")],
+    //B 8.2.2 other constraints
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "other constraints", \INSPIREMANDATORY => "true", \ISO_NAME => "other constraints", \HTML => _mb("Other constraints"), \VALUE => "", \CATEGORY => "useconstraints", \DESCRIPTION => _mb("Other constraints")],
+    //B 9. Organisations responsible for the establishment, management, maintance and distribution of spatial data sets and services
+    //B 9.1. Responsible party
+    //B 9.1.1 Responsible party name
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "responsible party name", \INSPIREMANDATORY => "true", \ISO_NAME => "responsible party name", \HTML => _mb("Responsible party name"), \VALUE => "", \CATEGORY => "contact", \DESCRIPTION => _mb("The name of the organisation as free text.")],
+    //B 9.1.2 Responsible party email
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "responsible party email", \INSPIREMANDATORY => "true", \ISO_NAME => "responsible party email", \HTML => _mb("Responsible party email"), \VALUE => "", \CATEGORY => "contact", \DESCRIPTION => _mb("A contact e-mail address as a character string.")],
+    //B 9.2 Responsible party role
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "responsible party role", \INSPIREMANDATORY => "true", \ISO_NAME => "responsible party role", \HTML => _mb("Responsible party role"), \VALUE => "", \CATEGORY => "contact", \DESCRIPTION => _mb("This is the role of the responsible organisation. The value domain of this metadata element is defined in Part D.")],
+    //TODO some more translations
+    //B 10 Metadata on metadata
+    //B 10.1. Metadata point of contact
+    //B 10.1.1 Metadata point of contact name
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "metadata point of contact name", \INSPIREMANDATORY => "true", \ISO_NAME => "Metadata point of contact name", \HTML => _mb("Metadata point of contact name"), \VALUE => "", \CATEGORY => "contact", \DESCRIPTION => _mb("The name of the organisation as free text.")],
+    //B 10.1.2 Metadata point of contact email
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "metadata point of contact email", \INSPIREMANDATORY => "true", \ISO_NAME => "Metadata point of contact email", \HTML => _mb("Metadata point of contact email"), \VALUE => "", \CATEGORY => "contact", \DESCRIPTION => _mb("A contact e-mail address as a character string.")],
+    //B 10.2. Metadata date
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:dateStamp/*", \ISO19139EXPLODE => "false", \INSPIRE => "metadata date", \INSPIREMANDATORY => "true", \ISO_NAME => "Metadata date", \HTML => _mb("Metadata date"), \VALUE => "", \CATEGORY => "metadata", \DESCRIPTION => _mb("The date which specifies when the metadata record was created or updated. This date shall be expressed in conformity with ISO 8601.")],
+    //B 10.3. Metadata language
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "metadata language", \INSPIREMANDATORY => "true", \ISO_NAME => "Metadata language", \HTML => _mb("Metadata language"), \VALUE => "", \CATEGORY => "metadata", \DESCRIPTION => _mb("This is the language in which the metadata elements are expressed. The value domain of this metadata element is limited to the official languages of the Community expressed in conformity with ISO 639-2.")],
+    //Additional Metadata Elements from the Data Specs
+    //Metadata required for interoperability
+    //TODO!!
+    /*
+    https://geo-ide.noaa.gov/wiki/index.php?title=ISO_Boilerplate
+    <gmd:referenceSystemInfo>
+        <gmd:MD_ReferenceSystem>
+            <gmd:referenceSystemIdentifier>
+                <gmd:RS_Identifier>
+                    <gmd:authority>
+                        <gmd:CI_Citation>
+                            <gmd:title>
+                                <gco:CharacterString>European Petroleum Survey Group (EPSG) Geodetic Parameter Registry</gco:CharacterString>
+                            </gmd:title>
+                            <gmd:date>
+                                <gmd:CI_Date>
+                                    <gmd:date>
+                                        <gco:Date>2008-11-12</gco:Date>
+                                    </gmd:date>
+                                    <gmd:dateType>
+                                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                    </gmd:dateType>
+                                </gmd:CI_Date>
+                            </gmd:date>
+                            <gmd:citedResponsibleParty>
+                                <gmd:CI_ResponsibleParty>
+                                    <gmd:organisationName>
+                                        <gco:CharacterString>European Petroleum Survey Group</gco:CharacterString>
+                                    </gmd:organisationName>
+                                    <gmd:contactInfo>
+                                        <gmd:CI_Contact>
+                                            <gmd:onlineResource>
+                                                <gmd:CI_OnlineResource>
+                                                    <gmd:linkage>
+                                                        <gmd:URL>http://www.epsg-registry.org/</gmd:URL>
+                                                    </gmd:linkage>
+                                                </gmd:CI_OnlineResource>
+                                            </gmd:onlineResource>
+                                        </gmd:CI_Contact>
+                                    </gmd:contactInfo>
+                                    <gmd:role gco:nilReason="missing"/>
+                                </gmd:CI_ResponsibleParty>
+                            </gmd:citedResponsibleParty>                            
+                        </gmd:CI_Citation>
+                    </gmd:authority>
+                    <gmd:code>
+                        <gco:CharacterString>urn:ogc:def:crs:EPSG:4326</gco:CharacterString>
+                    </gmd:code>
+                    <gmd:version>
+                        <gco:CharacterString>6.18.3</gco:CharacterString>
+                    </gmd:version>
+                </gmd:RS_Identifier>
+            </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+    </gmd:referenceSystemInfo>
+    */
+    //1. Coordinate Reference System
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:RS_Identifier/gmd:code/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "coordinate reference system", \INSPIREMANDATORY => "true", \ISO_NAME => "coordinate reference system", \HTML => _mb("Coordinate reference system"), \VALUE => "", \CATEGORY => "dataspec", \DESCRIPTION => _mb("Description of the coordinate reference system(s) used in the data set.")],
+    /*
+    //2. Temporal Reference System - only mandatory if not the standard system!
+    	array(	ibus => "t01_object.obj_id",
+    		iso19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue",
+    		iso19139explode => "false" ,
+    		inspire => "temporal reference system",
+    		inspiremandatory => "true",
+    		iso_name => "temporal reference system",
+    		html => _mb("Temporal reference system"),
+    		value => "",
+    		category => "dataspec",
+    		description => _mb("Description of the temporal reference system(s) used in the data set. This element is mandatory only if the spatial data set contains temporal information that does not refer to the default temporal reference system.")
+    	),
+    */
+    //3. Encoding
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:MD_DataIdentification/gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/gmd:name/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "encoding", \INSPIREMANDATORY => "true", \ISO_NAME => "encoding", \HTML => _mb("Encoding"), \VALUE => "", \CATEGORY => "dataspec", \DESCRIPTION => _mb("Description of the computer language construct(s) specifying the representation of data objects in a record, file, message, storage device or transmission channel.")],
+    /*
+    //4. Topological Consistency
+    	array(	ibus => "t01_object.obj_id",
+    		iso19139 => "/gmd:MD_Metadata/gmd:language/gmd:LanguageCode/@codeListValue",
+    		iso19139explode => "false" ,
+    		inspire => "topological Consistency",
+    		inspiremandatory => "true",
+    		iso_name => "topological Consistency",
+    		html => _mb("Topological Consistency"),
+    		value => "",
+    		category => "dataspec",
+    		description => _mb("Correctness of the explicitly encoded topological characteristics of the data set as described by the scope. This element is mandatory only if the data set includes types from the Generic Network Model and does not assure centreline topology (connectivity of centrelines) for the network.")
+    	),
+    */
+    //5. Character Encoding
+    /*<gmd:characterSet>
+      <gmd:MD_CharacterSetCode
+        codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode"
+        codeListValue="UTF8">UTF8</gmd:MD_CharacterSetCode>
+    </gmd:characterSet>
+    */
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue", \ISO19139EXPLODE => "false", \INSPIRE => "character Encoding", \INSPIREMANDATORY => "true", \ISO_NAME => "character Encoding", \HTML => _mb("Character encoding"), \VALUE => "", \CATEGORY => "dataspec", \DESCRIPTION => _mb("The character encoding used in the data set. This element is mandatory only if an encoding is used that is not based on UTF-8.")],
+    //Preview (36)
+    [\IBUS => "t01_object.obj_id", \ISO19139 => "/gmd:MD_Metadata/gmd:identificationInfo/*/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString", \ISO19139EXPLODE => "false", \INSPIRE => "preview", \INSPIREMANDATORY => "false", \ISO_NAME => "graphicOverview", \HTML => _mb("Preview"), \VALUE => "", \CATEGORY => "metadata", \DESCRIPTION => _mb("Graphical overview of the resource.")],
+];
 
 #***get the information out of the mapbender-db
 #get url to search interface (opensearch):
 $sql_os = "SELECT * from gp_opensearch where os_id = $1";
 #do db select
-$v_os = array($_REQUEST["osid"]);
-$t_os = array('i');
+$v_os = [$_REQUEST["osid"]];
+$t_os = ['i'];
 $res_os = db_prep_query($sql_os,$v_os,$t_os);
 #initialize count of search interfaces
 $cnt_os = 0;
 #initialize result array
-$os_list=array(array());
+$os_list=[[]];
 #fill result array
 while($row_os = db_fetch_array($res_os)){
 	$os_list[$cnt_os] ['id']= $row_os["os_id"];
@@ -790,7 +412,7 @@ switch ($os_list[0] ['version']) {
 			for ($i = 0; $i < count($resultOfXpath); $i++) {
 				$md_ident[$a]['value'] = $md_ident[$a]['value'].",".$resultOfXpath[$i];
 			}
-			$md_ident[$a]['value'] = ltrim($md_ident[$a]['value'],',');
+			$md_ident[$a]['value'] = ltrim((string) $md_ident[$a]['value'],',');
 		}
 	break;
 	default:
@@ -913,7 +535,7 @@ switch ($_REQUEST["mdtype"]) {
 		$html .= $tableEnd;
 		$html .= '</fieldset>';
 		
-		$bbox = explode(',',$md_ident[12]['value']);
+		$bbox = explode(',',(string) $md_ident[12]['value']);
 
 		if (count($bbox) == 4) {
 			$wgs84Bbox = $bbox[0].",".$bbox[2].",".$bbox[1].",".$bbox[3];

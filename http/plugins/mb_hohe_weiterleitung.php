@@ -7,8 +7,8 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_connector.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 if($ajaxResponse->getMethod() != "getheigth") {
@@ -25,7 +25,7 @@ $e = new connector();
 $e->set("httpType","post");
 $e->set("httpPostFieldsNumber",1);
 $e->set("curlSendCustomHeaders",false);
-$e->set("httpPostData","xyz=".urlencode($xyz));
+$e->set("httpPostData","xyz=".urlencode((string) $xyz));
 $result = $e->load($url);
 $ajaxResponse->setMessage($result);
 $ajaxResponse->setSuccess(true);

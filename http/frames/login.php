@@ -18,12 +18,12 @@
 
 ob_start();
 
-require_once dirname(__FILE__) . "/../../conf/mapbender.conf";
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once __DIR__ . "/../../conf/mapbender.conf";
+require_once(__DIR__."/../classes/class_user.php");
 
 function auth_user($name,$pw){
 	$user = new User();
-	$returnObject = json_decode($user->authenticateUserByName($name, $pw));
+	$returnObject = json_decode((string) $user->authenticateUserByName($name, $pw));
 	if ($returnObject->success !== false) {
 		return json_decode(json_encode($returnObject->result), JSON_OBJECT_AS_ARRAY);
 	} else {
@@ -33,10 +33,10 @@ function auth_user($name,$pw){
 
 function redirectToLogin ($name = "") {
 	if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
-		header ("Location: https://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/login.php?name=".$name);
+		header ("Location: https://".$_SERVER['HTTP_HOST'].dirname((string) $_SERVER['SCRIPT_NAME'])."/login.php?name=".$name);
 	}
 	else {
-		header ("Location: http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/login.php?name=".$name);
+		header ("Location: http://".$_SERVER['HTTP_HOST'].dirname((string) $_SERVER['SCRIPT_NAME'])."/login.php?name=".$name);
 	}
 	die;
 }
@@ -118,7 +118,7 @@ echo "<body onload='setFocus()'>";
 if(!isset($name) || $name == '' || !isset($password) || $password == ''){
 	echo "<form name='loginForm' action ='" . $_SERVER["SCRIPT_NAME"] . "' method='POST'>";
 	echo "<table>";
-	echo "<tr><td>Name: </td><td><input type='text' name='name' class='login_text' value='" . htmlentities($name, ENT_QUOTES, "UTF-8") . "'></td></tr>";
+	echo "<tr><td>Name: </td><td><input type='text' name='name' class='login_text' value='" . htmlentities((string) $name, ENT_QUOTES, "UTF-8") . "'></td></tr>";
 	echo "<tr><td>Password: </td><td><input type='password' name='password' class='login_text'></td></tr>";
 	echo "<tr><td></td><td><input type='submit' class='myButton' value='login' title='anmelden'>";
 	echo "&nbsp;&nbsp;<a href='../php/mod_forgottenPassword.php' title='Passwort vergessen?' target='_blank'>Forgot your password?</a>";
@@ -126,11 +126,11 @@ if(!isset($name) || $name == '' || !isset($password) || $password == ''){
 	echo "</form>";
 }
 if(isset($name) && $name != '' && isset($password) && $password != ''){
-	require_once dirname(__FILE__)."/../../core/system.php";
+	require_once __DIR__."/../../core/system.php";
 
 	$sql_count = "SELECT mb_user_login_count FROM mb_user WHERE mb_user_name = $1";
-	$params = array($name);
-	$types = array('s');
+	$params = [$name];
+	$types = ['s'];
 	$res_count = db_prep_query($sql_count,$params,$types);
 	if($row = db_fetch_array($res_count)){
 		if($row["mb_user_login_count"] > MAXLOGIN){
@@ -139,13 +139,13 @@ if(isset($name) && $name != '' && isset($password) && $password != ''){
 		}
 	}
 
-	require_once dirname(__FILE__)."/../../lib/class_Mapbender.php";
-	require_once dirname(__FILE__)."/../../lib/class_Mapbender_session.php";
+	require_once __DIR__."/../../lib/class_Mapbender.php";
+	require_once __DIR__."/../../lib/class_Mapbender_session.php";
 	$row = auth_user($name, $password);
 
 	// if given user data is found in database, set session data (db_fetch_array returns false if no row is found)
 	if($row){
-		require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+		require_once __DIR__ . "/../../core/globalSettings.php";
 # These lines will create a new session if a user logs in who is not the owner
 # of the session. However, in Geoportal-RLP this is intended,
 #
@@ -154,7 +154,7 @@ if(isset($name) && $name != '' && isset($password) && $password != ''){
 #			session_id(sha1(mt_rand()));
 #			session_start();
 #		}
-		include(dirname(__FILE__) . "/../../conf/session.conf");
+		include(__DIR__ . "/../../conf/session.conf");
 	} else {
 		# not needed anymore, this is done in class user
 		#$sql_set_cnt = "UPDATE mb_user SET mb_user_login_count = (mb_user_login_count + 1) WHERE mb_user_name = $1";
@@ -166,10 +166,10 @@ if(isset($name) && $name != '' && isset($password) && $password != ''){
 	if(Mapbender::session()->get("mb_user_id")){
 		if($row["mb_user_login_count"] <= MAXLOGIN){
 			$sql_del_cnt =  "UPDATE mb_user SET mb_user_login_count = 0 WHERE mb_user_id = $1";
-			$v = array(Mapbender::session()->get('mb_user_id'));
-			$t = array("i");
+			$v = [Mapbender::session()->get('mb_user_id')];
+			$t = ["i"];
 			db_prep_query($sql_del_cnt, $v, $t);
-			require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+			require_once(__DIR__."/../php/mb_getGUIs.php");
 			$arrayGUIs = mb_getGUIs($row["mb_user_id"]);
 			new mb_notice("login.setSession.mb_user_guis: ".serialize($arrayGUIs)." in session: " .session_id());
 			Mapbender::session()->set("mb_user_guis",$arrayGUIs);
@@ -183,13 +183,13 @@ if(isset($name) && $name != '' && isset($password) && $password != ''){
 			#only one gui is provided
 			if(count($arrayGUIs) == 1){
 				if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
-					$myURL = "Location: https://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/index.php?".strip_tags (SID)."&gui_id=".$arrayGUIs[0];
+					$myURL = "Location: https://".$_SERVER['HTTP_HOST'].dirname((string) $_SERVER['SCRIPT_NAME'])."/index.php?".strip_tags (SID)."&gui_id=".$arrayGUIs[0];
 				}
 				else {
-					$myURL = "Location: http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/index.php?".strip_tags (SID)."&gui_id=".$arrayGUIs[0];
+					$myURL = "Location: http://".$_SERVER['HTTP_HOST'].dirname((string) $_SERVER['SCRIPT_NAME'])."/index.php?".strip_tags (SID)."&gui_id=".$arrayGUIs[0];
 				}
 				# remove name and password from url, because url params are parsed later and written in javascript
-				$cleanUrl = preg_replace("/name=[^&]*&/","",$_SERVER["QUERY_STRING"]);
+				$cleanUrl = preg_replace("/name=[^&]*&/","",(string) $_SERVER["QUERY_STRING"]);
 				$cleanUrl = preg_replace("/password=[^&]*&/","",$cleanUrl);
 
 				$myURL .= "&".$cleanUrl;
@@ -199,15 +199,15 @@ if(isset($name) && $name != '' && isset($password) && $password != ''){
 			}
 			# list all guis of this user and his groups
 			else{
-				require_once(dirname(__FILE__)."/../php/mb_listGUIs.php");
+				require_once(__DIR__."/../php/mb_listGUIs.php");
 				mb_listGUIs($arrayGUIs);
 			}
 		}
 	} else {
 		Mapbender::session()->kill();
 		$sql_set_cnt = "UPDATE mb_user SET mb_user_login_count = (mb_user_login_count + 1) WHERE mb_user_name = $1";
-		$v = array($name);
-		$t = array('s');
+		$v = [$name];
+		$t = ['s'];
 		db_prep_query($sql_set_cnt,$v,$t);
 		redirectToLogin($name);
 	}

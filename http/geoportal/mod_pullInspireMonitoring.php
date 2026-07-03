@@ -15,10 +15,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once dirname(__FILE__)."/../classes/class_connector.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once __DIR__."/../classes/class_connector.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../classes/class_administration.php";
 
 $adminClass = new Administration();
 
@@ -59,7 +59,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 	//validate to csv integer list
 	$testMatch = $_REQUEST["registratingDepartments"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		echo 'registratingDepartments: is not valid.<br/>'; 
 		die(); 		
  	}
@@ -84,7 +84,7 @@ if (isset($_REQUEST["language"]) & $_REQUEST["language"] != "") {
 /* Array of database columns which should be read and sent back to DataTables. Use a space where
 * you want to insert a non-database field (for example a counter or static image)
 */
-$aColumns = array( 'title');
+$aColumns = ['title'];
 	
 /* Indexed column (used for fast and accurate table cardinality) */
 $sIndexColumn = "id";
@@ -215,7 +215,7 @@ $sql = <<<SQL
 	select inspire_category_id, inspire_category_key, inspire_category_code_$lang from inspire_category
 SQL;
 $result = db_query($sql);
-$inspireCategories = array();
+$inspireCategories = [];
 while ($row = db_fetch_array($result)) {
 	$inspireCategories['key'][$row['inspire_category_id']] = $row['inspire_category_key'];
 	$inspireCategories['title'][$row['inspire_category_id']] = $row['inspire_category_code_'.$lang];
@@ -286,7 +286,7 @@ $startTime = microtime();
 //get all service / owner / fkey_group information for the list of services
 $result = db_query($sql);
 //initialize result array
-$sqlTable = array();
+$sqlTable = [];
 while ($row = db_fetch_array($result)) {
 	$sqlTable['uuid'][] = $row['uuid'];
 	$sqlTable['title'][] = $row['title'];
@@ -307,7 +307,7 @@ while ($row = db_fetch_array($result)) {
 	$sqlTable['inspire_download'][] = $row['inspire_download'];
 	$sqlTable['inspire_interoperability'][] = $row['inspire_interoperability'];
 	$sqlTable['metadata_id'][] = $row['metadata_id'];
-	$metadataArray = array("datasetid_codespace" => $row['datasetid_codespace'], "datasetid" => $row['datasetid']);
+	$metadataArray = ["datasetid_codespace" => $row['datasetid_codespace'], "datasetid" => $row['datasetid']];
 	$uniqueResourceIdentifierCodespace = $adminClass->getIdentifierCodespaceFromRegistry($adminClass->getOrgaInfoFromRegistry('metadata', $row['metadata_id']), $metadataArray);
 	//extract datasetid
 	/*if (isset($row['datasetid']) && $row['datasetid'] != '') {
@@ -326,7 +326,7 @@ while ($row = db_fetch_array($result)) {
 		$sqlTable['datasetid'][] = $uniqueResourceIdentifierCodespace.$row['uuid'];
 	}
 }
-$groupOwnerArray = array();
+$groupOwnerArray = [];
 $groupOwnerArray[0] = $sqlTable['service_group'];
 $groupOwnerArray[1] = $sqlTable['service_owner'];
 //get orga information
@@ -386,20 +386,16 @@ switch ($outputFormat) {
 		$metadataIndex = -1;
 		$serviceIndex = 0;	
 		$orgaIndex = 0;
-		$alreadyBuildDls = array();
-		$alreadyReadOrgas = array();
-		$alreadyBuildVs = array();
+		$alreadyBuildDls = [];
+		$alreadyReadOrgas = [];
+		$alreadyBuildVs = [];
 		$currentUuid = "";
-		$inspireMonitoring = array(
-			"datasets" => array(),
-			"services" => array(),
-			"organizations" => array()
-		);
+		$inspireMonitoring = ["datasets" => [], "services" => [], "organizations" => []];
 		//loop over all found metadata uuids
-		for ($i=0; $i < count($sqlTable['uuid']); $i++){
+		for ($i=0; $i < count($sqlTable['uuid'] ?? []); $i++){
 			//filter for orga_id
 			//generate entry only if orga_id is the same as expected
-			if (!$registratingDepartments || ($registratingDepartments != null && in_array($groupOwnerArray[4][$i],explode(',',$registratingDepartments)))) {
+			if (!$registratingDepartments || ($registratingDepartments != null && in_array($groupOwnerArray[4][$i],explode(',',(string) $registratingDepartments)))) {
 				if ($sqlTable['uuid'][$i] != $currentUuid) {
 					//new metadataset identified - initialize it
 					$currentUuid = $sqlTable['uuid'][$i];
@@ -506,7 +502,7 @@ switch ($outputFormat) {
 						//Pull download options for specific dataset from mapbender database and show them
 						$downloadOptionsConnector = new connector("http://localhost".$_SERVER['SCRIPT_NAME']."/../../php/mod_getDownloadOptions.php?id=".$sqlTable['uuid'][$i]);
 						//$e = new mb_exception("download options: ".$downloadOptionsConnector->file);
-						$downloadOptions = json_decode($downloadOptionsConnector->file);
+						$downloadOptions = json_decode((string) $downloadOptionsConnector->file);
 						if (defined("MAPBENDER_PATH") && MAPBENDER_PATH != '') { 
 							$mapbenderUrl = MAPBENDER_PATH;
 						} else {
@@ -533,13 +529,13 @@ switch ($outputFormat) {
 									$uuidTest = $uuid->isuuid($mdUuid);
 									
 									if ($uuidTest) {
-										$mdPart = explode('-',$mdUuid);
+										$mdPart = explode('-',(string) $mdUuid);
 										//$e = new mb_exception("is uuid");
 									} else {
 										//$e = new mb_exception("is not uuid");
-										$mdPart = array();
-										$mdPart[2] = substr($mdUuid,-12,-8);
-										$mdPart[3] = substr($mdUuid,-4);
+										$mdPart = [];
+										$mdPart[2] = substr((string) $mdUuid,-12,-8);
+										$mdPart[3] = substr((string) $mdUuid,-4);
 									}
 									$servicePart = explode('-',$option->serviceUuid);
 									//$mdPart = explode('-',$mdUuid);
@@ -618,26 +614,14 @@ switch ($outputFormat) {
 						$alreadyReadOrgas[] = $sqlTable['organization'][$i];
 						$inspireMonitoring['organizations'][$orgaIndex]->id = $sqlTable['orgaId'][$i];
 						$inspireMonitoring['organizations'][$orgaIndex]->name = $sqlTable['organization'][$i];
-						switch ($sqlTable['adminCode'][$i]) {
-							case "NUTS 1":
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Land";
-							break;
-							case "NUTS 2":
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Regierungsbezirk";
-							break;
-							case "NUTS 3":
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Landkreis";
-							break;
-							case "LAU 1":
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Verbandsgemeinde/Stadt";
-							break;
-							case "LAU 2":
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Gemeinde";
-							break;
-							default:
-								$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = "Andere";
-							break;
-						}
+						$inspireMonitoring['organizations'][$orgaIndex]->adminLevel = match ($sqlTable['adminCode'][$i]) {
+          "NUTS 1" => "Land",
+          "NUTS 2" => "Regierungsbezirk",
+          "NUTS 3" => "Landkreis",
+          "LAU 1" => "Verbandsgemeinde/Stadt",
+          "LAU 2" => "Gemeinde",
+          default => "Andere",
+      };
 						
 						$orgaIndex++;
 					}
@@ -651,7 +635,7 @@ switch ($outputFormat) {
 						//$output['aaData'][$metadataIndex]->downloadServices[]->id = $sqlTable['resource_id'][$i];
 					}
 					//reduce categories if there are double entries
-					$arrayInspireCategories = array_unique(explode(',',(rtrim($insCat,','))));
+					$arrayInspireCategories = array_unique(explode(',',(rtrim((string) $insCat,','))));
 					//$e = new mb_exception($insCat);
 					for ($j=0; $j < 34; $j++) {
 						$catId = $j+1;
@@ -763,27 +747,17 @@ switch ($outputFormat) {
 		$currentUuid = "";
 		if (isset($iTotal)) {
 			//$e = new mb_exception("iTotal= ".$iTotal);
-			$output = array(
-				"sEcho" => intval($_REQUEST['sEcho']),
-				"iTotalRecords" => $iTotal,
-				"iTotalDisplayRecords" => $iTotal,
-				"aaData" => array()
-			);
+			$output = ["sEcho" => intval($_REQUEST['sEcho']), "iTotalRecords" => $iTotal, "iTotalDisplayRecords" => $iTotal, "aaData" => []];
 		} else {
-			$output = array(
-				"sEcho" => intval($_REQUEST['sEcho']),
-				"iTotalRecords" => $iTotal,
-				"iTotalDisplayRecords" => $iTotal,
-				"aaData" => array()
-			);
+			$output = ["sEcho" => intval($_REQUEST['sEcho']), "iTotalRecords" => $iTotal, "iTotalDisplayRecords" => $iTotal, "aaData" => []];
 		}
 		/*$output = array(
 			"aaData" => array()
 		);*/
-		for ($i=0; $i < count($sqlTable['uuid']); $i++){
+		for ($i=0; $i < count($sqlTable['uuid'] ?? []); $i++){
 			//filter for orga_id
 			//generate entry only if orga_id is the same as expected
-			if (!$registratingDepartments || ($registratingDepartments != null && in_array($groupOwnerArray[4][$i],explode(',',$registratingDepartments)))) {
+			if (!$registratingDepartments || ($registratingDepartments != null && in_array($groupOwnerArray[4][$i],explode(',',(string) $registratingDepartments)))) {
 				if ($sqlTable['uuid'][$i] != $currentUuid) {
 					//new metadataset identified - initialize it
 					$currentUuid = $sqlTable['uuid'][$i];
@@ -827,7 +801,7 @@ switch ($outputFormat) {
 						//$output['aaData'][$metadataIndex]->downloadServices[]->id = $sqlTable['resource_id'][$i];
 					}
 					//reduce categories if there are double entries
-					$output['aaData'][$metadataIndex]->inspireCategories = implode(',',array_unique(explode(',',(rtrim($insCat,',')))));
+					$output['aaData'][$metadataIndex]->inspireCategories = implode(',',array_unique(explode(',',(rtrim((string) $insCat,',')))));
 				}
 			}
 			if (isset($jsonLimit) && $metadataIndex >= $jsonLimit) {
@@ -845,10 +819,10 @@ switch ($outputFormat) {
 
 function getOrganizationInfoForServices($groupOwnerArray) {
 	//split array into two lists which are requested in two separate sqls
-	$listGroupIds = array();
-	$listOwnerIds = array();
+	$listGroupIds = [];
+	$listOwnerIds = [];
 	//echo "<br>count groupOwnerArray: ".count($groupOwnerArray[0]);
-	for ($i=0; $i < count($groupOwnerArray[0]); $i++){
+	for ($i=0; $i < count($groupOwnerArray[0] ?? []); $i++){
 		$key = $i;
 		if (!isset($groupOwnerArray[0][$i]) || is_null($groupOwnerArray[0][$i]) || $groupOwnerArray[0][$i] == 0){
 			$listOwnerIds[$key] = $groupOwnerArray[1][$i];
@@ -857,8 +831,8 @@ function getOrganizationInfoForServices($groupOwnerArray) {
 		}
 	}
 	//for ownerList
-	$metadataContactArray = array();
-	$metadataContact = array();
+	$metadataContactArray = [];
+	$metadataContact = [];
 	$listGroupIdsKeys =  array_keys($listGroupIds);
 	$listOwnerIdsKeys =  array_keys($listOwnerIds);
 	$listOwnerIdsString = implode(",",$listOwnerIds);

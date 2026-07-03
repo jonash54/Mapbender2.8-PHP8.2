@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_js.php';
 //defaults for element vars
 ?>
@@ -38,9 +38,9 @@ var mod_featureInfoTunnel_frameName = "";
 var mod_featureInfoTunnel_target = "<?php echo $e_target[0]; ?>";
 var mod_featureInfoTunnel_map = null;
 
-var mod_featureInfoTunnel_img_on = new Image(); mod_featureInfoTunnel_img_on.src =  "<?php  echo preg_replace("/_off/","_on",$e_src);  ?>";
+var mod_featureInfoTunnel_img_on = new Image(); mod_featureInfoTunnel_img_on.src =  "<?php  echo preg_replace("/_off/","_on",(string) $e_src);  ?>";
 var mod_featureInfoTunnel_img_off = new Image(); mod_featureInfoTunnel_img_off.src ="<?php  echo $e_src;  ?>";
-var mod_featureInfoTunnel_img_over = new Image(); mod_featureInfoTunnel_img_over.src = "<?php  echo preg_replace("/_off/","_over",$e_src);  ?>";
+var mod_featureInfoTunnel_img_over = new Image(); mod_featureInfoTunnel_img_over.src = "<?php  echo preg_replace("/_off/","_over",(string) $e_src);  ?>";
 
 eventInit.register(function () {
 	mb_regButton(function init_featureInfoTunnel(ind){
@@ -71,7 +71,7 @@ function mod_featureInfoTunnel_disable(){
 	if (domNode) {
 		$(domNode).unbind("click", mod_featureInfoTunnel_event);
 	}
-	
+
 	mod_featureInfoTunnel_map.getDomElement().style.cursor = "default";
 }
 
@@ -82,7 +82,7 @@ function removeProgressWheel () {
 
 function mod_featureInfoTunnel_event(e){
 	eventBeforeFeatureInfo.trigger({"fName":mod_featureInfoTunnel_target});
-	
+
 	//create progress wheel element
 	var map_el = mod_featureInfoTunnel_map.getDomElement();
 	if (!map_el.ownerDocument.getElementById(mod_featureInfoTunnel_map.elementName + "_progressWheel")) {
@@ -94,7 +94,7 @@ function mod_featureInfoTunnel_event(e){
 
 	var point = mod_featureInfoTunnel_map.getMousePosition(e);
 	var path = '../extensions/ext_featureInfoTunnel.php';
-	
+
 //TODO that code should go to featureInfo Redirect module
 	var ind = getMapObjIndexByName(mod_featureInfoTunnel_target);
 	if(document.getElementById("FeatureInfoRedirect")){
@@ -131,10 +131,10 @@ function mod_featureInfoTunnel_event(e){
 					else {
 						var dialogPosition = featureInfoPopupPosition;
 					}
-					
+
 					$(".fiResultFrame").remove();
 					$(".featureInfoTunnel-dialog").remove();
-          
+
 					mb_ajax_post(path, {'url':currentRequest},function(js_code,status){
 						if(js_code){
 							if(featureInfoLayerPopup == 'true') {
@@ -158,14 +158,14 @@ function mod_featureInfoTunnel_event(e){
 										$(this).remove();
 									}
 								}).parent().css({position:"fixed"});
-								
+
 								$(".noResultFound").dialog("close");
 							}
 							else{
 								window.open(path+"?url=" + encodeURIComponent(currentRequest), "" , "width="+featureInfoPopupWidth+",height="+featureInfoPopupHeight+",scrollbars=yes,resizable=yes");
 							}
 						}
-						
+
 						if(featureInfoNoResultPopup == 'true' && featureInfoLayerPopup == 'true') {
 							if($(".fiResultFrame").size() === 0) {
 								$(".noResultFound").dialog("close");

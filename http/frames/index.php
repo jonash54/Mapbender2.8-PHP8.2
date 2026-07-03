@@ -19,11 +19,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once("../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_gui.php");
-require_once(dirname(__FILE__)."/../classes/class_cache.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_gui.php");
+require_once(__DIR__."/../classes/class_cache.php");
+require_once(__DIR__."/../classes/class_connector.php");
 //compress js and css source - TODO compress js - it has problems :-(
-require_once(dirname(__FILE__)."/../extensions/minify.php");
+require_once(__DIR__."/../extensions/minify.php");
 //require_once(dirname(__FILE__)."/../extensions/jsqueeze-master/src/JSqueeze.php");
 //require_once(dirname(__FILE__)."/../extensions/JShrink-master/src/JShrink/Minifier.php");
 use MatthiasMullie\Minify;
@@ -137,8 +137,8 @@ if ($representationType == "htmlComplete") {
 
 //check if element var for caching gui is set to true!
 $sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = 'body' AND var_name='cacheGuiHtml'";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql,$v,$t);
 $row = db_fetch_array($res);
 //$e = new mb_notice("count row: ".count($row['var_name']));
@@ -163,8 +163,8 @@ $cacheKeyElementVars = 'guiElementVars_'.$gui_id;
 } else {*/
 	//do sql instead
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = 'body' AND fkey_gui_id = $1 and var_name='favicon' ORDER BY var_name";
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	/*if ($cache->isActive) {
 		$cache->cachedVariableAdd("mapbender: " . $cacheKeyElementVars,$res);
@@ -184,7 +184,7 @@ if ($representationType == "htmlComplete") {
 	$resultObject->cssFiles[] = "../css/reset.css";
 }
 if ($representationType == "htmlElement") {
-	$resultObject->jsFiles = array();
+	$resultObject->jsFiles = [];
 	$resultObject->jsString = "";
 }
 //define new key name cache
@@ -205,8 +205,8 @@ WHERE
 	ORDER BY var_name
 
 SQL;
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	/*if ($cache->isActive) {
 		$cache->cachedVariableAdd("mapbender: " . $cacheKeyGuiCss,$res);
@@ -251,8 +251,8 @@ ORDER BY var_name
 
 SQL;
 
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql,$v,$t);
 $cnt = 0;
 while($row = db_fetch_array($res)){
@@ -296,8 +296,8 @@ if ($representationType == "htmlComplete") {
 } else {
 	$resultObject->htmlString = replaceBodyWithElement($guiHtml);
 }
-$mapPhpParameters = htmlentities($urlParameters, ENT_QUOTES, CHARSET);
-$mapPhpParameters .= "&amp;".htmlentities($_SERVER["QUERY_STRING"]);
+$mapPhpParameters = htmlentities((string) $urlParameters, ENT_QUOTES, CHARSET);
+$mapPhpParameters .= "&amp;".htmlentities((string) $_SERVER["QUERY_STRING"]);
 //TODO - validate further GET params - e.g. querylayers ... - do this also in index_ext.php!
 //$e = new mb_exception("index.php: mapPhpParameters: ".$mapPhpParameters);
 if ($representationType == "htmlComplete") {
@@ -361,7 +361,7 @@ if ($representationType == "htmlComplete") {
 
 function replaceBodyWithElement($html, $elementName = 'div') {
     //https://stackoverflow.com/questions/6892199/how-can-i-grab-the-entire-content-inside-body-tag-with-regex
-    preg_match("/<body[^>]*>(.*?)<\/body>/is", $html, $matches);
+    preg_match("/<body[^>]*>(.*?)<\/body>/is", (string) $html, $matches);
     $result = "<".$elementName." id='body'>".$matches[1]."</".$elementName.">";
     //$result = "<".$elementName.">".$matches[1]."</".$elementName.">";
     //$e = new mb_exception($result);
@@ -375,11 +375,11 @@ function getSourceCode($path, $fileType = 'css') {
     } else {
 	$scheme = "http";
     }
-    $pathPrefix = $scheme.'://'.$_SERVER['HTTP_HOST'].parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+    $pathPrefix = $scheme.'://'.$_SERVER['HTTP_HOST'].parse_url((string) $_SERVER["REQUEST_URI"], PHP_URL_PATH);
     $pathPrefix = pathinfo($pathPrefix);
     $pathPrefix = $pathPrefix['dirname']."/";
-    if (substr($path, 0, 4) == 'http' || $fileType == 'js') {
-	if ($fileType == 'js' && substr($path, 0, 4) !== 'http') {
+    if (str_starts_with((string) $path, 'http') || $fileType == 'js') {
+	if ($fileType == 'js' && !str_starts_with((string) $path, 'http')) {
 	    //make absolute path, because script may be built dynamic!
 	    $path = $pathPrefix . $path;
 //$e = new mb_exception("jspath: ".$path);	
@@ -393,7 +393,7 @@ function getSourceCode($path, $fileType = 'css') {
 }
 
 function microtime_float() {
-    	list($usec, $sec) = explode(" ", microtime());
+    	[$usec, $sec] = explode(" ", microtime());
     	return ((float)$usec + (float)$sec);
 }
 ?>

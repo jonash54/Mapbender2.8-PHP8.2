@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 ?>
 // <script language="JavaScript">
     var $digitize = $(this);

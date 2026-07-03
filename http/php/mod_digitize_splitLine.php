@@ -6,21 +6,21 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 $startPoint = null;
 $endPoint = null;
-$points = array();
-$lineArray = array();
+$points = [];
+$lineArray = [];
 
 function isLinestring($string) {
 	$floatPattern = "-?\d+(\.\d+)?";
 	$pointPattern = $floatPattern . " " . $floatPattern;
 	$linePattern = "LINESTRING \(" . $pointPattern . ",( )*" . $pointPattern . "(,( )*" . $pointPattern . ")*\)";
 	
-	if(preg_match("/" . $linePattern . "/", $string)) {
+	if(preg_match("/" . $linePattern . "/", (string) $string)) {
 		return true;
 	}
 	return false;
@@ -58,7 +58,7 @@ while ($row = db_fetch_array($res)) {
 if(count($points) == 0){
 	$lineArray[] = $line1Text;
 }else{
-	$points = array_merge(array($startPoint),$points,array($endPoint));
+	$points = array_merge([$startPoint],$points,[$endPoint]);
 
 	// go through the point array in pairs, cut into segment, and add each segment onto resultArray
 	for($i = 0; $i < count($points)-1; $i++){
@@ -94,5 +94,5 @@ if(count($points) == 0){
 
 // OUTPUT
 header("Content-type:application/x-json; charset=utf-8");
-echo $json->encode(array("geometries" => $lineArray));
+echo $json->encode(["geometries" => $lineArray]);
 ?>

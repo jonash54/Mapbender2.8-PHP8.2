@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../../conf/mapbender.conf");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 //validate parameters
 $upload_id = false;
 if (isset($_REQUEST["serviceType"]) & $_REQUEST["serviceType"] != "") {
@@ -37,7 +37,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
         $testMatch = $_REQUEST["id"];
         //give max 99 entries - more will be to slow
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 echo 'Parameter <b>id</b> is not valid (integer).<br/>';
                 die();
         }
@@ -49,7 +49,7 @@ if (isset($_REQUEST["upload_id"]) & $_REQUEST["upload_id"] != "") {
     $testMatch = $_REQUEST["upload_id"];
     //give max 99 entries - more will be to slow
     $pattern = '/^[0-9]*$/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         echo 'Parameter <b>upload_id</b> is not valid (integer).<br/>';
         die();
     }
@@ -61,28 +61,28 @@ switch ($serviceType) {
 	case "wms":
 	    if ($upload_id) {
     		$sql = "SELECT cap_diff FROM mb_monitor WHERE fkey_wms_id = $1 and upload_id = $2";
-    		$v = array($id, $upload_id);
-    		$t = array('i', 'i');
+    		$v = [$id, $upload_id];
+    		$t = ['i', 'i'];
 	    } else {
 	        $sql = "SELECT cap_diff FROM mb_wms_availability WHERE fkey_wms_id = $1";
-	        $v = array($id);
-	        $t = array('i');
+	        $v = [$id];
+	        $t = ['i'];
 	    }
 		break;
 	case "wfs":
 	    if ($upload_id) {
     		$sql = "SELECT cap_diff FROM mb_monitor WHERE fkey_wfs_id = $1 and upload_id = $2";
-    		$v = array($id, $upload_id);
-    		$t = array('i', 'i');
+    		$v = [$id, $upload_id];
+    		$t = ['i', 'i'];
 	    } else {
 	        $sql = "SELECT cap_diff FROM mb_wfs_availability WHERE fkey_wfs_id = $1";
-	        $v = array($id);
-	        $t = array('i');
+	        $v = [$id];
+	        $t = ['i'];
 	    }
 		break;
 }
 $res = db_prep_query($sql,$v,$t);
 $cap_diff_row = db_fetch_row($res);
-$html = urldecode($cap_diff_row[0]);
+$html = urldecode((string) $cap_diff_row[0]);
 echo $html;
 ?>

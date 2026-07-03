@@ -17,36 +17,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_administration.php");
-require_once(dirname(__FILE__)."/class_wfs.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_administration.php");
+require_once(__DIR__."/class_wfs.php");
 
-class WfsFeatureType {
-	var $id;
-	var $name;
-	var $title;
-	var $summary;
-	var $searchable;
-	var $inspire_download;
-	var $schema; //text
-	var $schema_problem; //boolean
-	var $srs; // Tag DefaultSRS in wfs 1.1.0+
-	var $latLonBboxArray = array();
-	var $crsArray = array(); //new for wfs 1.1.0+ (tag OtherSRS)
-	var $metadataUrlArray = array();
-	var $wfs;
-	var $namespaceArray = array();
-	var $elementArray = array();
-	var $featuretype_keyword = array();
-	var $featuretype_md_topic_category_id = array();
-	var $featuretype_inspire_category_id = array();
-	var $featuretype_custom_category_id = array();
-	var $featuretypeOutputFormatArray = array();
+class WfsFeatureType implements \Stringable {
+	public $id;
+	public $name;
+	public $title;
+	public $summary;
+	public $searchable;
+	public $inspire_download;
+	public $schema; //text
+	public $schema_problem; //boolean
+	public $srs; // Tag DefaultSRS in wfs 1.1.0+
+	public $latLonBboxArray = [];
+	public $crsArray = []; //new for wfs 1.1.0+ (tag OtherSRS)
+	public $metadataUrlArray = [];
+	public $namespaceArray = [];
+	public $elementArray = [];
+	public $featuretype_keyword = [];
+	public $featuretype_md_topic_category_id = [];
+	public $featuretype_inspire_category_id = [];
+	public $featuretype_custom_category_id = [];
+	public $featuretypeOutputFormatArray = [];
 
-	public function __construct ($aWfs) {
-		$this->wfs = $aWfs;
-	}
+	public function __construct(public $wfs)
+ {
+ }
 
 	public function hasNamespace ($key, $value) {
 		for ($i = 0; $i < count($this->namespaceArray); $i++) {
@@ -137,8 +136,8 @@ class WfsFeatureType {
 		return $wfsString;
 	}
 
-	public function __toString () {
-		return $this->toHtml();
+	public function __toString (): string {
+		return (string) $this->toHtml();
 	}
 }
 ?>

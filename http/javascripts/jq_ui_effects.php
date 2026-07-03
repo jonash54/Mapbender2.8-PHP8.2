@@ -99,7 +99,7 @@
  */
 
 <?php
-	$uiPath = dirname(__FILE__) . '/' . 
+	$uiPath = __DIR__ . '/' . 
 		"../extensions/jquery-ui-1.8.1.custom/development-bundle/ui/minified/";
 
 	include '../include/dyn_php.php';

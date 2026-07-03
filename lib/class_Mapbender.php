@@ -5,8 +5,8 @@
  * To change the template for this generated file go to
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
-require_once(dirname(__FILE__)."/class_Mapbender_session.php");
-require_once(dirname(__FILE__)."/class_Singleton.php");
+require_once(__DIR__."/class_Mapbender_session.php");
+require_once(__DIR__."/class_Singleton.php");
  
  class Mapbender extends Singleton{
  	
@@ -17,8 +17,10 @@ require_once(dirname(__FILE__)."/class_Singleton.php");
  		return Mapbender_session::singleton();
  	}
  	
- 	public static function singleton() {
-        	return parent::singleton(__CLASS__);
+ 	// $classname kept for LSP-compat with Singleton::singleton($classname);
+ 	// it is ignored — children always self-register via self::class.
+ 	public static function singleton($classname = null) {
+        	return parent::singleton(self::class);
     	}
 	
 	public static function postgisAvailable () {

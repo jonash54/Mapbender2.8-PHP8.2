@@ -1,6 +1,6 @@
 <?php 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-include_once(dirname(__FILE__)."/../extensions/JSON.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+include_once(__DIR__."/../extensions/JSON.php");
 
 //db connection
 $con = db_connect($DBSERVER,$OWNER,$PW) or die ("Error while connecting database $dbname");
@@ -8,7 +8,7 @@ db_select_db(DB,$con);
 
 //Define JSON object
 $json = new Services_JSON();
-$obj = $json->decode(stripslashes($_REQUEST['obj']));
+$obj = $json->decode(stripslashes((string) $_REQUEST['obj']));
 //get language parameter out of mapbender session if it is set else set default language to de_DE
 $sessionLang = Mapbender::session()->get("mb_lang");
 if (($sessionLang != false) && ($sessionLang != '')) {
@@ -20,7 +20,7 @@ if (($sessionLang != false) && ($sessionLang != '')) {
 
 //extract language code out of locale
 
-$langCode = explode("_", $language);
+$langCode = explode("_", (string) $language);
 
 $langCode = $langCode[0];
 
@@ -46,8 +46,8 @@ switch($obj->action){
   
 function getList($langCode){
 	global $con;
-	$entries = array();
-	$entries['translations'] = array();
+	$entries = [];
+	$entries['translations'] = [];
 	switch ($langCode) {
 		case 'de':
 			$entries['translations']['extendedSearchTitle'] = 'Erweiterte Suche';
@@ -178,9 +178,9 @@ function getList($langCode){
 			break;
 		default:
 	}
-	$entries['user_department'] = array();
-	$entries['group_name'] = array();
-	$entries['group_title'] = array();
+	$entries['user_department'] = [];
+	$entries['group_name'] = [];
+	$entries['group_title'] = [];
 
 	$sql= "SELECT mb_group_id, mb_group_name, UPPER(mb_group_name) as upper_group_name,mb_group_title from registrating_groups LEFT OUTER JOIN mb_group ON (mb_group_id=fkey_mb_group_id)  GROUP BY mb_group_id, mb_group_name, mb_group_title ORDER BY upper_group_name";
 	$res = pg_query($sql);
@@ -195,9 +195,9 @@ function getList($langCode){
 	}
 	$maxStrLength = 200;
 	//get list of iso categories
-	$entries['iso_cat_id'] = array();
-	$entries['iso_cat_name'] = array();
-	$entries['iso_cat_title'] = array();
+	$entries['iso_cat_id'] = [];
+	$entries['iso_cat_name'] = [];
+	$entries['iso_cat_title'] = [];
 	/*
 	 * @security_patch sqli done
 	 */
@@ -205,29 +205,29 @@ function getList($langCode){
 	$res_cat = pg_query($sql_cat);
 	while($row_cat = db_fetch_array($res_cat)){
 		array_push($entries['iso_cat_id'], $row_cat['md_topic_category_id']);
-		array_push($entries['iso_cat_name'], substr($row_cat["md_topic_category_code_".$langCode], 0,$maxStrLength));
+		array_push($entries['iso_cat_name'], substr((string) $row_cat["md_topic_category_code_".$langCode], 0,$maxStrLength));
 		array_push($entries['iso_cat_title'], $row_cat["md_topic_category_code_".$langCode]);
 	}
 	//get list of inspire themes
-	$entries['inspire_cat_id'] = array();
-	$entries['inspire_cat_name'] = array();
-	$entries['inspire_cat_title'] = array();
+	$entries['inspire_cat_id'] = [];
+	$entries['inspire_cat_name'] = [];
+	$entries['inspire_cat_title'] = [];
 	$sql_cat= "SELECT * FROM inspire_category order by inspire_category_code_".$langCode;
 	$res_cat = pg_query($sql_cat);
 	while($row_cat = db_fetch_array($res_cat)){
 		array_push($entries['inspire_cat_id'], $row_cat['inspire_category_id']);
-		array_push($entries['inspire_cat_name'], substr($row_cat["inspire_category_code_".$langCode], 0,$maxStrLength));
+		array_push($entries['inspire_cat_name'], substr((string) $row_cat["inspire_category_code_".$langCode], 0,$maxStrLength));
 		array_push($entries['inspire_cat_title'], $row_cat["inspire_category_key"]." ".$row_cat["inspire_category_code_".$langCode]);
 	}
 	//get list of custom categories
-	$entries['custom_cat_id'] = array();
-	$entries['custom_cat_name'] = array();
-	$entries['custom_cat_title'] = array();
+	$entries['custom_cat_id'] = [];
+	$entries['custom_cat_name'] = [];
+	$entries['custom_cat_title'] = [];
 	$sql_cat= "SELECT * FROM custom_category WHERE custom_category_hidden != 1 order by custom_category_code_".$langCode;
 	$res_cat = pg_query($sql_cat);
 	while($row_cat = db_fetch_array($res_cat)){
 		array_push($entries['custom_cat_id'], $row_cat['custom_category_id']);
-		array_push($entries['custom_cat_name'], substr($row_cat["custom_category_code_".$langCode], 0,$maxStrLength));
+		array_push($entries['custom_cat_name'], substr((string) $row_cat["custom_category_code_".$langCode], 0,$maxStrLength));
 		array_push($entries['custom_cat_title'], $row_cat["custom_category_code_".$langCode]);
 	}
 	return $entries;

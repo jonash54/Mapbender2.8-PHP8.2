@@ -1,8 +1,8 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../../http/classes/class_connector.php");
-require_once(dirname(__FILE__)."/../../http/classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_weldMaps2JPEG.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../../http/classes/class_connector.php");
+require_once(__DIR__."/../../http/classes/class_administration.php");
+require_once(__DIR__."/../classes/class_weldMaps2JPEG.php");
 //define("LAYER_PREVIEW_BASE","../tmp/layerpreviews/");
 //define("LAYER_PREVIEW_BASE","../tmp/");
 

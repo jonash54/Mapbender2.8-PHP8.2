@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="newGui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -43,8 +43,8 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 <?php
 if(isset($newGui) && $newGui != ""){
   $sql = "SELECT gui_id FROM gui WHERE gui_id = $1";
-  $v = array($newGui);
-  $t = array('s');
+  $v = [$newGui];
+  $t = ['s'];
   $res = db_prep_query($sql,$v,$t);
   if(db_fetch_row($res)){
      echo "<script type='text/javascript'>";
@@ -54,15 +54,15 @@ if(isset($newGui) && $newGui != ""){
   else{
 	$sql = "INSERT INTO gui (gui_id,gui_name,gui_description,gui_public) ";
 	$sql .= "VALUES($1, $2, $3, $4)";
-	$v = array($newGui,$newGui,$newDesc,1);
-	$t = array('s','s','s','i');
+	$v = [$newGui, $newGui, $newDesc, 1];
+	$t = ['s', 's', 's', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	$sql = "INSERT INTO gui_mb_user (fkey_gui_id,fkey_mb_user_id,mb_user_type) ";
 	$sql .= "VALUES($1, $2, $3)";
-	$v = array($newGui,Mapbender::session()->get("mb_user_id"), 'owner');
-	$t = array('s','i','s');
+	$v = [$newGui, Mapbender::session()->get("mb_user_id"), 'owner'];
+	$t = ['s', 'i', 's'];
 	$res = db_prep_query($sql,$v,$t);
-	require_once(dirname(__FILE__)."/mb_getGUIs.php");
+	require_once(__DIR__."/mb_getGUIs.php");
 	$arrayGUIs = mb_getGUIs( Mapbender::session()->get("mb_user_id"));
 	Mapbender::session()->set("mb_user_guis",$arrayGUIs);
 	$guiCreated=true;

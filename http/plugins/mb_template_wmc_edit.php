@@ -1,5 +1,5 @@
 <?php
-	require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+	require_once __DIR__ . "/../../core/globalSettings.php";
 ?>
 <div id="wmc">
 <fieldset class="wmc-template">
@@ -46,7 +46,7 @@
             <label for="wmcTemplateLinkList1-title"><?php #echo _mb("Tooltip");?> :</label>
             <input name="title" id="wmcTemplateLinkList1-title"/>
         </p-->
-    
+
     </fieldset>
     <fieldset data-target="wmcTemplateLinkList2">
         <legend><?php echo _mb("Link List2");?>: 

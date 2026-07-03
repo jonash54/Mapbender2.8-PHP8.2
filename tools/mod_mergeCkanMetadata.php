@@ -1,18 +1,18 @@
 <?php
 //should be invoked from cli!
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_connector.php");
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_connector.php");
 $returnObject = new stdClass();
 $returnObject->help = "helptext";
 $returnObject->success = false;
-$returnObject->result = array();
+$returnObject->result = [];
 $mergedPackages = 0;
 $mergedOrganisations = 0;
 $mapbenderBaseUrl = "https://www.geoportal.rlp.de/mapbender/";
 //get organisation list from webservice
 $connector = new connector();
 $orgaListResult = $connector->load($mapbenderBaseUrl . "php/mod_showOrganizationList.php");
-$orgaListObject = json_decode($orgaListResult);
+$orgaListObject = json_decode((string) $orgaListResult);
 //$orgaIdArray = array();
 //alter METADATA_DIR from mapbender.conf to right relative path
 $metadataDir = str_replace("../../", "../", METADATA_DIR);

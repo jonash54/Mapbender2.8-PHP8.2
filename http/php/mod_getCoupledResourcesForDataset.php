@@ -4,10 +4,10 @@
 # This program is dual licensed under the GNU General Public License 
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_iso19139.php";
-require_once(dirname(__FILE__) . "/../classes/class_cswClient.php");
-require_once(dirname(__FILE__) . "/../classes/class_csw.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_iso19139.php";
+require_once(__DIR__ . "/../classes/class_cswClient.php");
+require_once(__DIR__ . "/../classes/class_csw.php");
 //show html from a given url
 //default languageCode to de
 //example:
@@ -17,37 +17,31 @@ require_once(dirname(__FILE__) . "/../classes/class_csw.php");
 
 function microtime_float()
 {
-    list($usec, $sec) = explode(" ", microtime());
+    [$usec, $sec] = explode(" ", microtime());
     return ((float)$usec + (float)$sec);
 }
 
 function correctWmsUrl($wms_url) {
 	//check if last sign is ? or & or none of them
-	$lastChar = substr($wms_url,-1);
+	$lastChar = substr((string) $wms_url,-1);
 	//check if getcapabilities is set as a parameter
 	$findme = "getcapabilities";
-	$posGetCap = strpos(strtolower($wms_url), $findme);
+	$posGetCap = strpos(strtolower((string) $wms_url), $findme);
 	if ($posGetCap === false) {
-		$posGetAmp = strpos(strtolower($wms_url), "?");
+		$posGetAmp = strpos(strtolower((string) $wms_url), "?");
 		if ($posGetAmp === false) {
 			$wms_url .= "?REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
 		} else {
-			switch ($lastChar) {
-				case "?":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				case "&":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				default:
-					$wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-			 }
+			match ($lastChar) {
+       "?" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       "&" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       default => $wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+   };
 		}
 	} else {
 		//check if version is defined
 		$findme1 = "version=";
-		$posVersion = strpos(strtolower($wms_url), $findme1);
+		$posVersion = strpos(strtolower((string) $wms_url), $findme1);
 		if ($posVersion === false) {
 			$wms_url .= "&VERSION=1.1.1";
 		} else {
@@ -69,15 +63,15 @@ Function to get the right service access url from an array of urls which was fou
 */
 function getServiceUrl($mdServiceType, $mdServiceTypeVersion, $accessUrls) {
 	if (is_array($accessUrls)) {
-		if (in_array(strtoupper($mdServiceType), array('VIEW','OGC:WMS','WMS','PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-			if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-				if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','ATOM'))) {
+		if (in_array(strtoupper((string) $mdServiceType), ['VIEW', 'OGC:WMS', 'WMS', 'PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+			if (in_array(strtoupper((string) $mdServiceType), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM']) || in_array(strtoupper((string) $mdServiceTypeVersion), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+				if (in_array(strtoupper((string) $mdServiceType), ['PREDEFINED ATOM', 'ATOM']) || in_array(strtoupper((string) $mdServiceTypeVersion), ['PREDEFINED ATOM', 'ATOM'])) {
 					//return first entry as atom feed access url
 					return $accessUrls[0];
 				} else {
 					//check for WFS
 					foreach ($accessUrls as $url) {
-						$pos = strpos(strtolower($url), 'service=wfs');
+						$pos = strpos(strtolower((string) $url), 'service=wfs');
 						if ($pos !== false) {
 							$accessUrl = $url; 
 							$accessUrlFound = true;
@@ -93,7 +87,7 @@ function getServiceUrl($mdServiceType, $mdServiceTypeVersion, $accessUrls) {
 			} else {
 				//check for WMS
 				foreach ($accessUrls as $url) {
-					$pos = strpos(strtolower($url), 'service=wms');
+					$pos = strpos(strtolower((string) $url), 'service=wms');
 					if ($pos !== false) {
 						$accessUrl = $url; 
 						$accessUrlFound = true;
@@ -120,7 +114,7 @@ function getServiceUrl($mdServiceType, $mdServiceTypeVersion, $accessUrls) {
 }
 
 $languageCode = "de";
-$url = urldecode($_REQUEST['getRecordByIdUrl']);
+$url = urldecode((string) $_REQUEST['getRecordByIdUrl']);
 $outputFormat = 'json';
 $catalogueId = 1;
 $resultObj['result'] = '';
@@ -163,7 +157,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -229,7 +223,7 @@ $mbMetadata = new Iso19139();
 //initialize if resource is based on a request to csw interface
 $cswBasedResource = false;
 //test if getrecordbyid request was used - then the service data may also be in the same catalogue
-if (strpos(strtoupper($url), "GETRECORDBYID") !== false && strpos(strtoupper($url), "SERVICE=CSW") !== false && strpos(strtoupper($url), "VERSION=2.0.2") !== false) {
+if (str_contains(strtoupper($url), "GETRECORDBYID") && str_contains(strtoupper($url), "SERVICE=CSW") && str_contains(strtoupper($url), "VERSION=2.0.2")) {
 	$cswBasedResource = true;
 } else {
 	$resultObj['message'] ='Url dont validate against a getrecordbyid url!'; 
@@ -273,13 +267,13 @@ if ($mbMetadata->hierarchyLevel == 'dataset' || $mbMetadata->hierarchyLevel == '
 		$operation = "getrecordsresolvecoupling";
 		$getrecordId = $mbMetadata->fileIdentifier;
 		if ($mbMetadata->datasetIdCodeSpace != '') {
-		    $datasetId = str_replace('&','&amp;',rtrim($mbMetadata->datasetIdCodeSpace, '/').'/'.$mbMetadata->datasetId);
+		    $datasetId = str_replace('&','&amp;',rtrim((string) $mbMetadata->datasetIdCodeSpace, '/').'/'.$mbMetadata->datasetId);
 		} else {
 		    $datasetId = (string)$mbMetadata->datasetId;
 		}
 		$recordType = 'service';
 		$cswResponseObject = $cswClient->doRequest(false, $operation, $getrecordId, false, $recordType, false, false, false, $datasetId, $csw);	
-		$serviceMetadataUrls = array();
+		$serviceMetadataUrls = [];
 		if ($cswClient->operationSuccessful == true) {
 			//$e = new mb_exception("operation successfull");	
 			//$e = new mb_exception(gettype($cswClient->operationResult));
@@ -345,17 +339,17 @@ if ($mbMetadata->hierarchyLevel == 'dataset' || $mbMetadata->hierarchyLevel == '
 				$serviceMetadata->service[$k]->serviceTitle = $mdTitle;
 				$serviceMetadata->service[$k]->serviceDate = $mdDateStamp;
 				$serviceMetadata->service[$k]->mdLink = $urlWithoutRequest."?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=".urlencode('http://www.isotc211.org/2005/gmd')."&id=".$fileIdentifier;
-				$serviceMetadata->service[$k]->htmlLink = $scheme.'://'.$hostName.str_replace(basename($_SERVER['SCRIPT_NAME']), "mod_exportIso19139.php", $_SERVER['PHP_SELF'])."?url=".urlencode($urlWithoutRequest."?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=".urlencode('http://www.isotc211.org/2005/gmd')."&id=".$fileIdentifier);
+				$serviceMetadata->service[$k]->htmlLink = $scheme.'://'.$hostName.str_replace(basename((string) $_SERVER['SCRIPT_NAME']), "mod_exportIso19139.php", $_SERVER['PHP_SELF'])."?url=".urlencode($urlWithoutRequest."?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=".urlencode('http://www.isotc211.org/2005/gmd')."&id=".$fileIdentifier);
 				/*if (is_array($mdAccessUrl)) {
 					$mdAccessUrl = $mdAccessUrl[0];
 				}*/
 				
 				//$serviceMetadata->service[$k]->accessUrl = $mdAccessUrl;
 
-				if (in_array(strtoupper($mdServiceType), array('VIEW','OGC:WMS','WMS','PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-					if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-						if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','ATOM'))) {
-							$serviceMetadata->service[$k]->accessClient = $scheme.'://'.$hostName.str_replace("php/".basename($_SERVER['SCRIPT_NAME']), "plugins/mb_downloadFeedClient.php", $_SERVER['PHP_SELF'])."?url=".urlencode($mdAccessUrl);
+				if (in_array(strtoupper($mdServiceType), ['VIEW', 'OGC:WMS', 'WMS', 'PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+					if (in_array(strtoupper($mdServiceType), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM']) || in_array(strtoupper($mdServiceTypeVersion), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+						if (in_array(strtoupper($mdServiceType), ['PREDEFINED ATOM', 'ATOM']) || in_array(strtoupper($mdServiceTypeVersion), ['PREDEFINED ATOM', 'ATOM'])) {
+							$serviceMetadata->service[$k]->accessClient = $scheme.'://'.$hostName.str_replace("php/".basename((string) $_SERVER['SCRIPT_NAME']), "plugins/mb_downloadFeedClient.php", $_SERVER['PHP_SELF'])."?url=".urlencode((string) $mdAccessUrl);
 							$serviceMetadata->service[$k]->serviceSubType = 'ATOM';
 							$serviceMetadata->service[$k]->serviceType = "download";
 							$serviceMetadata->service[$k]->accessUrl = (string)$mdAccessUrl;

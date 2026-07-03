@@ -29,8 +29,8 @@
  * @author Markus Krzyzanowski
  */
 
-include_once(dirname(__FILE__)."/sld_config.php");
-include_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+include_once(__DIR__."/sld_config.php");
+include_once(__DIR__."/../../conf/mapbender.conf");
 
 /**
  * This function saves the data into the database
@@ -41,8 +41,8 @@ function saveSld($data)
 	$con = db_connect($DBSERVER,$OWNER,$PW);
 	db_select_db($DB,$con);
 	$sql = "UPDATE sld_user_layer SET sld_xml=$1 WHERE fkey_gui_id=$2 AND fkey_layer_id=$3 AND fkey_mb_user_id=$4";
-	$v = array($data, $_SESSION["sld_gui_id"], $_SESSION["sld_layer_id"], $_SESSION["mb_user_id"]);
-	$t = array('s', 's', 'i', 'i');
+	$v = [$data, $_SESSION["sld_gui_id"], $_SESSION["sld_layer_id"], $_SESSION["mb_user_id"]];
+	$t = ['s', 's', 'i', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 }
 
@@ -52,7 +52,7 @@ if (isset($_REQUEST["function"]))
 	//MAIN FUNCTIONS:
 	if ($_REQUEST["function"] == "getdefaultsld")
 	{
-		$file = $mapfileUrl."VERSION=1.1.1&REQUEST=GetStyles&LAYERS=".urlencode($layer_name);
+		$file = $mapfileUrl."VERSION=1.1.1&REQUEST=GetStyles&LAYERS=".urlencode((string) $layer_name);
 		$data = readSld($file);
 		$data = char_encode($data);
 		saveSld($data);
@@ -164,16 +164,16 @@ if (isset($_REQUEST["function"]))
 			$con = db_connect($DBSERVER,$OWNER,$PW);
 			db_select_db($DB,$con);
 			$sql = "UPDATE sld_user_layer SET use_sld=$1 WHERE fkey_gui_id=$2 AND fkey_layer_id=$3 AND fkey_mb_user_id=$4";
-			$v = array($_REQUEST["use_sld"], $_SESSION["sld_gui_id"], $_SESSION["sld_layer_id"], $_SESSION["mb_user_id"]);
-			$t = array('i', 's', 'i', 'i');
+			$v = [$_REQUEST["use_sld"], $_SESSION["sld_gui_id"], $_SESSION["sld_layer_id"], $_SESSION["mb_user_id"]];
+			$t = ['i', 's', 'i', 'i'];
 			$res = db_prep_query($sql,$v,$t);
 			
 			# update gui_wms_sldurl
 			if ($_REQUEST["use_sld"]=="1") {
 				$sld_url = $_REQUEST["mb_sld_url"];
 				$sql = "UPDATE gui_wms SET gui_wms_sldurl=$1 WHERE fkey_gui_id=$2 AND fkey_wms_id=$3";
-				$v = array($sld_url, $_SESSION["sld_gui_id"], $_SESSION["sld_wms_id"]);
-				$t = array('s', 's', 'i');
+				$v = [$sld_url, $_SESSION["sld_gui_id"], $_SESSION["sld_wms_id"]];
+				$t = ['s', 's', 'i'];
 				$res = db_prep_query($sql,$v,$t); 
 			}
 		}

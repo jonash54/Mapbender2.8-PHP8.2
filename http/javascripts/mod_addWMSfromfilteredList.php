@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -178,8 +178,8 @@ function removeChildNodes(node) {
 <body onLoad="window.focus();setButtons('<?php echo $wms_show;?>','<?php echo $show_gui_configured_wms;?>','<?php echo $show_group_wms;?>','<?php echo $show_gui_wms;?>')">
 
 <?php
-require_once(dirname(__FILE__)."/../classes/class_wms.php"); 
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../classes/class_wms.php"); 
+require_once(__DIR__."/../php/mb_getGUIs.php");
 
 $fieldHeight = 20;
 $cnt_gui = 0;
@@ -205,8 +205,8 @@ $logged_gui_id=Mapbender::session()->get("mb_user_gui");
 
 //get group from logged user 
 $sql_user_group = "SELECT * FROM mb_user_mb_group WHERE fkey_mb_user_id= $1 ";
-$array_values = array($logged_user_id);
-$array_types = array('s');
+$array_values = [$logged_user_id];
+$array_types = ['s'];
 $res_user_group = db_prep_query($sql_user_group, $array_values, $array_types);
 while($row = db_fetch_array($res_user_group)){
 	$user_id[$cnt_user_group] = $row["fkey_mb_user_id"];
@@ -218,8 +218,8 @@ while($row = db_fetch_array($res_user_group)){
 # Thekla, please recheck
 /*get group name  ********************************************************************************************/								 
 if(count($group_id) > 0){
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql_group = "SELECT mb_group_id, mb_group_name, mb_group_description FROM mb_group WHERE mb_group_id IN (";	
 	for($i=0; $i < count($group_id); $i++){
 		if($i>0){ $sql_group .= ",";}
@@ -243,7 +243,7 @@ if(count($group_id) > 0){
 $arrayGuis=mb_getGUIs($logged_user_id);
 $sql_gui = "SELECT * FROM gui WHERE gui_id IN (";
 $v = $arrayGuis;
-$t = array();
+$t = [];
 
 for ($i = 1; $i <= count($arrayGuis); $i++){
 	if ($i > 1) { 
@@ -268,7 +268,7 @@ $res_gui = db_prep_query($sql_gui, $v, $t);
 /*get allocated wms from allocated gui  ********************************************************************************************/								 
 $sql_gui_wms = "SELECT DISTINCT fkey_wms_id, fkey_gui_id FROM gui_wms WHERE fkey_gui_id IN (";
 $v = $arrayGuis;
-$t = array();
+$t = [];
 for ($i = 1; $i <= count($arrayGuis); $i++){
 	if ($i > 1) { 
 		$sql_gui_wms .= ",";
@@ -289,7 +289,7 @@ while($row = db_fetch_array($res_gui_wms)){
 //get allocated wms-Abstract and wms-Capabilities from allocated gui								 
 $sql_wms = "SELECT DISTINCT wms_title, wms_abstract, wms_getcapabilities, wms_version FROM wms WHERE wms_id IN (";
 $v = $fkey_wms_id;
-$t = array();
+$t = [];
 for ($i = 1; $i <= count($fkey_wms_id); $i++){
 	if ($i > 1) { 
 		$sql_wms .= ",";
@@ -334,8 +334,8 @@ if (!empty($wms_show) || !empty($show_gui_configured_wms) || !empty($show_group_
 if (!empty($show_group_wms)){
 	/*get gui goup   ********************************************************************************************/
 	$sql_gui_mb_group = "SELECT fkey_gui_id, fkey_mb_group_id FROM gui_mb_group WHERE fkey_mb_group_id=$1";
-	$v = array($show_group_wms);
-	$t = array("s");
+	$v = [$show_group_wms];
+	$t = ["s"];
 	$res_gui_mb_group = db_prep_query($sql_gui_mb_group, $v, $t);
 
 				while($row = db_fetch_array($res_gui_mb_group)){
@@ -351,7 +351,7 @@ if (!empty($show_group_wms)){
 	if(count($group_gui_id)>0)	{								 
 		$sql_fkey_group_gui_wms = "SELECT DISTINCT fkey_wms_id, fkey_gui_id FROM gui_wms WHERE fkey_gui_id IN (";
 		$v = $group_gui_id;
-		$t = array();
+		$t = [];
 		for ($i = 1; $i <= count($group_gui_id); $i++){
 			if ($i > 1) { 
 				$sql_fkey_group_gui_wms .= ",";
@@ -375,7 +375,7 @@ if (!empty($show_group_wms)){
 		if(count($fkey_group_gui_wms_id)>0){
 			$sql_group_gui_wms = "SELECT DISTINCT wms_title, wms_abstract, wms_getcapabilities, wms_version FROM wms WHERE wms_id IN (";
 			$v = $fkey_group_gui_wms_id;
-			$t = array();
+			$t = [];
 			for ($i = 1; $i <= count($fkey_group_gui_wms_id); $i++){
 				if ($i > 1) { 
 					$sql_group_gui_wms .= ",";
@@ -404,8 +404,8 @@ if (!empty($show_group_wms)){
 	if ($cnt_group_gui_wms > 0){
 		/*get goup name for showing in the table ********************************************************************************************/								 
 		$sql_group_name = "SELECT mb_group_id, mb_group_name FROM mb_group WHERE mb_group_id = $1";   
-		$v = array($show_group_wms);
-		$t = array("s");
+		$v = [$show_group_wms];
+		$t = ["s"];
 		$res_group_name = db_prep_query($sql_group_name, $v, $t);
 		while($row = db_fetch_array($res_group_name)){
 			$group_name_table[$cnt_group_name] = $row["mb_group_name"];
@@ -449,8 +449,8 @@ if (!empty($show_group_wms)){
 if (!empty($show_gui_wms)){
 	/*get group gui WMS  ********************************************************************************************/								 
 	$sql_fkey_show_gui_wms = "SELECT DISTINCT fkey_wms_id, fkey_gui_id FROM gui_wms WHERE fkey_gui_id = $1";
-	$v = array($show_gui_wms);
-	$t = array("s");
+	$v = [$show_gui_wms];
+	$t = ["s"];
 	#$sql_fkey_show_gui_wms.= ") ORDER BY fkey_wms_id";
 
 	$res_fkey_show_gui_wms = db_prep_query($sql_fkey_show_gui_wms, $v, $t);
@@ -466,7 +466,7 @@ if (!empty($show_gui_wms)){
 	if(count($fkey_show_gui_wms_id)>0){
 		$sql_show_gui_wms = "SELECT DISTINCT wms_title, wms_abstract, wms_getcapabilities, wms_id, wms_version FROM wms WHERE wms_id IN (";
 		$v = $fkey_show_gui_wms_id;
-		$t = array();
+		$t = [];
 		for ($i = 1; $i <= count($fkey_show_gui_wms_id); $i++){
 			if ($i > 1) { 
 				$sql_show_gui_wms .= ",";
@@ -495,8 +495,8 @@ if (!empty($show_gui_wms)){
 	if ($cnt_show_gui_wms > 0){
 	/*get selected gui name for table caption ********************************************************************************************/  
 	$sql_gui_table = "SELECT * FROM gui WHERE gui_id = $1";       
-	$v = array($show_gui_wms);
-	$t = array("s");
+	$v = [$show_gui_wms];
+	$t = ["s"];
 	$res_gui_table = db_prep_query($sql_gui_table, $v, $t);
 		while($row = db_fetch_array($res_gui_table)){
 			$gui_id_table[$cnt_gui_table] = $row["gui_id"];
@@ -545,8 +545,8 @@ if (!empty($show_gui_configured_wms)){
 	/*get group gui WMS  ********************************************************************************************/								 
 	$sql_fkey_show_gui_wms = "SELECT DISTINCT fkey_wms_id, fkey_gui_id FROM gui_wms WHERE fkey_gui_id = $1";
 	#$sql_fkey_show_gui_wms.= ") ORDER BY fkey_wms_id";
-	$v = array($show_gui_configured_wms);
-	$t = array("s");
+	$v = [$show_gui_configured_wms];
+	$t = ["s"];
 	$res_fkey_show_gui_wms = db_prep_query($sql_fkey_show_gui_wms, $v, $t);
 	while($row = db_fetch_array($res_fkey_show_gui_wms)){
 		$fkey_show_gui_gui_id[$cnt_fkey_show_gui_wms] = $row["fkey_gui_id"];
@@ -560,7 +560,7 @@ if (!empty($show_gui_configured_wms)){
 	if(count($fkey_show_gui_wms_id)>0){
 		$sql_show_gui_wms = "SELECT DISTINCT wms_title, wms_abstract, wms_getcapabilities, wms_id, wms_version FROM wms WHERE wms_id IN (";
 		$v = $fkey_show_gui_wms_id;
-		$t = array();
+		$t = [];
 		for ($i = 1; $i <= count($fkey_show_gui_wms_id); $i++){
 			if ($i > 1) { 
 				$sql_show_gui_wms .= ",";
@@ -589,8 +589,8 @@ if (!empty($show_gui_configured_wms)){
 	if ($cnt_show_gui_wms > 0){
 	//get selected gui name for table caption  
 	$sql_gui_table = "SELECT * FROM gui WHERE gui_id = $1";
-	$v = array($show_gui_configured_wms);
-	$t = array("s");       
+	$v = [$show_gui_configured_wms];
+	$t = ["s"];       
 	$res_gui_table = db_prep_query($sql_gui_table, $v, $t);
 		while($row = db_fetch_array($res_gui_table)){
 			$gui_id_table[$cnt_gui_table] = $row["gui_id"];

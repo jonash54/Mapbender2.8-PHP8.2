@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id = "loadWMS";
-require_once dirname(__FILE__) . "/../php/mb_validatePermission.php";
+require_once __DIR__ . "/../php/mb_validatePermission.php";
 /*
  * @security_patch irv done
  */
@@ -90,7 +90,7 @@ function validate(wert){
 
 <?php
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 
@@ -101,8 +101,8 @@ echo "<td>";
 if (count($ownguis)>0){
 	echo"GUI";
 	echo"<br>";
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT * FROM gui WHERE gui_id IN ("; 
 	for($i=0; $i<count($ownguis); $i++){
 		if($i>0){ $sql .= ",";}
@@ -132,8 +132,8 @@ if (count($ownguis)>0){
 		$sql = "SELECT DISTINCT wms.wms_title,gui_wms_position from gui_wms JOIN ";
 		$sql .= "gui on gui_wms.fkey_gui_id = gui.gui_id JOIN wms ON gui_wms.fkey_wms_id = wms.wms_id ";
 		$sql .= "and gui_wms.fkey_gui_id = gui.gui_id where gui.gui_name = $1 order by gui_wms_position";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$count=0;
 		echo"<select size='8' name='wmsList' style='width:500px'>";

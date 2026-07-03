@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
-include_once(dirname(__FILE__)."/../classes/class_weldMaps2Image.php");
+require_once(__DIR__ . "/../php/mb_validateSession.php");
+include_once(__DIR__."/../classes/class_weldMaps2Image.php");
 
 $imageType = "";
 if(isset($_REQUEST["imagetype"])){
@@ -34,11 +34,11 @@ if(isset($_REQUEST["wms_urls"])){
 	
 }
 
-$array_file = array();
+$array_file = [];
 $array_file["dir"]  = TMPDIR; 
 $array_file["filename"] = "image"; 
 
-$array_urls = explode("___", $wms_urls);
+$array_urls = explode("___", (string) $wms_urls);
 foreach ($array_urls as $key => $value) {
       if (is_null($value) || $value=="") {
         unset($array_urls[$key]);

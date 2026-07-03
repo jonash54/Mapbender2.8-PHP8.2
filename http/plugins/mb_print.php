@@ -1,3 +1,11 @@
+<?php
+// PHP 8 needs _mb() (the gettext shim) to exist before the inline PHP
+// blocks further down call it. In normal use this file is include'd from
+// a script that already required globalSettings.php.
+if (!function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
+?>
 //<script>
 /**
  * Package: printPDF
@@ -339,7 +347,7 @@ var PrintPDF = function (options) {
     /* second we'd need to read the json configuration */
     that.loadConfig(mbPrintConfigFilenames[0]);
     /* than we need the translation of the print button */
-    $("#submit").val("<?php echo htmlentities(_mb("print"), ENT_QUOTES, "UTF-8");?>");
+    $("#submit").val("<?php echo htmlentities((string) _mb("print"), ENT_QUOTES, "UTF-8");?>");
 
     //show printBox for first entry in printTemplate selectbox
     $("." + myId + "-dialog").bind("dialogopen", function () {
@@ -899,7 +907,7 @@ var PrintPDF = function (options) {
     for (var i = 0; i < mbPrintConfigFilenames.length; i++) {
       str += '<option value="' + mbPrintConfigFilenames[i] + '">' + mbPrintConfigTitles[i] + '</option>\n';
     }
-    str += '</select><img id="printPDF_handle" src="../print/img/shape_handles.png" title="<?php echo htmlentities(_mb("use print box"), ENT_QUOTES, "UTF-8");?>">\n';
+    str += '</select><img id="printPDF_handle" src="../print/img/shape_handles.png" title="<?php echo htmlentities((string) _mb("use print box"), ENT_QUOTES, "UTF-8");?>">\n';
     if (str) {
       $("#printPDF_selector").append(str).find("#printPDF_template").change(function () {
         printObj.loadConfig(mbPrintConfigFilenames[this.selectedIndex], function () {

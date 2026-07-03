@@ -32,7 +32,7 @@
  *
  */
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
 
 class ckanApi
 {
@@ -85,16 +85,7 @@ class ckanApi
 	 *
 	 * @var		array
 	 */
-	private $http_status_codes = array(
-		'200' => 'OK',
-		'201' => 'OK - package created successfully!',
-		'301' => 'Moved Permanently',
-		'400' => 'Bad Request',
-		'403' => 'Not Authorized',
-		'404' => 'Not Found',
-		'409' => 'Conflict (e.g. name already exists)',
-		'500' => 'Service Error'
-	);
+	private $http_status_codes = ['200' => 'OK', '201' => 'OK - package created successfully!', '301' => 'Moved Permanently', '400' => 'Bad Request', '403' => 'Not Authorized', '404' => 'Not Found', '409' => 'Conflict (e.g. name already exists)', '500' => 'Service Error'];
 
 	/**
 	 * Array of CKAN resources and their URI fragment.
@@ -102,20 +93,7 @@ class ckanApi
 	 * @var		array
 	 * @link	http://knowledgeforge.net/ckan/doc/ckan/api.html#ckan-model-api
 	 */
-	private $resources = array(
-		'package_register' => 'rest/package',
-		'package_entity' => 'rest/package',
-		'group_register' => 'rest/group',
-		'group_entity' => 'rest/group',
-		'tag_register' => 'rest/tag',
-		'tag_entity' => 'rest/tag',
-		'rating_register' => 'rest/rating',
-		'rating_entity' => 'rest/rating',
-		'revision_register' => 'rest/revision',
-		'revision_entity' => 'rest/revision',
-		'license_list' => 'rest/licenses',
-		'package_search' => 'search/package'
-	);
+	private $resources = ['package_register' => 'rest/package', 'package_entity' => 'rest/package', 'group_register' => 'rest/group', 'group_entity' => 'rest/group', 'tag_register' => 'rest/tag', 'tag_entity' => 'rest/tag', 'rating_register' => 'rest/rating', 'rating_entity' => 'rest/rating', 'revision_register' => 'rest/revision', 'revision_entity' => 'rest/revision', 'license_list' => 'rest/licenses', 'package_search' => 'search/package'];
 
 	/**
 	 * Array of CKAN resources and their URI fragment.
@@ -123,44 +101,7 @@ class ckanApi
 	 * @var		array
 	 * @link	http://knowledgeforge.net/ckan/doc/ckan/api.html#ckan-model-api
 	 */
-	private $actionList = array(
-		'package_create'  => 'action/package_create',
-		'package_show' => 'action/package_show',
-		'package_update' => 'action/package_update',
-		'package_delete' => 'action/package_delete',
-                'package_search' => 'action/package_search',
-		'resource_create' => 'action/resource_create',
-		'resource_show' => 'action/resource_show',
-		'resource_update' => 'action/resource_update',
-		'resource_delete' => 'action/resource_delete',
-		'resource_view_show' => 'action/resource_view_show',
-		'resource_view_create' => 'action/resource_view_create',
-		'resource_view_update' => 'action/resource_view_update',
-		'resource_view_list' => 'action/resource_view_list',
-		'resource_view_delete' => 'action/resource_view_delete',
-		'organization_create' => 'action/organization_create',
-		'organization_show' => 'action/organization_show',
-		'organization_update' => 'action/organization_update',
-		'organization_delete' => 'action/organization_delete',
-		'organization_list_for_user' => 'action/organization_list_for_user',
-		'organization_list' => 'action/organization_list',
-		'organization_purge' => 'action/organization_purge',
-		'organization_revision_list' => 'action/organization_revision_list',
-		'user_create' => 'action/user_create',
-		'user_show' => 'action/user_show',
-		'user_update' => 'action/user_update',
-		'group_create' => 'action/group_create',
-		'group_update' => 'action/group_update',
-		'group_delete' => 'action/group_delete',
-		'group_show' => 'action/group_show',
-		'group_package_show' => 'action/group_package_show',
-		'member_create' => 'action/member_create',
-		'member_delete' => 'action/member_delete',
-		'member_list' => 'action/member_list',
-		'roles_show' => 'action/roles_show',
-		'package_owner_org_update' => 'package_owner_org_update',
-		'group_list_authz' => 'action/group_list_authz'
-	);
+	private $actionList = ['package_create'  => 'action/package_create', 'package_show' => 'action/package_show', 'package_update' => 'action/package_update', 'package_delete' => 'action/package_delete', 'package_search' => 'action/package_search', 'resource_create' => 'action/resource_create', 'resource_show' => 'action/resource_show', 'resource_update' => 'action/resource_update', 'resource_delete' => 'action/resource_delete', 'resource_view_show' => 'action/resource_view_show', 'resource_view_create' => 'action/resource_view_create', 'resource_view_update' => 'action/resource_view_update', 'resource_view_list' => 'action/resource_view_list', 'resource_view_delete' => 'action/resource_view_delete', 'organization_create' => 'action/organization_create', 'organization_show' => 'action/organization_show', 'organization_update' => 'action/organization_update', 'organization_delete' => 'action/organization_delete', 'organization_list_for_user' => 'action/organization_list_for_user', 'organization_list' => 'action/organization_list', 'organization_purge' => 'action/organization_purge', 'organization_revision_list' => 'action/organization_revision_list', 'user_create' => 'action/user_create', 'user_show' => 'action/user_show', 'user_update' => 'action/user_update', 'group_create' => 'action/group_create', 'group_update' => 'action/group_update', 'group_delete' => 'action/group_delete', 'group_show' => 'action/group_show', 'group_package_show' => 'action/group_package_show', 'member_create' => 'action/member_create', 'member_delete' => 'action/member_delete', 'member_list' => 'action/member_list', 'roles_show' => 'action/roles_show', 'package_owner_org_update' => 'package_owner_org_update', 'group_list_authz' => 'action/group_list_authz'];
 
 	/**
 	 * ckanApi user agent string.
@@ -310,13 +251,14 @@ class ckanApi
 	private function set_headers()
 	{
 		$date = new DateTime(NULL, new DateTimeZone('UTC'));
-		$this->ch_headers = array(
-			'Date: ' . $date->format('D, d M Y H:i:s') . ' GMT', // RFC 1123
-			'Accept: application/json;q=1.0, application/xml;q=0.5, */*;q=0.0',
-			'Accept-Charset: utf-8',
-			'Accept-Encoding: gzip',
-			'content-type: application/json'
-		);
+		$this->ch_headers = [
+      'Date: ' . $date->format('D, d M Y H:i:s') . ' GMT',
+      // RFC 1123
+      'Accept: application/json;q=1.0, application/xml;q=0.5, */*;q=0.0',
+      'Accept-Charset: utf-8',
+      'Accept-Encoding: gzip',
+      'content-type: application/json',
+  ];
 	}
 
 	/**
@@ -798,7 +740,7 @@ class ckanApi
 	*/
 	public function post_package_update($data)
 	{
-		$json = json_decode($data, TRUE);
+		$json = json_decode((string) $data, TRUE);
 		return $this->make_request('POST', 
 		$this->resources['package_register'] . "/" . $json['name'], 
 		$data);
@@ -808,7 +750,7 @@ class ckanApi
 	{
 		//$e = new mb_exception("testckan: get group: ".$this->resources['group_register'] . "/" . urlencode($name));
 		return $this->make_request('GET', 
-		$this->resources['group_register'] . "/" . urlencode($name));
+		$this->resources['group_register'] . "/" . urlencode((string) $name));
 	}
 
 
@@ -825,7 +767,7 @@ class ckanApi
 	{
 		//$e = new mb_exception($this->resources['package_entity'] . '/' . urlencode($package));
 		return $this->make_request('GET', 
-			$this->resources['package_entity'] . '/' . urlencode($package));
+			$this->resources['package_entity'] . '/' . urlencode((string) $package));
 	}
 
 	/**
@@ -838,7 +780,7 @@ class ckanApi
 	public function put_package_entity($packageName, $data)
 	{
 		return $this->make_request('POST', 
-			$this->resources['package_entity'] . '/' . urlencode($packageName), 
+			$this->resources['package_entity'] . '/' . urlencode((string) $packageName), 
 			$data);
 	}
 
@@ -899,7 +841,7 @@ class ckanApi
 	public function get_group_entity($group)
 	{
 		return $this->make_request('GET', 
-			$this->resources['group_entity'] . '/' . urlencode($group));
+			$this->resources['group_entity'] . '/' . urlencode((string) $group));
 	}
 
 	// Group utility alias
@@ -940,7 +882,7 @@ class ckanApi
 	public function get_tag_entity($tag)
 	{
 		return $this->make_request('GET', $this->resources['tag_entity'] . 
-			'/' . urlencode($tag));
+			'/' . urlencode((string) $tag));
 	}
 
 	// Tag utility alias
@@ -979,7 +921,7 @@ class ckanApi
 	public function get_revision_entity($revision)
 	{
 		return $this->make_request('GET', 
-			$this->resources['revision_entity'] . '/' . urlencode($revision));
+			$this->resources['revision_entity'] . '/' . urlencode((string) $revision));
 	}
 
 	// Revision utility alias
@@ -1026,29 +968,29 @@ class ckanApi
 	 * @param	array	Optional. Search options.
 	 * @return	mixed	If success, search object. On fail, false.
 	 */
-	public function search_package($keywords, $opts = array())
+	public function search_package($keywords, $opts = [])
 	{
 		// Gots to have keywords or there's nothing to search for.
 		// Also, $opts better be an array
-		if (0 === strlen(trim($keywords)) || FALSE === is_array($opts))
+		if (0 === strlen(trim((string) $keywords)) || FALSE === is_array($opts))
 		{
 			throw new Exception('We need keywords, yo!');
 		}
 		$q = '';
 		// Set querystring based on $opts param.
 		$q .= '&order_by=' . ((isset($opts['order_by'])) 
-			? urlencode($opts['order_by']) : 'rank');
+			? urlencode((string) $opts['order_by']) : 'rank');
 		$q .= '&offset=' . ((isset($opts['offset'])) 
-			? urlencode($opts['offset']) : '0');
+			? urlencode((string) $opts['offset']) : '0');
 		$q .= '&limit=' . ((isset($opts['limit'])) 
-			? urlencode($opts['limit']) : '20');
+			? urlencode((string) $opts['limit']) : '20');
 		$q .= '&filter_by_openness=' . ((isset($opts['openness'])) 
-			? urlencode($opts['openness']) : '0');
+			? urlencode((string) $opts['openness']) : '0');
 		$q .= '&filter_by_downloadable=' . ((isset($opts['downloadable'])) 
-			? urlencode($opts['downloadable']) : '0');
+			? urlencode((string) $opts['downloadable']) : '0');
 		return $data = $this->make_request('GET', 
 			$this->resources['package_search'] . '?q=' . 
-			urlencode($keywords) . $q);
+			urlencode((string) $keywords) . $q);
 	}
 
 	/**
@@ -1058,7 +1000,7 @@ class ckanApi
 	 * @see		search_package()
 	 * @access	public
 	 */
-	public function search($keywords, $opts = array())
+	public function search($keywords, $opts = [])
 	{
 		return $this->search_package($keywords, $opts);
 	}
@@ -1074,19 +1016,17 @@ class ckanApi
 	 * @param	array	Optional. An array of formatting options.
 	 * @return	void
 	 */
-	public function search_display($data, $opts = array())
+	public function search_display($data, $opts = [])
 	{
 		if ($data)
 		{
 			// Set vars based on $opts param.
-			$search_term = (isset($opts['search_term'])) ? 
-				$opts['search_term'] : '';
+			$search_term = $opts['search_term'] ?? '';
 			$title_tag = '<' . 
-				((isset($opts['title_tag'])) ? $opts['title_tag'] : 'h2') . '>';
+				($opts['title_tag'] ?? 'h2') . '>';
 			$title_close_tag = str_replace('<', '</', $title_tag);
-			$result_list_tag = (isset($opts['result_list_tag'])) 
-				? $opts['result_list_tag'] : 'ul';
-			if (strlen(trim($result_list_tag)))
+			$result_list_tag = $opts['result_list_tag'] ?? 'ul';
+			if (strlen(trim((string) $result_list_tag)))
 			{
 				$result_list_close_tag = '</' . $result_list_tag . '>';
 				$result_list_tag = '<' . $result_list_tag . '>';
@@ -1095,17 +1035,15 @@ class ckanApi
 			{
 				$result_list_close_tag = '';
 			}
-			$show_notes = (isset($opts['show_notes'])) 
-				? $opts['show_notes'] : FALSE;
-			$format_notes = (isset($opts['format_notes'])) 
-				? $opts['format_notes'] : FALSE;
+			$show_notes = $opts['show_notes'] ?? FALSE;
+			$format_notes = $opts['format_notes'] ?? FALSE;
 			// Set search title string
 			// is|are, count, ''|s, ''|search_term, .|:
 			printf($title_tag . 'There %s %d result%s%s%s' . $title_close_tag, 
 				(($data->count === 1) ? 'is' : 'are'), 
 				$data->count, 
 				(($data->count === 1) ? '' : 's'),
-				(strlen(trim($search_term)) 
+				(strlen(trim((string) $search_term)) 
 					? ' for &#8220;' . $search_term . '&#8221;' : ''),
 				(($data->count === 0) ? '.' : ':'));
 			if ($data->count > 0)
@@ -1156,7 +1094,7 @@ class ckanApi
 	 */
 	private function make_request($method, $url, $data = FALSE) {
 		// Set cURL method.
-		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, strtoupper((string) $method));
 		// Set cURL URI.
 $e = new mb_notice("testckan: ckan url to request: ".$this->base_url . $url." - data: ".json_encode($data));
 
@@ -1257,7 +1195,7 @@ curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
 		//check if some key is already set
 		$index = 0;
 		foreach ($headerArray as $header) {
-			if (strpos($header, "X-CKAN-API-Key:") !== false){
+			if (str_contains((string) $header, "X-CKAN-API-Key:")){
 				$keyFound = $index;
 			}
 			$index++;
@@ -1283,7 +1221,7 @@ curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
 		if ($data) {
 			if ($format == 'json') {
 			    try {
-			        $result = json_decode($data);
+			        $result = json_decode((string) $data);
 			    }
 			    catch (Exception $e) {
 			        $e = new mb_exception("classes/classCkanApi.php: " . $e->getMessage()); 

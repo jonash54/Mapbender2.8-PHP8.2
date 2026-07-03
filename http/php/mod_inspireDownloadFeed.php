@@ -30,17 +30,17 @@
  *  * DCAT Distribution object in Iso19139->furtherLinksJson with dcat:accessService.dct:hasPart
  *    attribute to remote html <item> list (since 04/2024)
  */
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once dirname(__FILE__) . "/../../core/epsg.php";
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
-require_once(dirname(__FILE__) . "/../../conf/mimetype.conf");
-require_once(dirname(__FILE__) . "/../classes/class_cache.php");
-require_once(dirname(__FILE__) . "/../classes/class_iso19139.php");
-require_once(dirname(__FILE__) . "/../classes/class_crs.php");
-require_once(dirname(__FILE__) . "/../classes/class_metadata_monitor.php");
-require_once(dirname(__FILE__) . "/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once __DIR__ . "/../../core/epsg.php";
+require_once(__DIR__ . "/../classes/class_Uuid.php");
+require_once(__DIR__ . "/../../conf/mimetype.conf");
+require_once(__DIR__ . "/../classes/class_cache.php");
+require_once(__DIR__ . "/../classes/class_iso19139.php");
+require_once(__DIR__ . "/../classes/class_crs.php");
+require_once(__DIR__ . "/../classes/class_metadata_monitor.php");
+require_once(__DIR__ . "/../classes/class_universal_wfs_factory.php");
 
 //check_epsg_wms_13($tmp_epsg)
 //http://www.weichand.de/inspire/dls/verwaltungsgrenzen.xml
@@ -62,7 +62,7 @@ $alterAxisOrder = false;
 
 $numberOfTiles = 0;
 	
-$furtherLink = array();
+$furtherLink = [];
 
 $featuretypeId = false;
 //pull the needed things from tables datalink, md_metadata, layer, wms
@@ -237,7 +237,7 @@ if ($generateFrom == "wmslayer") {
 	if (isset($_REQUEST['LAYERID']) & $_REQUEST['LAYERID'] != "") {
 		$testMatch = $_REQUEST["LAYERID"];
 		$pattern = '/^[\d]*$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			//echo 'LAYERID must be an integer: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 			echo 'LAYERID must be an integer!<br/>'; 
 			die(); 		
@@ -256,7 +256,7 @@ if ($generateFrom == "wfs") {
 	if (isset($_REQUEST['WFSID']) & $_REQUEST['WFSID'] != "") {
 		$testMatch = $_REQUEST["WFSID"];
 		$pattern = '/^[\d]*$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			//echo 'WFSID must be an integer: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 			echo 'WFSID must be an integer!<br/>'; 
 			die(); 		
@@ -271,7 +271,7 @@ if ($generateFrom == "wfs") {
 	if (isset($_REQUEST['featuretypeid']) && $_REQUEST['featuretypeid'] != "") {
 		$testMatch = $_REQUEST["featuretypeid"];
 		$pattern = '/^[\d]*$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo 'FEATURETYPEID must be an integer!<br/>'; 
 			die(); 		
  		}
@@ -310,7 +310,7 @@ $feedDoc->formatOutput = true;
 function delTotalFromQuery($paramName,$queryString) {
 	$queryString = "&".$queryString;
 	$queryStringNew = preg_replace('/\b'.$paramName.'\=[^&]+&?/',$str2exchange,$queryString);
-	$queryStringNew = ltrim($queryStringNew,'&');
+	$queryStringNew = ltrim((string) $queryStringNew,'&');
 	$queryStringNew = rtrim($queryStringNew,'&');
 	return $queryStringNew;
 }
@@ -419,7 +419,7 @@ function getDatasetFeedLinks($datasetFeedUrl) {
 	$feedFile = $feedConnector->file;
 	libxml_use_internal_errors(true);
 	try {
-		$feedXML = simplexml_load_string($feedFile);
+		$feedXML = simplexml_load_string((string) $feedFile);
 		if ($feedXML === false) {
 			foreach(libxml_get_errors() as $error) {
         			$err = new mb_exception("mod_inspireDownloadFeed.php:".$error->message);
@@ -589,9 +589,9 @@ function addBboxEntry($bboxWfsArray, &$bboxWfs, &$countBbox, &$multiPolygonText,
         $e = new mb_notice("php/mod_inspireDownloadFeed.php: split bboxes in two parts");
         //first check which side - use the longer side to split
         if (($maxxWfs - $minxWfs) >= ($maxyWfs - $minyWfs)) {
-            $firstBbox = array($minxWfs, $minyWfs, $minxWfs + ($maxxWfs - $minxWfs) / 2, $maxyWfs);
+            $firstBbox = [$minxWfs, $minyWfs, $minxWfs + ($maxxWfs - $minxWfs) / 2, $maxyWfs];
         } else {
-            $firstBbox = array($minxWfs, $minyWfs, $maxxWfs, $minyWfs + ($maxyWfs - $minyWfs) / 2);
+            $firstBbox = [$minxWfs, $minyWfs, $maxxWfs, $minyWfs + ($maxyWfs - $minyWfs) / 2];
         }
         $bboxFilter = getBboxFilter($firstBbox, $crs, $wfs->getVersion(), $geometryFieldName, $alterAxisOrder);
         //count features in current bbox
@@ -608,9 +608,9 @@ function addBboxEntry($bboxWfsArray, &$bboxWfs, &$countBbox, &$multiPolygonText,
         }
         //second bbox
         if (($maxxWfs - $minxWfs) >= ($maxyWfs - $minyWfs)) {
-            $secondBbox = array($minxWfs + ($maxxWfs - $minxWfs) / 2, $minyWfs, $maxxWfs, $maxyWfs);
+            $secondBbox = [$minxWfs + ($maxxWfs - $minxWfs) / 2, $minyWfs, $maxxWfs, $maxyWfs];
         } else {
-            $secondBbox = array($minxWfs, $minyWfs + ($maxyWfs - $minyWfs) / 2, $maxxWfs, $maxyWfs);
+            $secondBbox = [$minxWfs, $minyWfs + ($maxyWfs - $minyWfs) / 2, $maxxWfs, $maxyWfs];
         }
         $bboxFilter = getBboxFilter($secondBbox, $crs, $wfs->getVersion(), $geometryFieldName, $alterAxisOrder);
         //count features in current bbox
@@ -634,8 +634,8 @@ function getGeometryFieldNameFromMapbenderDb($mapbenderGeoemtryFieldName, $mapbe
     } else {
         $geometryFieldName = $mapbenderGeoemtryFieldName;
     }
-    if (strpos($mapbenderFeaturetypeName, ':') !== false) {
-        $ftNamespace = explode(':', $mapbenderFeaturetypeName);
+    if (str_contains((string) $mapbenderFeaturetypeName, ':')) {
+        $ftNamespace = explode(':', (string) $mapbenderFeaturetypeName);
         $ftNamespace = $ftNamespace[0];
         $geometryFieldName = $ftNamespace.':'.$geometryFieldName;
     } else {
@@ -654,8 +654,8 @@ function getBboxFilter($bbox, $crs, $wfs_version, $geometryFieldName, $switchAxi
         $bbox = $newBbox;
     }
     //if geometry name has an namespace - separate them for wfs 1.1.0
-    if (strpos($geometryFieldName, ':') !== false) {
-        $ftNamespace = explode(':', $geometryFieldName);
+    if (str_contains((string) $geometryFieldName, ':')) {
+        $ftNamespace = explode(':', (string) $geometryFieldName);
         $ftNamespace = $ftNamespace[0];
         $geometryFieldNameWithoutNamespace = str_replace($ftNamespace . ":", "", $geometryFieldName);
     } else {
@@ -714,7 +714,7 @@ function getBboxFilter($bbox, $crs, $wfs_version, $geometryFieldName, $switchAxi
 
 function readInfoFromDatabase($recordId, $generateFrom){
 	global $admin, $type, $mapbenderMetadata, $indexMapbenderMetadata, $layerId, $wfsId, $mapbenderPath, $mapbenderServerUrl, $epsgId, $alterAxisOrder, $departmentMetadata, $userMetadata, $hasPermission, $m, $crs, $crsUpper, $countRessource;
-	
+
 	switch ($generateFrom) {
 		case "dataurl":
 			$sql = <<<SQL
@@ -745,13 +745,13 @@ select 'remotelist' as origin, mb_metadata.metadata_id, mb_metadata.uuid as meta
 SQL;
 		    break;
 		case "all":
-			$sql = array();
+			$sql = [];
 			$sql[0] = <<<SQL
 select *, 'dataurl' as origin from (select * from (select * from (select * from (select mb_metadata.metadata_id, layer_relation.layer_name, layer_relation.fkey_wms_id, layer_relation.layer_id,layer_relation.inspire_download, mb_metadata.uuid as metadata_uuid, mb_metadata.format,mb_metadata.title as metadata_title, mb_metadata.abstract as metadata_abstract, box2d(mb_metadata.the_geom) as metadata_bbox, mb_metadata.bounding_geom as polygon, layer_relation.layer_title, layer_relation.layer_abstract, mb_metadata.ref_system as metadata_ref_system, mb_metadata.datasetid, mb_metadata.spatial_res_type, mb_metadata.spatial_res_value, mb_metadata.datasetid_codespace, mb_metadata.lastchanged as md_timestamp   from (select * from layer inner join ows_relation_metadata on layer.layer_id = ows_relation_metadata.fkey_layer_id) as layer_relation inner join mb_metadata on layer_relation.fkey_metadata_id = mb_metadata.metadata_id where mb_metadata.uuid = $1) as layer_metadata inner join ows_relation_data on ows_relation_data.fkey_layer_id = layer_metadata.layer_id) as layer_relation_data inner join datalink on layer_relation_data.fkey_datalink_id = datalink.datalink_id) as layer_data inner join wms on layer_data.fkey_wms_id = wms.wms_id)  as layer_wms, layer_epsg where layer_wms.layer_id = layer_epsg.fkey_layer_id and layer_epsg.epsg = 'EPSG:4326'				
 SQL;
 			$sql[1] =  <<<SQL
 select *, 'wmslayer' as origin from (select * from (select mb_metadata.metadata_id, layer_relation.layer_name,layer_relation.inspire_download, layer_relation.fkey_wms_id, layer_relation.layer_id, mb_metadata.uuid as metadata_uuid, mb_metadata.format,mb_metadata.title as metadata_title, mb_metadata.abstract as metadata_abstract, box2d(mb_metadata.the_geom) as metadata_bbox, mb_metadata.bounding_geom as polygon, layer_relation.layer_title, layer_relation.layer_abstract, mb_metadata.ref_system as metadata_ref_system, mb_metadata.datasetid, mb_metadata.spatial_res_type, mb_metadata.spatial_res_value, mb_metadata.datasetid_codespace, mb_metadata.lastchanged as md_timestamp   from (select * from layer inner join ows_relation_metadata on layer.layer_id = ows_relation_metadata.fkey_layer_id) as layer_relation inner join mb_metadata on layer_relation.fkey_metadata_id = mb_metadata.metadata_id where mb_metadata.uuid = $1) layer_data inner join wms on layer_data.fkey_wms_id = wms.wms_id)  as layer_wms, layer_epsg where layer_wms.layer_id = layer_epsg.fkey_layer_id and layer_epsg.epsg = 'EPSG:4326';		
-		
+
 SQL;
 			$sql[2] =  <<<SQL
 select *, 'wfs' as origin from (select mb_metadata.metadata_id, featuretype_relation.featuretype_name, featuretype_relation.fkey_wfs_id, featuretype_relation.inspire_download, featuretype_relation.featuretype_id, mb_metadata.uuid as metadata_uuid, mb_metadata.format,mb_metadata.title as metadata_title, mb_metadata.abstract as metadata_abstract, box2d(mb_metadata.the_geom) as metadata_bbox, mb_metadata.bounding_geom as polygon, featuretype_relation.featuretype_title, featuretype_relation.featuretype_abstract, mb_metadata.ref_system as metadata_ref_system, mb_metadata.datasetid, mb_metadata.spatial_res_type, mb_metadata.spatial_res_value, mb_metadata.datasetid_codespace, featuretype_relation.featuretype_latlon_bbox as latlonbbox, featuretype_relation.featuretype_srs, mb_metadata.lastchanged as md_timestamp from (select * from wfs_featuretype inner join ows_relation_metadata on wfs_featuretype.featuretype_id = ows_relation_metadata.fkey_featuretype_id) as featuretype_relation inner join mb_metadata on featuretype_relation.fkey_metadata_id = mb_metadata.metadata_id where mb_metadata.uuid = $1) as featuretype_data inner join wfs on featuretype_data.fkey_wfs_id = wfs.wfs_id;		
@@ -759,30 +759,30 @@ SQL;
 		break;
 	}
 
-	$row = array();
-	$mapbenderMetadata = array();
+	$row = [];
+	$mapbenderMetadata = [];
 	//initialize number of different download options
 	$indexMapbenderMetadata = 0;
 	switch ($generateFrom) {
 		case "dataurl":
 			//only one sql should be done 
-			$v = array($recordId);
-			$t = array('s');
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
 			//$e = new mb_exception("mod_inspireDownloadFeed: Fill mapbender metadata");
 			fillMapbenderMetadata($res, $generateFrom);
 		break;
 		case "wmslayer":
 			//only one sql should be done 
-			$v = array($recordId, $layerId);
-			$t = array('s','i');
+			$v = [$recordId, $layerId];
+			$t = ['s', 'i'];
 			$res = db_prep_query($sql,$v,$t);
 			fillMapbenderMetadata($res, $generateFrom);
 		break;
 		case "wfs":
 			//only one sql should be done 
-			$v = array($recordId, $wfsId);
-			$t = array('s','i');
+			$v = [$recordId, $wfsId];
+			$t = ['s', 'i'];
 			$res = db_prep_query($sql,$v,$t);
 			fillMapbenderMetadata($res, $generateFrom);
 		break;
@@ -790,8 +790,8 @@ SQL;
 			//only one sql should be done 
 			//$e = new mb_exception("sql metadata: ".$sql);
 			//$e = new mb_exception($recordId);
-			$v = array($recordId);
-			$t = array('s');
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
 			//$e = new mb_exception("num rows: ".db_numrows($res));
 			fillMapbenderMetadata($res, $generateFrom);
@@ -800,16 +800,16 @@ SQL;
 		    //only one sql should be done
 		    //$e = new mb_exception("sql metadata: ".$sql);
 		    //$e = new mb_exception($recordId);
-		    $v = array($recordId);
-		    $t = array('s');
+		    $v = [$recordId];
+		    $t = ['s'];
 		    $res = db_prep_query($sql,$v,$t);
 		    //$e = new mb_exception("num rows: ".db_numrows($res));
 		    fillMapbenderMetadata($res, $generateFrom);
 		    break;
 		case "all"://TODO: Maybe a union is a better way, but the sql must be harmonized before
 			for ($i = 0; $i < 3; $i++) {
-				$v = array($recordId);
-				$t = array('s');
+				$v = [$recordId];
+				$t = ['s'];
 				$sqlQuery = $sql[$i];
 				$res = db_prep_query($sqlQuery,$v,$t);
 				fillMapbenderMetadata($res);
@@ -818,7 +818,7 @@ SQL;
 
 	}
 	$e = new mb_exception("mapbenderMetadata id: " . $mapbenderMetadata[0]->id);
-	
+
 	$countRessource = count($mapbenderMetadata); //count of coupled featuretypes, layers or dataurls or both!
 	//echo "<error>".count($mapbenderMetadata)."</error>";
 	//die();
@@ -832,7 +832,7 @@ SQL;
 
 	//for the first entry - top feed level use the first index - right so or do it on another way?
 	$m = 0;
-	
+
 	if ($generateFromDataurl) {
 		//check if layer_id datalink_id and metadata_id are given and not empty!
 		if (!isset($mapbenderMetadata[$m]->datalink_id) || $mapbenderMetadata[$m]->datalink_id == '') {
@@ -854,7 +854,7 @@ SQL;
 	if (!isset($mapbenderMetadata[$m]->metadata_ref_system) || $mapbenderMetadata[$m]->metadata_ref_system == '') {
 		return "<error>For the metadataset with id ".$mapbenderMetadata[$m]->metadata_id." is no reference system defined!</error>";
 	}
-	
+
 	//Handle CRS - maybe in 'urn:ogc:def:crs:EPSG:6.9:4326' or 'EPSG:4326' or 'epsg:4326' or 'urn:ogc:def:crs:EPSG::4326' format!
 	//*********************** New use crs class for checking if the order has to be changed in the filter!!!
 	$crsObject = new Crs($crs);
@@ -901,24 +901,24 @@ SQL;
 	//**************************************************************************************
 	switch ($generateFrom) {
 		case "wmslayer":
-			$v = array($mapbenderMetadata[$m]->wms_owner);
+			$v = [$mapbenderMetadata[$m]->wms_owner];
 			$hasPermission=$admin->getLayerPermission($mapbenderMetadata[$m]->fkey_wms_id,$mapbenderMetadata[$m]->layer_name,PUBLIC_USER);
 		break;
 		case "dataurl":
-			$v = array($mapbenderMetadata[$m]->wms_owner);
+			$v = [$mapbenderMetadata[$m]->wms_owner];
 			//$hasPermission=$admin->getLayerPermission($mapbenderMetadata[$m]->fkey_wms_id,$mapbenderMetadata[$m]->layer_name,PUBLIC_USER);
 			$hasPermission = true;
 		break;
 		case "wfs":
-			$v = array($mapbenderMetadata[$m]->wfs_owner);
+			$v = [$mapbenderMetadata[$m]->wfs_owner];
 			$hasPermission = true;
 		break;
 		case "metadata":
-			$v = array($mapbenderMetadata[$m]->md_owner);
+			$v = [$mapbenderMetadata[$m]->md_owner];
 			$hasPermission = true;
 		break;
 		case "remotelist":
-		    $v = array($mapbenderMetadata[$m]->md_owner);
+		    $v = [$mapbenderMetadata[$m]->md_owner];
 		    $hasPermission = true;
 		    break;
 	}
@@ -953,7 +953,7 @@ SQL;
 function generateFeed($feedDoc, $recordId, $generateFrom) {
 	global $admin, $type, $imageResolution, $maxImageSize, $maxFeatureCount, $mapbenderMetadata, $indexMapbenderMetadata, $layerId, $wfsId, $featuretypeId, $mapbenderPath, $mapbenderServerUrl, $epsgId, $alterAxisOrder, $departmentMetadata, $userMetadata, $hasPermission, $m, $crs, $crsUpper,$countRessource, $numberOfTiles, $furtherLink;
 	$e = new mb_exception("generateFeed: gernerateFrom: " . $generateFrom); 
-	
+
 	//caching feeds in apc cache
 	//check age of information to allow caching of atom feeds
 	/*$e = new mb_exception("mod_inspireDownloadFeed.php: wms_timestamp: ".date("Y-m-d H:i:s",$mapbenderMetadata[$m]->wms_timestamp));
@@ -968,13 +968,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 			$metadataMonitor->increment($mapbenderMetadata[$m]->metadata_id);
 		}
 	}
-	$timestamps = array(
-		date("Y-m-d H:i:s",$mapbenderMetadata[$m]->wms_timestamp),
-		date("Y-m-d H:i:s",$mapbenderMetadata[$m]->wfs_timestamp),
-		date("Y-m-d H:i:s",strtotime($mapbenderMetadata[$m]->md_timestamp)),
-		date("Y-m-d H:i:s",strtotime($departmentMetadata['timestamp'])),
-		date("Y-m-d H:i:s",strtotime($userMetadata['timestamp']))
-	);
+	$timestamps = [date("Y-m-d H:i:s",$mapbenderMetadata[$m]->wms_timestamp), date("Y-m-d H:i:s",$mapbenderMetadata[$m]->wfs_timestamp), date("Y-m-d H:i:s",strtotime($mapbenderMetadata[$m]->md_timestamp)), date("Y-m-d H:i:s",strtotime((string) $departmentMetadata['timestamp'])), date("Y-m-d H:i:s",strtotime((string) $userMetadata['timestamp']))];
 	$maxDate = max($timestamps);
 	//$e = new mb_exception("mod_inspireDownloadFeed.php: maxDate: ".$maxDate);
 	//instantiate cache if available
@@ -1010,7 +1004,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 	        foreach ($distributions->{'dcat:Distribution'} as $dcatDistribution) {
 	            if ($dcatDistribution->{'dcat:accessService'}->{'dct:hasPart'}) {
 	                $mandatoryFieldsAvailable = true;
-	                $mandatoryFields = array('dcterms:format', 'gdirp:epsgCode', 'dcterms:title', 'dcterms:description');
+	                $mandatoryFields = ['dcterms:format', 'gdirp:epsgCode', 'dcterms:title', 'dcterms:description'];
 	                foreach ($mandatoryFields as $serviceAttribute) {
 	                    //$e = new mb_exception("php/mod_inspireDownloadFeed.php: check: " . $serviceAttribute . " - value found: " . $dcatDistribution->{$serviceAttribute});
 	                    if (!$dcatDistribution->{$serviceAttribute}) {
@@ -1037,7 +1031,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 	        }
 	        if ($linkListFound) {
 	            $furtherLink = urldecode($linkList);
-	            
+
 	        } else {
 	            header("Content-Type: text/html");
 	            echo "ATOM-Feed based on remote link list could not be generated, cause there is no available information about the remote list!";
@@ -1061,17 +1055,11 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 		break;
 		case "wfs":
 			$atomFeedKey .= $featuretypeId;
-			switch ($mapbenderMetadata[$m]->wfs_version) {
-				case "2.0.2":
-					$typeParameterName = "typeNames";
-					break;
-				case "2.0.0":
-					$typeParameterName = "typeNames";
-					break;
-				default:
-					$typeParameterName = "typeName";
-					break;
-			}
+			$typeParameterName = match ($mapbenderMetadata[$m]->wfs_version) {
+       "2.0.2" => "typeNames",
+       "2.0.0" => "typeNames",
+       default => "typeName",
+   };
 		break;
 	}
 	//$cache->isActive = false; //TODO delete productive
@@ -1112,14 +1100,14 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 		$ressourceTitle = $mapbenderMetadata[$m]->metadata_title;
 	} else {
 		//TODO check wfs title....
-		
+
 		if (isset($mapbenderMetadata[$m]->layer_title) && $mapbenderMetadata[$m]->layer_title != '' ) {
 		    $ressourceTitle = $mapbenderMetadata[$m]->layer_title;
 		} else {
 			$ressourceTitle = "Title of dataset cannot be found!";
 		}
 	}
-		
+
 
 	//first use metadata abstract then layer abstract
 	if (isset($mapbenderMetadata[$m]->metadata_abstract) && $mapbenderMetadata[$m]->metadata_abstract != '' ) {
@@ -1255,7 +1243,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 	$feedLink->setAttribute("hreflang", "de");
 	$feedLink->setAttribute("title", "Selbstreferenz");
 	$feed->appendChild($feedLink);
-	
+
 	//opensearch descriptionlink 5.1.5
 	if ($type == 'SERVICE') {
 		$feedLink = $feedDoc->createElement("link");
@@ -1399,7 +1387,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				}
 				//**************************************************************************************
 				$e = new mb_notice("Epsg id of layer ".$mapbenderMetadata[$m]->layer_id." : ".$epsgId);
-					
+
 				//TODO: check if epsg, and bbox are filled correctly!
 				$sqlExtent = "SELECT X(transform(GeometryFromText('POINT(".$mapbenderMetadata[$m]->minx." ".$mapbenderMetadata[$m]->miny.")',4326),".$epsgId.")) as minx, Y(transform(GeometryFromText('POINT(".$mapbenderMetadata[$m]->minx." ".$mapbenderMetadata[$m]->miny.")',4326),".$epsgId.")) as miny, X(transform(GeometryFromText('POINT(".$mapbenderMetadata[$m]->maxx." ".$mapbenderMetadata[$m]->maxy.")',4326),".$epsgId.")) as maxx, Y(transform(GeometryFromText('POINT(".$mapbenderMetadata[$m]->maxx." ".$mapbenderMetadata[$m]->maxy.")',4326),".$epsgId.")) as maxy";
 				$resExtent =  db_query($sqlExtent);
@@ -1407,9 +1395,9 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				$miny = floatval(db_result($resExtent,0,"miny"));
 				$maxx = floatval(db_result($resExtent,0,"maxx"));
 				$maxy = floatval(db_result($resExtent,0,"maxy"));
-	
+
 				//$e = new mb_exception("minx " . $minx . " miny " . $miny . " maxx " . $maxx . " maxy " . $maxy . " epsg " . $epsgId);
-				
+
 				$diffX = $maxx - $minx; //in m
 				$diffY = $maxy - $miny;	//in m
 				//$e = new mb_exception($diffX);
@@ -1425,15 +1413,15 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 						//transform to pixel
 						$diffXPx = $diffX / floatval($mapbenderMetadata[$m]->spatial_res_value);
 						$diffYPx = $diffY / floatval($mapbenderMetadata[$m]->spatial_res_value);
-						
+
 					break;
 				}
 				$e = new mb_notice($diffXPx.":".$diffYPx);
 				$nRows = ceil($diffYPx / floatval($maxImageSize));
 				$nCols = ceil($diffXPx / floatval($maxImageSize));
 				//$e = new mb_exception($nRows.":".$nCols . ":" . intval($nRows)*intval($nColumns));
-				$bboxWms = array();
-				$bboxWmsWGS84 = array();
+				$bboxWms = [];
+				$bboxWmsWGS84 = [];
 				/*echo $diffXPx.":".$diffYPx.",";
 				echo $nRows.":".$nCols.",";
 				echo $minx.":".$miny.",";
@@ -1469,7 +1457,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				$lonLatBboxWms2 = transformMultipolygon($geomGeneratorSql, intval($epsgId), 4326, $mapbenderMetadata[$m]->metadata_uuid, $polygonalFilter);
 				//delete entries from original bbox where latlon could not be calculated
 				//$e = new mb_exception("number of bbox records: " . count($bboxWms));
-				$newBboxWms = array();
+				$newBboxWms = [];
 				$arrayKeysWgsBox = array_keys($lonLatBboxWms2);
 				for ($k = 0; $k < count($arrayKeysWgsBox); $k++) {
 				    $newBboxWms[] = $bboxWms[$arrayKeysWgsBox[$k]];
@@ -1485,11 +1473,11 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 			$numberOfEntries = 1;
 			//generate Download Links for the different featuretypes
 			//first calculate the number of tiles for the different featureTypes
-			$featureHits = array();
-			$getFeatureLink = array();
-			$featureTypeName = array();
-			$featureTypeBbox = array();
-			$featureTypeBboxWGS84 = array();
+			$featureHits = [];
+			$getFeatureLink = [];
+			$featureTypeName = [];
+			$featureTypeBbox = [];
+			$featureTypeBboxWGS84 = [];
 			$featuretypeIndex = false;
 			//For each featuretype which was found! Maybe more than one!
 			for ($i = 0; $i < $countRessource; $i++) {
@@ -1498,7 +1486,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				$featuretypeIndex = $i;
 				//overwrite feature count with information from database
 				$maxFeatureCount = (integer)$mapbenderMetadata[$i]->wfs_max_features;
-				
+
 				$crs = $mapbenderMetadata[$i]->metadata_ref_system;
 				//use featuretype ref system - to build the bbox filters!!!
 				$crs = $mapbenderMetadata[$i]->featuretype_srs;
@@ -1563,8 +1551,8 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 					$width = sqrt(($diffX * $diffY) / $countTiles);
 					$nRows = ceil($diffY / $width);
 					$nCols = ceil($diffX / $width);
-					$bboxWfs = array();
-					$bboxWfs2 = array();
+					$bboxWfs = [];
+					$bboxWfs2 = [];
 					$countBbox = 0;
 					$multiPolygonText = "'MULTIPOLYGON(";
 					for ($j = 0; $j < $nRows; $j++) {
@@ -1579,26 +1567,26 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 							$maxyWfs = $miny + ($j+1) * $width;
 							//echo "maxyWms: ". $maxyWms .",";
 							//check if bbox don't have more than maxfeatures, the bboxes are given in the
-							$bboxFilter = getBboxFilter(array($minxWfs, $minyWfs, $maxxWfs, $maxyWfs), $crs, $wfs->getVersion(), $geometryFieldName, $alterAxisOrder);
+							$bboxFilter = getBboxFilter([$minxWfs, $minyWfs, $maxxWfs, $maxyWfs], $crs, $wfs->getVersion(), $geometryFieldName, $alterAxisOrder);
 							//count features in current bbox
 							$featureHitsBbox = $wfs->countFeatures( $mapbenderMetadata[$i]->featuretype_name, $bboxFilter, false, false, false, 'GET');
 							$e = new mb_notice("http/php/mod_inspireDownloadFeed.php: - hits for bbox: " . $featureHitsBbox);
 							if ($featureHitsBbox > 0) {
 							    $e = new mb_notice("http/php/mod_inspireDownloadFeed.php: - add recursively");
 							    //recursively add bbox to array 
-							    addBboxEntry(array($minxWfs, $minyWfs, $maxxWfs, $maxyWfs), $bboxWfs, $countBbox, $multiPolygonText, $featureHitsBbox, $crs, $wfs, $maxFeatureCount, $mapbenderMetadata[$i]->featuretype_name, $geometryFieldName);
+							    addBboxEntry([$minxWfs, $minyWfs, $maxxWfs, $maxyWfs], $bboxWfs, $countBbox, $multiPolygonText, $featureHitsBbox, $crs, $wfs, $maxFeatureCount, $mapbenderMetadata[$i]->featuretype_name, $geometryFieldName);
 							}
 						}
 					}
 					//new approach since 2022-07-11
-					$multiPolygonText = rtrim($multiPolygonText, ",");
+					$multiPolygonText = rtrim((string) $multiPolygonText, ",");
 					$multiPolygonText .= ")'";
 					$geomGeneratorSql = "ST_GeomFromText(" . $multiPolygonText . "," . intval($epsgId) . ")";
 					//$admin->putToStorage("multipolygon_1.sql", $geomGeneratorSql, "file", 10000, False);
 					//new approach - after 2022-07-11:
 					$lonLatBboxWfs2 = transformMultipolygon($geomGeneratorSql, intval($epsgId), 4326, $mapbenderMetadata[$i]->metadata_uuid, $polygonalFilter);
 					//delete entries from original bbox where latlon could not be calculated
-					$newBboxWfs = array();
+					$newBboxWfs = [];
 				    $arrayKeysWgsBox = array_keys($lonLatBboxWfs2);
 				    for ($k = 0; $k < count($arrayKeysWgsBox); $k++) {
 				        $newBboxWfs[$mapbenderMetadata[$i]->featuretype_name][] = $bboxWfs[$mapbenderMetadata[$i]->featuretype_name][$arrayKeysWgsBox[$k]];
@@ -1608,7 +1596,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 					$countBbox = count($featureTypeBboxWGS84);	
 				} else {
 					//only normal extent used
-					if ($minx == "" || $miny == "" || $maxx == "" || $maxy == "") {
+					if ($minx == 0.0 || $miny == 0.0 || $maxx == 0.0 || $maxy == 0.0) {
 						//set default values
 						//EPSG:4326
 						//use lon/lat - for postgis!!!
@@ -1617,18 +1605,18 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 						$maxx = "180";
 						$maxy = "90";
 						/*
-							
+
 						*/	
 						$epsgId = "4326";
 					}
 					$bboxWfs[$mapbenderMetadata[$i]->featuretype_name][0] = $minx.",".$miny.",".$maxx.",".$maxy;
 					//transform bbox back to geographic coordinates
 					$lonLatBbox = transformBbox($minx.",".$miny.",".$maxx.",".$maxy,intval($epsgId),4326);
-					$lonLatBbox = explode(',',$lonLatBbox);
+					$lonLatBbox = explode(',',(string) $lonLatBbox);
 					//georss needs latitude longitude
 					$featureTypeBboxWGS84[] = $lonLatBbox[1].",".$lonLatBbox[0].",".$lonLatBbox[3].",".$lonLatBbox[2];		
 				}
-				
+
 				//$getFeatureLink = array();
 				/*TODO for ($i = 0; $i < $countRessource-1; $i++) {
 					$gFLink = $mapbenderMetadata[$i]->wfs_getfeature."SERVICE=WFS&REQUEST=GetFeature&VERSION=";
@@ -1652,11 +1640,11 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
             </fes:BBOX>
 	</fes:Filter>
 					*/
-				    
+
 				    //				    
 					//$e = new mb_exception("mod_inspireDownloadFeed.php: geometryFieldName: ".$geometryFieldName);
 					//get bbox from wfs metadata
-					$currentBbox = explode(',',$bboxWfs[$mapbenderMetadata[$i]->featuretype_name][$l]);
+					$currentBbox = explode(',',(string) $bboxWfs[$mapbenderMetadata[$i]->featuretype_name][$l]);
 					//change axis order if crs definition and service needs it
 					if ($alterAxisOrder == true) {
 						$e = new mb_exception("mod_inspireDownloadFeed.php: axis order should be altered!");
@@ -1678,19 +1666,19 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 					//$crsObject->identifier;
 					if (count($mapbenderMetadata[$i]->output_formats) >= 1 && strtoupper($mapbenderMetadata[$i]->geometry_field_name[0] !== "SHAPE")) {
 						//use first output format which have been found - TODO - check if it should be pulled from featuretype instead from wfs 
-						$gFLink .= "&outputFormat=".rawurlencode($mapbenderMetadata[$i]->output_formats[0]);
+						$gFLink .= "&outputFormat=".rawurlencode((string) $mapbenderMetadata[$i]->output_formats[0]);
 					}
-					$gFLink .= "&FILTER=".rawurlencode(utf8_decode($bboxFilter));
+					$gFLink .= "&FILTER=".rawurlencode(mb_convert_encoding($bboxFilter, 'ISO-8859-1'));
 					$getFeatureLink[] = $gFLink;
 					$featureTypeName[] = $mapbenderMetadata[$i]->featuretype_name;
 					$featureTypeBbox[] = $bboxWfs[$mapbenderMetadata[$i]->featuretype_name][$l];
-					
+
 				}
 				//$numberOfTiles = count($bboxWfs[$mapbenderMetadata[$i]->featuretype_name]);
 				//$e = new mb_exception("Number of tiles for wfs predefined download service: ".$numberOfTiles);
 			} //end for if filter - if some featuretypeid was given via get parameter
 			} //end for each featuretype
-			
+
 		} else { //type SERVICE was set - generate one entry for each coupled resource - they are distinguished by names, titles, ids, bbox, type of download! 
 			$numberOfEntries = count($mapbenderMetadata);
 		}
@@ -1754,13 +1742,13 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				case "remotelist":
 				    $ressourceDataFeedEntryTitle = $ressourceTitle." - generiert über über externe Datenlinks";
 				    //TODO extract format mimetype from json 
-				    
+
 				    $resourceFormat = $mapbenderMetadata[$i]->format;
 				break;
 			}
 			if ($mapbenderMetadata[$i]->origin == "remotelist") {
 			    $feedEntryTitle->appendChild($feedDoc->createTextNode($ressourceDataFeedEntryTitle . " im CRS " . $atomFeedCrs . " und Format " . $atomFeedFormat)); //TODO: maybe add some category?
-			    
+
 			} else {
 			    $feedEntryTitle->appendChild($feedDoc->createTextNode($ressourceDataFeedEntryTitle. " im CRS " . $mapbenderMetadata[$i]->metadata_ref_system . " und Format " . $resourceFormat)); //TODO: maybe add some category?	
 			}
@@ -1778,7 +1766,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 		<id>http://xyz.org/data/waternetwork_feed.xml</id>*/
 		//or link to dataset 5.2.3
 		//<link rel="alternate" href="http://xyz.org/data/abc/waternetwork_WGS84.shp" type="application/x-shp" hreflang="en" title="Water Network encoded as a ShapeFile in WGS84geographic coordinates (http://www.opengis.net/def/crs/OGC/1.3/CRS84)"/>
-			
+
 		$datasetFeedLink = $mapbenderServerUrl.$_SERVER['SCRIPT_NAME']."?id=".$recordId."&type=DATASET&generateFrom=".$mapbenderMetadata[$i]->origin;
 		switch($mapbenderMetadata[$i]->origin) {
 			case "wmslayer":
@@ -1842,7 +1830,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				break;
 				case "metadata":
 					$downloadLinks = json_decode($mapbenderMetadata[$i]->datalinks);
-					$furtherLink = urldecode($downloadLinks->downloadLinks[0]->{"0"});
+					$furtherLink = urldecode((string) $downloadLinks->downloadLinks[0]->{"0"});
 					$furtherLinkType = $formatsMimetype[$mapbenderMetadata[$i]->format];
 					$furtherLinkTitle = $ressourceTitle." im CRS ".$mapbenderMetadata[$i]->metadata_ref_system."(".$mapbenderMetadata[$i]->format.")";
 					//generate content link 
@@ -1864,8 +1852,8 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				    $atomFeedDescription = $dcatDistribution->{'dcterms:Description'};
 				    $atomFeedFormat = $dcatDistribution->{'dcterms:format'};
 				    $atomFeedCrs = "EPSG:" . $dcatDistribution->{'gdirp:epsgCode'};
-				    
-				    $furtherLink = urldecode($atomFeedLinkList);
+
+				    $furtherLink = urldecode((string) $atomFeedLinkList);
 				    /*$furtherLinkType = $atomFeedFormat;
 				    $furtherLinkTitle = $atomFeedTitle." im CRS " . $atomFeedCrs . " (" . $atomFeedFormat . ")";
 
@@ -1880,7 +1868,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				    $listConnector = new Connector();
 				    //check if further list came from allowed server
 				    $e = new mb_exception("further link: " . $furtherLink);
-				    if (strpos($furtherLink, "https://geobasis-rlp.de") !== 0) {
+				    if (!str_starts_with($furtherLink, "https://geobasis-rlp.de")) {
 				        header("Content-type: text/html");
 				        echo "The url for the link list is not allowed!";
 				        die();
@@ -1900,10 +1888,10 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 					//example:
 					//http://localhost/cgi-bin/mapserv?map=/data/umn/geoportal/karte_rp/testinspiredownload.map&VERSION=1.1.1&REQUEST=GetMap&SERVICE=WMS&LAYERS=inspirewms&STYLES=&SRS=EPSG:4326&BBOX=6.92134,50.130465,6.93241,50.141535000000005&WIDTH=200&HEIGHT=200&FORMAT=image/png&BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=application/vnd.ogc.se_inimage
 					//generate further links, one for each tile which was computed before
-					$furtherLink = array();
-					$furtherLinkType = array();
-					$furtherLinkTitle = array();
-					$furtherLinkBbox = array();
+					$furtherLink = [];
+					$furtherLinkType = [];
+					$furtherLinkTitle = [];
+					$furtherLinkBbox = [];
 					if ($numberOfTiles > 1) {
 						$feedEntryContent = $feedDoc->createElement("content");
 						$feedEntryContentText = $feedDoc->createTextNode("Datensatz wird in  in ".$numberOfTiles." einzelnen Teilen ausgeliefert.");
@@ -1923,15 +1911,15 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 
 						switch ($mapbenderMetadata[$i]->wms_version) {
 						    case "1.1.1":
-						        $furtherLink[$m] .= "&STYLES=&SRS=".trim($crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
+						        $furtherLink[$m] .= "&STYLES=&SRS=".trim((string) $crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
 						        $furtherLink[$m] .= "BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=application/vnd.ogc.se_inimage";
 						        break;
 						    case "1.3.0":
-						        $furtherLink[$m] .= "&STYLES=&CRS=".trim($crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
+						        $furtherLink[$m] .= "&STYLES=&CRS=".trim((string) $crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
 						        $furtherLink[$m] .= "BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=INIMAGE";
 						        break;
 						    default:
-						        $furtherLink[$m] .= "&STYLES=&SRS=".trim($crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
+						        $furtherLink[$m] .= "&STYLES=&SRS=".trim((string) $crs)."&BBOX=".$bboxWms[$m]."&WIDTH=".$maxImageSize."&HEIGHT=".$maxImageSize."&FORMAT=image/tiff&";
 						        $furtherLink[$m] .= "BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=application/vnd.ogc.se_inimage";
 						        break;
 						}
@@ -1941,7 +1929,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 						//$furtherLinkBbox[$m] = $bboxWms[$m];
 						$furtherLinkBbox[$m] = $bboxWmsWGS84[$m];
 						//exchange lon lat with lat long for georss
-						$newBox = explode(',',$furtherLinkBbox[$m]);
+						$newBox = explode(',',(string) $furtherLinkBbox[$m]);
 						//georss needs latitude longitude - done before when transform it ;-)
 						$newBox = $newBox[0].",".$newBox[1].",".$newBox[2].",".$newBox[3];
 						//generate content link 
@@ -1966,10 +1954,10 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 					//http://localhost/cgi-bin/mapserv?map=/data/umn/geoportal/karte_rp/testinspiredownload.map&VERSION=1.1.1&REQUEST=GetMap&SERVICE=WMS&LAYERS=inspirewms&STYLES=&SRS=EPSG:4326&BBOX=6.92134,50.130465,6.93241,50.141535000000005&WIDTH=200&HEIGHT=200&FORMAT=image/png&BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=application/vnd.ogc.se_inimage
 					//for each possibly format do following
 					//foreach ($mapbenderMetadata[$i]->output_formats as $output_format) {
-					$furtherLink = array();
-					$furtherLinkType = array();
-					$furtherLinkTitle = array();
-					$furtherLinkBbox = array();
+					$furtherLink = [];
+					$furtherLinkType = [];
+					$furtherLinkTitle = [];
+					$furtherLinkBbox = [];
 					//loop for each featuretype
 					$e = new mb_notice("Count of wfs links: ".count($getFeatureLink));
 					if (count($getFeatureLink) > 1) {
@@ -1994,11 +1982,11 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 						//$furtherLinkBbox[$m] = $featureTypeBbox[$m];
 						$furtherLinkBbox[$m] = $featureTypeBboxWGS84[$m];
 
-						$newBox = explode(',',$furtherLinkBbox[$m]);
+						$newBox = explode(',',(string) $furtherLinkBbox[$m]);
 						/*if ($alterAxisOrder == true) {
 							$newBox = $newBox[1].",".$newBox[0].",".$newBox[3].",".$newBox[2];
 						} else {*/
-						
+
 							$newBox = $newBox[0].",".$newBox[1].",".$newBox[2].",".$newBox[3];
 						/*}*/
 						//generate content links
@@ -2034,7 +2022,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 		$feedEntryRightsText = $feedDoc->createTextNode($mapbenderMetadata[$i]->accessconstraints);
 		$feedEntryRights->appendChild($feedEntryRightsText);
 		$feedEntry->appendChild($feedEntryRights);
-		
+
 		//5.1.14 / 5.2  - updated
 		//<!-- last date/time pre-defined dataset was updated -->
 		//<updated>2011-06-14T12:22:09Z</updated>
@@ -2110,7 +2098,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 				$feedEntryCopyXml = $feedDoc->saveXML($feedEntry);
 				//exchange formats
 				$feedEntryCopyXml = str_replace($mapbenderMetadata[$i]->output_formats[0],$mapbenderMetadata[$i]->output_formats[$j],$feedEntryCopyXml);
-				$feedEntryCopyXml = str_replace(rawurlencode($mapbenderMetadata[$i]->output_formats[0]),rawurlencode($mapbenderMetadata[$i]->output_formats[$j]),$feedEntryCopyXml);
+				$feedEntryCopyXml = str_replace(rawurlencode((string) $mapbenderMetadata[$i]->output_formats[0]),rawurlencode((string) $mapbenderMetadata[$i]->output_formats[$j]),$feedEntryCopyXml);
 				$feedEntryCopyXml = str_replace("application/gml+xml", $mapbenderMetadata[$i]->output_formats[$j], $feedEntryCopyXml);
 				$feedEntryCopyXmlDOM = $feedDoc->createDocumentFragment();
 				$feedEntryCopyXmlDOM->appendXML($feedEntryCopyXml);
@@ -2136,7 +2124,7 @@ function generateFeed($feedDoc, $recordId, $generateFrom) {
 
 
 //function to give away the xml data
-function pushOpenSearch($feedDoc, $recordId, $generateFrom) {
+function pushOpenSearch($feedDoc, $recordId, $generateFrom): never {
 	header("Content-type: application/opensearchdescription+xml; charset=UTF-8");
 	$xml = generateOpenSearchDescription($feedDoc, $recordId, $generateFrom);
 	echo $xml;
@@ -2144,7 +2132,7 @@ function pushOpenSearch($feedDoc, $recordId, $generateFrom) {
 }
 
 //function to give away the xml data
-function pushFeed($feedDoc, $recordId, $generateFrom) {
+function pushFeed($feedDoc, $recordId, $generateFrom): never {
 	header("Content-type: application/xhtml+xml; charset=UTF-8");
 	$xml = generateFeed($feedDoc, $recordId, $generateFrom);
 	echo $xml;
@@ -2163,14 +2151,14 @@ function parseBox2d($box2d) {
 
 function transformBbox($oldBbox, $fromCRS, $toCRS, $metadataUuid = false ,$polygonFilter = false) {
 	//Transform the given BBOX to $toCRS
-	$arrayBbox = explode(',',$oldBbox);
+	$arrayBbox = explode(',',(string) $oldBbox);
 	if ($metadataUuid != false && $polygonFilter != false) {
 		$sql = "select asewkt(transform(GeometryFromText ( 'LINESTRING ( ".$arrayBbox[0]." ".$arrayBbox[1].",".$arrayBbox[2]." ".$arrayBbox[3]." )', $fromCRS ),".intval($toCRS).")) as bbox, 
 CASE 
 WHEN st_intersects((select geography(bounding_geom) from mb_metadata where uuid = '".$metadataUuid."'),transform(GeometryFromText ( 'POLYGON (( ".$arrayBbox[0]." ".$arrayBbox[1].",".$arrayBbox[2]." ".$arrayBbox[1].",".$arrayBbox[2]." ".$arrayBbox[3].",".$arrayBbox[0]." ".$arrayBbox[3].",".$arrayBbox[0]." ".$arrayBbox[1]."))', $fromCRS ),".intval($toCRS)." )) = true THEN true
 ELSE false
 END as inside;";
-		$res = db_query($sql,$v,$t);
+		$res = db_query($sql);
 		$row = db_fetch_assoc($res);
 		$textBbox = $row['bbox'];
 		$inside = $row['inside'];
@@ -2178,16 +2166,16 @@ END as inside;";
 			return false;
 		} else {	
 			$pattern = '~LINESTRING\((.*)\)~i';
-			preg_match($pattern, $textBbox, $subpattern);
+			preg_match($pattern, (string) $textBbox, $subpattern);
 			$newBbox = str_replace(" ", ",", $subpattern[1]);
 			return $newBbox;
 		} 
 	} else {
 		$sql = "select asewkt(transform(GeometryFromText ( 'LINESTRING ( ".$arrayBbox[0]." ".$arrayBbox[1].",".$arrayBbox[2]." ".$arrayBbox[3]." )', $fromCRS ),".intval($toCRS)."))";
-		$res = db_query($sql,$v,$t);
+		$res = db_query($sql);
 		$textBbox = db_fetch_row($res);
 		$pattern = '~LINESTRING\((.*)\)~i';
-		preg_match($pattern, $textBbox[0], $subpattern);
+		preg_match($pattern, (string) $textBbox[0], $subpattern);
 		$newBbox = str_replace(" ", ",", $subpattern[1]);
 		return $newBbox;
 	}
@@ -2206,7 +2194,7 @@ function transformMultipolygon($multiPolygonSql, $fromCRS, $toCRS, $metadataUuid
         $sql .= " AS p_geom) AS b) AS c where ST_INTERSECTS((dumped).geom, (select bounding_geom from mb_metadata where uuid = '".$metadataUuid."'))";
       
         $res = db_query($sql);
-        $wgs84bboxArray = array();
+        $wgs84bboxArray = [];
         while ($row = db_fetch_array($res)) {
             $wgs84bboxArray[intval($row['path_poly']) - 1] = implode(",", parseBox2d($row['wgs84bbox']));
         }
@@ -2220,7 +2208,7 @@ function transformMultipolygon($multiPolygonSql, $fromCRS, $toCRS, $metadataUuid
         $sql .= " AS p_geom) AS b) AS c";//where ST_INTERSECTS((dumped).geom, (select bounding_geom from mb_metadata where metadata_id=" . $metadataUuid . "))";
      
         $res = db_query($sql);
-        $wgs84bboxArray = array();
+        $wgs84bboxArray = [];
         while ($row = db_fetch_array($res)) {
             $wgs84bboxArray[] = implode(",", parseBox2d($row['wgs84bbox']));
         }
@@ -2241,7 +2229,7 @@ function fillMapbenderMetadata($dbResult, $generateFrom) {
 		$mapbenderMetadata[$indexMapbenderMetadata]->origin = $row['origin']; 
 		if (isset($row['bbox2d']) && $row['bbox2d'] != '') {
 				$bbox = $row['bbox2d'];
-				$mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox = explode(',',$bbox);
+				$mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox = explode(',',(string) $bbox);
 				$mapbenderMetadata[$indexMapbenderMetadata]->minx = $mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox[0];
 				$mapbenderMetadata[$indexMapbenderMetadata]->miny = $mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox[1];
 				$mapbenderMetadata[$indexMapbenderMetadata]->maxx = $mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox[2];
@@ -2283,7 +2271,7 @@ function fillMapbenderMetadata($dbResult, $generateFrom) {
 			//get metadata from metadata proxy by uuid
 			//http://www.geoportal.rlp.de/mapbender/php/mod_iso19139ToHtml.php?url=http%3A%2F%2Fwww.geoportal.rlp.de%2Fmapbender%2Fphp%2Fmod_dataISOMetadata.php%3FoutputFormat%3Diso19139%26id%3D2b009ae4-aa3e-ff21-870b-49846d9561b2
 			$iso19139 = new iso19139();
-			
+
 			$metadata = $iso19139->createFromUrl($mapbenderPath."php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$mapbenderMetadata[$indexMapbenderMetadata]->metadata_uuid);
 			//$e = new mb_exception($mapbenderPath."php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$mapbenderMetadata[$indexMapbenderMetadata]->metadata_uuid);
 			if ($metadata->fees == "" || empty($metadata->fees)) {
@@ -2378,17 +2366,17 @@ function fillMapbenderMetadata($dbResult, $generateFrom) {
 					$mapbenderMetadata[$indexMapbenderMetadata]->datasetid = $mapbenderMetadata[$indexMapbenderMetadata]->metadata_uuid;
 				}
 				if ($generateFrom == "wfs" or $mapbenderMetadata[$indexMapbenderMetadata]->origin == "wfs") {
-					$latlonbbox = explode(",",$mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox);
+					$latlonbbox = explode(",",(string) $mapbenderMetadata[$indexMapbenderMetadata]->latlonbbox);
 					$mapbenderMetadata[$indexMapbenderMetadata]->minx = $latlonbbox[0];
 					$mapbenderMetadata[$indexMapbenderMetadata]->miny = $latlonbbox[1];
 					$mapbenderMetadata[$indexMapbenderMetadata]->maxx = $latlonbbox[2];
 					$mapbenderMetadata[$indexMapbenderMetadata]->maxy = $latlonbbox[3];
 					//do a special select to get all outputformats from database
-					$mapbenderMetadata[$indexMapbenderMetadata]->output_formats = array();
+					$mapbenderMetadata[$indexMapbenderMetadata]->output_formats = [];
 					//$e = new mb_exception("php/mod_inspireDownloadFeed.php: owfsId: ".$mapbenderMetadata[$indexMapbenderMetadata]->wfs_id);
 					$sql = "SELECT output_format from wfs_output_formats WHERE fkey_wfs_id = $1 UNION SELECT output_format FROM wfs_featuretype_output_formats WHERE fkey_featuretype_id = $2";			
-					$v = array($mapbenderMetadata[$indexMapbenderMetadata]->wfs_id, $mapbenderMetadata[$indexMapbenderMetadata]->featuretype_id);
-					$t = array('i', 'i');
+					$v = [$mapbenderMetadata[$indexMapbenderMetadata]->wfs_id, $mapbenderMetadata[$indexMapbenderMetadata]->featuretype_id];
+					$t = ['i', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 					while ($row = db_fetch_array($res)) {
 						$mapbenderMetadata[$indexMapbenderMetadata]->output_formats[] = $row['output_format'];
@@ -2401,11 +2389,11 @@ function fillMapbenderMetadata($dbResult, $generateFrom) {
 					$mapbenderMetadata[$indexMapbenderMetadata]->output_formats = array_unique($mapbenderMetadata[$indexMapbenderMetadata]->output_formats);
 					//get geometry field name from featuretype information out of mapbender database
 					$sql = "SELECT element_name, element_type from wfs_element WHERE fkey_featuretype_id = $1";			
-					$v = array($mapbenderMetadata[$indexMapbenderMetadata]->featuretype_id);
-					$t = array('i');
+					$v = [$mapbenderMetadata[$indexMapbenderMetadata]->featuretype_id];
+					$t = ['i'];
 					$res = db_prep_query($sql,$v,$t);
 					//pull first element with type is string like "PropertyType"
-					$geometryElements = array("GeometryPropertyType","MultiSurfacePropertyType","GeometryPropertyType","CurvePropertyType","PolygonPropertyType","LineStringPropertyType","PointPropertyType","MultiPolygonPropertyType","MultiLineStringPropertyType","MultiPointPropertyType","SurfacePropertyType");
+					$geometryElements = ["GeometryPropertyType", "MultiSurfacePropertyType", "GeometryPropertyType", "CurvePropertyType", "PolygonPropertyType", "LineStringPropertyType", "PointPropertyType", "MultiPolygonPropertyType", "MultiLineStringPropertyType", "MultiPointPropertyType", "SurfacePropertyType"];
 					while ($row = db_fetch_array($res)) {
 						//$e = new mb_exception("php/mod_inspireDownloadFeed.php: test element_type: ".$row['element_type']);
 						if (in_array($row['element_type'], $geometryElements)) {
@@ -2420,7 +2408,7 @@ function fillMapbenderMetadata($dbResult, $generateFrom) {
 				}
 				//overwrite mapbenderMetadata->minx ... which came from layer/featuretype metadata with bbox of metadata itself, if given
 				if (isset($mapbenderMetadata[$indexMapbenderMetadata]->metadata_bbox) && $mapbenderMetadata[$indexMapbenderMetadata]->metadata_bbox !== "") {
-					$bbox = explode(",", $mapbenderMetadata[$indexMapbenderMetadata]->metadata_bbox);
+					$bbox = explode(",", (string) $mapbenderMetadata[$indexMapbenderMetadata]->metadata_bbox);
 					$mapbenderMetadata[$indexMapbenderMetadata]->minx = $bbox[0];
 					$mapbenderMetadata[$indexMapbenderMetadata]->miny = $bbox[1];
 					$mapbenderMetadata[$indexMapbenderMetadata]->maxx = $bbox[2];
@@ -2436,7 +2424,7 @@ if ($openSearch) {
 	readInfoFromDatabase($recordId, $generateFrom);
 	//generate rss to get number of tiles!
 	//generateFeed($feedDoc, $recordId, $generateFrom);//TODO: maybe call feed from cache first - we have to parse the feed - it is mor simple than generate it !!!!
-	answerOpenSearchRequest($feedDoc, $recordId, $generateFrom);
+	answerOpenSearchRequest();
 	
 } else {
 	if ($getOpenSearch) {

@@ -19,8 +19,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //Script for pulling all download options for one or more metadataset which are identified by their fileidentifier
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_Uuid.php");
 
 //get language parameter out of mapbender session if it is set else set default language to de_DE
 $sessionLang = Mapbender::session()->get("mb_lang");
@@ -28,7 +28,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -64,7 +64,7 @@ if (isset($_REQUEST["outputFormat"]) & $_REQUEST["outputFormat"] != "") {
 }
 
 function checkUrlInDatalink($url, $datalinkIds) {
-	$sql = "SELECT datalink_id FROM datalink WHERE datalink_id in (".explode(",",$datalinkIds).") AND datalink_url = ".urldecode($url);
+	$sql = "SELECT datalink_id FROM datalink WHERE datalink_id in (".explode(",",(string) $datalinkIds).") AND datalink_url = ".urldecode((string) $url);
 	$res = db_query($sql);
 	//$row = db_fetch_assoc($res)
 	$e = new mb_exception("num rows: ".db_numrows($res));
@@ -85,8 +85,8 @@ if (isset($_REQUEST['ID']) & $_REQUEST['ID'] != "") {
 	$testMatch = $_REQUEST["ID"];
 	//$uuid = new Uuid($testMatch);
 	//$isUuid = $uuid->isValid();
-	$idList = explode(',',$_REQUEST['ID']);
-	for ($i = 0; $i < count($idList); $i++) {
+	$idList = explode(',',(string) $_REQUEST['ID']);
+	for ($i = 0; $i < count($idList ?? []); $i++) {
 		$testMatch = $idList[$i];
 		$uuid = new Uuid($testMatch);
 		$isUuid = $uuid->isValid();
@@ -130,9 +130,9 @@ select service_id, resource_id, service_uuid, resource_type, fkey_datalink_id as
 
 	//initialize array for result
 	//$e = new mb_exception($idList);
-	for ($i = 0; $i < count($idList); $i++) {
-		$v = array($idList[$i]);
-		$t = array('s');
+	for ($i = 0; $i < count($idList ?? []); $i++) {
+		$v = [$idList[$i]];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		//problem, $res don't give back false if it was not successful!
 		//push rows into associative array
@@ -208,11 +208,11 @@ select service_id, resource_id, service_uuid, resource_type, fkey_datalink_id as
 						$downloadOptions->{$idList[$i]}->option[$j]->wmsId = $row['service_id'];
 						$downloadOptions->{$idList[$i]}->option[$j]->layerId = $row['resource_id'];
 					}
-					
+
 				break;
 				case "metadata":
 					if (isset($row['datalink_text'] ) || $row['datalink_text'] != '') {
-						$downloadLinks = json_decode($row['datalink_text']);
+						$downloadLinks = json_decode((string) $row['datalink_text']);
 						$downloadOptions->{$idList[$i]}->option[$j]->type = "downloadlink";
 						//parse json and add some more info?
 						//$downloadLinks = json_decode($row['datalink_text']);
@@ -246,7 +246,7 @@ if ($downloadOptions != "null" && $outputFormat == "json") {
 	echo $downloadOptions;
 }
 if ($downloadOptions != "null" && $outputFormat == "html") {
-	$options = json_decode($downloadOptions);
+	$options = json_decode((string) $downloadOptions);
 	$header = '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.$languageCode.'">';
 	$header .= '<body>';
 	$header .= '<head>' . 

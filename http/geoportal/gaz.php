@@ -21,10 +21,10 @@
 #wiki Modul:		gaz_wiki.php
 #OpenSearch Modul:	mod_readOpenSearchResults.php
 
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/geoportal.conf");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 
 $n = new mb_notice("-- gaz.php was invoked--");
 $con = db_connect(DBSERVER,OWNER,PW);
@@ -84,7 +84,7 @@ if (isset($regTimeEnd) & ($regTimeEnd != 'false')){
 }
 if (isset($searchBbox) & ($searchBbox != 'false')){
 	//parse bbox
-	$spatialFilterCoords = explode(',',$searchBbox);
+	$spatialFilterCoords = explode(',',(string) $searchBbox);
 	//definition of the spatial filter
 	$openSearchFilter .= "+x1:".$spatialFilterCoords[0];
 	$openSearchFilter .= "+x2:".$spatialFilterCoords[2];

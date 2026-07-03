@@ -48,7 +48,7 @@ function trace($msg) {
 
 class Exception {
     /* Emulate a Java exception, sort of... */
-  var $message;
+  public $message;
   function Exception($message) {
     $this->message = $message;
   }
@@ -58,7 +58,7 @@ class Exception {
 }
 
 class Assert {
-  function assert($boolean, $message=0) {
+  function __construct($boolean, $message=0) {
     if (! $boolean)
       $this->fail($message);
   }
@@ -70,7 +70,7 @@ class Assert {
   }
 
   function assertRegexp($regexp, $actual, $message=false) {
-    if (! preg_match($regexp, $actual)) {
+    if (! preg_match($regexp, (string) $actual)) {
       $this->failNotEquals($regexp, $actual, "pattern", $message);
     }
   }
@@ -79,8 +79,8 @@ class Assert {
     // Private function for reporting failure to match.
     $str = $message ? ($message . ' ') : '';
     $str .= "($expected_label/actual)<br>";
-    $htmlExpected = htmlspecialchars($expected);
-    $htmlActual = htmlspecialchars($actual);
+    $htmlExpected = htmlspecialchars((string) $expected);
+    $htmlActual = htmlspecialchars((string) $actual);
     $str .= sprintf("<pre>%s\n--------\n%s</pre>",
 		    $htmlExpected, $htmlActual);
     $this->fail($str);
@@ -88,17 +88,11 @@ class Assert {
 }
 
 class TestCase extends Assert /* implements Test */ {
-  /* Defines context for running tests.  Specific context -- such as
-     instance variables, global variables, global state -- is defined
-     by creating a subclass that specializes the setUp() and
-     tearDown() methods.  A specific test is defined by a subclass
-     that specializes the runTest() method. */
-  var $fName;
-  var $fResult;
-  var $fExceptions = array();
+  public $fResult;
+  public $fExceptions = [];
 
-  function TestCase($name) {
-    $this->fName = $name;
+  function __construct(public $fName)
+  {
   }
 
   function run($testResult=0) {
@@ -112,7 +106,7 @@ class TestCase extends Assert /* implements Test */ {
     if (! $testResult)
       $testResult = $this->_createResult();
     $this->fResult = $testResult;
-    $testResult->run(&$this);
+    $testResult->run($this);
     $this->fResult = 0;
     return $testResult;
   }
@@ -180,9 +174,9 @@ class TestCase extends Assert /* implements Test */ {
 class TestSuite /* implements Test */ {
   /* Compose a set of Tests (instances of TestCase or TestSuite), and
      run them all. */
-  var $fTests = array();
+  public $fTests = [];
 
-  function TestSuite($classname=false) {
+  function __construct($classname=false) {
     if ($classname) {
       // Find all methods of the given class whose name starts with
       // "test" and add them to the test suite.  We are just _barely_
@@ -196,22 +190,22 @@ class TestSuite /* implements Test */ {
       if (floor(phpversion()) >= 4) {
 	// PHP4 introspection, submitted by Dylan Kuhn
 	$names = get_class_methods($classname);
-	while (list($key, $method) = each($names)) {
-	  if (preg_match('/^test/', $method) && $method != "testcase") {  
-	    $this->addTest(new $classname($method));
-	  }
-	}
+	foreach ($names as $key => $method) {
+     if (preg_match('/^test/', $method) && $method != "testcase") {  
+  	    $this->addTest(new $classname($method));
+  	  }
+ }
       }
       else {
 	$dummy = new $classname("dummy");
 	$names = (array) $dummy;
-	while (list($key, $value) = each($names)) {
-	  $type = gettype($value);
-	  if ($type == "user function" && preg_match('/^test/', $key)
-	  && $key != "testcase") {  
-	    $this->addTest(new $classname($key));
-	  }
-	}
+	foreach ($names as $key => $value) {
+     $type = gettype($value);
+     if ($type == "user function" && preg_match('/^test/', $key)
+  	  && $key != "testcase") {  
+  	    $this->addTest(new $classname($key));
+  	  }
+ }
       }
     }
   }
@@ -225,10 +219,10 @@ class TestSuite /* implements Test */ {
     /* Run all TestCases and TestSuites comprising this TestSuite,
        accumulating results in the given TestResult object. */
     reset($this->fTests);
-    while (list($na, $test) = each($this->fTests)) {
-      if ($testResult->shouldStop())
-	break;
-      $test->run(&$testResult);
+    foreach ($this->fTests as $na => $test) {
+        if ($testResult->shouldStop())
+  	break;
+        $test->run($testResult);
     }
   }
 
@@ -237,8 +231,8 @@ class TestSuite /* implements Test */ {
        in any constituent TestSuites) */
     $count = 0;
     reset($fTests);
-    while (list($na, $test_case) = each($this->fTests)) {
-      $count += $test_case->countTestCases();
+    foreach ($this->fTests as $na => $test_case) {
+        $count += $test_case->countTestCases();
     }
     return $count;
   }
@@ -248,12 +242,10 @@ class TestSuite /* implements Test */ {
 class TestFailure {
   /* Record failure of a single TestCase, associating it with the
      exception(s) that occurred */
-  var $fFailedTestName;
-  var $fExceptions;
+  public $fFailedTestName;
 
-  function TestFailure(&$test, &$exceptions) {
+  function __construct(&$test, public $fExceptions) {
     $this->fFailedTestName = $test->name();
-    $this->fExceptions = $exceptions;
   }
 
   function getExceptions() {
@@ -267,11 +259,11 @@ class TestFailure {
 
 class TestResult {
   /* Collect the results of running a set of TestCases. */
-  var $fFailures = array();
-  var $fRunTests = 0;
-  var $fStop = false;
+  public $fFailures = [];
+  public $fRunTests = 0;
+  public $fStop = false;
 
-  function TestResult() { }
+  function __construct() { }
 
   function _endTest($test) /* protected */ {
       /* specialize this for end-of-test action, such as progress
@@ -321,7 +313,7 @@ class TestResult {
 
 class TextTestResult extends TestResult {
   /* Specialize TestResult to produce text/html report */
-  function TextTestResult() {
+  function __construct() {
     $this->TestResult();  // call superclass constructor
   }
   
@@ -336,15 +328,15 @@ class TextTestResult extends TestResult {
 
     print("<ol>\n");
     $failures = $this->getFailures();
-    while (list($i, $failure) = each($failures)) {
-      $failedTestName = $failure->getTestName();
-      printf("<li>%s\n", $failedTestName);
-
-      $exceptions = $failure->getExceptions();
-      print("<ul>");
-      while (list($na, $exception) = each($exceptions))
-	printf("<li>%s\n", $exception->getMessage());
-      print("</ul>");
+    foreach ($failures as $i => $failure) {
+        $failedTestName = $failure->getTestName();
+        printf("<li>%s\n", $failedTestName);
+        $exceptions = $failure->getExceptions();
+        print("<ul>");
+        foreach ($exceptions as $na => $exception) {
+            printf("<li>%s\n", $exception->getMessage());
+        }
+        print("</ul>");
     }
     print("</ol>\n");
   }

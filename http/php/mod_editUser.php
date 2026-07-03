@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $e_id="editUser";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done
  */ 
@@ -29,6 +29,6 @@ $postvars = explode(",", "selected_user,name,firstname,lastname,academic_title,p
 foreach ($postvars as $value) {
    ${$value} = $_POST[$value];
 }
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_user.php");
 include "../../lib/editUser.php";
 ?>

@@ -17,15 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/mb_validatePermission.php");
-require_once(dirname(__FILE__) . "/../classes/class_wms.php"); 
+require_once(__DIR__ . "/mb_validatePermission.php");
+require_once(__DIR__ . "/../classes/class_wms.php"); 
 
 if(isset($_REQUEST["wms_id"]) == false) {
 	echo "file: ".$_REQUEST["xml_file"];
     	$gui_id = $_REQUEST["guiList"];
     	$xml = $_REQUEST["xml_file"];
     	if ($_REQUEST["auth_type"] == 'basic' || $_REQUEST["auth_type"] == 'digest') {
-		$auth = array();
+		$auth = [];
     		$auth['username'] = $_REQUEST["username"];
     		$auth['password'] = $_REQUEST["password"];
     		$auth['auth_type'] = $_REQUEST["auth_type"];
@@ -62,6 +62,6 @@ if(isset($_REQUEST["wms_id"]) == false) {
 } else {
 	$wms_id = $_REQUEST["wms_id"];
 }
-require_once(dirname(__FILE__)."/../php/mod_editWMS_Metadata.php");
+require_once(__DIR__."/../php/mod_editWMS_Metadata.php");
 editWMSByWMSID ($wms_id);
 ?>

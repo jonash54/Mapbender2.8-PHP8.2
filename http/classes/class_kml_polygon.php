@@ -19,9 +19,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_linearring.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_kml_geometry.php");
+require_once(__DIR__."/../classes/class_kml_linearring.php");
 
 /**
  * Represents a polygon, consisting of 1 outer boundary and 0..n inner boundaries 
@@ -29,7 +29,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_linearring.php");
  * 
  * @package KML
  */
-class KMLPolygon extends KMLGeometry {
+class KMLPolygon extends KMLGeometry implements \Stringable {
 
 	/**
 	 * @param KMLLinearRing	$aLinearRing the outer ring of the polygon
@@ -39,7 +39,7 @@ class KMLPolygon extends KMLGeometry {
 			$this->outerBoundary = $aLinearRing;
 		}
 		else {
-			$e = new mb_exception("class_kml_polygon.php: __construct: parameter not a linear ring, but a " . get_class($aLinearRing));
+			$e = new mb_exception("class_kml_polygon.php: __construct: parameter not a linear ring, but a " . $aLinearRing::class);
 		}
 	}
 
@@ -47,7 +47,7 @@ class KMLPolygon extends KMLGeometry {
 	 * @return string a string representation of the object, currently 
 	 * 					{@link http://www.geojson.org GeoJSON}
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toGeoJSON();
 	}
 	
@@ -112,7 +112,7 @@ class KMLPolygon extends KMLGeometry {
 	/**
 	 * @var	KMLLinearRing[]	The inner boundaries (holes) of the polygon
 	 */
-	private $innerBoundaryArray = array();
+	private $innerBoundaryArray = [];
 
 	/**
 	 * @return outerBoundary

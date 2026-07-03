@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 
 
@@ -15,7 +15,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
 				$e = new mb_exception("fileid ".$fileId );
 				if($fileId == false){ throw new Exception("Could not create file");}
 				$url = "../tmp/$fileId";
-				$result = array('url'=>$url);
+				$result = ['url'=>$url];
 			break;
 
 			default:
@@ -38,14 +38,14 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
 		$fileid = $_GET['file'];
 		header("Content-Type","application/x-json");
 		header("Content-Disposition", "attachment; filename=\"".  $filename ."\"");
-		$result = file_get_contents(realpath(dirname(__FILE__)."/../../http/tmp/$id"));
+		$result = file_get_contents(realpath(__DIR__."/../../http/tmp/$id"));
 		print $result;
 	ob_end_flush();
 } 
 
 function createFile($data){
-	$filename = sha1(date("Y-m-d-His".rand())).".gjson";
-	$filepath = dirname(__FILE__)."/../tmp/$filename";
+	$filename = sha1(date("Y-m-d-His".random_int(0, mt_getrandmax()))).".gjson";
+	$filepath = __DIR__."/../tmp/$filename";
 	$e 	= new mb_exception( $filepath);
 	if (file_put_contents($filepath,$data) === false){
 		return false;

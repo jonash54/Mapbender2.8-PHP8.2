@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__)."/../classes/class_administration.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__."/../classes/class_administration.php";
 if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["id"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter id is not valid (integer oder cs integer list).<br/>'; 
 		die(); 		
@@ -31,8 +31,8 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 }
 //dbselect for generate KML
 $sqlKML = "select wms.wms_getmap, wms.wms_version, wms.wms_owsproxy, layer.layer_name,layer.layer_title, layer_epsg.minx,layer_epsg.miny,layer_epsg.maxx,layer_epsg.maxy from wms, layer, layer_epsg, wms_format where layer.layer_id=$1 and layer.fkey_wms_id=wms.wms_id and layer.layer_id=layer_epsg.fkey_layer_id and layer_epsg.epsg='EPSG:4326' and wms.wms_id=wms_format.fkey_wms_id and wms_format.data_format like '%image/png%' LIMIT 1";
-$vKML = array($layerId);
-$tKML = array('i');
+$vKML = [$layerId];
+$tKML = ['i'];
 $resKML = db_prep_query($sqlKML, $vKML, $tKML);
 $rowKML = db_fetch_array($resKML);
 

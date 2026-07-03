@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__) . "/../core/globalSettings.php");
+require_once(__DIR__ . "/../core/globalSettings.php");
 //require_once(dirname(__FILE__) . "/../http/classes/class_iso19139.php");
 //require_once(dirname(__FILE__) . "/../http/classes/class_Uuid.php");
 
@@ -25,8 +25,8 @@ db_select_db(DB,$con);
 $sql = "SELECT wms_id, wms_getcapabilities_doc, wms_version ";
 $sql .= "FROM wms";
 
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res = db_prep_query($sql,$v,$t);
 logMessages(date('Y-m-d - H:i:s', time()));
 while($row = db_fetch_array($res)){
@@ -42,7 +42,7 @@ while($row = db_fetch_array($res)){
     libxml_use_internal_errors ( true );
     try {
         
-        $capabilitiesXmlObject = simplexml_load_string( $row['wms_getcapabilities_doc'] ); 
+        $capabilitiesXmlObject = simplexml_load_string( (string) $row['wms_getcapabilities_doc'] ); 
         //$capabilitiesDomObject->loadXML ( $row['wms_getcapabilities_doc'] );
         if ($capabilitiesXmlObject === false) {
             foreach ( libxml_get_errors () as $error ) {
@@ -66,8 +66,8 @@ while($row = db_fetch_array($res)){
                 $title = $layer->Title;
                 //select layer with title and wms_id from db and check how many are given ;-) - if only one - the name can be exchanged without any problems
                 $sql2 = "SELECT layer_id, layer_name from layer where layer_title = $1 and fkey_wms_id = $2";
-                $v2 = array($title, $row['wms_id']);
-                $t2 = array("s","i");
+                $v2 = [$title, $row['wms_id']];
+                $t2 = ["s", "i"];
                 $res2 = db_prep_query($sql2,$v2,$t2);
                 $countLayerWithTitle = 0;
                 while($row2 = db_fetch_array($res2)){
@@ -80,8 +80,8 @@ while($row = db_fetch_array($res)){
                     if ($countLayerWithTitle == 1 && $forceUpdate == true) {
                         //repair layer name
                         $sql3 = "update layer set layer_name = 'unnamed_layer:' || md5( $1 ) where layer_title = $1 and fkey_wms_id = $2";
-                        $v3 = array($title, $row['wms_id']);
-                        $t3 = array("s","i");
+                        $v3 = [$title, $row['wms_id']];
+                        $t3 = ["s", "i"];
                         $res3 = db_prep_query($sql3,$v3,$t3);
                         logMessages("Updated layer name to " . "unnamed_layer:" . md5($title) . " - WMS " . $row['wms_id']);
                     }
@@ -107,8 +107,8 @@ function getLayerAttributesRecursive($layer, $wmsId, $forceUpdate) {
             //logMessages("test1");
             //select layer with title and wms_id from db and check how many are given ;-) - if only one - the name can be exchanged without any problems
             $sql2 = "SELECT layer_name, layer_id from layer where layer_title = $1 and fkey_wms_id = $2";
-            $v2 = array($title, $wmsId);
-            $t2 = array("s","i");
+            $v2 = [$title, $wmsId];
+            $t2 = ["s", "i"];
             $res = db_prep_query($sql2,$v2,$t2);  
             $countLayerWithTitle = 0;
             while($row2 = db_fetch_array($res2)){
@@ -121,8 +121,8 @@ function getLayerAttributesRecursive($layer, $wmsId, $forceUpdate) {
                 if ($countLayerWithTitle == 1 && $forceUpdate == true) {
                     //repair layer name
                     $sql3 = "update layer set layer_name = 'unnamed_layer:' || md5( $1 ) where layer_title = $1 and fkey_wms_id = $2";
-                    $v3 = array($title, $wmsId);
-                    $t3 = array("s","i");
+                    $v3 = [$title, $wmsId];
+                    $t3 = ["s", "i"];
                     $res3 = db_prep_query($sql3,$v3,$t3);
                     logMessages("Updated layer name to " . "unnamed_layer:" . md5($title) . " - WMS " . $wmsId);
                 }

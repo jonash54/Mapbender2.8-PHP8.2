@@ -16,17 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * class to handle keywords for services
  */
- 
+
 class Mapbender_keyword{
-	
-	private $service;
-	private $serviceId;
-		
+
 	/*
 	 * Constructor of the keyword-class
 	 * set the service to: wms, layer, wfs, featuretype
@@ -35,32 +32,29 @@ class Mapbender_keyword{
 	 * @param integer id the id of the service
 	 * 
 	 */
-	function __construct($service,$serviceId){
-		$this->service = $service;
-		$this->serviceId = $serviceId;
-			
+	function __construct(private $service,private $serviceId){
 		if ($this->service == "layer"){
-	
+
 			$this->table = 'layer_keyword';
 			$this->serviceIdColumn = 'fkey_layer_id';
-								
+
 		}
 		//example for wms
 		else if ($this->service == "wms"){
-	
+
 			$this->table = 'wms_keyword';
 			$this->serviceIdColumn = 'fkey_wms_id';
-						
+
 		}
 		//example for featuretype
 		else if ($this->service == "featuretype"){
-	
+
 			$this->table = 'wfs_featuretype_keyword';
 			$this->serviceIdColumn = 'fkey_featuretype_id';
-						
+
 		}
 	}
-	
+
 	/*
 	 * selects a keyword
 	 *
@@ -70,8 +64,8 @@ class Mapbender_keyword{
 	function get($keywordId){
 		global $con;
 		$sql = "SELECT keyword FROM keyword WHERE keyword_id = $1";
-		$v = array($keywordId);
-		$t = array('i');
+		$v = [$keywordId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row['keyword'];
@@ -80,7 +74,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/* selects keywords of layer
 	 *
 	 * @param integer the layer_id
@@ -92,8 +86,8 @@ class Mapbender_keyword{
                "WHERE keyword.keyword_id = layer_keyword.fkey_keyword_id " .
                "AND layer_keyword.fkey_layer_id = layer.layer_id " .
                "AND layer.layer_id = $1";
-       	$v = array($this->serviceId);
-		$t = array('i');
+       	$v = [$this->serviceId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$keywordList = "";
         $separator = "";
@@ -105,7 +99,7 @@ class Mapbender_keyword{
         }
         return $keywordList;
     }
-    
+
     /* selects keywords of featuretype
 	 *
 	 * @param integer the featuretype_id
@@ -117,8 +111,8 @@ class Mapbender_keyword{
                "WHERE keyword.keyword_id = wfs_featuretype_keyword.fkey_keyword_id " .
                "AND wfs_featuretype_keyword.fkey_featuretype_id = wfs_featuretype.featuretype_id " .
                "AND wfs_featuretype.featuretype_id = $1";
-       	$v = array($this->serviceId);
-		$t = array('i');
+       	$v = [$this->serviceId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$keywordList = "";
         $separator = "";
@@ -130,7 +124,7 @@ class Mapbender_keyword{
         }
         return $keywordList;
     }
-	
+
 	/*
 	 * Checks whether the keyword exist in the table keywords
 	 * 
@@ -140,8 +134,8 @@ class Mapbender_keyword{
 	function exists($keyword){
 		global $con;
 		$sql = "SELECT keyword_id FROM keyword WHERE keyword = $1";
-		$v = array($keyword);
-		$t = array('s');
+		$v = [$keyword];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row['keyword_id'];
@@ -150,7 +144,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * Inserts a new keyword in the parent table keyword
 	 * Check first, if the keyword exists
@@ -165,12 +159,12 @@ class Mapbender_keyword{
 		}
 		else{
 			$sql = "INSERT INTO keyword (keyword) VALUES ($1)";
-			$v = array($keyword);
-			$t = array('s');
+			$v = [$keyword];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
 			$id_sql = "SELECT keyword_id FROM keyword WHERE keyword = $1";
-			$id_v = array($keyword);
-			$id_t = array('s');
+			$id_v = [$keyword];
+			$id_t = ['s'];
 			$id_res = db_prep_query($id_sql,$id_v,$id_t);
 				if($row = db_fetch_array($id_res)){
 					return $row['keyword_id'];
@@ -180,7 +174,7 @@ class Mapbender_keyword{
 				}
 		}
 	}
-	
+
 	/*
 	 * Deletes the entry in the parent table keyword
 	 *
@@ -190,8 +184,8 @@ class Mapbender_keyword{
 	function delete($keywordId){
 		global $con;
 		$sql = "DELETE FROM keyword WHERE keyword_id = $1";
-		$v = array($keywordId);
-		$t = array('i');
+		$v = [$keywordId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row['keyword_id'];
@@ -200,7 +194,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * Inserts a new keyword-constraint in the crosstabulation
 	 *
@@ -210,8 +204,8 @@ class Mapbender_keyword{
 	function allocate($keywordId){
 		global $con;
 		$sql = "INSERT INTO ".$this->table." (".$this->serviceIdColumn.", fkey_keyword_id) VALUES ($1,$2)";
-		$v = array($this->serviceId, $keywordId);
-		$t = array('i','i');
+		$v = [$this->serviceId, $keywordId];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row['fkey_keyword_id'];
@@ -220,7 +214,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * Checks whether the keyword exist in the crosstabulation layer_keywords
 	 * 
@@ -230,8 +224,8 @@ class Mapbender_keyword{
 	function isAllocated($keywordId){
 		global $con;
 		$sql = "SELECT ".$this->serviceIdColumn." FROM ".$this->table." WHERE fkey_keyword_id = $1";
-		$v = array($keywordId);
-		$t = array('i');
+		$v = [$keywordId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return true;
@@ -250,8 +244,8 @@ class Mapbender_keyword{
 	function remove($keywordId){
 		global $con;
 		$sql = "DELETE FROM ".$this->table." WHERE ".$this->serviceIdColumn." = $1 AND fkey_keyword_id = $2";
-		$v = array($this->serviceId, $keywordId);
-		$t = array('i','i');
+		$v = [$this->serviceId, $keywordId];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($res!=FALSE){
 			return true;
@@ -260,7 +254,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * Deletes all entries of service in the crosstabulation (relation)
 	 *
@@ -270,8 +264,8 @@ class Mapbender_keyword{
 	function removeAll(){
 		global $con;
 		$sql = "DELETE FROM ".$this->table." WHERE ".$this->serviceIdColumn." = $1";
-		$v = array($this->serviceId);
-		$t = array('i');
+		$v = [$this->serviceId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($res!=FALSE){
 			return true;
@@ -280,7 +274,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * Deletes the keyword if it has no entry in one of the crosstabs
 	 *
@@ -299,7 +293,7 @@ class Mapbender_keyword{
 			return false;
 		}
 	}
-	
+
 	/*
 	 * add a new keyword. 
 	 * 
@@ -316,7 +310,7 @@ class Mapbender_keyword{
 			$this->allocate($keywordId);
 			}
 	}
-	
+
 	/*
 	 * add list of keywords to a service
 	 * 
@@ -335,7 +329,7 @@ class Mapbender_keyword{
 			}
 		}
 	}
-	
+
 	/*
 	 * replaces the keywords of a service
 	 *

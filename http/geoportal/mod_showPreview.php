@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 //get type of resource and id of resource - normally layer and wmc
 $resource = 'layer';
 $id = 0;
@@ -17,7 +17,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 	//validate to integer
 	$testMatch = $_REQUEST["id"];
 	$pattern = '/^[0-9]*$/';
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		die();
  	}

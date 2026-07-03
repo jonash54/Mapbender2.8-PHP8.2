@@ -30,7 +30,7 @@ class NamedLayer extends StyledLayerDescriptor
 	 * The name attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $name = "";
+	public $name = "";
 	//Probably not supported by Mapserver - TODO
 	//var $layerfeatureconstraints = "";
 	/**
@@ -39,19 +39,19 @@ class NamedLayer extends StyledLayerDescriptor
 	 * @see UserStyle
 	 * @var array
 	 */
-	var $styles = array();
+	public $styles = [];
 	// $id and $parent for the $objects session array
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects

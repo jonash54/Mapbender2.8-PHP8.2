@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
-require_once(dirname(__FILE__) . "/../classes/class_tou.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
+require_once(__DIR__ . "/../classes/class_tou.php");
 
 //ajax wrapper for class_tou.php
 
@@ -12,7 +12,7 @@ $touObject = new tou();
 //$currentUser = new User();
 //$wmc = new wmc();
 
-$resultObj = array();
+$resultObj = [];
 //obj structure in session for acceptedTou (see class_tou.php):
 //acceptedTou {
 //		wms [100,101,112],

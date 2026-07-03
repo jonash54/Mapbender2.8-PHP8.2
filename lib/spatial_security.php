@@ -2,8 +2,8 @@
 
 namespace spatial_security {
 
-    require_once(dirname(__FILE__) . "/../conf/mapbender.conf");
-    require_once(dirname(__FILE__) . "/../http/classes/class_group.php");
+    require_once(__DIR__ . "/../conf/mapbender.conf");
+    require_once(__DIR__ . "/../http/classes/class_group.php");
     use Group;
     use Imagick;
     use ImagickException;
@@ -40,7 +40,7 @@ namespace spatial_security {
             }
 
             $conn = db_connect();
-            pg_query_params($conn, $sql, array($value, $id));
+            pg_query_params($conn, $sql, [$value, $id]);
         }
     }
 
@@ -63,7 +63,7 @@ namespace spatial_security {
             }
 
             $conn = db_connect();
-            $result = pg_query_params($conn, $sql, array($id));
+            $result = pg_query_params($conn, $sql, [$id]);
             return pg_fetch_row($result)[0];
         }
     }
@@ -77,7 +77,7 @@ namespace spatial_security {
                 echo "<select name=\"spatial_security[]\" multiple style=\"width:250px;height:400px;background-color:white;\">";
 
                 $conn = db_connect();
-                $values = !empty($currentValue) ? explode(",", $currentValue) : array();
+                $values = !empty($currentValue) ? explode(",", (string) $currentValue) : [];
                 if ($conn) {
                     $result = pg_query($conn, "SELECT id, name FROM spatial_security;");
                     while ($row = pg_fetch_assoc($result)) {
@@ -102,12 +102,12 @@ namespace spatial_security {
             $user = new User($userId);
             $user->load();
 
-            $keys = empty($user->spatialSecurity) ? array() : explode(",", $user->spatialSecurity);
+            $keys = empty($user->spatialSecurity) ? [] : explode(",", (string) $user->spatialSecurity);
 
             foreach ($user->getGroupsByUser() as $groupId) {
                 $group = new Group($groupId);
                 if (!empty($group->spatialSecurity)) {
-                    $keys = array_merge($keys, explode(",", $group->spatialSecurity));
+                    $keys = array_merge($keys, explode(",", (string) $group->spatialSecurity));
                 }
             }
 
@@ -125,7 +125,7 @@ namespace spatial_security {
 
     function get_mask_url($reqParams, $keys) {
         $srs = urlencode(empty($reqParams["srs"]) ? $reqParams["crs"] : $reqParams["srs"]);
-        $bbox = urlencode($reqParams["bbox"]);
+        $bbox = urlencode((string) $reqParams["bbox"]);
         $width = $reqParams["width"];
         $height = $reqParams["height"];
 
@@ -168,7 +168,7 @@ namespace spatial_security {
         $imageBlob = file_get_contents($url);
         try {
             $mask->readImageBlob($imageBlob);
-        } catch (ImagickException $e) {
+        } catch (ImagickException) {
             new mb_exception("Error loading image. Response: $imageBlob");
             return null;
         }

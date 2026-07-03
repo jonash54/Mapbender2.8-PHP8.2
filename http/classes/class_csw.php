@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_user.php");
-require_once(dirname(__FILE__)."/class_administration.php");
-require_once(dirname(__FILE__)."/class_cache.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_user.php");
+require_once(__DIR__."/class_administration.php");
+require_once(__DIR__."/class_cache.php");
 
 /**
  * CSW main class to hold catalog object
@@ -29,48 +29,48 @@ require_once(dirname(__FILE__)."/class_cache.php");
  *
  */
 class csw{
-	var $cat_id;
-	var $cat_title;
-	var $cat_abstract;
-	var $cat_version;
+	public $cat_id;
+	public $cat_title;
+	public $cat_abstract;
+	public $cat_version;
 	
-	var $cat_op_getcapabilities;
-	var $cat_op_getrecords;
-	var $cat_op_getrecordbyid;
-	var $cat_op_describerecord;
+	public $cat_op_getcapabilities;
+	public $cat_op_getrecords;
+	public $cat_op_getrecordbyid;
+	public $cat_op_describerecord;
 
-	var $cat_getcapabilities_doc;
+	public $cat_getcapabilities_doc;
 	
-	var $cat_get_capabilities_values = array();
-	var $cat_get_records_values = array();
+	public $cat_get_capabilities_values = [];
+	public $cat_get_records_values = [];
 	
-	var $cat_op_values = array();
+	public $cat_op_values = [];
 	
-	var $cat_upload_url;
-	var $fees;
-	var $accessconstraints;
-	var $contactperson;
-	var $contactposition;
-	var $contactorganization;
-	var $address;
-	var $city;
-	var $stateorprovince;
-	var $postcode;
-	var $country;
-	var $contactvoicetelephone;
-	var $contactfacsimiletelephone;
-	var $contactelectronicmailaddress;
+	public $cat_upload_url;
+	public $fees;
+	public $accessconstraints;
+	public $contactperson;
+	public $contactposition;
+	public $contactorganization;
+	public $address;
+	public $city;
+	public $stateorprovince;
+	public $postcode;
+	public $country;
+	public $contactvoicetelephone;
+	public $contactfacsimiletelephone;
+	public $contactelectronicmailaddress;
 	
-	var $keywords = array();
+	public $keywords = [];
 	
-	var $catowner;
-	var $cattimestamp;
-	var $providername;
-	var $providersite;
-	var $delivery='';
+	public $catowner;
+	public $cattimestamp;
+	public $providername;
+	public $providersite;
+	public $delivery='';
 	
 	//store catalog retrieval status
-	var $cat_status;
+	public $cat_status;
 	
 	function __construct(){
 		
@@ -114,16 +114,16 @@ class csw{
 	public function createCatObjFromXML($url) {
 		$cache = new Cache();
 		if (defined("CACHE_CSW_CAPS") && CACHE_CSW_CAPS == true) {
-		   if ($cache->isActive && $cache->cachedVariableExists("mapbender:cswurl:" . md5($url))) {
+		   if ($cache->isActive && $cache->cachedVariableExists("mapbender:cswurl:" . md5((string) $url))) {
 		    //overwrite csw caps xml with content from cache
-		       $data = $cache->cachedVariableFetch("mapbender:cswurl:" . md5($url));
+		       $data = $cache->cachedVariableFetch("mapbender:cswurl:" . md5((string) $url));
 		    $e = new mb_exception("classes/class_csw.php: Read CSW Object from cache - if something changed in external catalogue - apache restart is needed!!!");
 		} else {
                     if ($cache->isActive) {
                         //load csw xml and write it to cache - don't resolve it twice!
 			$x = new connector($url);
 			$data = $x->file;
-			$cache->cachedVariableAdd("mapbender:cswurl:" . md5($url), $data);
+			$cache->cachedVariableAdd("mapbender:cswurl:" . md5((string) $url), $data);
                     } else {
 			$x = new connector($url);
 			$data = $x->file;
@@ -228,7 +228,7 @@ class csw{
 			$this->contactfacsimiletelephone
 			$this->contactelectronicmailaddress*/
 			//for op_types
-			$op_types = array("GetCapabilities","DescribeRecord","GetRecords","GetRecordById");
+			$op_types = ["GetCapabilities", "DescribeRecord", "GetRecords", "GetRecordById"];
 			foreach ($op_types as $op_type)  {
 				$this->cat_op_values[mb_strtolower($op_type)]['get']['dflt'] = $csw202Cap->xpath('/csw:Capabilities/ows:OperationsMetadata/ows:Operation[@name="'.$op_type.'"]/ows:DCP/ows:HTTP/ows:Get/@xlink:href');
 				$this->cat_op_values[mb_strtolower($op_type)]['get']['dflt'] = html_entity_decode($this->cat_op_values[mb_strtolower($op_type)]['get']['dflt'][0]);
@@ -269,8 +269,8 @@ class csw{
 	public function createCatObjFromDB($cat_id)
 	{
 		$sql = "select * from cat where cat_id = $1";
-		$v = array($cat_id);
-		$t = array('i');
+		$v = [$cat_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
 			$this->cat_id = $row['cat_id'];
@@ -283,8 +283,8 @@ class csw{
 
 			//Get op values
 			$sql = "select * from cat_op_conf where fk_cat_id=$1";
-			$v = array($cat_id);
-			$t = array('i');
+			$v = [$cat_id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			while($subrow = db_fetch_array($res)){
 				$this->cat_op_values[$subrow['param_type']][$subrow['param_name']]=$subrow['param_value'];
@@ -313,14 +313,9 @@ class csw{
         $sql .= "cat_getcapabilities_doc, cat_owner, cat_timestamp) ";
     	$sql .= "VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)";
     	
-		$v = array($this->cat_version,$this->cat_title,$this->cat_abstract,
-			$this->cat_upload_url,$this->fees,$this->accessconstraints,$this->providername,$this->providersite,
-			$this->contactperson, $this->contactposition, $this->contactvoicetelephone,$this->contactfacsimiletelephone,$this->delivery,
-			$this->city,$this->address,$this->postcode,$this->country,$this->contactelectronicmailaddress,
-			$admin->char_encode($this->cat_getcapabilities_doc),
-			$_SESSION['mb_user_id'],strtotime("now"));
+		$v = [$this->cat_version, $this->cat_title, $this->cat_abstract, $this->cat_upload_url, $this->fees, $this->accessconstraints, $this->providername, $this->providersite, $this->contactperson, $this->contactposition, $this->contactvoicetelephone, $this->contactfacsimiletelephone, $this->delivery, $this->city, $this->address, $this->postcode, $this->country, $this->contactelectronicmailaddress, $admin->char_encode($this->cat_getcapabilities_doc), $_SESSION['mb_user_id'], strtotime("now")];
 			
-		$t = array('s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','i','i');
+		$t = ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 'i', 'i'];
 		
 		$res = db_prep_query($sql,$v,$t);
 		if(!$res){
@@ -332,8 +327,8 @@ class csw{
 		//GUI_CAT 
 		$sql ="INSERT INTO gui_cat (fkey_gui_id, fkey_cat_id) ";
 		$sql .= "VALUES($1,$2)";
-		$v = array($gui,$cat_insert_id);
-		$t = array('s','i');
+		$v = [$gui, $cat_insert_id];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if(!$res){
 			db_rollback();	
@@ -357,8 +352,8 @@ class csw{
 					//Store values
 					$sql = " INSERT INTO cat_op_conf(fk_cat_id, param_type, param_name, param_value) " ;
 	    			$sql .= " VALUES ($1, $2, $3, $4)";
-	    			$v = array($cat_insert_id,$op_category,$op_type_value,$value);
-					$t = array('i','s','s','s');
+	    			$v = [$cat_insert_id, $op_category, $op_type_value, $value];
+					$t = ['i', 's', 's', 's'];
 					$res = db_prep_query($sql,$v,$t);
 					if(!$res){
 						db_rollback();	
@@ -391,7 +386,7 @@ class csw{
 	 * @return unknown_type
 	 */
 	function stripEndlineAndCarriageReturn($string) {
-	  	return preg_replace("/\n/", "", preg_replace("/\r/", " ", $string));
+	  	return preg_replace("/\n/", "", preg_replace("/\r/", " ", (string) $string));
 	}
 	
 

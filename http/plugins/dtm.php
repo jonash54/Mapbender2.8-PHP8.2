@@ -6,7 +6,7 @@
 # 2020-02-03
 #
 
-require_once dirname(__FILE__)."/../../conf/altitudeProfile.conf";
+require_once __DIR__."/../../conf/altitudeProfile.conf";
 
 # Use constants from configuration file
 $imageFile = ALTITUDE_PROFILE_DTM_IMAGE_FILE;
@@ -19,7 +19,7 @@ $height_pix = ALTITUDE_PROFILE_DTM_IMAGE_FILE_HEIGHT;
 
 # Use frontend user input from POST
 $json_unsafe = $_POST['xyz'];
-$array = json_decode($json_unsafe);
+$array = json_decode((string) $json_unsafe);
 
 $width_cor = $right - $left;
 $height_cor = $top - $bottom;

@@ -18,13 +18,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #Script which is included by a typo3 script to register the users
-	require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-	require_once(dirname(__FILE__)."/../classes/class_administration.php");
+	require_once(__DIR__."/../../core/globalSettings.php");
+	require_once(__DIR__."/../classes/class_administration.php");
 	//alter handling of script to use the mapbenders user class
 	/*
 	 * begin of refactoring
 	 */
-	require_once(dirname(__FILE__)."/../classes/class_user.php");
+	require_once(__DIR__."/../classes/class_user.php");
 	if (defined("PORTAL_ADMIN_USER_ID") && PORTAL_ADMIN_USER_ID != "" ) {
 		$mb_user_owner = PORTAL_ADMIN_USER_ID;
 	} else {
@@ -47,21 +47,21 @@
 	//build user object from information in the current session
 	$user = new User(); //if no id is given, object will be instantiated from current session
 	if ($user->isPublic() == false) {
-		$variableMapping = array(
-				//"mb_user_name" => "name",
-				"mb_user_description" => "description",
-				"mb_user_email" => "email",
-				"mb_user_phone" => "phone",
-				"mb_user_organisation_name" => "organization",
-				"mb_user_position_name" => "position",
-				"mb_user_city" => "city",
-				"mb_user_postal_code" => "postalCode",
-				//"Textsize" => "textSize",
-				//"Glossar" => "wantsGlossar",
-				//"mb_user_spatial_suggest" => "wantsSpatialSuggest",
-				"mb_user_allow_survey" => "allowsSurvey",
-				"mb_user_newsletter" => "wantsNewsletter"
-		);
+		$variableMapping = [
+      //"mb_user_name" => "name",
+      "mb_user_description" => "description",
+      "mb_user_email" => "email",
+      "mb_user_phone" => "phone",
+      "mb_user_organisation_name" => "organization",
+      "mb_user_position_name" => "position",
+      "mb_user_city" => "city",
+      "mb_user_postal_code" => "postalCode",
+      //"Textsize" => "textSize",
+      //"Glossar" => "wantsGlossar",
+      //"mb_user_spatial_suggest" => "wantsSpatialSuggest",
+      "mb_user_allow_survey" => "allowsSurvey",
+      "mb_user_newsletter" => "wantsNewsletter",
+  ];
 		foreach ($variableMapping as $key => $value) {
 			if (isset(${$key}) && ${$key} != '') {
 				$user->{$value} = ${$key};

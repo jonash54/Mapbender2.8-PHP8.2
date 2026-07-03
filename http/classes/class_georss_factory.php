@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_rss_factory.php";
-require_once dirname(__FILE__) . "/../classes/class_georss.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_rss_factory.php";
+require_once __DIR__ . "/../classes/class_georss.php";
 
 class GeoRssFactory extends RssFactory {
 

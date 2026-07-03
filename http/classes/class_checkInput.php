@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/mapbender.conf");
 
 class checkInput{
-	var $v;
+	public $v;
         
 	function __construct($q,$v,$t){
 		if(is_array($v) == false){
-			$v = array($v);
+			$v = [$v];
 		}
 		if(is_array($t) == false){
-			$t = array($t);
+			$t = [$t];
 		}
 		if(count($v) != count($t)){
 			$e = new mb_exception("array params and array types have a different count  in ".$_SERVER['SCRIPT_FILENAME'].": Sql: ".$q);
@@ -41,8 +41,8 @@ class checkInput{
 					$v[$i] = db_escape_string($v[$i]);
 				}
 				else if($t[$i] == 'i'){
-					if(preg_match("/w/",$v[$i])){
-						$e = new mb_exception($_SERVER['SCRIPT_FILENAME'].": Unable to parse integer in: ".$q." with: param ".$i.",".$v[i]);
+					if(preg_match("/w/",(string) $v[$i])){
+						$e = new mb_exception($_SERVER['SCRIPT_FILENAME'].": Unable to parse integer in: ".$q." with: param ".$i.",".$v["I"]);
 						die("wrong data type in sql:".$q);
 					}					
 				}

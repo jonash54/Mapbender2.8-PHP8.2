@@ -5,8 +5,8 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $e = new mb_notice("locale: " . Mapbender::session()->get("mb_locale") . "; lang: " . Mapbender::session()->get("mb_lang"));
 $e = new mb_notice(setlocale(LC_ALL, Mapbender::session()->get("mb_locale")));
@@ -14,7 +14,7 @@ $e = new mb_notice(setlocale(LC_ALL, Mapbender::session()->get("mb_locale")));
 //
 // Messages
 //
-$msg_obj = array();
+$msg_obj = [];
 $msg_obj["messageDescriptionPolygon"] = _mb("polygon");
 $msg_obj["messageDescriptionLine"] = _mb("line");
 $msg_obj["messageDescriptionPoint"] = _mb("point");

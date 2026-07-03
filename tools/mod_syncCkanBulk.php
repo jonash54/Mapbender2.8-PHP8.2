@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_syncCkan.php");
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_syncCkan.php");
 /*
  * Sync metadata of each coupled organization ;-) - some things copied from https://github.com/mrmap-community/Mapbender2.8/blob/master/http/php/syncCkanRoot.php
  */
@@ -14,7 +14,7 @@ $connector = new Connector();
 $url = "http://localhost/mapbender/php/mod_showOpenDataOrganizations.php?showOnlyDatasetMetadata=false";
 
 $openDataOrgsJson = $connector->load($url);
-$openDataOrgs = json_decode($openDataOrgsJson);
+$openDataOrgs = json_decode((string) $openDataOrgsJson);
 $numberPackages = 0;
 $countOrgas = 0;
 foreach($openDataOrgs as $orga) {
@@ -32,8 +32,8 @@ function syncSingleOrganizationById( $orgaId ){
     $compareTimestamps = true;
     //get first user which may sync the requested department
     $sql = "SELECT fkey_mb_user_id FROM mb_user_mb_group WHERE fkey_mb_group_id = $1 AND mb_user_mb_group_type IN (2,3) ORDER BY mb_user_mb_group_type DESC LIMIT 1";
-    $v = array($orgaId);
-    $t = array('i');
+    $v = [$orgaId];
+    $t = ['i'];
     $res = db_prep_query($sql, $v, $t);
     if (!$res || is_null($res) || empty($res)) {        
         $resultObject->error->message = 'No user for publishing department data found!';
@@ -51,7 +51,7 @@ function syncSingleOrganizationById( $orgaId ){
             //logMessages($syncListJson);
             //$syncDepartmentId = (string)$syncDepartmentId;
             $syncCkanClass->syncOrgaId = $orgaId;
-            $syncList = json_decode($syncListJson);
+            $syncList = json_decode((string) $syncListJson);
             if ($syncList->success = true) {
                 foreach ($syncList->result->geoportal_organization as $orga) {
                     //try to sync single orga - the class has already set the syncOrgaId if wished!
@@ -59,7 +59,7 @@ function syncSingleOrganizationById( $orgaId ){
                         //overwrite result with result from sync process
                         //$syncList = json_decode($syncCkanClass->syncSingleOrga(json_encode($orga)));
                         // TODO activate later!
-                        $syncList = json_decode($syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
+                        $syncList = json_decode((string) $syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
                     }
                 }
             }

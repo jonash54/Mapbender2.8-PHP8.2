@@ -16,10 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../classes/class_kml_ows.php");
-require_once(dirname(__FILE__)."/../classes/class_geojson_style.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__ . "/../classes/class_kml_ows.php");
+require_once(__DIR__."/../classes/class_geojson_style.php");
 
 //FIXME: what about projections?
 //header("Content-Type: text/x-json");
@@ -34,7 +34,7 @@ $con = new connector();
 $content = $con->load($url);
 
 try {
-    if(preg_match('/.kml$/', $url)) {
+    if(preg_match('/.kml$/', (string) $url)) {
         header("Content-Type: text/plain");
         if($kml->parseKml($content)){
             $geojson  =  $kml->createGeoJSON();
@@ -43,14 +43,14 @@ try {
             echo("{}");
         }
     }
-    if(preg_match('/.(json|geojson)$/', $url)) {
+    if(preg_match('/.(json|geojson)$/', (string) $url)) {
 	//set dummy style attributes if not exits!!!
 	$jsonStyle = new geojson_style();
 	$content = $jsonStyle->addDefaultStyles($content);
         header("Content-Type: text/plain");
         echo $content;
     }
-    if(preg_match('/.(xml|gpx)$/', $url)) {
+    if(preg_match('/.(xml|gpx)$/', (string) $url)) {
         header("Content-Type: text/plain");
         echo $content;
     }

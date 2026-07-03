@@ -18,7 +18,7 @@
 ?>
 function mod_home_init(){
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 echo "var url = '".str_replace('login.php', 'home.php', LOGIN)."';";
 //echo "var name = '".urlencode(Mapbender::session()->get("mb_user_name"))."';";
 //echo "var pw = '".Mapbender::session()->get("mb_user_password")."';";

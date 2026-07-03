@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $e = new mb_notice("locale: " . Mapbender::session()->get("mb_locale") . "; lang: " . Mapbender::session()->get("mb_lang"));
 $e = new mb_notice(setlocale(LC_ALL, Mapbender::session()->get("mb_locale")));
@@ -26,7 +26,7 @@ $e = new mb_notice(setlocale(LC_ALL, Mapbender::session()->get("mb_locale")));
 //
 // Messages
 //
-$msg_obj = array();
+$msg_obj = [];
 $msg_obj["srsNotSupported"] = _mb("The following WMS do not support the current SRS");
 
 $json = new Mapbender_JSON();

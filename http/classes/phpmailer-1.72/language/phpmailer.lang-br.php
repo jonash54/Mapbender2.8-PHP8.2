@@ -5,7 +5,7 @@
  * By Paulo Henrique Garcia - paulo@controllerweb.com.br
  */
 
-$PHPMAILER_LANG = array();
+$PHPMAILER_LANG = [];
 $PHPMAILER_LANG["provide_address"] = 'Você deve fornecer pelo menos um endereço de destinatário de email.';
 $PHPMAILER_LANG["mailer_not_supported"] = ' mailer não suportado.';
 $PHPMAILER_LANG["execute"] = 'Não foi possível executar: ';

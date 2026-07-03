@@ -1,17 +1,17 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";//already includes iso19139!
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once dirname(__FILE__) . "/../classes/class_wfs.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
-require_once dirname(__FILE__) . "/../classes/class_customCategory.php";
-require_once dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";//already includes iso19139!
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../classes/class_wfs.php";
+require_once __DIR__ . "/../classes/class_administration.php";
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
+require_once __DIR__ . "/../classes/class_customCategory.php";
+require_once __DIR__ . "/../../tools/wms_extent/extent_service.conf";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -21,7 +21,7 @@ function abort ($message) {
 
 function DOMNodeListObjectValuesToArray($domNodeList) {
 	$iterator = 0;
-	$array = array();
+	$array = [];
 	foreach ($domNodeList as $item) {
     		$array[$iterator] = $item->nodeValue; // this is a DOMNode instance
     		// you might want to have the textContent of them like this
@@ -78,14 +78,14 @@ function getFeaturetype ($featuretypeId = null) {
 
 //NOTE: independend
 function extractPolygonArray($domXpath, $path) {
-	$polygonalExtentExterior = array();
+	$polygonalExtentExterior = [];
 	if ($domXpath->query($path.'/gml:Polygon/gml:exterior/gml:LinearRing/gml:posList')) {
 		//read posList
 		$exteriorRingPoints = $domXpath->query($path.'/gml:Polygon/gml:exterior/gml:LinearRing/gml:posList');
 		$exteriorRingPoints = DOMNodeListObjectValuesToArray($exteriorRingPoints);
 		if (count($exteriorRingPoints) > 0) {
 			//poslist is only space separated
-			$exteriorRingPointsArray = explode(' ',$exteriorRingPoints[0]);
+			$exteriorRingPointsArray = explode(' ',(string) $exteriorRingPoints[0]);
 			for ($i = 0; $i <= count($exteriorRingPointsArray)/2-1; $i++) {
 				$polygonalExtentExterior[$i]['x'] = $exteriorRingPointsArray[2*$i];
 				$polygonalExtentExterior[$i]['y'] = $exteriorRingPointsArray[(2*$i)+1];
@@ -113,7 +113,7 @@ function extractPolygonArray($domXpath, $path) {
 function gml2wkt($gml) {
 	//function to create wkt from given gml multipolygon
 	//DOM
-	$polygonalExtentExterior = array();
+	$polygonalExtentExterior = [];
 	$gmlObject = new DOMDocument();
 	libxml_use_internal_errors(true);
 	try {
@@ -139,7 +139,7 @@ function gml2wkt($gml) {
 		if ($MultiSurface->length == 1) { //test for DOM!
 			$crs = $xpath->query('/gml:MultiSurface/@srsName');
 			$crsArray = DOMNodeListObjectValuesToArray($crs);
-			$crsId = end(explode(":",$crsArray[0]));
+			$crsId = end(explode(":",(string) $crsArray[0]));
 			//count surfaceMembers
 			$numberOfSurfaces = count(DOMNodeListObjectValuesToArray($xpath->query('/gml:MultiSurface/gml:surfaceMember')));
 			for ($k = 0; $k < $numberOfSurfaces; $k++) {
@@ -150,7 +150,7 @@ function gml2wkt($gml) {
 		}
 		$crs = $xpath->query('/gml:Polygon/@srsName');
 		$crsArray = DOMNodeListObjectValuesToArray($crs);
-		$crsId = end(explode(":",$crsArray[0]));
+		$crsId = end(explode(":",(string) $crsArray[0]));
 		if (!isset($crsId) || $crsId =="" || $crsId == NULL) {
 			//set default to lonlat wgs84
 			$crsId = "4326";
@@ -166,7 +166,7 @@ switch ($ajaxResponse->getMethod()) {
         $customCategory = new CustomCategory();
         $customCategoriesFromDb = $customCategory->readFromDb($idFilter = false, $languageCode = "de", $showHidden = false, $outputFormat= "assocArray", $originIdFilter = false);
         $result = $customCategory->buildStructure($customCategoriesFromDb);
-        $resultObj = array();
+        $resultObj = [];
         $resultObj["data"] = $result;
         $ajaxResponse->setResult($resultObj);
         $ajaxResponse->setSuccess(true);
@@ -181,21 +181,12 @@ ON wms.wms_id = m.fkey_wms_id
 WHERE wms_id IN ($wmsList);
 SQL;
 		$res = db_query($sql);
-		$resultObj = array(
-			"header" => array(
-				_mb("WMS ID"),
-				_mb("title"),
-				_mb("last change"),
-				_mb("creation"),
-				_mb("version"),
-				_mb("status"),
-				_mb("wms id")
-			),
-			"data" => array()
-		);
+		$resultObj = ["header" => [_mb("WMS ID"), _mb("title"), _mb("last change"), _mb("creation"), _mb("version"), _mb("status"), _mb("wms id")], "data" => []];
 		while ($row = db_fetch_row($res)) {
 			// convert NULL to '', NULL values cause datatables to crash
-			$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+			$walk = array_walk($row, function (&$s) {
+       $s = strval($s);
+   });
 			$resultObj["data"][]= $row;
 		}
 		$ajaxResponse->setResult($resultObj);
@@ -209,18 +200,12 @@ SELECT wfs.wfs_id, wfs.wfs_title, wfs.wfs_timestamp, wfs_version
 FROM wfs WHERE wfs_id IN ($wfsList);
 SQL;
 		$res = db_query($sql);
-		$resultObj = array(
-			"header" => array(
-				"WFS ID",
-				"Titel",
-				"Timestamp",
-				"Version"
-			), 
-			"data" => array()
-		);
+		$resultObj = ["header" => ["WFS ID", "Titel", "Timestamp", "Version"], "data" => []];
 		while ($row = db_fetch_row($res)) {
 			// convert NULL to '', NULL values cause datatables to crash
-			$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+			$walk = array_walk($row, function (&$s) {
+       $s = strval($s);
+   });
 			$resultObj["data"][]= $row;
 		}
 		$ajaxResponse->setResult($resultObj);
@@ -248,36 +233,9 @@ SQL;
 		$wms = new wms();
 		$wms->createObjFromDBNoGui($wmsId);//here the owsproxyurls will be read out - to make previews with proxy urls
 
-		$fields = array(
-			"wms_id",
-			"wms_abstract",
-			"wms_title",
-		    "wms_alternate_title",
-			"fees",
-			"accessconstraints",
-			"contactperson",
-			"contactposition",
-			"contactvoicetelephone",
-			"contactfacsimiletelephone",
-			"contactorganization",
-			"address",
-			"city",
-			"stateorprovince",
-			"postcode",
-			"country",
-			"contactelectronicmailaddress",
-			"wms_timestamp",
-			"wms_timestamp_create",
-			"wms_network_access",
-			"wms_max_imagesize",
-			"fkey_mb_group_id",
-			"inspire_annual_requests",
-			"wms_license_source_note",
-			"wms_bequeath_licence_info",
-			"wms_bequeath_contact_info"
-		);
+		$fields = ["wms_id", "wms_abstract", "wms_title", "wms_alternate_title", "fees", "accessconstraints", "contactperson", "contactposition", "contactvoicetelephone", "contactfacsimiletelephone", "contactorganization", "address", "city", "stateorprovince", "postcode", "country", "contactelectronicmailaddress", "wms_timestamp", "wms_timestamp_create", "wms_network_access", "wms_max_imagesize", "fkey_mb_group_id", "inspire_annual_requests", "wms_license_source_note", "wms_bequeath_licence_info", "wms_bequeath_contact_info"];
 
-		$resultObj = array();
+		$resultObj = [];
 		foreach ($fields as $field) {
 			if ($field == "wms_timestamp" || $field == "wms_timestamp_create") {
 				if ($wms->$field != "") {
@@ -292,7 +250,7 @@ SQL;
 			}
 		}
 		// layer searchable
-		$resultObj["layer_searchable"] = array();
+		$resultObj["layer_searchable"] = [];
 		foreach ($wms->objLayer as $layer) {
 			if (intval($layer->layer_searchable) === 1) {
 				$resultObj["layer_searchable"][] = intval($layer->layer_uid);
@@ -307,7 +265,7 @@ WHERE keyword_id = fkey_keyword_id AND fkey_layer_id IN (
 ) ORDER BY keyword
 SQL;
 		$keywordRes = db_query($keywordSql);
-		$keywords = array();
+		$keywords = [];
 		while ($keywordRow = db_fetch_assoc($keywordRes)) {
 			$keywords[]= $keywordRow["keyword"];
 		}
@@ -342,10 +300,10 @@ SQL;
 			$sql = <<<SQL
 SELECT fkey_mb_group_id, mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM (SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 AND mb_user_mb_group_type = 2) AS a LEFT JOIN mb_group ON a.fkey_mb_group_id = mb_group.mb_group_id
 SQL;
-			$v = array($userId);
-			$t = array('i');
+			$v = [$userId];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["fkey_mb_group_id"] = $row["fkey_mb_group_id"];
@@ -362,10 +320,10 @@ SQL;
 			$sql = <<<SQL
 SELECT mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM mb_group WHERE mb_group_id = $1
 SQL;
-			$v = array($resultObj["fkey_mb_group_id"]);
-			$t = array('i');
+			$v = [$resultObj["fkey_mb_group_id"]];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["mb_group_title"] = $row["mb_group_title"];
@@ -396,7 +354,7 @@ wfs_timestamp, wfs_timestamp_create, wfs_network_access, fkey_mb_group_id, wfs_m
 FROM wfs WHERE wfs_id = $wfsId;
 SQL;
 		$res = db_query($sql);
-		$resultObj = array();
+		$resultObj = [];
 		$row = db_fetch_assoc($res);
 		$resultObj['wfs_id'] = $row['wfs_id'];
 		$resultObj['summary'] = $row['wfs_abstract'];
@@ -430,7 +388,7 @@ WHERE keyword_id = fkey_keyword_id AND fkey_featuretype_id IN (
 ) ORDER BY keyword
 SQL;
 		$keywordRes = db_query($keywordSql);
-		$keywords = array();
+		$keywords = [];
 		while ($keywordRow = db_fetch_assoc($keywordRes)) {
 			$keywords[]= $keywordRow["keyword"];
 		}
@@ -460,10 +418,10 @@ SQL;
 			$sql = <<<SQL
 SELECT fkey_mb_group_id, mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM (SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 AND mb_user_mb_group_type = 2) AS a LEFT JOIN mb_group ON a.fkey_mb_group_id = mb_group.mb_group_id
 SQL;
-			$v = array($userId);
-			$t = array('i');
+			$v = [$userId];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["fkey_mb_group_id"] = $row["fkey_mb_group_id"];
@@ -480,10 +438,10 @@ SQL;
 			$sql = <<<SQL
 SELECT mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM mb_group WHERE mb_group_id = $1
 SQL;
-			$v = array($resultObj["fkey_mb_group_id"]);
-			$t = array('i');
+			$v = [$resultObj["fkey_mb_group_id"]];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["mb_group_title"] = $row["mb_group_title"];
@@ -528,7 +486,7 @@ SQL;
 			break;
 		}
 		$res = db_query($sql);
-		$resultObj = array();
+		$resultObj = [];
 		while ($row = db_fetch_assoc($res)) {
 			foreach ($row as $key => $value) {
 				$resultObj[$key] = $value;
@@ -552,7 +510,7 @@ SQL;
 		}
 		$sql = "SELECT keyword FROM keyword, ".$tablename."_keyword WHERE keyword_id = fkey_keyword_id AND fkey_".$identierName."_id = ".$resourceId;
 		$res = db_query($sql);
-		$resultObj[$identierName."_keyword"] = array();
+		$resultObj[$identierName."_keyword"] = [];
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj[$identierName."_keyword"][]= $row["keyword"];
 		}
@@ -569,12 +527,12 @@ SQL;
 		$sql .= " mb_metadata.metadata_id = relation.fkey_metadata_id WHERE relation.relation_type IN"; 
 		$sql .= " ('capabilities','external','metador','upload', 'internal') ORDER BY metadata_id DESC";
 		$res = db_query($sql);
-		$resultObj["md_metadata"]->metadata_id = array();
-		$resultObj["md_metadata"]->uuid = array();
-		$resultObj["md_metadata"]->origin = array();
-		$resultObj["md_metadata"]->linktype = array();
-		$resultObj["md_metadata"]->link = array();
-		$resultObj["md_metadata"]->internal = array();
+		$resultObj["md_metadata"]->metadata_id = [];
+		$resultObj["md_metadata"]->uuid = [];
+		$resultObj["md_metadata"]->origin = [];
+		$resultObj["md_metadata"]->linktype = [];
+		$resultObj["md_metadata"]->link = [];
+		$resultObj["md_metadata"]->internal = [];
 		$i = 0;
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj["md_metadata"]->metadata_id[$i]= $row["metadata_id"];
@@ -610,7 +568,7 @@ FROM layer WHERE fkey_wms_id = $wmsId ORDER BY layer_pos;
 
 SQL;
 		$res = db_query($sql);
-		$rows = array();
+		$rows = [];
 		while ($row = db_fetch_assoc($res)) {
 			$rows[] = $row;
 		}
@@ -638,7 +596,7 @@ SQL;
 		    //debug
 		    //print json_encode($adjacense_array[$parent_id])."\n";
 		    //get all unprocessed entries that has the same parent
-		    $reducedArray = array();
+		    $reducedArray = [];
 		    foreach ($adjacense_array as $entry) {
 		        if ($entry['parent'] == $parent_id && $entry['pos'] > $adjacense_index) {
 		            $reducedArray[] = $entry;
@@ -676,7 +634,7 @@ SQL;
 		 */
 		function built_mptt_elements_recursive($adjacense_index, $adjacense_array, $left, &$mptt_array){
 		    while ($adjacense_index < count($adjacense_array)) {
-		        $mptt_entry = array();
+		        $mptt_entry = [];
 		        //print "Index: " . $adjacense_index . " - Title: " . $adjacense_array[$adjacense_index]['title'] . "\n";
 		        //initialize default values
 		        $mptt_array[$adjacense_index]['title'] = $adjacense_array[$adjacense_index]['title'];
@@ -725,7 +683,7 @@ SQL;
 		function adjacense2mptt($adjacense_array) {
 		    $left = 1;
 		    $adjacense_index = 0;
-		    $mptt_array = array();
+		    $mptt_array = [];
 		    built_mptt_elements_recursive($adjacense_index, $adjacense_array, $left, $mptt_array);
 		    $mptt_array[0]['rgt'] = count($mptt_array) * 2;
 		    return $mptt_array;
@@ -741,26 +699,11 @@ SQL;
 			} else {
 				$inspireCats = 0;
 			}
-			return array(
-				"left" => $left,
-				"right" => $right,
-				"parent" => $row["layer_parent"] !== "" ? intval($row["layer_parent"]) : null,
-				"pos" => intval($row["layer_pos"]),
-				"attr" => array (
-					"layer_id" => intval($row["layer_id"]),
-					"layer_name" => $row["layer_name"],
-					"layer_title" => $row["layer_title"],
-					"layer_abstract" => $row["layer_abstract"],
-					"layer_searchable" => intval($row["layer_searchable"]),
-					"layer_coupling" => intval($row["count_coupling"]),
-					"inspire_download" => intval($row["inspire_download"]),
-					"inspire_cats" => intval($inspireCats)
-				)
-			);
+			return ["left" => $left, "right" => $right, "parent" => $row["layer_parent"] !== "" ? intval($row["layer_parent"]) : null, "pos" => intval($row["layer_pos"]), "attr" => ["layer_id" => intval($row["layer_id"]), "layer_name" => $row["layer_name"], "layer_title" => $row["layer_title"], "layer_abstract" => $row["layer_abstract"], "layer_searchable" => intval($row["layer_searchable"]), "layer_coupling" => intval($row["count_coupling"]), "inspire_download" => intval($row["inspire_download"]), "inspire_cats" => intval($inspireCats)]];
 		}
 
 		function addSubTree ($rows, $i, $left) {
-			$nodeArray = array();
+			$nodeArray = [];
 			$addNewNode = true;
 			for ($j = $i; $j < count($rows); $j++) {
 				$row = $rows[$j];
@@ -804,8 +747,8 @@ SQL;
 		
 		//alternative approach
 		//$e = new mb_exception("plugins/mb_metadata_server.php: count nodeArray: " . count($nodeArray));
-		$adjacenseArray = array();
-		$entry = array();
+		$adjacenseArray = [];
+		$entry = [];
 		foreach ($nodeArray as $node) {
 		    $entry['pos'] =  $node['pos'];
 		    $entry['parent'] = $node['parent'];
@@ -822,9 +765,7 @@ SQL;
 		    $nodeArray[$j]['right'] = $mpttArray[$j]['rgt'];
 		}
 		//$e = new mb_exception("plugins/mb_metadata_server.php: nodeArray: " . json_encode($nodeArray));
-		$resultObj = array(
-			"nestedSets" => $nodeArray
-			);
+		$resultObj = ["nestedSets" => $nodeArray];
 		$ajaxResponse->setResult($resultObj);
 		$ajaxResponse->setSuccess(true);
 		break;
@@ -835,32 +776,23 @@ SELECT featuretype_id, featuretype_name, f_count_featuretype_couplings(featurety
 FROM wfs_featuretype WHERE fkey_wfs_id = $wfsId ORDER BY featuretype_id;
 SQL;
 		$res = db_query($sql);
-		$rows = array();
+		$rows = [];
 		while ($row = db_fetch_assoc($res)) {
 			$rows[] = $row;
 		}
 		$left = 1;
 		function createNode ($left, $right, $row) {
-			return array(
-				"left" => $left,
-				"right" => $right,
-				#"parent" => $row["featuretype_parent"] !== "" ? intval($row["featuretype_parent"]) : null,
-				#"pos" => intval($row["featuretype_pos"]),
-				"attr" => array (
-					"featuretype_id" => intval($row["featuretype_id"]),
-					"featuretype_name" => $row["featuretype_name"],
-					"featuretype_title" => $row["featuretype_title"],
-					"featuretype_abstract" => $row["featuretype_abstract"],
-					"featuretype_searchable" => intval($row["featuretype_searchable"]),
-					"inspire_download" => intval($row["inspire_download"]),
-					"featuretype_coupling" => intval($row["count_coupling"]),
-					"inspire_cats" => intval($inspireCats)
-				)
-			);
+			return [
+       "left" => $left,
+       "right" => $right,
+       #"parent" => $row["featuretype_parent"] !== "" ? intval($row["featuretype_parent"]) : null,
+       #"pos" => intval($row["featuretype_pos"]),
+       "attr" => ["featuretype_id" => intval($row["featuretype_id"]), "featuretype_name" => $row["featuretype_name"], "featuretype_title" => $row["featuretype_title"], "featuretype_abstract" => $row["featuretype_abstract"], "featuretype_searchable" => intval($row["featuretype_searchable"]), "inspire_download" => intval($row["inspire_download"]), "featuretype_coupling" => intval($row["count_coupling"]), "inspire_cats" => intval($inspireCats)],
+   ];
 		}
 
 		function addSubTree ($rows, $i, $left) {
-			$nodeArray = array();
+			$nodeArray = [];
 			$addNewNode = true;
 			for ($j = $i; $j < count($rows); $j++) {
 				$row = $rows[$j];
@@ -882,9 +814,7 @@ SQL;
 			return $nodeArray;
 		}
 		$nodeArray = addSubTree($rows, 0, 1);
-		$resultObj = array(
-			"nestedSets" => $nodeArray
-		);
+		$resultObj = ["nestedSets" => $nodeArray];
 		$ajaxResponse->setResult($resultObj);
 		$ajaxResponse->setSuccess(true);	
 		break;
@@ -904,32 +834,7 @@ SQL;
 				getWms($wmsId);
 				$wms = new wms();
 				$wms->createObjFromDBNoGui($wmsId,false);//here the original urls will be used - cause the object will used to update the wms table
-				$columns = array(
-					"wms_abstract",
-					"wms_title",
-				    "wms_alternate_title",
-					"fees",
-					"accessconstraints",
-					"contactperson",
-					"contactposition",
-					"contactvoicetelephone",
-					"contactfacsimiletelephone",
-					"contactorganization",
-					"address",
-					"city",
-					"stateorprovince",
-					"postcode",
-					"country",
-					"contactelectronicmailaddress",
-					"wms_termsofuse",
-					"wms_network_access",
-					"wms_max_imagesize",
-					"fkey_mb_group_id",
-					"inspire_annual_requests",
-					"wms_license_source_note",
-					"wms_bequeath_licence_info",
-					"wms_bequeath_contact_info"
-				);
+				$columns = ["wms_abstract", "wms_title", "wms_alternate_title", "fees", "accessconstraints", "contactperson", "contactposition", "contactvoicetelephone", "contactfacsimiletelephone", "contactorganization", "address", "city", "stateorprovince", "postcode", "country", "contactelectronicmailaddress", "wms_termsofuse", "wms_network_access", "wms_max_imagesize", "fkey_mb_group_id", "inspire_annual_requests", "wms_license_source_note", "wms_bequeath_licence_info", "wms_bequeath_contact_info"];
 				foreach ($columns as $c) {
 					if ($c == 'wms_termsofuse' && $data->wms->$c == "0") {
 						$value = null;
@@ -982,21 +887,13 @@ SQL;
 						$ajaxResponse->setMessage(_mb("Could not get layer with ID ".$layerId." from wms object by reference!"));
 						$ajaxResponse->send();
 					}
-					$columns = array(
-						"layer_abstract",
-						"layer_title",
-						"layer_keyword",
-						"inspire_download",
-						"layer_md_topic_category_id",
-						"layer_inspire_category_id",
-						"layer_custom_category_id"
-					);
+					$columns = ["layer_abstract", "layer_title", "layer_keyword", "inspire_download", "layer_md_topic_category_id", "layer_inspire_category_id", "layer_custom_category_id"];
 					//extract relevant information from json and fill them into the wms object // both are filled together!!
 					foreach ($columns as $c) {
 						$value = $data->layer->$c;
 						$e = new mb_notice("plugins/mb_metadata_server.php: layer entry for ".$c.": ".$data->layer->$c);
 						if ($c === "layer_keyword") {
-							$layer->$c = explode(",", $value);
+							$layer->$c = explode(",", (string) $value);
 							foreach ($layer->$c as &$val) {
 								$val = trim($val);
 							}
@@ -1006,7 +903,7 @@ SQL;
 							|| $c === "layer_custom_category_id"
 						) {
 							if (!is_array($value)) {
-								$layer->$c = array($value);
+								$layer->$c = [$value];
 							}
 							else {
 								$layer->$c = $value;
@@ -1027,7 +924,7 @@ SQL;
 					}
 				}
 				//array of checkboxes (integer values in database)
-				$checkboxes = array("wms_network_access","wms_bequeath_licence_info","wms_bequeath_contact_info");
+				$checkboxes = ["wms_network_access", "wms_bequeath_licence_info", "wms_bequeath_contact_info"];
 				foreach ($checkboxes as $checkbox) {
 					if ($wms->{$checkbox} == "on") {
 						$wms->{$checkbox} = intval('1');
@@ -1091,33 +988,7 @@ SQL;
 					$ajaxResponse->setMessage(_mb("Invalid WFS ID."));
 					$ajaxResponse->send();	
 				}
-				$columns = array(
-					"summary", 
-					"title", 
-				    "alternate_title",
-					"fees", 
-					"accessconstraints", 
-					"individualName", 
-					"positionName", 
-					"voice", 
-					"facsimile", 
-					"providerName", 
-					"deliveryPoint", 
-					"city", 
-					"administrativeArea", 
-					"postalCode", 
-					"country", 
-					"electronicMailAddress",
-					"wfs_termsofuse",
-					"timestamp",
-					"timestamp_create",
-					"wfs_network_access",
-					"wfs_max_features",
-					"fkey_mb_group_id",
-					"inspire_annual_requests",
-					"uuid",
-					"wfs_license_source_note"
-				);
+				$columns = ["summary", "title", "alternate_title", "fees", "accessconstraints", "individualName", "positionName", "voice", "facsimile", "providerName", "deliveryPoint", "city", "administrativeArea", "postalCode", "country", "electronicMailAddress", "wfs_termsofuse", "timestamp", "timestamp_create", "wfs_network_access", "wfs_max_features", "fkey_mb_group_id", "inspire_annual_requests", "uuid", "wfs_license_source_note"];
 				foreach ($columns as $c) {
 					if ($c == 'wfs_termsofuse' && $data->wfs->$c == "0") {
 						$value = null;
@@ -1160,20 +1031,12 @@ SQL;
 					try {
 						$featuretype = &$wfs->findFeatureTypeReferenceById($featuretypeId);
 					}
-					catch (Exception $e) {
+					catch (Exception) {
 						$ajaxResponse->setSuccess(false);
 						$ajaxResponse->setMessage(_mb("Could not get featuretype with ID ".$featuretypeId." from wfs object by reference!"));
 						$ajaxResponse->send();
 					}
-					$columns = array(
-						"summary", 
-						"title",
-						"featuretype_keyword",
-						"inspire_download",
-						"featuretype_md_topic_category_id",
-						"featuretype_inspire_category_id",
-						"featuretype_custom_category_id"
-					);			
+					$columns = ["summary", "title", "featuretype_keyword", "inspire_download", "featuretype_md_topic_category_id", "featuretype_inspire_category_id", "featuretype_custom_category_id"];			
 					//extract relevant information from json and fill them into the wfs object
 					foreach ($columns as $c) {
 						if ($c === "summary") {
@@ -1186,7 +1049,7 @@ SQL;
 							$value = $data->featuretype->$c;
 						}	
 						if ($c === "featuretype_keyword") {
-							$featuretype->$c = explode(",", $value);
+							$featuretype->$c = explode(",", (string) $value);
 							foreach ($featuretype->$c as &$val) {
 								$val = trim($val);
 							}
@@ -1196,7 +1059,7 @@ SQL;
 							|| $c === "featuretype_custom_category_id"
 						) {
 							if (!is_array($value)) {
-								$featuretype->$c = array($value);
+								$featuretype->$c = [$value];
 							}
 							else {
 								$featuretype->$c = $value;
@@ -1238,10 +1101,10 @@ SQL;
 		$sql = <<<SQL
 SELECT mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM mb_group WHERE mb_group_id = $1
 SQL;
-		$v = array($mbGroupId);
-		$t = array('i');
+		$v = [$mbGroupId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["fkey_mb_group_id"] = $mbGroupId;
@@ -1263,10 +1126,10 @@ SQL;
 		$sql = <<<SQL
 SELECT name, symbollink, description, descriptionlink, isopen, source_required FROM termsofuse WHERE termsofuse_id = $1
 SQL;
-		$v = array($termsofuseId);
-		$t = array('i');
+		$v = [$termsofuseId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["termsofuse_id"] = $termsofuseId;
@@ -1292,10 +1155,10 @@ SQL;
 		$sql = <<<SQL
 SELECT fkey_wms_id from layer where layer_id = $1
 SQL;
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["wms_id"]= $row['fkey_wms_id'];
@@ -1582,10 +1445,10 @@ SQL;
 				$sql = <<<SQL
 SELECT layerpart.*, wms.accessconstraints, wms.fees FROM (SELECT layer_title, fkey_wms_id, layer_abstract, minx as west, miny as south, maxx as east, maxy as north FROM layer INNER JOIN layer_epsg ON layer.layer_id = layer_epsg.fkey_layer_id WHERE layer_id = $1 AND epsg = 'EPSG:4326') as layerpart INNER JOIN wms ON layerpart.fkey_wms_id = wms.wms_id
 SQL;
-				$v = array($resourceId);
-				$t = array('i');
+				$v = [$resourceId];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
-				$row = array();
+				$row = [];
 				if ($res) {
 					$row = db_fetch_assoc($res);
 					$resultObj["title"]= $row['layer_title']; //serial
@@ -1600,10 +1463,10 @@ SQL;
 				$sql = <<<SQL
 SELECT fkey_termsofuse_id FROM wms_termsofuse WHERE fkey_wms_id = $1;
 SQL;
-				$v = array($row['fkey_wms_id']);
-				$t = array('i');
+				$v = [$row['fkey_wms_id']];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
-				$row = array();
+				$row = [];
 				if ($res) {
 					$row = db_fetch_assoc($res);
 					$resultObj["md_termsofuse"]= $row['fkey_termsofuse_id']; //serial
@@ -1616,18 +1479,18 @@ SQL;
 SELECT featuretype_title, featuretype_abstract, featuretype_latlon_bbox    
 FROM  wfs_featuretype WHERE featuretype_id = $1
 SQL;
-				$v = array($featuretypeId);
-				$t = array('i');
+				$v = [$featuretypeId];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
-				$row = array();
+				$row = [];
 				if ($res) {
 					$row = db_fetch_assoc($res);
 					$resultObj["title"]= $row['featuretype_title']; //serial
 					$resultObj["abstract"] = $row["featuretype_abstract"]; //char
 					if (isset($resultObj["featuretype_latlon_bbox"]) && $resultObj["featuretype_latlon_bbox"] != '') {	
-						$bbox = explode(',',$resultObj["featuretype_latlon_bbox"]);
+						$bbox = explode(',',(string) $resultObj["featuretype_latlon_bbox"]);
 					} else {
-						$bbox = array(-180,-90,180,90);
+						$bbox = [-180, -90, 180, 90];
 					}
 					$resultObj["west"] = $bbox[0]; //double
 					$resultObj["south"] = $bbox[1]; //double
@@ -1707,7 +1570,7 @@ SQL;
 			$mbMetadata->spatialResValue = $data->spatial_res_value;
 			$mbMetadata->inspireCharset = $data->inspire_charset;
 			$mbMetadata->updateFrequency = $data->update_frequency;
-			$mbMetadata->downloadLinks = array($data->downloadlink);
+			$mbMetadata->downloadLinks = [$data->downloadlink];
 			//$mbMetadata->polygonalExtentExterior = null; //this will delete existing polygons!
 			if (isset($data->inspire_whole_area) && $data->inspire_whole_area != "") {
 				$mbMetadata->inspireWholeArea = $data->inspire_whole_area;
@@ -1731,17 +1594,17 @@ SQL;
 			if (isset($data->md_md_topic_category_id)) {
 				$mbMetadata->isoCategories = $data->md_md_topic_category_id;
 			} else {
-				$mbMetadata->isoCategories = array();
+				$mbMetadata->isoCategories = [];
 			}
 			if (isset($data->md_inspire_category_id)) {
 				$mbMetadata->inspireCategories = $data->md_inspire_category_id;
 			} else {
-				$mbMetadata->inspireCategories = array();
+				$mbMetadata->inspireCategories = [];
 			}
 			if (isset($data->md_custom_category_id)) {
 				$mbMetadata->customCategories = $data->md_custom_category_id;
 			} else {
-				$mbMetadata->customCategories = array();
+				$mbMetadata->customCategories = [];
 			}
 			//use information from bbox!
 			if (isset($data->west)) {
@@ -1811,11 +1674,11 @@ SQL;
 	case "getOwnedMetadata" :
 		$user = new User(Mapbender::session()->get("mb_user_id"));
 		$sql = "SELECT metadata_id, title FROM mb_metadata WHERE fkey_mb_user_id = $1 ORDER BY metadata_id DESC";
-		$v = array($user->id);
-		$t = array('i');
+		$v = [$user->id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
-		$resultObj = array();
+		$row = [];
+		$resultObj = [];
 		$i = 0;
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj[$i]->metadataId = $row['metadata_id']; //integer
@@ -1828,11 +1691,11 @@ SQL;
 	case "getOwnedApplicationMetadata" :
 		$user = new User(Mapbender::session()->get("mb_user_id"));
 		$sql = "SELECT metadata_id, title FROM mb_metadata WHERE fkey_mb_user_id = $1 & type = 'application' ORDER BY metadata_id DESC";
-		$v = array($user->id);
-		$t = array('i');
+		$v = [$user->id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
-		$resultObj = array();
+		$row = [];
+		$resultObj = [];
 		$i = 0;
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj[$i]->metadataId = $row['metadata_id']; //integer
@@ -1971,7 +1834,7 @@ SQL;
 			$mbMetadata->updateFrequency = $data->update_frequency;
 		}
 		if (isset($data->update_frequency)) {
-			$mbMetadata->downloadLinks = array($data->downloadlink);
+			$mbMetadata->downloadLinks = [$data->downloadlink];
 		}
 		//new for keywords and classifications:
 		if (isset($data->keywords) && $data->keywords != "") {
@@ -2116,9 +1979,9 @@ SQL;
 			$sql = <<<SQL
 UPDATE mb_metadata SET bounding_geom = $2 WHERE metadata_id = $1
 SQL;
-			$v = array($metadataId, $wktPolygon);
+			$v = [$metadataId, $wktPolygon];
 			//$e = new mb_exception($metadataId);
-			$t = array('i','POLYGON');
+			$t = ['i', 'POLYGON'];
 			$res = db_prep_query($sql,$v,$t);
 			if (!$res) {
 				abort(_mb("Problem while storing geometry into database!"));
@@ -2146,10 +2009,10 @@ SQL;
 		if (defined('PREVIEW_DIR') && PREVIEW_DIR != '') {
 		    $new_name = $metadataId."_metadata_preview.jpg";
 		    // get the file informations
-		    $info = pathinfo($filename);
+		    $info = pathinfo((string) $filename);
 		    // get the extension of the file
 		    $ext = $info['extension'];
-		    $new_image = dirname(__FILE__)."/".PREVIEW_DIR."/".$new_name;
+		    $new_image = __DIR__."/".PREVIEW_DIR."/".$new_name;
 		    // get the ímage
 		    $image = $filename;
 		    //resize the image to 200px * 200px
@@ -2240,8 +2103,8 @@ SQL;
 		    $ajaxResponse->setSuccess(false);
 		} else {
 		    $sql = "UPDATE mb_metadata SET preview_image = '{localstorage}' WHERE metadata_id = $1";
-		    $v = array($metadataId);
-		    $t = array('i');
+		    $v = [$metadataId];
+		    $t = ['i'];
 		    $res = db_prep_query($sql,$v,$t);
 		    if (!$res) {
 		    	$ajaxResponse->setMessage("The preview image has been stored under ".$new_image.", but the database record could not be updated!");
@@ -2280,13 +2143,13 @@ SQL;
 		$metadataId = $ajaxResponse->getParameter("metadataId");
 		if (defined('PREVIEW_DIR') && PREVIEW_DIR != '') {
 		    $previewName = $metadataId."_metadata_preview.jpg";
-		    $previewPath =  dirname(__FILE__)."/".PREVIEW_DIR."/".$previewName;
+		    $previewPath =  __DIR__."/".PREVIEW_DIR."/".$previewName;
 		    if (file_exists($previewPath)) {
 		        unlink($previewPath);
 			//delete {localstorage} from mb_metadata.preview_image
 			$sql = "UPDATE mb_metadata SET preview_image = '' WHERE metadata_id = $1";
-			$v = array($metadataId);
-			$t = array('i');
+			$v = [$metadataId];
+			$t = ['i'];
 			db_prep_query($sql,$v,$t);
 			$ajaxResponse->setMessage("Preview for metadata with id ".$metadataId." successfully deleted!");
 		        $ajaxResponse->setSuccess(true);
@@ -2314,8 +2177,8 @@ SQL;
 		$sql = <<<SQL
 UPDATE mb_metadata SET bounding_geom = NULL WHERE metadata_id = $1
 SQL;
-		$v = array($metadataId);
-		$t = array('i');
+		$v = [$metadataId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			abort(_mb("Problem while deleting geometry from database!"));
@@ -2385,7 +2248,7 @@ SQL;
 			$mbMetadata->updateFrequency = $data->update_frequency;
 		}
 		if (isset($data->update_frequency)) {
-			$mbMetadata->downloadLinks = array($data->downloadlink);
+			$mbMetadata->downloadLinks = [$data->downloadlink];
 		}
 		//new for keywords and classifications:
 		if (isset($data->keywords) && $data->keywords != "") {
@@ -2527,17 +2390,17 @@ SQL;
 			if (isset($data->md_md_topic_category_id)) {
 				$mbMetadata->isoCategories = $data->md_md_topic_category_id;
 			} else {
-				$mbMetadata->isoCategories = array();
+				$mbMetadata->isoCategories = [];
 			}
 			if (isset($data->md_inspire_category_id)) {
 				$mbMetadata->inspireCategories = $data->md_inspire_category_id;
 			} else {
-				$mbMetadata->inspireCategories = array();
+				$mbMetadata->inspireCategories = [];
 			}
 			if (isset($data->md_custom_category_id)) {
 				$mbMetadata->customCategories = $data->md_custom_category_id;
 			} else {
-				$mbMetadata->customCategories = array();
+				$mbMetadata->customCategories = [];
 			}
 			//use information from bbox!
 			if (isset($data->west)) {

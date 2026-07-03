@@ -1,12 +1,12 @@
 <?php
 //http://localhost/mapbender_trunk/plugins/mb_downloadFeedClient.php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
 if (isset($_REQUEST['url']) & $_REQUEST['url'] != "") {
 	//validate
 	$testMatch = $_REQUEST["url"];
-	if (preg_match('#^(http|https):\/\/#i', $testMatch) && filter_var($testMatch, FILTER_VALIDATE_URL)) {
-			$testMatch = htmlspecialchars($testMatch, ENT_QUOTES);
+	if (preg_match('#^(http|https):\/\/#i', (string) $testMatch) && filter_var($testMatch, FILTER_VALIDATE_URL)) {
+			$testMatch = htmlspecialchars((string) $testMatch, ENT_QUOTES);
 			$url = urldecode($testMatch);
 	} else {
 		echo 'Parameter <b>url</b> is not a valid url.<br/>'; 
@@ -21,7 +21,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -194,7 +194,7 @@ select {max-width: 100%;}
             <img style="margin-top: -3px;" src="../img/misc/delete.png" onclick="$('#download_feed_url').val('');"/>
           </button>
         </span>
-        <input name="download_feed_url" id="download_feed_url" class="required form-control" type="text" <?php if (isset($url)) {echo " value=\"".htmlspecialchars($url)."\"";} else { echo " value=\"\"";}?>/>
+        <input name="download_feed_url" id="download_feed_url" class="required form-control" type="text" <?php if (isset($url)) {echo " value=\"".htmlspecialchars((string) $url)."\"";} else { echo " value=\"\"";}?>/>
 	<span class="input-group-btn">
           <button class="btn btn-primary" type="button" id="download_feed_button">
             <img style="margin-top: -3px;" src="../img/misc/refresh.png" />

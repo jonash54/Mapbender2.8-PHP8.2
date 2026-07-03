@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_js.php';
 
 echo "var mod_dependentDiv_target = '".$e_target[0]."';";

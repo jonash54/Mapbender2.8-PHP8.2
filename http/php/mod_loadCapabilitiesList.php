@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="loadWMSList";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -138,7 +138,7 @@ function load(){
 
 <?php
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 
@@ -146,8 +146,8 @@ $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 ###INSERT
 if(isset($wmsID) && isset($guiID_)){
 	$sql_pos = "SELECT MAX(gui_wms_position) AS my_gui_wms_position FROM gui_wms WHERE fkey_gui_id = $1";
-	$v = array($guiList);
-	$t = array('s');
+	$v = [$guiList];
+	$t = ['s'];
 	$res_pos = db_prep_query($sql_pos,$v,$t);
 	if(db_result($res_pos,0,"my_gui_wms_position") > -1){
 		$gui_wms_position = db_result($res_pos,0,"my_gui_wms_position") + 1;
@@ -157,24 +157,23 @@ if(isset($wmsID) && isset($guiID_)){
 	}
 
 	$sql = "SELECT * FROM gui_wms WHERE fkey_gui_id = $1 AND fkey_wms_id = $2";
-	$v = array($guiID_,$wmsID);
-	$t = array('s','i');
+	$v = [$guiID_, $wmsID];
+	$t = ['s', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){
 		$sql_ins = "INSERT INTO gui_wms (fkey_gui_id,fkey_wms_id,gui_wms_position,gui_wms_mapformat,";
 		$sql_ins .= "gui_wms_featureinfoformat,gui_wms_exceptionformat,gui_wms_epsg,gui_wms_visible,gui_wms_opacity,gui_wms_sldurl) ";
 		$sql_ins .= "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)";
-		$v = array($guiList,$wmsID,$gui_wms_position,$row["gui_wms_mapformat"],$row["gui_wms_featureinfoformat"],
-		$row["gui_wms_exceptionformat"],$row["gui_wms_epsg"],$row["gui_wms_visible"],$row["gui_wms_opacity"],$row["gui_wms_sldurl"]);
-		$t = array('s','i','i','s','s','s','s','i','i','s');
+		$v = [$guiList, $wmsID, $gui_wms_position, $row["gui_wms_mapformat"], $row["gui_wms_featureinfoformat"], $row["gui_wms_exceptionformat"], $row["gui_wms_epsg"], $row["gui_wms_visible"], $row["gui_wms_opacity"], $row["gui_wms_sldurl"]];
+		$t = ['s', 'i', 'i', 's', 's', 's', 's', 'i', 'i', 's'];
 		db_prep_query($sql_ins,$v,$t);
 		$cnt++;
 	}
 
 	$sql = "SELECT * FROM gui_layer WHERE fkey_gui_id = $1 AND gui_layer_wms_id = $2";
-	$v = array($guiID_, $wmsID);
-	$t = array("s", "i");
+	$v = [$guiID_, $wmsID];
+	$t = ["s", "i"];
 	$res = db_prep_query($sql, $v, $t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){
@@ -182,10 +181,8 @@ if(isset($wmsID) && isset($guiID_)){
 		$sql_ins .= "gui_layer_visible,gui_layer_queryable,gui_layer_querylayer,gui_layer_minscale,gui_layer_maxscale,";
 		$sql_ins .= "gui_layer_priority,gui_layer_style,gui_layer_wfs_featuretype,gui_layer_title) ";
 		$sql_ins .= "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)";
-		$v = array($guiList,$row["fkey_layer_id"],$wmsID,$row["gui_layer_status"],$row["gui_layer_selectable"],
-		$row["gui_layer_visible"],$row["gui_layer_queryable"],$row["gui_layer_querylayer"],$row["gui_layer_minscale"],
-		$row["gui_layer_maxscale"],$row["gui_layer_priority"],$row["gui_layer_style"],$row["gui_layer_wfs_featuretype"],$row["gui_layer_title"]);
-		$t = array('s','i','i','i','i','i','i','i','i','i','i','s','s','s');
+		$v = [$guiList, $row["fkey_layer_id"], $wmsID, $row["gui_layer_status"], $row["gui_layer_selectable"], $row["gui_layer_visible"], $row["gui_layer_queryable"], $row["gui_layer_querylayer"], $row["gui_layer_minscale"], $row["gui_layer_maxscale"], $row["gui_layer_priority"], $row["gui_layer_style"], $row["gui_layer_wfs_featuretype"], $row["gui_layer_title"]];
+		$t = ['s', 'i', 'i', 'i', 'i', 'i', 'i', 'i', 'i', 'i', 'i', 's', 's', 's'];
 		db_prep_query($sql_ins,$v,$t);
 		$cnt++;
 	}
@@ -202,7 +199,7 @@ if (count($ownguis)>0){
 	 
 	$sql = "SELECT * FROM gui WHERE gui_id IN (";
 	$v = $ownguis;
-	$t = array();
+	$t = [];
 	for ($i = 1; $i <= count($ownguis); $i++){
 		if ($i > 1) { 
 			$sql .= ",";
@@ -237,15 +234,15 @@ if (count($ownguis)>0){
 		$sql = "SELECT DISTINCT wms_id, wms.wms_title,wms.wms_abstract, gui_wms_position FROM gui_wms ";
 		$sql .= "JOIN gui ON gui_wms.fkey_gui_id = gui.gui_id JOIN wms ON gui_wms.fkey_wms_id=wms.wms_id ";
 		$sql .= "AND gui_wms.fkey_gui_id=gui.gui_id WHERE gui.gui_name = $1 ORDER BY gui_wms_position";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);	
 		$count=0;
 		echo"<select size='8' name='wmsList' style='width:300px'>";
 	
 		while($row = db_fetch_array($res)){
 			if ($row["wms_title"]!=""){
-				echo "<option title='".htmlentities($row["wms_abstract"],ENT_QUOTES,"UTF-8")."' value='".$row["wms_id"]."' ";
+				echo "<option title='".htmlentities((string) $row["wms_abstract"],ENT_QUOTES,"UTF-8")."' value='".$row["wms_id"]."' ";
 				echo ">".$row["wms_title"]."</option>";
 			}
 			$count++;
@@ -262,7 +259,7 @@ if (count($ownguis)>0){
 	$sql = "SELECT DISTINCT wms.wms_id,wms.wms_title,wms.wms_abstract,wms.wms_owner FROM gui_wms JOIN wms ON ";
 	$sql .= "wms.wms_id = gui_wms.fkey_wms_id WHERE gui_wms.fkey_gui_id IN(";
 	$v = $arrayGUIs;
-	$t = array();
+	$t = [];
 	for ($i = 1; $i <= count($arrayGUIs); $i++){
 		if ($i > 1) {
 			$sql .= ",";
@@ -276,7 +273,7 @@ if (count($ownguis)>0){
 	$cnt = 0;
   $owner = Mapbender::session()->get("mb_user_id");
 	while($row = db_fetch_array($res)){
-		echo "<option title='".htmlentities($row["wms_abstract"],ENT_QUOTES,"UTF-8")."' value='".$row["wms_id"]."' ";
+		echo "<option title='".htmlentities((string) $row["wms_abstract"],ENT_QUOTES,"UTF-8")."' value='".$row["wms_id"]."' ";
 		if($row["wms_owner"] == $owner){
 			echo "style='color:green' ";	
 		}
@@ -295,8 +292,8 @@ if (count($ownguis)>0){
 	if(isset($wmsID)){
 		echo "<div class='text2'>FROM:</div>";
 		$sql = "SELECT * from gui_wms WHERE fkey_wms_id = $1 ORDER BY fkey_gui_id";
-		$v = array($wmsID);
-		$t = array("s");
+		$v = [$wmsID];
+		$t = ["s"];
 		$res = db_prep_query($sql, $v, $t);
 		echo "<select class='select2' name='guiID_' size='20' onchange='load()'>";
 		$cnt = 0;

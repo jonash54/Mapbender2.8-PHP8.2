@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../conf/mapbender.conf");
+require_once(__DIR__."/../classes/class_administration.php");
 
 /*  
  * @security_patch irv done
@@ -66,8 +66,8 @@ else {
 
 $sql = "SELECT cap_diff FROM mb_monitor ";
 $sql .= "WHERE fkey_wms_id = $1 AND upload_id = $2";
-$v = array($wms_id,$upload_id);
-$t = array('i','i');
+$v = [$wms_id, $upload_id];
+$t = ['i', 'i'];
 $res = db_prep_query($sql,$v,$t);
 
 while ($row = db_fetch_array($res)) {

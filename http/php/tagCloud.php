@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 $pathToSearchScript = '/php/mod_callMetadata.php?';
@@ -165,10 +165,10 @@ if ($type == 'topicCategories' || $type == 'inspireCategories') {
 }
 //$e = new mb_exception($sql);
 
-$v = array($maxObjects);
-$t = array('i');
+$v = [$maxObjects];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
-$tags = array();
+$tags = [];
 $i = 0;
 //max pixelsize
 
@@ -180,14 +180,14 @@ while($row = db_fetch_array($res)){
 		$maxWeight = (integer)$row['sum'];
 	} 
 	if ($type == 'topicCategories') {
-		$tags[$i] = array('weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText=*&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&isoCategories='.$row['md_topic_category_id'].'&languageCode='.$languageCode,'description'=>$row[$categoryFilter.'_description_'.$languageCode], 'info'=>$row[$categoryFilter.'_uri'], 'mbId'=>$row[$categoryFilter.'_id'], 'symbol'=>$row[$categoryFilter.'_symbol']);
+		$tags[$i] = ['weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText=*&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&isoCategories='.$row['md_topic_category_id'].'&languageCode='.$languageCode, 'description'=>$row[$categoryFilter.'_description_'.$languageCode], 'info'=>$row[$categoryFilter.'_uri'], 'mbId'=>$row[$categoryFilter.'_id'], 'symbol'=>$row[$categoryFilter.'_symbol']];
 	}
 	if ($type == 'inspireCategories') {
-		$tags[$i] = array('weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText=*&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&inspireCategories='.$row[$categoryFilter.'_id'].'&languageCode='.$languageCode, 'description'=>$row[$categoryFilter.'_description_'.$languageCode], 'info'=>$row[$categoryFilter.'_uri'], 'mbId'=>$row[$categoryFilter.'_id']);
+		$tags[$i] = ['weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText=*&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&inspireCategories='.$row[$categoryFilter.'_id'].'&languageCode='.$languageCode, 'description'=>$row[$categoryFilter.'_description_'.$languageCode], 'info'=>$row[$categoryFilter.'_uri'], 'mbId'=>$row[$categoryFilter.'_id']];
 	}
 
 	if ($type == 'keywords') {
-		$tags[$i] = array('weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText='.$row[$showName].'&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&languageCode='.$languageCode);
+		$tags[$i] = ['weight'  =>$row['sum'], 'tagname' =>$row[$showName], 'url'=>MAPBENDER_PATH.$pathToSearchScript.'searchText='.$row[$showName].'&resultTarget=webclient&searchResources=dataset&resolveCoupledResources=true&outputFormat=json&languageCode='.$languageCode];
 	}
 
 	$i++;
@@ -239,11 +239,7 @@ if ($outputFormat == 'html'){
 
 if ($outputFormat == 'json'){
 	$tagCloudJSON = new stdClass;
-	$tagCloudJSON->tagCloud = (object) array(
-		'maxFontSize' => $maxFontSize, 
-		'maxObjects' => $maxObjects,
-		'tags' => array()
-	);
+	$tagCloudJSON->tagCloud = (object) ['maxFontSize' => $maxFontSize, 'maxObjects' => $maxObjects, 'tags' => []];
 	//shuffle($tags); - only for html view - not for json!
 	for($i=0; $i<count($tags);$i++){
     		$tagCloudJSON->tagCloud->tags[$i]->title = $tags[$i]['tagname'];
@@ -256,11 +252,11 @@ if ($outputFormat == 'json'){
                 switch ($type) {
                     case "inspireCategories":
 			$tagCloudJSON->tagCloud->tags[$i]->info = $tags[$i]['info'];		
-			$tagCloudJSON->tagCloud->tags[$i]->inspireThemeId = end(explode('/', $tagCloudJSON->tagCloud->tags[$i]->info));
+			$tagCloudJSON->tagCloud->tags[$i]->inspireThemeId = end(explode('/', (string) $tagCloudJSON->tagCloud->tags[$i]->info));
 			$tagCloudJSON->tagCloud->tags[$i]->description = $tags[$i]['description'];
 			//symbol
 			//$tagCloudJSON->tagCloud->tags[$i]->symbolUrl = MAPBENDER_PATH."/img/INSPIRE-themes-icons-master/svg/".$tagCloudJSON->tagCloud->tags[$i]->inspireThemeId.".svg";
-			$symbolFilePath = dirname(__FILE__)."/../img/INSPIRE-themes-icons-master/svg/".$tagCloudJSON->tagCloud->tags[$i]->inspireThemeId."_simple.svg";
+			$symbolFilePath = __DIR__."/../img/INSPIRE-themes-icons-master/svg/".$tagCloudJSON->tagCloud->tags[$i]->inspireThemeId."_simple.svg";
 			$tagCloudJSON->tagCloud->tags[$i]->inlineSvg = file_get_contents($symbolFilePath);
 			$tagCloudJSON->tagCloud->tags[$i]->keepColor = true;
 			break;
@@ -270,7 +266,7 @@ if ($outputFormat == 'json'){
 			$tagCloudJSON->tagCloud->tags[$i]->description = $tags[$i]['description'];
 			//symbol
 			//$tagCloudJSON->tagCloud->tags[$i]->symbolUrl = MAPBENDER_PATH."/img/ISOTopicThemes/". $tags[$i]['symbol'].".svg";
-			$symbolFilePath = dirname(__FILE__)."/../img/ISOTopicThemes/". $tags[$i]['symbol'].".svg";
+			$symbolFilePath = __DIR__."/../img/ISOTopicThemes/". $tags[$i]['symbol'].".svg";
 			$tagCloudJSON->tagCloud->tags[$i]->inlineSvg = file_get_contents($symbolFilePath);
 			$tagCloudJSON->tagCloud->tags[$i]->keepColor = false;
 			break;
@@ -284,13 +280,8 @@ if ($outputFormat == 'json'){
 
 class tagCloud{
 
-/*** the array of tags ***/
-private $tagsArray;
-
-
-public function __construct($tags){
- /*** set a few properties ***/
- $this->tagsArray = $tags;
+public function __construct(private $tagsArray)
+{
 }
 
 /**

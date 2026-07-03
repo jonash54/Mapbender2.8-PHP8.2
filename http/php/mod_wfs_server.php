@@ -1,9 +1,9 @@
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
-require_once(dirname(__FILE__) . "/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_wfs.php");
+require_once(__DIR__ . "/../classes/class_json.php");
+require_once(__DIR__ . "/../classes/class_universal_wfs_factory.php");
 
 $json = new Mapbender_JSON();
 $obj = $json->decode($_REQUEST['obj']);
@@ -11,7 +11,7 @@ $obj = $json->decode($_REQUEST['obj']);
 //workflow:
 switch($obj->action){
 	case 'getServices':
-		$obj->services = getServices($obj);
+		$obj->services = getServices();
 		sendOutput($obj);
 	break;
 	case 'getWfsConfData':
@@ -19,7 +19,7 @@ switch($obj->action){
 		sendOutput($obj);
 	break;
 	case 'getGuis':
-		$obj->id = getGuis($obj);
+		$obj->id = getGuis();
 		sendOutput($obj);
 	break;
 	case 'getAssignedConfs':
@@ -47,19 +47,19 @@ switch($obj->action){
 		sendOutput($obj);
 	break;
 	case 'setOwsproxy':
-		$ows = array();
+		$ows = [];
 		$ows['string'] = setOwsproxy($obj);
 		$ows['action'] = "owsproxy";
 		sendOutput($ows);
 	break;
 	case 'removeOwsproxy':
-		$ows = array();
+		$ows = [];
 		$ows['string'] = removeOwsproxy($obj);
 		$ows['action'] = "owsproxy";
 		sendOutput($ows);
 	break;
 	case 'getOwsproxy':
-		$ows = array();
+		$ows = [];
 		$ows['string'] = getOwsproxy($obj);
 		$ows['action'] = "owsproxy";
 		sendOutput($ows);
@@ -76,9 +76,9 @@ switch($obj->action){
  */
 function getServices(){
 	global $con;
-	$services = array();
-	$services['id'] = array();
-	$services['title'] = array();
+	$services = [];
+	$services['id'] = [];
+	$services['title'] = [];
 	$adm = new administration();
 	$serviceList = $adm->getWfsByOwner(Mapbender::session()->get("mb_user_id"));
 	if(count($serviceList) == 0){
@@ -86,7 +86,7 @@ function getServices(){
 	}
 	$sql = "SELECT * FROM wfs WHERE wfs_id IN (";
 	$v = $serviceList;
-	$t = array();
+	$t = [];
 	for ($i = 1; $i <= count($serviceList); $i++) {
 		if ($i > 1) {
 			$sql .= ", ";
@@ -114,12 +114,12 @@ function getWfsConfData($wfsID){
 	$adm = new administration();
 	$serviceList = $adm->getWfsByOwner(Mapbender::session()->get("mb_user_id"));
 	if(in_array($wfsID, $serviceList)){
-		$wfsConf = array();
-		$wfsConf['id'] = array();
-		$wfsConf['abstract'] = array();
+		$wfsConf = [];
+		$wfsConf['id'] = [];
+		$wfsConf['abstract'] = [];
 		$sql = "SELECT * FROM wfs_conf WHERE fkey_wfs_id = $1 ORDER BY wfs_conf_abstract";
-		$v = array($wfsID);
-		$t = array('i');
+		$v = [$wfsID];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 		while($row = db_fetch_array($res)){
@@ -135,15 +135,15 @@ function getWfsConfData($wfsID){
 		}
 	}
 	else if($wfsID==="gui_confs"){
-		$wfsConf = array();
-		$wfsConf['id'] = array();
-		$wfsConf['abstract'] = array();
+		$wfsConf = [];
+		$wfsConf['id'] = [];
+		$wfsConf['abstract'] = [];
 		$wfsConf['id'] = $adm->getWfsConfByPermission(Mapbender::session()->get("mb_user_id"));
 		$cnt = 0;
 		foreach($wfsConf['id'] as $wfscid){
 			$sql = "SELECT wfs_conf_abstract FROM wfs_conf WHERE wfs_conf_id = $1";
-			$v = array($wfscid);
-			$t = array('i');
+			$v = [$wfscid];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			while($row = db_fetch_array($res)){
 				array_push($wfsConf['abstract'], $row['wfs_conf_abstract']);
@@ -181,14 +181,14 @@ function getGuis(){
  */
 function getAssignedConfs($obj){
 	global $con;
-	$assignedConfs = array();
+	$assignedConfs = [];
 	$confs = getWfsConfData($obj->selectedWfs);
 	if($confs === false || is_null($confs)){
 		return false;
 	}
 	$sql = "SELECT * FROM gui_wfs_conf WHERE fkey_gui_id = $1 AND fkey_wfs_conf_id IN (".join(",",$confs['id']).")";
-	$v = array($obj->selectedGui);
-	$t = array('s');
+	$v = [$obj->selectedGui];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	if(!$res){
 		$e = new mb_exception("Error: SQL: " . $sql . " -> Gui: " .$obj->selectedGui);
@@ -204,13 +204,13 @@ function addConfsToGui($obj){
 	global $con;
 	for($i=0; $i<count($obj->confs); $i++){
 		$sql = "SELECT * FROM gui_wfs_conf WHERE fkey_gui_id = $1 AND fkey_wfs_conf_id = $2";
-		$v = array($obj->gui,$obj->confs->$i);
-		$t = array('s','i');
+		$v = [$obj->gui, $obj->confs->$i];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if(!$row = db_fetch_array($res)){
 			$sql1 = "INSERT INTO gui_wfs_conf (fkey_gui_id,fkey_wfs_conf_id) VALUES ($1,$2)";
-			$v1 = array($obj->gui, $obj->confs->$i);
-			$t1 = array('s', 'i');
+			$v1 = [$obj->gui, $obj->confs->$i];
+			$t1 = ['s', 'i'];
 			$res1 = db_prep_query($sql1,$v1,$t1);
 		}
 	}
@@ -220,8 +220,8 @@ function removeConfsFromGui($obj){
 	global $con;
 	for($i=0; $i<count($obj->confs); $i++){
 		$sql = "DELETE FROM gui_wfs_conf  WHERE fkey_gui_id = $1 AND fkey_wfs_conf_id = $2";
-		$v = array($obj->gui, $obj->confs->$i);
-		$t = array('s', 'i');
+		$v = [$obj->gui, $obj->confs->$i];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 	}
 }
@@ -236,8 +236,8 @@ function updateWfs($obj){
 	$url = $obj->url;
 	//get authentication information from db
 	$sql = "SELECT wfs_auth_type, wfs_username, wfs_password from wfs WHERE wfs_id = $1 ";
-	$v = array($id);
-	$t = array('i');
+	$v = [$id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	$row = db_fetch_assoc($res);
 	$auth['auth_type'] = $row["wfs_auth_type"];
@@ -296,8 +296,8 @@ function deleteWfs($obj){
 function getUpdateUrl($obj){
 	global $con;
 	$sql = "SELECT * FROM wfs WHERE wfs_id = $1;";
-	$v = array($obj->wfs);
-	$t = array('i');
+	$v = [$obj->wfs];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		$ContentOfColumn = $row[$obj->column];

@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_geometry.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_geometry.php");
 
 
 class GMLMultiLine extends GmlGeometry {
 
-	var $lineArray = array();
+	public $lineArray = [];
 
 	public function __construct() {
 		
@@ -32,16 +32,16 @@ class GMLMultiLine extends GmlGeometry {
 	
 	public function addPoint ($x, $y, $i) {
             if (!is_array($this->lineArray[$i])) {
-                $this->lineArray[$i] = array();
+                $this->lineArray[$i] = [];
             }
-            array_push($this->lineArray[$i], array("x" => $x, "y" => $y));
+            array_push($this->lineArray[$i], ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGml2 () {
 		$str = "<gml:MultiLineString srsName='$this->srs'>";
 		foreach ($this->lineArray as $line) {
 			$str .=	"<gml:lineStringMember><gml:LineString><gml:coordinates>";
-			$ptArray = array();
+			$ptArray = [];
 			foreach ($line as $point) {
 				$ptArray[] = $point["x"] . "," . $point["y"];
 			}
@@ -56,7 +56,7 @@ class GMLMultiLine extends GmlGeometry {
 		$str = "<gml:MultiCurve srsName='$this->srs'>";
 		foreach ($this->lineArray as $line) {
 			$str .=	"<gml:curveMember><gml:LineString>";
-			$ptArray = array();
+			$ptArray = [];
 			foreach ($line as $point) {
 				$ptArray[] = "<gml:pos>" . $point["x"] . " " . $point["y"] . "</gml:pos>";
 			}

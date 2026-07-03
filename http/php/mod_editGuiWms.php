@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id = "editGUI_WMS";
-require_once (dirname(__FILE__) . "/../php/mb_validatePermission.php");
+require_once (__DIR__ . "/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done 
@@ -44,7 +44,7 @@ $this_layer_count = $_POST["this_layer_count"];
 $update_content = $_POST["update_content"];
 $userId = Mapbender::session()->get("mb_user_id");
 
-require_once (dirname(__FILE__) . "/../classes/class_wms.php");
+require_once (__DIR__ . "/../classes/class_wms.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
@@ -63,7 +63,7 @@ include_once '../include/dyn_css.php';
 function toImage($text) {
 	$angle = 90;
 	if (extension_loaded("gd2")) {
-		return "<img src='../php/createImageFromText.php?text=" . urlencode($text) . "&angle=" . $angle . "'>";
+		return "<img src='../php/createImageFromText.php?text=" . urlencode((string) $text) . "&angle=" . $angle . "'>";
 	}
 	return $text;
 }
@@ -73,10 +73,10 @@ function toImage($text) {
 
 <?php
 
-require_once (dirname(__FILE__) . "/../extensions/jquery-ui-1.7.2.custom/js/jquery-1.3.2.min.js");
-require_once (dirname(__FILE__) . "/../extensions/jquery-ui-1.7.2.custom/js/jquery-ui-1.7.2.custom.min.js");
-require_once (dirname(__FILE__) . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.dialog.js");
-require_once (dirname(__FILE__) . "/../javascripts/mod_wfsLayerObj_conf.js");
+require_once (__DIR__ . "/../extensions/jquery-ui-1.7.2.custom/js/jquery-1.3.2.min.js");
+require_once (__DIR__ . "/../extensions/jquery-ui-1.7.2.custom/js/jquery-ui-1.7.2.custom.min.js");
+require_once (__DIR__ . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.dialog.js");
+require_once (__DIR__ . "/../javascripts/mod_wfsLayerObj_conf.js");
 header('Content-type: text/html');
 ?>
 
@@ -186,7 +186,7 @@ function showSld(origUrl){
 <?php
 
 
-require_once (dirname(__FILE__) . "/../../conf/mapbender.conf");
+require_once (__DIR__ . "/../../conf/mapbender.conf");
 $con = db_connect($DBSERVER, $OWNER, $PW);
 db_select_db(DB, $con);
 
@@ -194,14 +194,8 @@ $mb_user_id = Mapbender :: session()->get("mb_user_id");
 #delete gui_wms from gui
 if ($del && $del == 'true') {
 	$sql = "SELECT DISTINCT gui_wms_position from gui_wms WHERE fkey_gui_id = $1 and fkey_wms_id = $2";
-	$v = array (
-		$guiList,
-		$wmsList
-	);
-	$t = array (
-		's',
-		'i'
-	);
+	$v = [$guiList, $wmsList];
+	$t = ['s', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	$cnt = 0;
 	while ($row = db_fetch_array($res)) {
@@ -210,36 +204,18 @@ if ($del && $del == 'true') {
 	}
 	#if($cnt > 1){die("Error: WMS (ID) not unique!");}
 	$sql = "Delete from gui_wms where fkey_gui_id = $1 and fkey_wms_id = $2 ";
-	$v = array (
-		$guiList,
-		$wmsList
-	);
-	$t = array (
-		's',
-		'i'
-	);
+	$v = [$guiList, $wmsList];
+	$t = ['s', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	$sql = "Delete from gui_layer where fkey_gui_id = $1 and gui_layer_wms_id = $2";
-	$v = array (
-		$guiList,
-		$wmsList
-	);
-	$t = array (
-		's',
-		'i'
-	);
+	$v = [$guiList, $wmsList];
+	$t = ['s', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	$del = 'false';
 	$sql = "UPDATE gui_wms SET gui_wms_position = (gui_wms_position - 1) WHERE gui_wms_position > $1";
 	$sql .= " AND fkey_gui_id = $2 ";
-	$v = array (
-		$wms_position,
-		$guiList
-	);
-	$t = array (
-		'i',
-		's'
-	);
+	$v = [$wms_position, $guiList];
+	$t = ['i', 's'];
 	$res = db_prep_query($sql, $v, $t);
 
 	unset ($wmsList);
@@ -250,14 +226,8 @@ if ($up && $up == 'true') {
 	if ($wmsList != "") {
 		$sql = "SELECT gui_wms_position ";
 		$sql .= "FROM gui_wms WHERE fkey_gui_id = $1 AND fkey_wms_id = $2";
-		$v = array (
-			$guiList,
-			$wmsList
-		);
-		$t = array (
-			's',
-			'i'
-		);
+		$v = [$guiList, $wmsList];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
 			$wms_position = $row["gui_wms_position"];
@@ -267,28 +237,16 @@ if ($up && $up == 'true') {
 		$sql = "UPDATE gui_wms SET ";
 		$sql .= "gui_wms_position = $1";
 		$sql .= " WHERE fkey_gui_id = $2 AND fkey_wms_id = $3";
-		$v = array (
-			($wms_position -1
-		), $guiList, $wmsList);
-		$t = array (
-			'i',
-			's',
-			'i'
-		);
+		$v = [($wms_position -1
+		), $guiList, $wmsList];
+		$t = ['i', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		$sql = "UPDATE gui_wms SET ";
 		$sql .= "gui_wms_position = $1";
 		$sql .= " WHERE gui_wms_position = $2 AND fkey_gui_id = $3 AND fkey_wms_id <> $4 ";
-		$v = array (
-			$wms_position,
-			 ($wms_position -1
-		), $guiList, $wmsList);
-		$t = array (
-			'i',
-			'i',
-			's',
-			'i'
-		);
+		$v = [$wms_position, ($wms_position -1
+		), $guiList, $wmsList];
+		$t = ['i', 'i', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 	}
 }
@@ -298,25 +256,15 @@ if ($down && $down == 'true') {
 	if ($wmsList != "") {
 		$sql = "SELECT gui_wms_position ";
 		$sql .= "FROM gui_wms WHERE fkey_gui_id = $1 AND fkey_wms_id = $2";
-		$v = array (
-			$guiList,
-			$wmsList
-		);
-		$t = array (
-			's',
-			'i'
-		);
+		$v = [$guiList, $wmsList];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
 			$wms_position = $row["gui_wms_position"];
 		}
 		$sql = "SELECT MAX(gui_wms_position) as max FROM gui_wms WHERE fkey_gui_id = $1 ";
-		$v = array (
-			$guiList
-		);
-		$t = array (
-			's'
-		);
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
 			$max = $row["max"];
@@ -326,28 +274,16 @@ if ($down && $down == 'true') {
 		$sql = "UPDATE gui_wms SET ";
 		$sql .= "gui_wms_position = $1";
 		$sql .= " WHERE fkey_gui_id = $2 AND fkey_wms_id = $3";
-		$v = array (
-			($wms_position +1
-		), $guiList, $wmsList);
-		$t = array (
-			'i',
-			's',
-			'i'
-		);
+		$v = [($wms_position +1
+		), $guiList, $wmsList];
+		$t = ['i', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		$sql = "UPDATE gui_wms SET ";
 		$sql .= "gui_wms_position = $1";
 		$sql .= " WHERE gui_wms_position = $2 AND fkey_gui_id = $3 AND fkey_wms_id <> $4";
-		$v = array (
-			$wms_position,
-			 ($wms_position +1
-		), $guiList, $wmsList);
-		$t = array (
-			'i',
-			'i',
-			's',
-			'i'
-		);
+		$v = [$wms_position, ($wms_position +1
+		), $guiList, $wmsList];
+		$t = ['i', 'i', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 	}
 }
@@ -359,91 +295,42 @@ if (isset ($update_content) && $update_content == "1") {
 		$sql .= "gui_wms_featureinfoformat = $3, gui_wms_exceptionformat = $4, ";
 		$sql .= "gui_wms_visible = $5, gui_wms_opacity = $6, gui_wms_sldurl = $7 ";
 		$sql .= "WHERE fkey_gui_id = $8 AND fkey_wms_id = $9";
-		$v = array (
-			$this_gui_wms_epsg,
-			$this_gui_wms_mapformat,
-			$this_gui_wms_featureinfoformat,
-			$this_gui_wms_exceptionformat,
-			$this_gui_wms_visible,
-			$this_gui_wms_opacity,
-			$this_gui_wms_sldurl,
-			$this_gui,
-			$this_wms
-		);
-		$t = array (
-			's',
-			's',
-			's',
-			's',
-			'i',
-			'i',
-			's',
-			's',
-			'i'
-		);
+		$v = [$this_gui_wms_epsg, $this_gui_wms_mapformat, $this_gui_wms_featureinfoformat, $this_gui_wms_exceptionformat, $this_gui_wms_visible, $this_gui_wms_opacity, $this_gui_wms_sldurl, $this_gui, $this_wms];
+		$t = ['s', 's', 's', 's', 'i', 'i', 's', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 	} else {
 		$sql = "UPDATE gui_wms set gui_wms_mapformat = $1, ";
 		$sql .= "gui_wms_featureinfoformat = $2, gui_wms_exceptionformat = $3, ";
 		$sql .= "gui_wms_visible = $4, gui_wms_opacity = $5, gui_wms_sldurl = $6 ";
 		$sql .= "WHERE fkey_gui_id = $7 AND fkey_wms_id = $8";
-		$v = array (
-			$this_gui_wms_mapformat,
-			$this_gui_wms_featureinfoformat,
-			$this_gui_wms_exceptionformat,
-			$this_gui_wms_visible,
-			$this_gui_wms_opacity,
-			$this_gui_wms_sldurl,
-			$this_gui,
-			$this_wms
-		);
-		$t = array (
-			's',
-			's',
-			's',
-			'i',
-			'i',
-			's',
-			's',
-			'i'
-		);
+		$v = [$this_gui_wms_mapformat, $this_gui_wms_featureinfoformat, $this_gui_wms_exceptionformat, $this_gui_wms_visible, $this_gui_wms_opacity, $this_gui_wms_sldurl, $this_gui, $this_wms];
+		$t = ['s', 's', 's', 'i', 'i', 's', 's', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 	}
 
 	/* */
 
 	$cnt = 0;
-	while (list ($key, $val) = each($_POST)) {
-		if (preg_match("/___/", $key)) {
-			$myKey = explode("___", $key);
-			if ($myKey[1] != "layer_parent" && $myKey[1] != 'layer_id') {
-				$sql = "UPDATE gui_layer SET " . $myKey[1] . " = $1 WHERE fkey_gui_id = $2 AND fkey_layer_id = $3";
-				$v = array (
-					$val,
-					$this_gui,
-					preg_replace("/L_/",
-					"",
-					$myKey[0]
-				));
-				if ($myKey[1] == 'gui_layer_style') {
-					$t = array (
-						's',
-						's',
-						'i'
-					);
-				} else {
-					$t = array (
-						'i',
-						's',
-						'i'
-					);
-				}
-				if (!$res = db_prep_query($sql, $v, $t)) {
-					echo "FEHLER in ZEILE 288";
-				}
-			}
-		}
-	}
+	foreach ($_POST as $key => $val) {
+     if (preg_match("/___/", $key)) {
+   			$myKey = explode("___", $key);
+   			if ($myKey[1] != "layer_parent" && $myKey[1] != 'layer_id') {
+   				$sql = "UPDATE gui_layer SET " . $myKey[1] . " = $1 WHERE fkey_gui_id = $2 AND fkey_layer_id = $3";
+   				$v = [$val, $this_gui, preg_replace("/L_/",
+  					"",
+  					$myKey[0]
+  				)];
+   				if ($myKey[1] == 'gui_layer_style') {
+   					$t = ['s', 's', 'i'];
+   				} else {
+   					$t = ['i', 's', 'i'];
+   				}
+   				if (!$res = db_prep_query($sql, $v, $t)) {
+   					echo "FEHLER in ZEILE 288";
+   				}
+   			}
+   		}
+ }
 }
 
 echo "<form name='form1' action='" . $self . "' method='post'>";
@@ -462,11 +349,11 @@ echo "<tr>";
 
 echo "<td>";
 
-require_once (dirname(__FILE__) . "/../classes/class_administration.php");
+require_once (__DIR__ . "/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender :: session()->get("mb_user_id"), true);
 
-$gui_id = array ();
+$gui_id = [];
 if (count($ownguis) > 0) {
 	for ($i = 0; $i < count($ownguis); $i++) {
 		$gui_id[$i] = $ownguis[$i];
@@ -496,12 +383,8 @@ echo "<td>";
 
 $sql = "SELECT * from gui_wms JOIN gui ON gui_wms.fkey_gui_id = gui.gui_id JOIN wms ON ";
 $sql .= "gui_wms.fkey_wms_id = wms.wms_id AND gui_wms.fkey_gui_id=gui.gui_id WHERE gui.gui_id = $1 ORDER BY gui_wms_position";
-$v = array (
-	$selected_gui_id
-);
-$t = array (
-	's'
-);
+$v = [$selected_gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 $count_wms = 0;
 
@@ -509,7 +392,7 @@ $count_wms = 0;
 echo "<select size='8' name='wmsList' style='width:300px' onchange='submit()'>";
 
 while ($row = db_fetch_array($res)) {
-	echo "<option title='" . htmlentities($row["wms_abstract"], ENT_QUOTES, "UTF-8") . "'  value='" . $row["wms_id"] . "' ";
+	echo "<option title='" . htmlentities((string) $row["wms_abstract"], ENT_QUOTES, "UTF-8") . "'  value='" . $row["wms_id"] . "' ";
 	if (isset ($wmsList) && $wmsList == $row["wms_id"]) {
 		echo "selected";
 	}
@@ -541,7 +424,7 @@ select (not exists(
 ))::int as may_delete
 EOT;
 
-    $res = db_prep_query($sql, array($wmsList, $userId, $selected_gui_id), array('i', 'i', 's'));
+    $res = db_prep_query($sql, [$wmsList, $userId, $selected_gui_id], ['i', 'i', 's']);
     $may_delete = (bool)db_fetch_array($res)["may_delete"];
 }
 
@@ -560,14 +443,8 @@ echo "</table>";
 if (isset ($wmsList)) {
 	#gui_wms
 	$sql_gw = "SELECT * FROM gui_wms WHERE fkey_gui_id = $1 AND fkey_wms_id = $2";
-	$v = array (
-		$guiList,
-		$wmsList
-	);
-	$t = array (
-		's',
-		'i'
-	);
+	$v = [$guiList, $wmsList];
+	$t = ['s', 'i'];
 	$res_gw = db_prep_query($sql_gw, $v, $t);
 	$cnt_gw = 0;
 	while ($row = db_fetch_array($res_gw)) {
@@ -583,31 +460,23 @@ if (isset ($wmsList)) {
 	}
 	#wms
 	$sql_w = "SELECT * FROM wms WHERE wms_id = $1";
-	$v = array (
-		$wmsList
-	);
-	$t = array (
-		'i'
-	);
+	$v = [$wmsList];
+	$t = ['i'];
 	$res_w = db_prep_query($sql_w, $v, $t);
 	$cnt_w = 0;
 	while ($row = db_fetch_array($res_w)) {
 		$wms_id[$cnt_w] = $row["wms_id"];
 		$wms_version[$cnt_w] = $row["wms_version"];
 		$wms_title[$cnt_w] = $row["wms_title"];
-		$wms_abstract[$cnt_w] = htmlentities($row["wms_abstract"], ENT_QUOTES, "UTF-8");
+		$wms_abstract[$cnt_w] = htmlentities((string) $row["wms_abstract"], ENT_QUOTES, "UTF-8");
 		$wms_getcapabilities[$cnt_w] = $row["wms_getcapabilities"];
 		$wms_supportsld[$cnt_w] = $row["wms_supportsld"]; # Buttons zum sld support anzeigen?
 		$cnt_w++;
 	}
 	#wms_format
 	$sql_wf = "SELECT * FROM  wms_format WHERE  fkey_wms_id = $1";
-	$v = array (
-		$wmsList
-	);
-	$t = array (
-		'i'
-	);
+	$v = [$wmsList];
+	$t = ['i'];
 	$res_wf = db_prep_query($sql_wf, $v, $t);
 	$cnt_wf = 0;
 	while ($row = db_fetch_array($res_wf)) {
@@ -617,41 +486,31 @@ if (isset ($wmsList)) {
 	}
 	#gui_layer
 	$sql_gl = "SELECT l.*, gl.*, sld.sld_user_layer_id, sld.use_sld FROM layer AS l, gui_layer AS gl left outer join sld_user_layer AS sld on sld.fkey_layer_id = gl.fkey_layer_id WHERE l.layer_id = gl.fkey_layer_id AND gl.gui_layer_wms_id = $1 AND gl.fkey_gui_id = $2 AND (sld.fkey_gui_id = $3 or sld.fkey_gui_id is NULL) AND (sld.fkey_mb_user_id = $4 or sld.fkey_mb_user_id is NULL) ORDER BY l.layer_pos";
-	$v = array (
-		$wmsList,
-		$guiList,
-		$guiList,
-		$mb_user_id
-	);
-	$t = array (
-		'i',
-		's',
-		's',
-		'i'
-	);
+	$v = [$wmsList, $guiList, $guiList, $mb_user_id];
+	$t = ['i', 's', 's', 'i'];
 
 	$res_gl = db_prep_query($sql_gl, $v, $t);
-	$gui_layer_status = array ();
-	$gui_layer_title = array ();
-	$gui_layer_selectable = array ();
-	$gui_layer_visible = array ();
-	$gui_layer_queryable = array ();
-	$gui_layer_querylayer = array ();
-	$gui_layer_minscale = array ();
-	$gui_layer_maxscale = array ();
-	$gui_layer_priority = array ();
-	$gui_layer_style = array ();
-	$gui_layer_wfs_featuretype = array ();
-	$layer_maxscale = array ();
-	$layer_id = array ();
-	$layer_parent = array ();
-	$layer_name = array ();
-	$layer_title = array ();
-	$layer_queryable = array ();
-	$layer_minscale = array ();
-	$layer_maxscale = array ();
-	$sld_user_layer_id = array ();
-	$use_sld = array ();
+	$gui_layer_status = [];
+	$gui_layer_title = [];
+	$gui_layer_selectable = [];
+	$gui_layer_visible = [];
+	$gui_layer_queryable = [];
+	$gui_layer_querylayer = [];
+	$gui_layer_minscale = [];
+	$gui_layer_maxscale = [];
+	$gui_layer_priority = [];
+	$gui_layer_style = [];
+	$gui_layer_wfs_featuretype = [];
+	$layer_maxscale = [];
+	$layer_id = [];
+	$layer_parent = [];
+	$layer_name = [];
+	$layer_title = [];
+	$layer_queryable = [];
+	$layer_minscale = [];
+	$layer_maxscale = [];
+	$sld_user_layer_id = [];
+	$use_sld = [];
 	while ($row = db_fetch_array($res_gl)) {
 		array_push($gui_layer_status, $row["gui_layer_status"]);
 		array_push($gui_layer_title, $row["gui_layer_title"]);
@@ -677,12 +536,8 @@ if (isset ($wmsList)) {
 
 	#layer_epsg
 	$sql_le = "SELECT * FROM layer_epsg WHERE  fkey_layer_id = $1";
-	$v = array (
-		$layer_id[0]
-	);
-	$t = array (
-		'i'
-	);
+	$v = [$layer_id[0]];
+	$t = ['i'];
 	$res_le = db_prep_query($sql_le, $v, $t);
 	$cnt_le = 0;
 	while ($row = db_fetch_array($res_le)) {
@@ -863,15 +718,11 @@ if (isset ($wmsList)) {
 	for ($i = 0; $i < count($layer_id); $i++) {
 		#layer_styles
 		$sql_styles = "SELECT * FROM layer_style WHERE  fkey_layer_id = $1";
-		$v = array (
-			$layer_id[$i]
-		);
-		$t = array (
-			'i'
-		);
+		$v = [$layer_id[$i]];
+		$t = ['i'];
 		$res_styles = db_prep_query($sql_styles, $v, $t);
 		$cnt_styles = 0;
-		$style = array ();
+		$style = [];
 		while ($row = db_fetch_array($res_styles)) {
 			$style[$cnt_styles] = $row["name"];
 			$cnt_styles++;

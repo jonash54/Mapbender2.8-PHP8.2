@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class WmsOwsLogCsv {
     private $mb_user_id;
@@ -66,13 +66,13 @@ class WmsOwsLogCsv {
         $wmslogcsv->listType = $listType;
         $wmslogcsv->function = $function;
         
-        if($withContactData != null && strlen($withContactData) > 0){
+        if($withContactData != null && strlen((string) $withContactData) > 0){
             $wmslogcsv->withContactData = $withContactData;
         }
-        $wmslogcsv->resultHeader = array();
-        $wmslogcsv->resultHeaderDisplay = array();
-        $wmslogcsv->resultData = array();
-        $wmslogcsv->resultDataDisplay = array();
+        $wmslogcsv->resultHeader = [];
+        $wmslogcsv->resultHeaderDisplay = [];
+        $wmslogcsv->resultData = [];
+        $wmslogcsv->resultDataDisplay = [];
         $wmslogcsv->resultMessage = "";
         return $wmslogcsv;
     }
@@ -95,20 +95,20 @@ class WmsOwsLogCsv {
         if(!empty($this->resultData)) {
             $rowCount = count($this->resultData[0]);
             $maxRows = (count($this->resultData) -1);
-            $offset = array();
-            $data = array();
+            $offset = [];
+            $data = [];
 
             for($i=0;$i<$rowCount;$i++) {
                 if($this->resultHeader[$i] == 'price')
-                    $data[] = array('price', $this->resultData[$maxRows][$i]);
+                    $data[] = ['price', $this->resultData[$maxRows][$i]];
                 else if($this->resultHeader[$i] == 'pixel')
-                    $data[] = array('pixel', $this->resultData[$maxRows][$i]);
+                    $data[] = ['pixel', $this->resultData[$maxRows][$i]];
             }
 
             
         }
 
-        $this->resultHeader = array();
+        $this->resultHeader = [];
         $this->resultData = $data;
     }
 
@@ -129,9 +129,9 @@ class WmsOwsLogCsv {
                         .",u.mb_user_city";
                 $groupByForDisplay = " GROUP BY m.fkey_wms_id, u.mb_user_id,u.mb_user_name, u.mb_user_firstname,mb_user_lastname,u.mb_user_department,u.mb_user_description,u.mb_user_email,u.mb_user_phone,u.mb_user_street,u.mb_user_housenumber,u.mb_user_postal_code,u.mb_user_city ORDER BY m.fkey_wms_id DESC";
             }
-            $v = array($this->mb_user_id, $this->timeFrom, $this->timeTo);
+            $v = [$this->mb_user_id, $this->timeFrom, $this->timeTo];
 //            $v = array($this->wmsId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t");
+            $t = ['i', "t", "t"];
             $wmsIdWhere = "";
             if($this->wmsId !== null && intval($this->wmsId)> -1){
                 $v[] = $this->wmsId;
@@ -172,8 +172,8 @@ class WmsOwsLogCsv {
                 $groupByForDisplay = " GROUP BY m.fkey_wms_id, w.wms_title,w.wms_version,w.wms_abstract,u.mb_user_firstname,mb_user_lastname,u.mb_user_department,u.mb_user_description,u.mb_user_email,u.mb_user_phone,u.mb_user_street,u.mb_user_housenumber,u.mb_user_postal_code,u.mb_user_city ORDER BY m.fkey_wms_id DESC";
             }            
             
-            $v = array($this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array("t", "t", "i");
+            $v = [$this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ["t", "t", "i"];
             
             /* GUI start*/
             if(intval($this->userId) == -1){ // all users
@@ -184,7 +184,7 @@ class WmsOwsLogCsv {
                 $userWhere = " AND m.fkey_mb_user_id = $".count($v);
             }
             $wmsIdWhere = "";
-            if($this->wmsId !== null && strlen($this->wmsId)> 0 && intval($this->wmsId)> -1){
+            if($this->wmsId !== null && strlen((string) $this->wmsId)> 0 && intval($this->wmsId)> -1){
                 $v[] = $this->wmsId;
                 $t[] = "i";
                 $wmsIdWhere = " AND m.fkey_wms_id=$".count($v);
@@ -221,9 +221,9 @@ class WmsOwsLogCsv {
                         .",u.mb_user_street,u.mb_user_housenumber"
                         .",u.mb_user_postal_code,u.mb_user_city";
             }
-            $v = array($this->wmsId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
+            $v = [$this->wmsId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
 //            $v = array($this->wmsId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t", "i");
+            $t = ['i', "t", "t", "i"];
             $sql  = "SELECT".$selectColumns
                     ." FROM mb_proxy_log AS m INNER JOIN wms AS w ON"
                     ." (m.fkey_wms_id = w.wms_id AND w.wms_owner=$4"
@@ -246,9 +246,9 @@ class WmsOwsLogCsv {
                         .",u.mb_user_city";
                 $join .= " INNER JOIN mb_user AS u  ON (u.mb_user_id = m.fkey_mb_user_id)";
             }
-            $v = array($this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
+            $v = [$this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
 //            $v = array($this->userId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t", "i");
+            $t = ['i', "t", "t", "i"];
             $whereWms = "";
             $sql  = "SELECT ".$selectColumns
                     ." FROM mb_proxy_log AS m INNER JOIN wms AS w ON"
@@ -271,15 +271,15 @@ class WmsOwsLogCsv {
 //            $t = array('i', "t", "t");
 //            $sql = "DELETE FROM mb_proxy_log WHERE fkey_wms_id = $1"
 //                    ." AND proxy_log_timestamp >= $2 AND proxy_log_timestamp <= $3";
-            $v = array($this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array("t", "t", "i");
+            $v = [$this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ["t", "t", "i"];
             $sql = "DELETE FROM mb_proxy_log"
                     ." WHERE log_id in("
                         ." SELECT m.log_id"
                         ." FROM mb_proxy_log AS m INNER JOIN wms AS w ON"
                         ." (m.fkey_wms_id = w.wms_id AND w.wms_owner=$3";
             $inOffset = 4;
-    		foreach(explode(",",$this->wmsId) as $wms) {
+    		foreach(explode(",",(string) $this->wmsId) as $wms) {
     			$v[] = trim($wms);
     			$t[] = "i";
     			$inParams[] = "$".$inOffset;
@@ -306,13 +306,13 @@ class WmsOwsLogCsv {
 //                $v[] = $wmsId;
 //                $t[] = 'i';
 //            }
-            $v = array($this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array('i', "t", "t", "i");
+            $v = [$this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ['i', "t", "t", "i"];
             $whereWms = "";
             if($this->wmsId !== null && $this->wmsId != "") {
                 $whereWms = " AND m.fkey_wms_id IN (";
                 $inOffset = 5;
-    			foreach(explode(",",$this->wmsId) as $wms) {
+    			foreach(explode(",",(string) $this->wmsId) as $wms) {
     				$v[] = trim($wms);
     				$t[] = "i";
     				$inParams[] = "$".$inOffset;
@@ -462,26 +462,19 @@ class WmsOwsLogCsv {
     
     public function getAsArray($function=null) {
     	if($function == "getServiceLogs") {
-    		return array(
-    				"function"=> $this->function,
-    				"header"=> $this->resultHeader,
-    				"headerDisplay"=> $this->resultHeaderDisplay,
-    				//"data" => $this->resultData,
-    				"dataDisplay" => $this->resultDataDisplay,
-    				"message" => $this->resultMessage,
-    				"error" => "",
-    				"limit" => WmsOwsLogCsv::$LIMIT_INT);
+    		return [
+          "function"=> $this->function,
+          "header"=> $this->resultHeader,
+          "headerDisplay"=> $this->resultHeaderDisplay,
+          //"data" => $this->resultData,
+          "dataDisplay" => $this->resultDataDisplay,
+          "message" => $this->resultMessage,
+          "error" => "",
+          "limit" => WmsOwsLogCsv::$LIMIT_INT,
+      ];
     	}
     	else {
-	        return array(
-	            "function"=> $this->function,
-	            "header"=> $this->resultHeader,
-	        	"headerDisplay"=> $this->resultHeaderDisplay,
-	            "data" => $this->resultData,
-	        	"dataDisplay" => $this->resultDataDisplay,
-	            "message" => $this->resultMessage,
-	            "error" => "",
-	            "limit" => WmsOwsLogCsv::$LIMIT_INT);
+	        return ["function"=> $this->function, "header"=> $this->resultHeader, "headerDisplay"=> $this->resultHeaderDisplay, "data" => $this->resultData, "dataDisplay" => $this->resultDataDisplay, "message" => $this->resultMessage, "error" => "", "limit" => WmsOwsLogCsv::$LIMIT_INT];
     	}
     }
 }

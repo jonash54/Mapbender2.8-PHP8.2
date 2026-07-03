@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $admin = new administration();
 
@@ -46,13 +46,13 @@ $isAllowed = $admin->getModulPermission(Mapbender::session()->get("mb_user_id"),
 //
 // (if SCRIPT_NAME is "map.php", we trust the script.)
 //
-if (!preg_match("/^.*\/javascripts\/map\.php$/", $_SERVER["SCRIPT_NAME"])) {
+if (!preg_match("/^.*\/javascripts\/map\.php$/", (string) $_SERVER["SCRIPT_NAME"])) {
 
 	$isCorrectScript = true;
 	
 	$sql = "SELECT e_element FROM gui_element WHERE e_id = $1 AND fkey_gui_id = $2";
-	$v = array($e_id, $gui_id);
-	$t = array("s", "s");
+	$v = [$e_id, $gui_id];
+	$t = ["s", "s"];
 	$res = db_prep_query($sql, $v, $t);
 	while ($row = db_fetch_array($res)) {
 		if (!$admin->checkModulePermission_new(Mapbender::session()->get("mb_user_id"), $_SERVER["SCRIPT_NAME"], $row["e_element"])) {

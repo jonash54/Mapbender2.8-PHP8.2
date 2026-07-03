@@ -1,6 +1,6 @@
 <?php
 function myNl2br ($str) {
-	return preg_replace('#\r?\n#', '\\n', $str);
+	return preg_replace('#\r?\n#', '\\n', (string) $str);
 }
 
 $textAreaCode = <<<CODE
@@ -38,30 +38,5 @@ $checkboxCode = <<<CODE
 <input type='checkbox' id='' value='1'>
 CODE;
 
-$templateOptionArray = array(
-	"none" => array(
-		"label" =>"--", 
-		"code" => ""
-	),
-	"datepicker" => array(
-		"label" => "Datepicker", 
-		"code" => $datepickerCode
-	),
-	"textarea" => array(
-		"label" => "Textarea", 
-		"code" => $textAreaCode
-	),
-	"select" => array(
-		"label" =>"Select",
-		"code" => $selectCode
-	),
-    "selectWfs" => array(
-        "label" =>"SelectWfs",
-        "code" => $selectWfsCode
-    ),
-	"checkbox" => array(
-		"label" => "Checkbox",
-		"code" => $checkboxCode
-	)
-);
+$templateOptionArray = ["none" => ["label" =>"--", "code" => ""], "datepicker" => ["label" => "Datepicker", "code" => $datepickerCode], "textarea" => ["label" => "Textarea", "code" => $textAreaCode], "select" => ["label" =>"Select", "code" => $selectCode], "selectWfs" => ["label" =>"SelectWfs", "code" => $selectWfsCode], "checkbox" => ["label" => "Checkbox", "code" => $checkboxCode]];
 ?>

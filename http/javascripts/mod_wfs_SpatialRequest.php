@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 $wfs_conf_filename = "wfs_default.conf";
 include '../include/dyn_php.php';
-$fname = dirname(__FILE__) . "/../../conf/" . $wfs_conf_filename;
+$fname = __DIR__ . "/../../conf/" . $wfs_conf_filename;
 if (file_exists($fname)) {
 	/*
 	 * @security_patch finc done

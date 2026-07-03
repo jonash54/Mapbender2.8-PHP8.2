@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php" ;
+require_once __DIR__ . "/../../core/globalSettings.php" ;
 
 $ajaxRequest = new AjaxRequest($_POST);
 
 $e_id = "log";
 $gui_id = Mapbender::session()->get("mb_user_gui");
 
-require dirname(__FILE__) . "/../include/dyn_php.php" ;
+require __DIR__ . "/../include/dyn_php.php" ;
 
 switch ($ajaxRequest->getMethod()) {
 	case "logRequest":
@@ -38,7 +38,7 @@ switch ($ajaxRequest->getMethod()) {
 			if (empty($request)) {
 				$request = "init";
 			}
-			require dirname(__FILE__) . "/../classes/class_log.php";
+			require __DIR__ . "/../classes/class_log.php";
 			$log = new log("default", $request, $time_client, $logtype);
 		}
 		break;

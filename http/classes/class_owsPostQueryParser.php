@@ -17,20 +17,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * An class to parse OWS Post queries to extract the relevant parameters, post or post_xml musst be tested!
  */
  class OwsPostQueryParser {
-	var $serviceType; //string
-	var $serviceVersion; //string
-	var $serviceRequestType; //string
-	var $serviceResourceName; //string - layer name(s), featuretype name(s)
-	var $outputFormat; //string - parameter outputFormat
-	var $parsingSuccessful; //boolean
-	var $postType; //string - 'xml' or 'form'
-	var $resultType; //string - 'hits' or 'results'
+	public $serviceType; //string
+	public $serviceVersion; //string
+	public $serviceRequestType; //string
+	public $serviceResourceName; //string - layer name(s), featuretype name(s)
+	public $outputFormat; //string - parameter outputFormat
+	public $parsingSuccessful; //boolean
+	public $postType; //string - 'xml' or 'form'
+	public $resultType; //string - 'hits' or 'results'
 	/**
 	 * Constructor of the OwsPostQueryHandler
 	 * 
@@ -72,7 +72,7 @@ require_once(dirname(__FILE__)."/../../core/globalSettings.php");
 			} else {
 				$rootNamespace = $queryDomObject->lookupNamespaceUri($queryDomObject->namespaceURI);
 			}
-			
+
 			//$e = new mb_exception("class_owsPostQueryHandler.php: ".json_encode($rootNamespace));
 			switch ($rootNamespace) {
 				case "http://www.opengis.net/wfs/2.0": 
@@ -102,7 +102,7 @@ require_once(dirname(__FILE__)."/../../core/globalSettings.php");
 					$queryNodeList = $xpath->query('/defaultns:'.$this->serviceRequestType.'/defaultns:Query');
 				}
 				//array of requests that need typenames
-				$typenameRequired = array('getfeature','describefeaturetype');
+				$typenameRequired = ['getfeature', 'describefeaturetype'];
 				//TODO: look for typenames only in getfeature requests!!!!!! https://github.com/qgis/QGIS/commit/ccb4c80f8a6d2bb179258f1ffec0dc9a447ca465
 				if (in_array(strtolower($this->serviceRequestType), $typenameRequired)) {
 					switch ($this->serviceVersion) {

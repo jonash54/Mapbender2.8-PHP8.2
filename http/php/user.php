@@ -3,7 +3,7 @@
  * 
  *******************************************************************************/
 //$e_id="user";
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 $user = (int)Mapbender::session()->get("mb_user_id");
 
@@ -26,8 +26,8 @@ if($_POST['userCheck'] == "on") {
         
         $sqlCnt = "SELECT count(*) as cnt FROM mb_user WHERE mb_user_owner = $1 AND (" . SEARCH_COLUMN1 . " LIKE '%' || $2 || '%' OR " . SEARCH_COLUMN2 . " LIKE '%' || $3 || '%')";
 
-        $v = array($user, $_POST['searchterm'], $_POST['searchterm']);
-        $t = array("i", "s", "s");
+        $v = [$user, $_POST['searchterm'], $_POST['searchterm']];
+        $t = ["i", "s", "s"];
     }
     else {
         $sql = "SELECT * FROM mb_user WHERE mb_user_owner = $1 AND " . SEARCH_COLUMN1 . " LIKE '%' || $2 || '%' " .     
@@ -35,8 +35,8 @@ if($_POST['userCheck'] == "on") {
         
         $sqlCnt = "SELECT count(*) as cnt FROM mb_user WHERE mb_user_owner = $1 AND " . SEARCH_COLUMN1 . " LIKE '%' || $2 || '%' ";
         
-        $v = array($user, $_POST['searchterm']);
-        $t = array("i", "s");
+        $v = [$user, $_POST['searchterm']];
+        $t = ["i", "s"];
     }     
 }
 else {
@@ -46,8 +46,8 @@ else {
         
         $sqlCnt = "SELECT count(*) as cnt FROM mb_user WHERE " . SEARCH_COLUMN1 . " LIKE '%' || $1 || '%' OR " . SEARCH_COLUMN2 . " LIKE '%' || $2 || '%' ";
         
-        $v = array($_POST['searchterm'], $_POST['searchterm']);
-        $t = array("s", "s");
+        $v = [$_POST['searchterm'], $_POST['searchterm']];
+        $t = ["s", "s"];
     }
     else {
         $sql = "SELECT * FROM mb_user WHERE " . SEARCH_COLUMN1 . " LIKE '%' || $1 || '%' " .     
@@ -55,8 +55,8 @@ else {
         
         $sqlCnt = "SELECT count(*) as cnt FROM mb_user WHERE " . SEARCH_COLUMN1 . " LIKE '%' || $1 || '%' ";
         
-        $v = array($_POST['searchterm']);
-        $t = array("s");
+        $v = [$_POST['searchterm']];
+        $t = ["s"];
     } 
 }
 
@@ -64,17 +64,10 @@ $result = db_prep_query($sql,$v,$t);
 $resultCnt = db_prep_query($sqlCnt,$v,$t);
 
 if($result) {
-    $userArray = array();
+    $userArray = [];
     
     while($users = db_fetch_assoc($result)) {
-        $userArray[] = array(
-            'id' => $users['mb_user_id'],
-            'login' => $users['mb_user_name'],
-            'firstname' => $users['mb_user_firstname'],
-            'lastname' => $users['mb_user_lastname'],
-        	'name' => $users['mb_user_name'],
-            'email' => $users['mb_user_email']
-        );
+        $userArray[] = ['id' => $users['mb_user_id'], 'login' => $users['mb_user_name'], 'firstname' => $users['mb_user_firstname'], 'lastname' => $users['mb_user_lastname'], 'name' => $users['mb_user_name'], 'email' => $users['mb_user_email']];
     }
     
     $userCnt = db_fetch_assoc($resultCnt);
@@ -84,7 +77,7 @@ if($result) {
     else {
         $limit = SEARCH_LIMIT;
     }
-    $resultArray = array("hits" => $userCnt['cnt'], "limit" => $limit, "users" => $userArray);
+    $resultArray = ["hits" => $userCnt['cnt'], "limit" => $limit, "users" => $userArray];
     
     #$resultArray = array($userArray, $userInfoArray);
     

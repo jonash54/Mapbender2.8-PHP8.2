@@ -74,7 +74,7 @@ final class PHPMailerTest extends TestCase
         }
         $this->Mail = new PHPMailer();
         $this->Mail->SMTPDebug = 3; //Full debug output
-        $this->Mail->Debugoutput = ['PHPMailer\Test\DebugLogTestListener', 'debugLog'];
+        $this->Mail->Debugoutput = \PHPMailer\Test\DebugLogTestListener::debugLog(...);
         $this->Mail->Priority = 3;
         $this->Mail->Encoding = '8bit';
         $this->Mail->CharSet = 'iso-8859-1';
@@ -113,7 +113,7 @@ final class PHPMailerTest extends TestCase
         if (array_key_exists('mail_to', $_REQUEST)) {
             $this->setAddress($_REQUEST['mail_to'], 'Test User', 'to');
         }
-        if (array_key_exists('mail_cc', $_REQUEST) and strlen($_REQUEST['mail_cc']) > 0) {
+        if (array_key_exists('mail_cc', $_REQUEST) and strlen((string) $_REQUEST['mail_cc']) > 0) {
             $this->setAddress($_REQUEST['mail_cc'], 'Carbon User', 'cc');
         }
     }
@@ -129,7 +129,7 @@ final class PHPMailerTest extends TestCase
         $this->NoteLog = [];
 
         foreach ($this->pids as $pid) {
-            $p = escapeshellarg($pid);
+            $p = escapeshellarg((string) $pid);
             shell_exec("ps $p && kill -TERM $p");
         }
     }
@@ -277,16 +277,12 @@ final class PHPMailerTest extends TestCase
      */
     private function setAddress($sAddress, $sName = '', $sType = 'to')
     {
-        switch ($sType) {
-            case 'to':
-                return $this->Mail->addAddress($sAddress, $sName);
-            case 'cc':
-                return $this->Mail->addCC($sAddress, $sName);
-            case 'bcc':
-                return $this->Mail->addBCC($sAddress, $sName);
-        }
-
-        return false;
+        return match ($sType) {
+            'to' => $this->Mail->addAddress($sAddress, $sName),
+            'cc' => $this->Mail->addCC($sAddress, $sName),
+            'bcc' => $this->Mail->addBCC($sAddress, $sName),
+            default => false,
+        };
     }
 
     /**
@@ -674,25 +670,19 @@ final class PHPMailerTest extends TestCase
         $this->assertTrue(
             PHPMailer::validateAddress(
                 'user@example.com',
-                function ($address) {
-                    return strpos($address, '@') !== false;
-                }
+                fn($address) => str_contains((string) $address, '@')
             ),
             'Custom validator false negative'
         );
         $this->assertFalse(
             PHPMailer::validateAddress(
                 'userexample.com',
-                function ($address) {
-                    return strpos($address, '@') !== false;
-                }
+                fn($address) => str_contains((string) $address, '@')
             ),
             'Custom validator false positive'
         );
         //Set the default validator to an injected function
-        PHPMailer::$validator = function ($address) {
-            return 'user@example.com' === $address;
-        };
+        PHPMailer::$validator = fn($address) => 'user@example.com' === $address;
         $this->assertTrue(
             $this->Mail->addAddress('user@example.com'),
             'Custom default validator false negative'
@@ -964,7 +954,7 @@ EOT;
         );
         $this->buildBody();
         $this->assertTrue(
-            strpos($this->Mail->Body, $check) !== false,
+            str_contains($this->Mail->Body, $check),
             'ISO message body does not contain expected text'
         );
         $this->assertTrue($this->Mail->send(), $this->Mail->ErrorInfo);
@@ -1078,43 +1068,41 @@ EOT;
         $this->Mail->msgHTML(
             $message,
             realpath($this->INCLUDE_DIR . '/examples'),
-            function ($html) {
-                return strtoupper(strip_tags($html));
-            }
+            fn($html) => strtoupper(strip_tags((string) $html))
         );
         $this->Mail->Subject = $sub . ' + custom html2text';
         $this->assertTrue($this->Mail->send(), $this->Mail->ErrorInfo);
 
         //Test that local paths without a basedir are ignored
         $this->Mail->msgHTML('<img src="/etc/hostname">test');
-        $this->assertTrue(strpos($this->Mail->Body, 'src="/etc/hostname"') !== false);
+        $this->assertTrue(str_contains($this->Mail->Body, 'src="/etc/hostname"'));
         //Test that local paths with a basedir are not ignored
         $this->Mail->msgHTML('<img src="composer.json">test', realpath($this->INCLUDE_DIR));
-        $this->assertTrue(strpos($this->Mail->Body, 'src="composer.json"') === false);
+        $this->assertTrue(!str_contains($this->Mail->Body, 'src="composer.json"'));
         //Test that local paths with parent traversal are ignored
         $this->Mail->msgHTML('<img src="../composer.json">test', realpath($this->INCLUDE_DIR));
-        $this->assertTrue(strpos($this->Mail->Body, 'src="composer.json"') === false);
+        $this->assertTrue(!str_contains($this->Mail->Body, 'src="composer.json"'));
         //Test that existing embedded URLs are ignored
         $this->Mail->msgHTML('<img src="cid:5d41402abc4b2a76b9719d911017c592">test');
         $this->assertTrue(
-            strpos($this->Mail->Body, 'src="cid:5d41402abc4b2a76b9719d911017c592"') !== false
+            str_contains($this->Mail->Body, 'src="cid:5d41402abc4b2a76b9719d911017c592"')
         );
         //Test that absolute URLs are ignored
         $this->Mail->msgHTML('<img src="https://github.com/PHPMailer/PHPMailer/blob/master/composer.json">test');
         $this->assertTrue(
-            strpos(
+            str_contains(
                 $this->Mail->Body,
                 'src="https://github.com/PHPMailer/PHPMailer/blob/master/composer.json"'
-            ) !== false
+            )
         );
         //Test that absolute URLs with anonymous/relative protocol are ignored
         //Note that such URLs will not work in email anyway because they have no protocol to be relative to
         $this->Mail->msgHTML('<img src="//github.com/PHPMailer/PHPMailer/blob/master/composer.json">test');
         $this->assertTrue(
-            strpos(
+            str_contains(
                 $this->Mail->Body,
                 'src="//github.com/PHPMailer/PHPMailer/blob/master/composer.json"'
-            ) !== false
+            )
         );
     }
 
@@ -1363,7 +1351,7 @@ EOT;
     {
         $sendmail = ini_get('sendmail_path');
         //No path in sendmail_path
-        if (strpos($sendmail, '/') === false) {
+        if (!str_contains($sendmail, '/')) {
             ini_set('sendmail_path', '/usr/sbin/sendmail -t -i ');
         }
         $this->Mail->Body = 'Sending via mail()';
@@ -1650,7 +1638,7 @@ EOT;
         $this->buildBody();
         $this->Mail->preSend();
         $b = $this->Mail->getSentMIMEMessage();
-        $this->assertTrue((strpos($b, 'To: "Tim \"The Book\" O\'Reilly" <foo@example.com>') !== false));
+        $this->assertTrue((str_contains($b, 'To: "Tim \"The Book\" O\'Reilly" <foo@example.com>')));
     }
 
     /**

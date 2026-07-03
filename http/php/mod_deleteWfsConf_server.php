@@ -1,20 +1,20 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs.php");
-include_once(dirname(__FILE__)."/../extensions/JSON.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_wfs.php");
+include_once(__DIR__."/../extensions/JSON.php");
 
 //db connection
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 
 $json = new Services_JSON();
-$obj = $json->decode(stripslashes($_REQUEST['obj']));
+$obj = $json->decode(stripslashes((string) $_REQUEST['obj']));
 
 //workflow:
 switch($obj->action){
 	case 'getServices':
-		$obj->services = getServices($obj);
+		$obj->services = getServices();
 		sendOutput($obj);
 	break;
 	case 'getWfsConfData':
@@ -41,9 +41,9 @@ switch($obj->action){
  */
 function getServices(){
 	global $con;
-	$services = array();
-	$services['id'] = array();
-	$services['title'] = array();
+	$services = [];
+	$services['id'] = [];
+	$services['title'] = [];
 	$adm = new administration();
 	$serviceList = $adm->getWfsByOwner(Mapbender::session()->get("mb_user_id"));
 	if(count($serviceList) == 0){
@@ -69,12 +69,12 @@ function getWfsConfData($wfsID){
 	$adm = new administration();
 	$serviceList = $adm->getWfsByOwner(Mapbender::session()->get("mb_user_id"));
 	if(in_array($wfsID, $serviceList)){
-		$wfsConf = array();
-		$wfsConf['id'] = array();
-		$wfsConf['abstract'] = array();
+		$wfsConf = [];
+		$wfsConf['id'] = [];
+		$wfsConf['abstract'] = [];
 		$sql = "SELECT * FROM wfs_conf WHERE fkey_wfs_id = $1 ORDER BY wfs_conf_abstract";
-		$v = array($wfsID);
-		$t = array('i');
+		$v = [$wfsID];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 		while($row = db_fetch_array($res)){
@@ -122,8 +122,8 @@ function getWfsConfData($wfsID){
  */
 function getAssignedGuis($obj){
 	global $con;
-	$guis = array();
-	$wfsConf['id'] = array();
+	$guis = [];
+	$wfsConf['id'] = [];
 	$wfsConf['id'] = $obj->selectedConf;
 	$confs = "";
 	foreach($wfsConf['id'] as $wfsConfId){
@@ -155,17 +155,17 @@ function getAssignedGuis($obj){
  */
 function deleteWfsConf($obj){
 	global $con;
-	$wfsConf['id'] = array();
+	$wfsConf['id'] = [];
 	$wfsConf['id'] = $obj->confs;
 	foreach($wfsConf['id'] as $wfsConfId){
 		$sql = "DELETE FROM gui_wfs_conf WHERE fkey_wfs_conf_id =$1";
-		$v = array($wfsConfId);
-		$t = array('i');
+		$v = [$wfsConfId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		$sql1 = "DELETE FROM wfs_conf WHERE wfs_conf_id = $1";
-		$v1 = array($wfsConfId);
-		$t1 = array('i');
+		$v1 = [$wfsConfId];
+		$t1 = ['i'];
 		$res1 = db_prep_query($sql1,$v1,$t1);
 	}
 	$obj->success = true;

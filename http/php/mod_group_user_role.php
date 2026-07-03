@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="Group_User_Role";
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 //require_once(dirname(__FILE__)."/../core/globalSettings.php");
 /*
  * @security_patch irv done
@@ -163,16 +163,16 @@ if($insert){
 			$exists = false;
 			//check if a user is already in this group a standard role
 			$sql = "SELECT * from mb_user_mb_group where fkey_mb_group_id = $1 and fkey_mb_user_id = $2 and mb_user_mb_group_type = $3";
-			$v = array($selected_group,$selected_user[$i],1);
-			$t = array('i','i','i');
+			$v = [$selected_group, $selected_user[$i], 1];
+			$t = ['i', 'i', 'i'];
 			$res_insert = db_prep_query($sql,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				//add a user without any special role to the selected group
 				$sql = "INSERT INTO mb_user_mb_group(fkey_mb_group_id, fkey_mb_user_id) ";
 				$sql .= "VALUES($1, $2);";
-				$v = array($selected_group,$selected_user[$i]);
-				$t = array('i','i');
+				$v = [$selected_group, $selected_user[$i]];
+				$t = ['i', 'i'];
 				$res = db_prep_query($sql,$v,$t);
 			}
 		}
@@ -184,9 +184,9 @@ if($remove){
 			$sql_remove = "DELETE FROM mb_user_mb_group WHERE ";
 			$sql_remove .= "fkey_mb_user_id = $1 and fkey_mb_group_id = $2 AND mb_user_mb_group_type = $3";
 			//explode identifier for selected user option 
-			$remove_user_explode = explode('+',$remove_user[$i]);
-			$v = array($remove_user_explode[0],$selected_group,$remove_user_explode[1]);
-			$t = array('i','i','i');
+			$remove_user_explode = explode('+',(string) $remove_user[$i]);
+			$v = [$remove_user_explode[0], $selected_group, $remove_user_explode[1]];
+			$t = ['i', 'i', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -201,9 +201,9 @@ if($alterrole){
 		//check if a user is already in this group without that role
 		$sql = "SELECT * from mb_user_mb_group where fkey_mb_group_id = $1 and fkey_mb_user_id = $2 and mb_user_mb_group_type = $3";
 		//explode user-role combi to single elements userId and roleId
-		$remove_user_explode = explode('+',$remove_user[0]);
-		$v = array($selected_group,$remove_user_explode[0],$select_role[0]);
-		$t = array('i','i','i');
+		$remove_user_explode = explode('+',(string) $remove_user[0]);
+		$v = [$selected_group, $remove_user_explode[0], $select_role[0]];
+		$t = ['i', 'i', 'i'];
 		$res_insert = db_prep_query($sql,$v,$t);
 		while(db_fetch_row($res_insert)){$exists = true;}
 		if($exists == false){
@@ -213,8 +213,8 @@ if($alterrole){
 			$sql_alterrole = "UPDATE mb_user_mb_group SET mb_user_mb_group_type = $1 WHERE ";
 			$sql_alterrole .= "fkey_mb_user_id = $2 and fkey_mb_group_id = $3 AND mb_user_mb_group_type = $4";
 			$e = new mb_exception("select_row: ".$select_row);
-			$v = array($select_role[0],$remove_user_explode[0],$selected_group,$remove_user_explode[1]);
-			$t = array('i','i','i','i');
+			$v = [$select_role[0], $remove_user_explode[0], $selected_group, $remove_user_explode[1]];
+			$t = ['i', 'i', 'i', 'i'];
 			db_prep_query($sql_alterrole,$v,$t);
 		} else {
 			$e = new mb_exception("Combi user_group_role does already exist in the database - it need not to be added again!");
@@ -264,9 +264,9 @@ $sql_mb_user_mb_group .= "INNER JOIN mb_user ON mb_user_mb_group.fkey_mb_user_id
 $sql_mb_user_mb_group .= "WHERE mb_user_mb_group.fkey_mb_group_id= $1 ";
 $sql_mb_user_mb_group .= " ORDER BY mb_user.mb_user_name";
 */
-if(!$selected_group){$v = array($group_id[0]);}
-if($selected_group){$v = array($selected_group);}
-$t = array('i');
+if(!$selected_group){$v = [$group_id[0]];}
+if($selected_group){$v = [$selected_group];}
+$t = ['i'];
 
 $res_mb_user_mb_group = db_prep_query($sql_mb_user_mb_group,$v,$t);
 while($row = db_fetch_array($res_mb_user_mb_group)){

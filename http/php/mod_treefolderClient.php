@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <HTML>
@@ -547,8 +547,8 @@ function checkLayer(){
 $sql = "SELECT id FROM gui_treegde WHERE fkey_gui_id = $1";
 // $v and $t will be re-used below!
 $guiList = Mapbender::session()->get("mb_user_gui");
-$v = array($guiList);
-$t = array("s");
+$v = [$guiList];
+$t = ["s"];
 $res = db_prep_query($sql, $v, $t);
 if(!db_fetch_row($res)){
 	$sql = "INSERT INTO gui_treegde(fkey_gui_id, my_layer_title,lft,rgt,layer) VALUES($1, 'new','1','4','')";
@@ -563,8 +563,8 @@ $sql = "SELECT n.wms_id, n.id, n.my_layer_title, n.lft, n.rgt, n.layer, COUNT(*)
 $sql .= "FROM gui_treegde as n, gui_treegde as p WHERE n.lft BETWEEN p.lft AND p.rgt ";
 $sql .= " AND n.fkey_gui_id = $1 AND p.fkey_gui_id = $2 ";
 $sql .= " GROUP BY n.wms_id, n.lft, n.my_layer_title,  ((n.rgt - n.lft -1)/2) , n.id, n.rgt, n.layer ORDER BY n.lft";
-$v = array($guiList, $guiList);
-$t = array("s", "s");
+$v = [$guiList, $guiList];
+$t = ["s", "s"];
 $res = db_prep_query($sql, $v, $t);
 	echo "function initArray(){";
 	echo "Note(0,-1,'','');";

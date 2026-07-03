@@ -1,10 +1,10 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class OwsMetadataUrl {
-	var $urlArray;
-        var $typeArray;
-	var $formatArray;
+	public $urlArray;
+        public $typeArray;
+	public $formatArray;
 
 //for wfs 1.x after LatLongBoundingBox
 //problem: different layouts for different wfs versions!
@@ -138,7 +138,7 @@ class OwsMetadataUrl {
 				break;
 		}
 		//$metadataUrlDomObject->load(dirname(__FILE__) . "/../geoportal/metadata_templates/mb_ows_metadataurl.xml");
-		$metadataUrlDomObject->load(dirname(__FILE__) . "/../geoportal/metadata_templates/".$template);
+		$metadataUrlDomObject->load(__DIR__ . "/../geoportal/metadata_templates/".$template);
 		$xpathMetadataUrl = new DOMXpath($metadataUrlDomObject);
 		//$reportNodeList = $xpathLicense->query('/mb:dataqualityreport/gmd:report');
 		$xpathMetadataUrl->registerNamespace("mb", "http://www.mapbender.org/ows/metadataurl");

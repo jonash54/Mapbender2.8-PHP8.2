@@ -29,31 +29,31 @@ class PropertyIsBetween
 	 * The property name
 	 * @var string
 	 */
-	var $ogcPropertyName = "";
+	public $ogcPropertyName = "";
 	
 	/**
 	 * The lower boundary for this property
 	 * @var float
 	 */
-	var $upperBoundary = "";
+	public $upperBoundary = "";
 	
 	/**
 	 * The upper boundary for this property
 	 * @var float
 	 */
-	var $lowerBoundary = "";
+	public $lowerBoundary = "";
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -121,7 +121,7 @@ class PropertyIsBetween
 		$temp .= $offset." </td>\n";
 		$temp .= $offset." <td>\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."  <a class=\"edit\" href=\"?function=deleteoperation&id=".$this->parent."&number=".$number."\">";
 		$temp .= "<img src='./img/minus.gif' border='0'>&nbsp;l&ouml;schen</a>\n";

@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 /*
 	copies an uploaded file from a field called 'geoJSONUpload'
@@ -10,8 +10,8 @@ require_once(dirname(__FILE__)."/../classes/class_json.php");
 if($_SERVER['REQUEST_METHOD'] == "POST") {
 	$url = "";
 	$error = "";
-	$filename = "wfs_upload".sha1(date("Y-m-d-His".rand())).".gjson";
-	$filepath = dirname(__FILE__)."/../tmp/$filename";
+	$filename = "wfs_upload".sha1(date("Y-m-d-His".random_int(0, mt_getrandmax()))).".gjson";
+	$filepath = __DIR__."/../tmp/$filename";
 	if(copy($_FILES['geoJSONUpload']['tmp_name'],$filepath) === False){
 		$error =  $_FILES['geoJSONUpload']['tmp_name'] ."-> $filepath";
 	}else{

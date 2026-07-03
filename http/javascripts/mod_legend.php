@@ -19,7 +19,7 @@
 
 $e_id = "legend";
 $e_id_css = "legend";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
@@ -35,8 +35,8 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 <?php
 include '../include/dyn_css.php';
 $sql = "SELECT DISTINCT e_target, e_width, e_height FROM gui_element WHERE e_id = $1 AND fkey_gui_id = $2";
-$v = array($e_id, $gui_id);
-$t = array('s', 's');
+$v = [$e_id, $gui_id];
+$t = ['s', 's'];
 $res = db_prep_query($sql, $v, $t);
 $cnt = 0;
 while($row = db_fetch_array($res)){    
@@ -48,8 +48,8 @@ if($cnt > 1){
 }
 
 $sql2 = "SELECT e_left,e_top,e_width,e_height FROM gui_element WHERE e_id = $1 AND fkey_gui_id = $2";
-$v = array($e_target, $gui_id);
-$t = array('s','s');
+$v = [$e_target, $gui_id];
+$t = ['s', 's'];
 $res2 = db_prep_query($sql2, $v, $t);
 echo "<script type='text/javascript'>\n";
 echo "var mod_legend_target = '".$e_target."';\n";

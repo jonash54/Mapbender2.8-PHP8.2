@@ -23,9 +23,9 @@
 * get/post '___' separated maprequests
 *
 **/
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_mb_exception.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_mb_exception.php");
+require_once(__DIR__."/class_connector.php");
 
 class weldOverview2PNG_rotate{
 
@@ -66,7 +66,7 @@ class weldOverview2PNG_rotate{
 		$objx = new stripRequest($url_extent);
 		$ex_width = $objx->get("width");
 		$ex_height = $objx->get("height");
-		$extent = explode(",",$objx->get("BBOX"));
+		$extent = explode(",",(string) $objx->get("BBOX"));
 
 		$p1 = $this->makeRealWorld2mapPos($url_overview, round($rotatedExtent[0][0]), round($rotatedExtent[0][1]));
 		$p2 = $this->makeRealWorld2mapPos($url_overview, round($rotatedExtent[1][0]), round($rotatedExtent[1][1]));
@@ -131,7 +131,7 @@ class weldOverview2PNG_rotate{
 		#$e = new mb_exception("weld_url: ".$url);
 		#$e = new mb_exception("w: ".$width."height".$height);
 
-	   $arrayBBox = explode(",",$obj->get("BBOX"));
+	   $arrayBBox = explode(",",(string) $obj->get("BBOX"));
 	   $minX = $arrayBBox[0];
 	   $minY = $arrayBBox[1];
 	   $maxX = $arrayBBox[2];
@@ -145,7 +145,7 @@ class weldOverview2PNG_rotate{
 	   $pixPos_x = round((($rw_posx - $minX)/$xtentx)*$width);
 	   $pixPos_y = round((($maxY - $rw_posy)/$xtenty)*$height);
 
-	   $pixPos = array($pixPos_x, $pixPos_y);
+	   $pixPos = [$pixPos_x, $pixPos_y];
 	   
 	   return $pixPos;
 	}

@@ -37,7 +37,7 @@ function mod_copyright(){
 	var myMapObj = Mapbender.modules[mod_copyright_target];
 
 	var str_c = "<div style='z-index:1001;font-family:" + mod_copyright_font + ";font-size:" + mod_copyright_fontsize + ";color:" + mod_copyright_color2 + ";position:absolute;bottom:5px;right:5px'>"+mod_copyright_text+"</div>";
-	
+
 	var map_el = myMapObj.getDomElement();
 	if(!map_el.ownerDocument.getElementById(myMapObj.elementName+"_copyright")){
 		//create Box Elements

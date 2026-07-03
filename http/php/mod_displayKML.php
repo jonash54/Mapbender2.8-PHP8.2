@@ -19,8 +19,8 @@
 
 mb_internal_encoding("UTF-8");
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_kml_ows.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_kml_ows.php");
 
 $kmlId = $_GET["kmlId"];
 

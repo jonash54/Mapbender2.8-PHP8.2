@@ -5,7 +5,7 @@
  * bruno@ioda-net.ch 09.08.2003
  */
 
-$PHPMAILER_LANG = array();
+$PHPMAILER_LANG = [];
 
 $PHPMAILER_LANG["provide_address"] = 'Vous devez fournir au moins ' .
                                      'une adresse de destinataire.';

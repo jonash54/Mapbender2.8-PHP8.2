@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="loadWFS";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -29,7 +29,7 @@ $guiList = $_POST["guiList"];
 $wfsList = $_POST["wfsList"];
 $xml_file = $_POST["xml_file"];
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -103,7 +103,7 @@ echo "<tr>";
 echo "<td>";
 echo"GUI";
 echo"<br>";
-$gui_id =array();
+$gui_id =[];
 if (count($ownguis)>0){
 	for($i=0; $i<count($ownguis); $i++){
 		$gui_id[$i]=$ownguis[$i];
@@ -135,8 +135,8 @@ echo"<br>";
 if(isset($guiList) && $guiList!=""){
 	$sql = "SELECT Distinct wfs.wfs_title from gui_wfs LEFT JOIN wfs ON gui_wfs.fkey_wfs_id=wfs.wfs_id ";
 	$sql .= "where gui_wfs.fkey_gui_id = $1 order by wfs.wfs_title";
-	$v = array($guiList);
-	$t = array('s');
+	$v = [$guiList];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 
   $count=0;

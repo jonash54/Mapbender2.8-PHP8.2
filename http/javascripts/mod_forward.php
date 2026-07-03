@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 echo "var mod_forward_map = '".$e_target[0]."';";
 echo "var mod_forward_overview = '".$e_target[1]."';";
 
 ?>
 var mod_forward_img_off = new Image(); 
-mod_forward_img_off.src = "<?php  echo preg_replace("/_off_disabled/","_off",$e_src);?>";
+mod_forward_img_off.src = "<?php  echo preg_replace("/_off_disabled/","_off",(string) $e_src);?>";
 var mod_forward_img_off_disabled = new Image(); 
 mod_forward_img_off_disabled.src = "<?php  echo $e_src;  ?>";
 var mod_forward_img_over = new Image(); 
-mod_forward_img_over.src = "<?php  echo preg_replace("/_off_disabled/","_over",$e_src);?>";
+mod_forward_img_over.src = "<?php  echo preg_replace("/_off_disabled/","_over",(string) $e_src);?>";
 var mod_forward_img_previous = mod_forward_img_off_disabled.src;
 
 eventAfterMapRequest.register(function (obj) {

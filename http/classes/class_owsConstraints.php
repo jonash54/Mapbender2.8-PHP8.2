@@ -1,15 +1,15 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class OwsConstraints {	
 	//initialize
-	var $type;
-	var $id;
-	var $languageCode;
-	var $withHeader;
-	var $asTable;
-	var $outputFormat;
-	var $returnDirect;
+	public $type;
+	public $id;
+	public $languageCode;
+	public $withHeader;
+	public $asTable;
+	public $outputFormat;
+	public $returnDirect;
 
 	function __construct() {
 		$this->type = "wms";
@@ -19,12 +19,12 @@ class OwsConstraints {
 		$this->asTable = false;
 		$this->outputFormat = "html";
 		$this->returnDirect = true;
-		$this->accessLimitationCodes = array();
-		$this->accessLimitationDescription = array();
-		if (file_exists(dirname(__FILE__)."/../../conf/inspire_LimitationsOnPublicAccess.json")) {
+		$this->accessLimitationCodes = [];
+		$this->accessLimitationDescription = [];
+		if (file_exists(__DIR__."/../../conf/inspire_LimitationsOnPublicAccess.json")) {
 			$configObject = json_decode(file_get_contents("../../conf/inspire_LimitationsOnPublicAccess.json"));
-            $arrayLimitationOnPublicAccessCodes = array();
-            $arrayLimitationOnPublicAccessDescriptions = array();
+            $arrayLimitationOnPublicAccessCodes = [];
+            $arrayLimitationOnPublicAccessDescriptions = [];
 			foreach ($configObject->codelist as $accessconstraintsCodelist) {
 				$arrayLimitationOnPublicAccessCodes[] = $accessconstraintsCodelist->code;
 				$arrayLimitationOnPublicAccessDescriptions[$accessconstraintsCodelist->code] = $accessconstraintsCodelist->title->de.": ".$accessconstraintsCodelist->description->de;
@@ -39,7 +39,7 @@ class OwsConstraints {
 			//validate to integer 
 			$testMatch = $_REQUEST["id"];
 			$pattern = '/^[\d]*$/';		
- 			if (!preg_match($pattern,$testMatch)){ 
+ 			if (!preg_match($pattern,(string) $testMatch)){ 
 				$returnObject['success'] = false;
 				$returnObject['message'] = "Parameter id was no integer!";	
 				return $returnObject;	
@@ -119,14 +119,14 @@ class OwsConstraints {
 	}
 	
 	function display_text($string) {
-    		$string = preg_replace("#[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]#", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    		$string = preg_replace("#[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]#", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     		$string = preg_replace("#^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$#", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     		$string = preg_replace("#\n#", "<br>", $string);
     		return $string;
 	}  
 
 	function getDisclaimer() {
-		$htmlHeader = array();
+		$htmlHeader = [];
 		//define header texts
 		$htmlHeader['discHeader'] = _mb('Terms of use');
 		$htmlHeader['discPrivacyHeader'] = _mb('Note on protection of privacy');
@@ -171,8 +171,8 @@ class OwsConstraints {
 			$sql .= "  md_termsofuse ON  (mb_metadata.metadata_id = md_termsofuse.fkey_metadata_id) LEFT OUTER JOIN termsofuse ON";
 			$sql .= " (md_termsofuse.fkey_termsofuse_id=termsofuse.termsofuse_id) where mb_metadata.metadata_id = $1";	
 		}
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		array_push($t, "i");
 		array_push($v, $this->id);
 		$res = db_prep_query($sql,$v,$t);
@@ -192,8 +192,8 @@ class OwsConstraints {
 		if ($this->type == "metadata") {
 			$sql = "SELECT mb_user_email FROM mb_metadata LEFT OUTER JOIN mb_user ON  (fkey_mb_user_id = mb_user.mb_user_id) WHERE metadata_id=$1";
 		}
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		array_push($t, "i");
 		array_push($v, $this->id);
 		$res = db_prep_query($sql,$v,$t);
@@ -204,7 +204,7 @@ class OwsConstraints {
 		//if fees exists,
 		//if licences are defined,
 		//if network access is restricted - only services
-		if ((isset($row[$this->type.'_proxylog']) & $row[$this->type.'_proxylog'] != 0) or strtoupper($row['accessconstraints']) != "NONE" or strtoupper($row['fees']) != "NONE" or isset($row['termsofuse_id']) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0)) {
+		if ((isset($row[$this->type.'_proxylog']) & $row[$this->type.'_proxylog'] != 0) or strtoupper((string) $row['accessconstraints']) != "NONE" or strtoupper((string) $row['fees']) != "NONE" or isset($row['termsofuse_id']) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0)) {
 			$html = "";
 			//generate text for json object if restrictions exists
 			if ($this->withHeader && $this->outputFormat != "iso19139") {
@@ -222,7 +222,7 @@ class OwsConstraints {
 					$discPrivacy .= "<a href=\"mailto:".$rowOwner['mb_user_email']."\">".$rowOwner['mb_user_email']."</a>";
 					$html .= $t_a.$htmlHeader['discPrivacyHeader'].$t_b.$discPrivacy.$t_c;
 				}
-				if ((strtoupper($row['accessconstraints']) != "NONE" & (str_replace(" ", "", $row['accessconstraints']) != "")) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) ) {
+				if ((strtoupper((string) $row['accessconstraints']) != "NONE" & (str_replace(" ", "", $row['accessconstraints']) != "")) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) ) {
 					$accessConstraintsHeader = $htmlHeader['accessConstraintsHeader'];
 					if (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) {
 						$accessConstraints = $htmlHeader['networkAccess'];
@@ -233,7 +233,7 @@ class OwsConstraints {
 					$accessConstraints .= $this->display_text($row['accessconstraints']);
 					$html .= $t_a.$htmlHeader['accessConstraintsHeader'].$t_b.$accessConstraints.$t_c;
 				}
-				if (isset($row['termsofuse_id']) or (strtoupper($row['fees']) != "NONE" & (str_replace(" ", "", $row['fees']) != "")) or ($this->type == "wms" & isset($row['wms_pricevolume']) & $row['wms_pricevolume'] != 0) or ($this->type == "wfs" & isset($row['wfs_pricevolume']) & $row['wfs_pricevolume'] != 0)) {
+				if (isset($row['termsofuse_id']) or (strtoupper((string) $row['fees']) != "NONE" & (str_replace(" ", "", $row['fees']) != "")) or ($this->type == "wms" & isset($row['wms_pricevolume']) & $row['wms_pricevolume'] != 0) or ($this->type == "wfs" & isset($row['wfs_pricevolume']) & $row['wfs_pricevolume'] != 0)) {
 					$feesPart = $t_a.$htmlHeader['feesHeader'].$t_b;
 					if (isset($row['termsofuse_id'])) {
 						$fees = $htmlHeader['licences'];
@@ -249,7 +249,7 @@ class OwsConstraints {
 						}
 						$feesPart .= $fees;
 					} else {
-						if (isset($row['fees']) & ((strtoupper($row['fees']) != 'NONE') or ($row['fees'] != ''))) {
+						if (isset($row['fees']) & ((strtoupper((string) $row['fees']) != 'NONE') or ($row['fees'] != ''))) {
 							$fees = $this->display_text($row['fees']);
 							$feesPart .= $fees;
 						}
@@ -288,7 +288,7 @@ class OwsConstraints {
 					$discPrivacy .= "<a href=\"mailto:".$rowOwner['mb_user_email']."\">".$rowOwner['mb_user_email']."</a>";
 					$html .= $discPrivacy."<br>";
 				}
-				if ((strtoupper($row['accessconstraints']) != "NONE" & (str_replace(" ", "", $row['accessconstraints']) != "")) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) ) {
+				if ((strtoupper((string) $row['accessconstraints']) != "NONE" & (str_replace(" ", "", $row['accessconstraints']) != "")) or (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) ) {
 					$accessConstraintsHeader = $htmlHeader['accessConstraintsHeader'];
 					if (isset($row[$this->type.'_network_access']) & $row[$this->type.'_network_access'] != 0) {
 						$accessConstraints .= $htmlHeader['networkAccess'];
@@ -299,7 +299,7 @@ class OwsConstraints {
 					$accessConstraints .= "<h2>".$htmlHeader['accessConstraintsHeader']."</h2>".$this->display_text($row['accessconstraints']);
 					$html .= $accessConstraints."<br>";
 				}
-				if (isset($row['termsofuse_id']) or (strtoupper($row['fees']) != "NONE" & (str_replace(" ", "", $row['fees']) != "")) or ($this->type == "wms" & isset($row['wms_pricevolume']) & $row['wms_pricevolume'] != 0) or ($this->type == "wfs" & isset($row['wfs_pricevolume']) & $row['wfs_pricevolume'] != 0)) {
+				if (isset($row['termsofuse_id']) or (strtoupper((string) $row['fees']) != "NONE" & (str_replace(" ", "", $row['fees']) != "")) or ($this->type == "wms" & isset($row['wms_pricevolume']) & $row['wms_pricevolume'] != 0) or ($this->type == "wfs" & isset($row['wfs_pricevolume']) & $row['wfs_pricevolume'] != 0)) {
 					$fees .= "<h2>".$htmlHeader['feesHeader']."</h2>";
 					if (isset($row['termsofuse_id'])) {
 						$fees .= $htmlHeader['licences'];
@@ -313,7 +313,7 @@ class OwsConstraints {
 							$fees .= _mb("Source note").": ".$row['source_note']."<br>";
 						}
 					} else {
-						if (isset($row['fees']) & ((strtoupper($row['fees']) != 'NONE') or ($row['fees'] != ''))) {
+						if (isset($row['fees']) & ((strtoupper((string) $row['fees']) != 'NONE') or ($row['fees'] != ''))) {
 							$fees .= $this->display_text($row['fees']);
 						}
 					}
@@ -454,7 +454,7 @@ class OwsConstraints {
 		//if so, give them (fees from capabilities should be included in useLimitations, accessconstraints from capabilities should be included in a separate accessConstraints element!
 		//if some fees are given and a predefined license is selected, give a combination of both!
 		//$e = new mb_exception("fees:".$fees);
-		if (isset($fees) && $fees !== '' && $fees !== false && strtoupper($fees) !== "NONE") {
+		if (isset($fees) && $fees !== '' && $fees !== false && strtoupper((string) $fees) !== "NONE") {
 			if ($predefinedLicenseText != "") {
 				$useLimitationTextString = $fees." - ".$predefinedLicenseText;
 			} else {
@@ -469,7 +469,7 @@ class OwsConstraints {
 		}
 		//All information about the license and costs, ... are now concatenated in the freetextfield 
 		//$e = new mb_exception($useLimitationTextString);
-		switch(strtolower($useLimitationTextString)) {
+		switch(strtolower((string) $useLimitationTextString)) {
 			case "none":
 				$useLimitationTextString = "no conditions to access and use";
 				$useLimitationTextString_de = "Es gelten keine Bedingungen";
@@ -502,7 +502,7 @@ No conditions apply to access and use
 					break;
 			}
 		}
-		if (in_array($useLimitationTextString, array("conditions to access and use unknown", "no conditions to access and use"))) {
+		if (in_array($useLimitationTextString, ["conditions to access and use unknown", "no conditions to access and use"])) {
 			$useLimitationText = $iso19139->createTextNode($useLimitationTextString_de);
 		} else {
 			$useLimitationText = $iso19139->createTextNode($useLimitationTextString);
@@ -617,7 +617,7 @@ No conditions apply to access and use
 		$MD_LegalConstraints=$iso19139->createElement("gmd:MD_LegalConstraints");
 		$accessConstraintsXml=$iso19139->createElement("gmd:accessConstraints");
 		$MD_RestrictionCode=$iso19139->createElement("gmd:MD_RestrictionCode");
-		$accessConstraintExists = isset($accessConstraints) && $accessConstraints !== '' && strtoupper($accessConstraints) !== 'NONE' && $accessConstraints !== false;
+		$accessConstraintExists = isset($accessConstraints) && $accessConstraints !== '' && strtoupper((string) $accessConstraints) !== 'NONE' && $accessConstraints !== false;
 		if (defined("INSPIRE_METADATA_SPEC") && INSPIRE_METADATA_SPEC != "") {
 			switch(INSPIRE_METADATA_SPEC) {
 				case "2.0.1":

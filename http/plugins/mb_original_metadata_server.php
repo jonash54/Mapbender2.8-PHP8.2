@@ -1,11 +1,11 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -20,24 +20,24 @@ function getWmsMetadataFromXml($capabilitiesDoc) {
 	$xmlDoc->loadXML($capabilitiesDoc);
 	
 	//define default resultObj
-	$resultObj = array(
-		"original_wms_title" => "",
-		"original_wms_abstract" => "",
-		"original_accessconstraints" => "",
-		"original_fees" => "",
-//		"original_wms_keywords" => "",
-		"original_contactposition" => "",
-		"original_contactelectronicmailaddress" => "",
-		"original_contactfacsimiletelephone" => "",
-		"original_contactvoicetelephone" => "",
-		"original_contactperson" => "",
-		"original_contactorganization" => "",
-		"original_address" => "",
-		"original_city" => "",
-		"original_stateorprovince" => "",
-		"original_postcode" => "",
-		"original_country" => ""
-	);
+	$resultObj = [
+     "original_wms_title" => "",
+     "original_wms_abstract" => "",
+     "original_accessconstraints" => "",
+     "original_fees" => "",
+     //		"original_wms_keywords" => "",
+     "original_contactposition" => "",
+     "original_contactelectronicmailaddress" => "",
+     "original_contactfacsimiletelephone" => "",
+     "original_contactvoicetelephone" => "",
+     "original_contactperson" => "",
+     "original_contactorganization" => "",
+     "original_address" => "",
+     "original_city" => "",
+     "original_stateorprovince" => "",
+     "original_postcode" => "",
+     "original_country" => "",
+ ];
 	
 	$service_node = $xmlDoc->getElementsByTagName('Service'); 
 	foreach ($service_node as $node) {
@@ -136,11 +136,7 @@ function getLayerMetadataFromXml($capabilitiesDoc,$layerName) {
 	$xmlDoc->loadXML($capabilitiesDoc);
 	
 	//define default resultObj
-	$resultObj = array(
-		"original_layer_title" => "",
-		"original_layer_abstract" => "",
-		"original_layer_keyword" => ""
-	);
+	$resultObj = ["original_layer_title" => "", "original_layer_abstract" => "", "original_layer_keyword" => ""];
 	
 	$layer_nodes = $xmlDoc->getElementsByTagName('Layer');
 	foreach ($layer_nodes as $node) {
@@ -165,7 +161,7 @@ function getLayerMetadataFromXml($capabilitiesDoc,$layerName) {
 		//"Service"-childnode KeywordList	
 		if (strtoupper($layerChild->nodeName) == "KEYWORDLIST") {
 			$keywords_list = $layerChild->childNodes;
-			$keywords = array();
+			$keywords = [];
 			foreach ($keywords_list as $keywordlist_child_node) {																		
 				$keyword = $keywordlist_child_node->nodeValue;						
 				array_push($keywords, $keyword);

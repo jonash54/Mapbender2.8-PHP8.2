@@ -14,15 +14,15 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-require_once(dirname(__FILE__) . '/../../core/globalSettings.php');
-require_once(dirname(__FILE__).'/../classes/class_connector.php');
-require_once(dirname(__FILE__).'/../classes/class_ckanApi.php');
-require_once(dirname(__FILE__).'/../classes/class_group.php');
-require_once(dirname(__FILE__) . '/../php/mod_getDownloadOptions.php');
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__ . '/../../core/globalSettings.php');
+require_once(__DIR__.'/../classes/class_connector.php');
+require_once(__DIR__.'/../classes/class_ckanApi.php');
+require_once(__DIR__.'/../classes/class_group.php');
+require_once(__DIR__ . '/../php/mod_getDownloadOptions.php');
+require_once(__DIR__.'/../../conf/ckan.conf');
 //classes for csw handling
-require_once(dirname(__FILE__)."/../classes/class_cswClient.php");
-require_once(dirname(__FILE__)."/../classes/class_csw.php");
+require_once(__DIR__."/../classes/class_cswClient.php");
+require_once(__DIR__."/../classes/class_csw.php");
 /**
  * Class to provide functions to sync a mapbender metadata repository to a ckan instance, tested with ckan 2.5.3 in 2016
  *
@@ -30,16 +30,16 @@ require_once(dirname(__FILE__)."/../classes/class_csw.php");
  */
 
 class syncCkan {
-    var $ckanApiKey;
-    var $ckanApiUrl;
-    var $ckanApiVersion;
-    var $syncOrgaId;
-    var $mapbenderUserId;
-    var $topicCkanCategoryMap;
-    var $topicDataThemeCategoryMap;
-    var $frequencyMap;
-    var $compareTimestamps;
-    var $mapbenderUrl;
+    public $ckanApiKey;
+    public $ckanApiUrl;
+    public $ckanApiVersion;
+    public $syncOrgaId;
+    public $mapbenderUserId;
+    public $topicCkanCategoryMap;
+    public $topicDataThemeCategoryMap;
+    public $frequencyMap;
+    public $compareTimestamps;
+    public $mapbenderUrl;
 
     public function __construct() {
         if (defined("CKAN_SERVER_PORT") && CKAN_SERVER_PORT !== '') {
@@ -67,42 +67,47 @@ class syncCkan {
 	$this->topicCkanCategoryMap = $topicCkanCategoryMap; //from ckan.conf
 	//Mapping of DCAT-AP categories to iso topic categories
 	//$this->topicDataThemeCategoryMap = $topicDataThemeCategoryMap; //from ckan.conf
-$this->topicDataThemeCategoryMap = array(
-	"1" => "AGRI,ENVI,HEAL",//"1" => "farming",
-	"2" => "AGRI,ENVI,HEAL",//"2" => "biota",
-	"3" => "GOVE,JUST,SOCI",//"3" => "boundaries",
-	"4" => "AGRI,ENVI,HEAL,TECH",//"4" => "climatologyMeteorologyAtmosphere",
-	"5" => "ECON,ENER,INTR",//"5" => "economy",
-	"6" => "ENVI,TRAN,REGI",//"6" => "elevation",
-	"7" => "ENVI",//"7" => "environment",
-	"8" => "AGRI,ENVI,ENER,REGI,TECH,TRAN",//"8" => "geoscientificInformation",
-	"9" => "HEAL",//"9" => "health",
-	"10" => "AGRI,ENVI,TRAN",//"10" => "imageryBaseMapsEarthCover",
-	"11" => "AGRI,ECON,GOVE,TRAN",//"11" => "intelligenceMilitary",
-	"12" => "ENVI,REGI,AGRI",//"12" => "inlandWaters",
-	"13" => "REGI",//"13" => "location",
-	"14" => "ENVI",//"14" => "oceans",
-	"15" => "TRAN,ENVI,ECON,AGRI,GOVE,SOCI,JUST",//"15" => "planningCadastre",
-	"16" => "SOCI,EDUC,JUST",//"16" => "society",
-	"17" => "AGRI,REGI,ENER,HEAL,GOVE",//"17" => "structure",
-	"18" => "TRAN",//"18" => "transportation",
-	"19" => "ECON,EDUC,ENER,TECH"//"19" => "utilitiesCommunication"
-);
+$this->topicDataThemeCategoryMap = [
+    "1" => "AGRI,ENVI,HEAL",
+    //"1" => "farming",
+    "2" => "AGRI,ENVI,HEAL",
+    //"2" => "biota",
+    "3" => "GOVE,JUST,SOCI",
+    //"3" => "boundaries",
+    "4" => "AGRI,ENVI,HEAL,TECH",
+    //"4" => "climatologyMeteorologyAtmosphere",
+    "5" => "ECON,ENER,INTR",
+    //"5" => "economy",
+    "6" => "ENVI,TRAN,REGI",
+    //"6" => "elevation",
+    "7" => "ENVI",
+    //"7" => "environment",
+    "8" => "AGRI,ENVI,ENER,REGI,TECH,TRAN",
+    //"8" => "geoscientificInformation",
+    "9" => "HEAL",
+    //"9" => "health",
+    "10" => "AGRI,ENVI,TRAN",
+    //"10" => "imageryBaseMapsEarthCover",
+    "11" => "AGRI,ECON,GOVE,TRAN",
+    //"11" => "intelligenceMilitary",
+    "12" => "ENVI,REGI,AGRI",
+    //"12" => "inlandWaters",
+    "13" => "REGI",
+    //"13" => "location",
+    "14" => "ENVI",
+    //"14" => "oceans",
+    "15" => "TRAN,ENVI,ECON,AGRI,GOVE,SOCI,JUST",
+    //"15" => "planningCadastre",
+    "16" => "SOCI,EDUC,JUST",
+    //"16" => "society",
+    "17" => "AGRI,REGI,ENER,HEAL,GOVE",
+    //"17" => "structure",
+    "18" => "TRAN",
+    //"18" => "transportation",
+    "19" => "ECON,EDUC,ENER,TECH",
+];
 
-$this->frequencyMap = array(
-	"continual" => "CONT",
-	"daily" => "DAILY",
-	"weekly" => "WEEKLY",
-	"fortnightly" => "WEEKLY_2",
-	"monthly" => "MONTHLY",
-	"quarterly" => "QUARTERLY",
-	"biannually" => "BIENNIAL",
-	"annually" => "ANNUAL",
-	"asNeeded" => "OTHER",
-	"irregular" => "IRREG",
-	"notPlanned" => "NEVER",
-	"unknown" => "UNKNOWN"
-);
+$this->frequencyMap = ["continual" => "CONT", "daily" => "DAILY", "weekly" => "WEEKLY", "fortnightly" => "WEEKLY_2", "monthly" => "MONTHLY", "quarterly" => "QUARTERLY", "biannually" => "BIENNIAL", "annually" => "ANNUAL", "asNeeded" => "OTHER", "irregular" => "IRREG", "notPlanned" => "NEVER", "unknown" => "UNKNOWN"];
 	$this->compareTimestamps = false; //default to update each dataset, because the ckan index for metadata_modified may not be up to date !!!
     }
 
@@ -259,7 +264,7 @@ $this->frequencyMap = array(
         if ($ckanConnector->timedOut == true) {
             return false;
         }
-        $listOfFilteredData = json_decode($ckanConnector->file);
+        $listOfFilteredData = json_decode((string) $ckanConnector->file);
         $externalCkanMetadataArray = [];
         $countExternalCkanMetadataArray = 0;
         if ($listOfFilteredData->success == true) {
@@ -283,7 +288,7 @@ $this->frequencyMap = array(
         }
         $ckanPackageJson = $ckanConnector->file;
 //$e = new mb_exception("remote ckan package: ".$ckanPackageJson);
-        $ckanPackageRemote = json_decode($ckanPackageJson);
+        $ckanPackageRemote = json_decode((string) $ckanPackageJson);
 	$ckanPackage->title = "Demo: ".$ckanPackageRemote->result->title;
 //use identical name and value!
 	$ckanPackage->id = $ckanPackageRemote->result->id;	
@@ -298,7 +303,7 @@ $ckanPackage->type = "dataset";
 $ckanPackage->license_id = "odc-odbl";
 	//pull filter
 	if (isset($central_filter) && $central_filter !== "") {
-		$central_filterArray = explode(":",$central_filter);
+		$central_filterArray = explode(":",(string) $central_filter);
 		$ckanPackage->{$central_filterArray[0]} = $central_filterArray[1];
 	}
 	//$ckanPackage->transparency_category_de_rp = "spatial_data";
@@ -390,12 +395,12 @@ $ckanPackage->license_id = "odc-odbl";
         if (isset($this->mapbenderUserId) && (integer)$this->mapbenderUserId > 0) {
             if (isset($this->syncOrgaId) && (integer)$this->syncOrgaId > 0) {
 	        $sql = "SELECT DISTINCT mb_group_id, mb_group_title, mb_group_name, mb_group_title, mb_group_email, mb_group_ckan_uuid, mb_group_ckan_api_key_text, mb_group_csw_catalogues, mb_group_ckan_catalogues, mb_user_mb_group.mb_user_mb_group_type FROM mb_group JOIN mb_user_mb_group ON mb_group_id = fkey_mb_group_id AND fkey_mb_user_id = $1 AND mb_group_id = $2 AND mb_user_mb_group_type IN (2,3)";
-	        $v = array($this->mapbenderUserId, $this->syncOrgaId);
-	        $t = array('i','i');
+	        $v = [$this->mapbenderUserId, $this->syncOrgaId];
+	        $t = ['i', 'i'];
             } else {
 	        $sql = "SELECT DISTINCT mb_group_id, mb_group_title, mb_group_name, mb_group_title, mb_group_email, mb_group_ckan_uuid, mb_group_ckan_api_key_text, mb_group_csw_catalogues, mb_group_ckan_catalogues, mb_user_mb_group.mb_user_mb_group_type FROM mb_group JOIN mb_user_mb_group ON mb_group_id = fkey_mb_group_id AND fkey_mb_user_id = $1 AND mb_user_mb_group_type IN (2,3)";
-	        $v = array($this->mapbenderUserId);
-	        $t = array('i');
+	        $v = [$this->mapbenderUserId];
+	        $t = ['i'];
             }
             $res = db_prep_query($sql, $v, $t);
             $countDepArray = 0;
@@ -442,8 +447,8 @@ $ckanPackage->license_id = "odc-odbl";
 		if (array_search($lowerCaseString, $mixedStringArray) !== false) {
 			$result[] = $mixedStringArray[array_search($lowerCaseString, $mixedStringArray)];
 		} else {
-			if (array_search(strtoupper($lowerCaseString), $mixedStringArray) !== false) {
-				$result[] = $mixedStringArray[array_search(strtoupper($lowerCaseString), $mixedStringArray)];
+			if (array_search(strtoupper((string) $lowerCaseString), $mixedStringArray) !== false) {
+				$result[] = $mixedStringArray[array_search(strtoupper((string) $lowerCaseString), $mixedStringArray)];
 			}
 		}
 	}
@@ -485,7 +490,7 @@ $e = new mb_exception("classes/class_syncCkan.php: parameter departmentId: ".$de
 	    return false;
 	}
 	$organization = $departmentsArray[$index];
-	$catalogues = json_decode($departmentsArray[$index]["ckan_catalogues"])->ckan_catalogues;
+	$catalogues = json_decode((string) $departmentsArray[$index]["ckan_catalogues"])->ckan_catalogues;
         foreach ($catalogues as $catalogue) { //only one in this case
 
 	    $syncListResultRemoteCkan->external_ckan[$numberOfCatalogue]->name = $catalogue->ckan_name;
@@ -527,7 +532,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
                         //get list of ids for existing spatial datasets - category spatial should be defined!!!!!!
                         //http://localhost:5000/api/3/action/package_search?fq=extras_transparency_category_de_rp:spatial_data
                         //with org: http://localhost:5000/api/3/action/package_search?fq=extras_transparency_category_de_rp:spatial_data%20AND%20owner_org:81476cf5-6c52-4e99-8b9f-6150d63fcb32
-			
+
                         //TODO: define standard category filter in ckan.conf!
                         //$queryObject->fq = STANDARD_CKAN_FILTER." AND owner_org:".$organization["ckan_uuid"];
 			$queryObject->fq = $catalogue->central_ckan_filter." AND owner_org:".$organization["ckan_uuid"];
@@ -673,7 +678,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
         $syncListCsw->function = "getSyncListCswJson";
         $numberOfCatalogue = 0;
 	$organization = $departmentsArray[0];
-	$catalogues = json_decode($departmentsArray[0]["csw_catalogues"])->csw_catalogues;
+	$catalogues = json_decode((string) $departmentsArray[0]["csw_catalogues"])->csw_catalogues;
         foreach ($catalogues as $catalogue) { //only one in this case
 	    $syncListResultCsw->external_csw[$numberOfCatalogue]->id = $catalogue->catalogue_id;
 	    $syncListResultCsw->external_csw[$numberOfCatalogue]->orga_filter = $catalogue->organisation_filter;
@@ -706,7 +711,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
                         //get list of ids for existing spatial datasets - category spatial should be defined!!!!!!
                         //http://localhost:5000/api/3/action/package_search?fq=transparency_category_de_rp:spatial_data
                         //with org: http://localhost:5000/api/3/action/package_search?fq=transparency_category_de_rp:spatial_data%20AND%20owner_org:81476cf5-6c52-4e99-8b9f-6150d63fcb32
-			
+
                         //TODO: define standard category filter in ckan.conf!
                         //$queryObject->fq = STANDARD_CKAN_FILTER." AND owner_org:".$organization["ckan_uuid"];
 			$queryObject->fq = $catalogue->ckan_filter." AND owner_org:".$organization["ckan_uuid"];
@@ -856,7 +861,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
             $syncListResult->geoportal_organization[$numberGeoportalOrga]->title = $organization["title"];
             $syncListResult->geoportal_organization[$numberGeoportalOrga]->email = $organization["email"];
             $syncListResult->geoportal_organization[$numberGeoportalOrga]->ckan_orga_ident = false;
-	    $syncListResult->geoportal_organization[$numberGeoportalOrga]->csw_catalogues = json_decode($organization["csw_catalogues"])->csw_catalogues;
+	    $syncListResult->geoportal_organization[$numberGeoportalOrga]->csw_catalogues = json_decode((string) $organization["csw_catalogues"])->csw_catalogues;
             if (isset($organization["ckan_uuid"]) && isset($organization["ckan_api_key"])) {
                 //Test if organization with the given external uuid exists in the coupled ckan
                 //show organizations of the authorized user (from geoportal group table) via action api
@@ -937,15 +942,15 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
 			    $sql .= "(SELECT layer_id as ressource_id, 'layer' as ressource_type, layer.uuid::varchar, layer_title as title, wms.wms_timestamp as lastchanged, layer.fkey_wms_id FROM layer INNER JOIN wms on layer.fkey_wms_id = wms.wms_id WHERE wms_owner = $2 AND (fkey_mb_group_id is null OR fkey_mb_group_id = 0 OR fkey_mb_group_id = $3)";
 			    $sql .= " AND layer.export2csw IS true AND layer.layer_searchable = 1 AND layer_id NOT IN (SELECT DISTINCT fkey_layer_id FROM ows_relation_metadata WHERE fkey_layer_id IS NOT NULL)) AS layer_metadata INNER JOIN wms_termsofuse ON layer_metadata.fkey_wms_id = wms_termsofuse.fkey_wms_id AND fkey_termsofuse_id IS NOT NULL AND wms_termsofuse.fkey_termsofuse_id IN (SELECT termsofuse_id FROM termsofuse WHERE isopen = 1)";
 			    //$e = new mb_exception("class_syncCkan.php: sql: ".$sql);
-                            $v = array($this->mapbenderUserId, $this->mapbenderUserId, $syncListResult->geoportal_organization[$numberGeoportalOrga]->id);
-                            $t = array('i', 'i', 'i');
+                            $v = [$this->mapbenderUserId, $this->mapbenderUserId, $syncListResult->geoportal_organization[$numberGeoportalOrga]->id];
+                            $t = ['i', 'i', 'i'];
                         } else {
 			   $sql = "SELECT metadata_id as ressource_id, 'metadata' as ressource_type, uuid::varchar, title, lastchanged, fkey_termsofuse_id, f_get_coupled_resources(metadata_id) from mb_metadata LEFT OUTER JOIN md_termsofuse ON mb_metadata.metadata_id = md_termsofuse.fkey_metadata_id WHERE fkey_mb_group_id = $1 AND export2csw IS true AND md_termsofuse.fkey_termsofuse_id in (select termsofuse_id from termsofuse where isopen = 1)";
 			    $sql .= " UNION SELECT layer_metadata.ressource_id, layer_metadata.ressource_type, layer_metadata.uuid::varchar, layer_metadata.title, to_timestamp(layer_metadata.lastchanged), wms_termsofuse.fkey_termsofuse_id, '{\"coupledResources\":{\"layerIds\":[' || layer_metadata.ressource_id || '],\"featuretypeIds\":[]}}' ";
 			    $sql .= "as f_get_coupled_resources FROM (SELECT layer_id as ressource_id, 'layer' as ressource_type, layer.uuid::varchar, layer_title as title, wms.wms_timestamp as lastchanged, layer.fkey_wms_id FROM layer INNER JOIN wms on layer.fkey_wms_id = wms.wms_id WHERE fkey_mb_group_id = $2 AND layer.export2csw IS true AND layer.layer_searchable = 1 AND";
 			    $sql .= " layer_id NOT IN (SELECT DISTINCT fkey_layer_id FROM ows_relation_metadata WHERE fkey_layer_id IS NOT NULL)) AS layer_metadata INNER JOIN wms_termsofuse ON layer_metadata.fkey_wms_id = wms_termsofuse.fkey_wms_id AND fkey_termsofuse_id IS NOT NULL AND wms_termsofuse.fkey_termsofuse_id IN (SELECT termsofuse_id FROM termsofuse WHERE isopen = 1)";
-                            $v = array($organization['id'], $organization['id']);
-                            $t = array('i', 'i');
+                            $v = [$organization['id'], $organization['id']];
+                            $t = ['i', 'i'];
                         }
                         $res = db_prep_query($sql, $v, $t);
                         $countMetadataArray = 0;
@@ -962,11 +967,11 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
                             $metadataArray[$countMetadataArray]["license_id"] = $row["fkey_termsofuse_id"];
                             $metadataArray[$countMetadataArray]["resources"] = $row["f_get_coupled_resources"];
 			    $metadataArray[$countMetadataArray]["resource_type"] = $row["ressource_type"];
-                            foreach (json_decode($metadataArray[$countMetadataArray]["resources"])->coupledResources->layerIds as $layerId) {
+                            foreach (json_decode((string) $metadataArray[$countMetadataArray]["resources"])->coupledResources->layerIds as $layerId) {
                                 $layerArray[] = $layerId;
                                 $metadataArray[$countMetadataArray]["hasResource"] = true;
                             }
-                            foreach (json_decode($metadataArray[$countMetadataArray]["resources"])->coupledResources->featuretypeIds as $featuretypeId) {
+                            foreach (json_decode((string) $metadataArray[$countMetadataArray]["resources"])->coupledResources->featuretypeIds as $featuretypeId) {
                                 $featuretypeArray[] = $featuretypeId;
                                 $metadataArray[$countMetadataArray]["hasResource"] = true;
                             }
@@ -990,7 +995,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
                                             $syncListResult->geoportal_organization[$numberGeoportalOrga]->datasource_metadata[$numberGeoportalMetadata]->id = $geoportalMetadata['uuid'];
                                             $syncListResult->geoportal_organization[$numberGeoportalOrga]->datasource_metadata[$numberGeoportalMetadata]->date_time = $geoportalMetadata['changedate'];
 					    $syncListResult->geoportal_organization[$numberGeoportalOrga]->datasource_metadata[$numberGeoportalMetadata]->resource_type = $geoportalMetadata['resource_type'];
-                                            $syncListResult->geoportal_organization[$numberGeoportalOrga]->datasource_metadata[$numberGeoportalMetadata]->resources = json_decode($geoportalMetadata['resources']);
+                                            $syncListResult->geoportal_organization[$numberGeoportalOrga]->datasource_metadata[$numberGeoportalMetadata]->resources = json_decode((string) $geoportalMetadata['resources']);
                                         }
                                         $geoportalUuids[] = $geoportalMetadata['uuid'];
                                         $numberGeoportalMetadata++;
@@ -1005,7 +1010,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
                             //Those which are only in geoportal: create them
                             $onlyInGeoportal = array_values(array_diff($geoportalUuids, $ckanPackageNames));
                             //Those which are in both - update them if geoportal metadata is newer than the package in ckan
-				
+
                             $inBoth = array_values(array_intersect($ckanPackageNames, $geoportalUuids));
                             //if the timestamps should be compared before
                             if ($this->compareTimestamps == true) { 
@@ -1043,7 +1048,7 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
             }
             $numberGeoportalOrga++;
         }
-	if (count($syncListResult->geoportal_organization) >= 1) {
+	if (count($syncListResult->geoportal_organization ?? []) >= 1) {
 	    $syncList->result = $syncListResult;
             $syncList->success = true;
 	}
@@ -1055,17 +1060,8 @@ $e = new mb_exception("classes/class_syncCkan.php: uuid from departmentArray: ".
         $sql = <<<SQL
 INSERT INTO ckan_sync_log (begin_time, end_time, datasource_type, fkey_mb_group_id, created, updated, deleted, error_messages, result) VALUES ($1, now(), $2, $3, $4, $5, $6, $7, $8)
 SQL;
-        $v = array(
-            $startTime,
-            $dataSourceType,
-            $orgaId,
-            $created,
-            $updated,
-            $deleted,
-            $error_messages,
-            $result
-        );
-        $t = array('s', 's', 'i', 'i','i', 'i', 's', 's');
+        $v = [$startTime, $dataSourceType, $orgaId, $created, $updated, $deleted, $error_messages, $result];
+        $t = ['s', 's', 'i', 'i', 'i', 'i', 's', 's'];
         $res = db_prep_query($sql,$v,$t);
         return true;
     }
@@ -1084,10 +1080,10 @@ SQL;
         /*
          * 
          */
-	    $dataSourceTypeArrayWithViews = array("portalucsw","mapbender");
+	    $dataSourceTypeArrayWithViews = ["portalucsw", "mapbender"];
         $resultObject = new stdClass();
         $resultObject->help = "Syncing datasource of type ".$dataSourceType." for organization with id: ".$this->syncOrgaId;
-	    $syncList = json_decode($syncListJson);
+	    $syncList = json_decode((string) $syncListJson);
         $numberOfDeletedPackages = 0;
         $numberOfCreatedPackages = 0;
         $numberOfUpdatedPackages = 0; 
@@ -1100,8 +1096,8 @@ SQL;
 	    } else {
 	        //read ckan api-key from database again, because we wont transfer it via json thru the web ;-)
 	        $sql = "SELECT mb_group_ckan_api_key_text FROM mb_group WHERE mb_group_id = $1"; 
-            $v = array($this->syncOrgaId);
-	        $t = array('s');
+            $v = [$this->syncOrgaId];
+	        $t = ['s'];
 	        $res = db_prep_query($sql, $v, $t);
 	        //$e = new mb_exception("classes/class_syncCkan.php (syncSingleDataSource): syncList->update: ".json_encode($syncList->update));
 	        //$e = new mb_exception("classes/class_syncCkan.php (syncSingleDataSource): syncList->delete: ".json_encode($syncList->delete));
@@ -1166,21 +1162,11 @@ SQL;
                     if ($result->success == true) {
 		                //try to do an update
 			            //first try to read from datasource
-		                switch ($dataSourceType) {
-		                    case "mapbender":
-			                    $resultCkanRepresentation = $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type);
-			                    break;
-		                    case "portalucsw":
-			                    $resultCkanRepresentation = $this->getCkanRepresentationFromCsw($syncList->id, $datasetMetadata->id, $syncList->ckan_orga_ident, $syncList->name, $syncList->email, $this->topicDataThemeCategoryMap, $syncList->ckan_filter);
-		                        break;
-			                default:
-                                //TODO: pull ckan json object from remote ckan source and transform it into central object - map attributes!!!!
-				                //$e = new mb_exception("classes/class_syncCkan.php: try to pull json object from remote ckan - id: ".$datasetMetadata->id);
-				                $resultCkanRepresentation = $this->getCkanRepresentationFromCkan($syncList->ckan_api_url, $syncList->ckan_api_version, $datasetMetadata->id, $syncList->central_filter, $syncList->ckan_orga_ident);
-				                //$resultCkanRepresentation = false;
-			                    //$resultCkanRepresentation = $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type);
-			                    break;
-		                }
+		                $resultCkanRepresentation = match ($dataSourceType) {
+                      "mapbender" => $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type),
+                      "portalucsw" => $this->getCkanRepresentationFromCsw($syncList->id, $datasetMetadata->id, $syncList->ckan_orga_ident, $syncList->name, $syncList->email, $this->topicDataThemeCategoryMap, $syncList->ckan_filter),
+                      default => $this->getCkanRepresentationFromCkan($syncList->ckan_api_url, $syncList->ckan_api_version, $datasetMetadata->id, $syncList->central_filter, $syncList->ckan_orga_ident),
+                  };
 			            //if reading was successful
                         if ($resultCkanRepresentation != false) {
 			                //try to do an update via api
@@ -1202,21 +1188,11 @@ SQL;
                     } else {
                         //create new package
 			            //first read from external source 
-		                switch ($dataSourceType) {
-		                    case "mapbender":
-			                    $resultCkanRepresentation = $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type);
-			                    break;
-		                    case "portalucsw":
-			                    $resultCkanRepresentation = $this->getCkanRepresentationFromCsw($syncList->id, $datasetMetadata->id, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $syncList->ckan_filter);
-		                        break;
-			                default:
-				                //TODO: pull ckan json object from remote ckan source and transform it into central object - map attributes!!!!
-				                //$e = new mb_exception("classes/class_syncCkan.php: try to pull json object from remote ckan - id: ".$datasetMetadata->id);
-				                $resultCkanRepresentation = $this->getCkanRepresentationFromCkan($syncList->ckan_api_url, $syncList->ckan_api_version, $datasetMetadata->id, $syncList->central_filter, $syncList->ckan_orga_ident);
-				                //$resultCkanRepresentation = false;
-			                    //$resultCkanRepresentation = $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type);
-			                    break;
-		                }
+		                $resultCkanRepresentation = match ($dataSourceType) {
+                      "mapbender" => $this->getCkanRepresentation($datasetMetadata->id, $layerArrayMetadata, $featuretypeArrayMetadata, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $datasetMetadata->resource_type),
+                      "portalucsw" => $this->getCkanRepresentationFromCsw($syncList->id, $datasetMetadata->id, $syncList->ckan_orga_ident, $syncList->title, $syncList->email, $this->topicDataThemeCategoryMap, $syncList->ckan_filter),
+                      default => $this->getCkanRepresentationFromCkan($syncList->ckan_api_url, $syncList->ckan_api_version, $datasetMetadata->id, $syncList->central_filter, $syncList->ckan_orga_ident),
+                  };
 			            //if read from source was successful
                         if ($resultCkanRepresentation != false) {
                             $result = $ckan->action_package_create($resultCkanRepresentation['json']);
@@ -1281,7 +1257,7 @@ SQL;
         //write json object
 		$ckanPackage->title = $metadataTitle;
         $ckanPackage->notes = $metadataAbstract;
-        $ckanPackage->name = strtolower($fileIdentifier);
+        $ckanPackage->name = strtolower((string) $fileIdentifier);
 		$ckanPackage->author = $orgaTitle;
 		$ckanPackage->author_email = $orgaEmail;
 		$ckanPackage->owner_org = $ckan_orga_ident;
@@ -1291,7 +1267,7 @@ SQL;
 		$ckanPackage->dcat_ap_eu_data_category = "ENVI";
         //convert bbox - if available to geojson
 		//TODO - use key of ckan category from conf!
-		$ckanCategoryFilter = explode(":",$ckanCategoryFilter);
+		$ckanCategoryFilter = explode(":",(string) $ckanCategoryFilter);
 		$ckanPackage->{$ckanCategoryFilter[0]} = $ckanCategoryFilter[1];
 		//$ckanPackage->type = "ckan-govdata-full-1-1";
 		$ckanPackage->type = "dataset";
@@ -1299,7 +1275,7 @@ SQL;
 		$keywords = array_unique($keywords);
 		$keywordIndex = 0;
 	    for ($i=0; $i < count($keywords); $i++) {
-	        if ($keywords[$i] !== "" && isset($keywords[$i]) && strpos($keywords[$i], " ") === false && strpos($keywords[$i], "(") === false) {
+	        if ($keywords[$i] !== "" && isset($keywords[$i]) && !str_contains((string) $keywords[$i], " ") && !str_contains((string) $keywords[$i], "(")) {
                 $ckanPackage->tags[$keywordIndex]->name = (string)$keywords[$i];
 				$keywordIndex++;
 			}
@@ -1385,8 +1361,8 @@ SQL;
     			$sql = "SELECT * , st_asgeojson(the_geom) as geojson, f_get_responsible_organization_for_ressource(metadata_id, 'metadata') as resp_party_id from mb_metadata LEFT OUTER JOIN md_termsofuse ON mb_metadata.metadata_id = md_termsofuse.fkey_metadata_id LEFT OUTER JOIN termsofuse ON md_termsofuse.fkey_termsofuse_id = termsofuse.termsofuse_id WHERE mb_metadata.uuid = $1 AND export2csw IS true";
     			break;
     	}
-    	$v = array($uuid);
-    	$t = array('s');
+    	$v = [$uuid];
+    	$t = ['s'];
     	$res = db_prep_query($sql, $v, $t);
     	if ($res) {
     	    $row = db_fetch_assoc($res);
@@ -1399,8 +1375,8 @@ SQL;
     		//get info from mb_group_table
     		$sqlGroup = "SELECT mb_group_name, mb_group_email FROM mb_group WHERE mb_group_id = $1";
     		$groupId = $row['resp_party_id'];
-    		$vGroup = array($groupId);
-    		$tGroup = array('i');
+    		$vGroup = [$groupId];
+    		$tGroup = ['i'];
     		$resGroup = db_prep_query($sqlGroup, $vGroup, $tGroup);
     		if ($resGroup) {
     	    		$rowGroup = db_fetch_assoc($resGroup);
@@ -1545,7 +1521,7 @@ SQL;
         $downloadOptionsMetadataArray = [];
         $downloadOptionsMetadataArray[0] = $metadataUuid;
         $downloadOptionsJson = getDownloadOptions($downloadOptionsMetadataArray);
-        $metadataObject = json_decode($downloadOptionsJson)->{$metadataUuid};
+        $metadataObject = json_decode((string) $downloadOptionsJson)->{$metadataUuid};
         if ($downloadOptionsJson !== null) {
             foreach ($metadataObject->option as $option) {
             //$e = new mb_exception("option: ".json_encode($option));	
@@ -1607,8 +1583,8 @@ SQL;
         		    // add new linked open data proxy uri if wfs is classified open data!
         		    // 
         		    $sql = "SELECT * FROM (SELECT wfs_id, wfs_version, fkey_termsofuse_id FROM wfs INNER JOIN wfs_termsofuse ON wfs_id = fkey_wfs_id AND wfs_id = $1) AS wfs_tou INNER JOIN termsofuse ON fkey_termsofuse_id = termsofuse_id WHERE isopen = 1";
-        		    $v = array($option->serviceId);
-        		    $t = array($i);
+        		    $v = [$option->serviceId];
+        		    $t = [$i];
         		    $res = db_prep_query($sql, $v, $t);	
 		            $numberOfServices = 0;
         		    while($row = db_fetch_array($res)){
@@ -1622,8 +1598,8 @@ SQL;
     		            $resourcesArray[$indexResourceArray]->description = $metadataObject->title." - Zugriff auf Daten über LinkedOpenData REST API (OGC API Features)";
     			        //ft id = $option->featureType[0] !
     			        $sql = "SELECT featuretype_name from wfs_featuretype WHERE featuretype_id = $1";
-        		    	$v = array($option->featureType[0]);
-        		   	    $t = array($i);
+        		    	$v = [$option->featureType[0]];
+        		   	    $t = [$i];
         		   	    $res = db_prep_query($sql, $v, $t);
     			        while($row = db_fetch_array($res)){
             			    $featureTypeName = $row['featuretype_name'];
@@ -1698,8 +1674,8 @@ SQL;
             if (array_key_exists((string)$topicIdArray[$i],$this->topicDataThemeCategoryMap)) {
                 //check if categories should be exploded
                 //check if one comma is in string
-                if (strpos($this->topicDataThemeCategoryMap[$topicIdArray[$i]], ",") !== false) {
-                    $newCategories = explode(",",$this->topicDataThemeCategoryMap[$topicIdArray[$i]]);
+                if (str_contains((string) $this->topicDataThemeCategoryMap[$topicIdArray[$i]], ",")) {
+                    $newCategories = explode(",",(string) $this->topicDataThemeCategoryMap[$topicIdArray[$i]]);
                 } else {
                     //single category
                     $newCategories[0] = $this->topicDataThemeCategoryMap[$topicIdArray[$i]];
@@ -1742,7 +1718,7 @@ SQL;
             $res = db_query($sql);
             while($row = db_fetch_array($res)) {
                 //don't allow blanks in keywords!
-                if ($row['keyword'] !== "" && strpos($row['keyword'], " ") === false && strpos($row['keyword'], "(") === false) {
+                if ($row['keyword'] !== "" && !str_contains((string) $row['keyword'], " ") && !str_contains((string) $row['keyword'], "(")) {
                     $keywordArray[] = $row['keyword'];
                 }
             }

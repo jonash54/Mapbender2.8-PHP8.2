@@ -1,0 +1,15 @@
+{
+    "name": "mapbender-characterization-tests",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "playwright test",
+        "test:php8": "BASE_URL=http://mapbender-php8 playwright test",
+        "test:legacy": "BASE_URL=http://mapbender-legacy playwright test",
+        "record": "playwright codegen http://mapbender-php8",
+        "report": "playwright show-report"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.60.0"
+    }
+}

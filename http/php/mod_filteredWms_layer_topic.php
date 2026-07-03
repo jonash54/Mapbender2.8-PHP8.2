@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/mb_validatePermission.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
+require_once(__DIR__."/mb_validatePermission.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
 
 $logged_user_name = Mapbender::session()->get("mb_user_name");
 $logged_user_id = Mapbender::session()->get("mb_user_id");
@@ -72,11 +72,11 @@ if ($language == "'de'") {
 
 $admin = new administration();
 $own_gui_id_array = $admin->getGuisByOwner($logged_user_id,true);
-$own_wms_id_array = array();
+$own_wms_id_array = [];
 
 $sql = "SELECT wms_id FROM wms WHERE wms_owner = $1";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 
 while($row = db_fetch_array($res)){
@@ -90,14 +90,14 @@ if($insert){
 		for($i=0; $i<count($selected_topic); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * FROM layer_md_topic_category WHERE fkey_layer_id = $1 and fkey_md_topic_category_id = $2";
-			$v = array($selected_layer,$selected_topic[$i]);
-			$t = array('i','i');
+			$v = [$selected_layer, $selected_topic[$i]];
+			$t = ['i', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO layer_md_topic_category (fkey_layer_id, fkey_md_topic_category_id) VALUES($1, $2)";
-				$v = array($selected_layer,$selected_topic[$i]);
-				$t = array('i','i');
+				$v = [$selected_layer, $selected_topic[$i]];
+				$t = ['i', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -107,8 +107,8 @@ if($remove){
 	if(count($remove_topic)>0){
 		for($i=0; $i<count($remove_topic); $i++){
 			$sql_remove = "DELETE FROM layer_md_topic_category WHERE fkey_md_topic_category_id = $1 and fkey_layer_id = $2";
-			$v = array($remove_topic[$i],$selected_layer);
-			$t = array('i','s');
+			$v = [$remove_topic[$i], $selected_layer];
+			$t = ['i', 's'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -121,7 +121,7 @@ if (!isset($selected_layer)) {
 	}
 }
 
-$topic_id_layer = array();
+$topic_id_layer = [];
 
 if (isset($selected_layer)) {
 	/*get all topics from selected layer*****************************************************************/
@@ -136,8 +136,8 @@ if (isset($selected_layer)) {
 		$sql_layer_topic .= "ORDER BY t.md_topic_category_code_en";
 	}
 	
-	$v = array($selected_layer);
-	$t = array('s');
+	$v = [$selected_layer];
+	$t = ['s'];
 	$res_layer_topic = db_prep_query($sql_layer_topic,$v,$t);
 
 	while($row = db_fetch_array($res_layer_topic)){
@@ -153,8 +153,8 @@ else {
 	$sql_topic = "SELECT * FROM md_topic_category ORDER BY md_topic_category_code_en";
 }
 $res_topic = db_query($sql_topic);
-$topic_id = array();
-$topic_name = array();
+$topic_id = [];
+$topic_name = [];
 while($row = db_fetch_array($res_topic)){
 	if (!in_array($row["md_topic_category_id"], $topic_id_layer)) {
 		array_push($topic_id, $row["md_topic_category_id"]);

@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/mapbender.conf");
 echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">';	
 ?>
 <title>Url-Encode and -Decode</title>
@@ -36,10 +36,10 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 <textarea rows="10" cols="100">
 <?php
 if($_REQUEST["encode"]){
-echo urlencode($_REQUEST["c"]);
+echo urlencode((string) $_REQUEST["c"]);
 }
 if($_REQUEST["decode"]){
-echo urldecode($_REQUEST["c"]);	
+echo urldecode((string) $_REQUEST["c"]);	
 }
 ?>
 </textarea>

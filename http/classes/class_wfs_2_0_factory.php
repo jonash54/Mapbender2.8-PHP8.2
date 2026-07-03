@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_2_0.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_featuretype.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_xml_parser.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_wfs_factory.php");
+require_once(__DIR__."/../classes/class_wfs_2_0.php");
+require_once(__DIR__."/../classes/class_wfs_featuretype.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_xml_parser.php");
 
 /**
  * Creates WFS 2.0 objects from a capabilities documents.
@@ -32,7 +32,7 @@ require_once(dirname(__FILE__)."/../classes/class_xml_parser.php");
  */
 class Wfs_2_0_Factory extends WfsFactory {
 
-	protected function createFeatureTypeFromUrl ($aWfs, $featureTypeName, $featureTypeNsArray) {
+	protected function createFeatureTypeFromUrl ($aWfs = null, $featureTypeName = null, $featureTypeNsArray = null) {
 		$postData = "<?xml version=\"1.0\"?>\n".
 				"<DescribeFeatureType version=\"" . $aWfs->getVersion() . "\" " .
 				"service=\"WFS\" xmlns=\"http://www.opengis.net/wfs\" ";
@@ -63,14 +63,9 @@ class Wfs_2_0_Factory extends WfsFactory {
 		if (!$nsUrl) {
 			$nsUrl = $featureTypeNsArray[$key];
 		}
-		$paramArray = array(
-			"SERVICE=WFS",
-			"VERSION=2.0.0",
-			"REQUEST=DescribeFeatureType",
-			"TYPENAME=" . urlencode($featureTypeName),
-			"NAMESPACE=" . urlencode(
+		$paramArray = ["SERVICE=WFS", "VERSION=2.0.0", "REQUEST=DescribeFeatureType", "TYPENAME=" . urlencode((string) $featureTypeName), "NAMESPACE=" . urlencode(
 				"xmlns(" . $key . "=" . $nsUrl . ")"
-		));
+		)];
 
 		$url = $aWfs->describeFeatureType .
 			$aWfs->getConjunctionCharacter($aWfs->describeFeatureType) .
@@ -83,11 +78,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 	}
 	
 	protected function createStoredQueryFromUrlGet ($aWfs, $listStoredQueries, $describeStoredQueries) {
-		$paramArray = array(
-				"SERVICE=WFS",
-				"VERSION=2.0.0",
-				"REQUEST=ListStoredQueries"
-		);
+		$paramArray = ["SERVICE=WFS", "VERSION=2.0.0", "REQUEST=ListStoredQueries"];
 	
 		$url = $listStoredQueries .
 			$aWfs->getConjunctionCharacter($listStoredQueries) .
@@ -97,7 +88,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 		
 		#$e = new mb_notice("class_wfs_2_0_factory.php: Got following StoredQuery XML: ".$xml);
 		
-		$parser = new XMLParser();
+		$parser = new MbXMLParser();
 		$parser->loadXMLFromString($xml);
 		$parser->loadJsonSchemaFromString('{
 		    "cmd": {
@@ -118,7 +109,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 		
 		$array = $parser->parse();
 		
-		$storedQueryArray = array();
+		$storedQueryArray = [];
 		
 		$m = 0;
 		foreach($array['storedQuery'] as $storedQuery) {
@@ -158,7 +149,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 		
 		// populate a Namespaces Hastable where we can use the namespace as a lookup for the prefix
 		// and also keep a 
-		$namespaces = array();
+		$namespaces = [];
 		$namespaceList = $xpath->query("//namespace::*");
 		$targetNamespace = $doc->documentElement->getAttribute("targetNamespace");
 		$targetNamespaceNode = null;
@@ -175,7 +166,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 			}
 		}
 	
-		list($ftLocalname, $ftTypePrefix) = array_reverse(explode(":",$featureTypeName));
+		[$ftLocalname, $ftTypePrefix] = array_reverse(explode(":",(string) $featureTypeName));
 		// for the sake of simplicity we only care about top level elements. Seems to have worked so far
 		$query = sprintf("/xs:schema/xs:element[@name='%s']",$ftLocalname);
 		$elementList = $xpath->query($query);
@@ -195,7 +186,7 @@ class Wfs_2_0_Factory extends WfsFactory {
                 		// if the prefix is in the targetNamespace, changces are good it's defined in this very document
                 		// if the prefix is not in the targetNamespace, it's likely not defined here, and we bail
 
-                		list($elementTypeLocalname,$elementTypePrefix) = array_reverse(explode(":",$elementType));
+                		[$elementTypeLocalname, $elementTypePrefix] = array_reverse(explode(":",(string) $elementType));
                 		$elementTypeNamespace = $doc->lookupNamespaceURI($elementTypePrefix);
                 		if($elementTypeNamespace !== $targetNamespaceNode->nodeValue){
                     			$e = new mb_warning("Tried to parse FeatureTypeName $featureTypeName : $elementType is not in the targetNamespace");	
@@ -249,12 +240,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 	}
 	
 	protected function createSingleStoredQuery ($describeStoredQueryUrl, $storedQueryId, $aWfs) {
-		$paramArray = array(
-				"SERVICE=WFS",
-				"VERSION=2.0.0",
-				"REQUEST=DescribeStoredQueries",
-				"STOREDQUERY_ID=" . $storedQueryId
-		);
+		$paramArray = ["SERVICE=WFS", "VERSION=2.0.0", "REQUEST=DescribeStoredQueries", "STOREDQUERY_ID=" . $storedQueryId];
 	
 		$url = $describeStoredQueryUrl .
 		$aWfs->getConjunctionCharacter($describeStoredQueryUrl) .
@@ -265,7 +251,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 		//parse result to get storedQuery attributes
 		$e = new mb_notice("class_wfs_2_0_factory.php: Got following StoredQuery DescribeStoredQueries XML: ".$xml);
 		
-		$parser = new XMLParser();
+		$parser = new MbXMLParser();
 		$parser->loadXMLFromString($xml);
 		$parser->loadJsonSchemaFromString('{
 		    "cmd": {
@@ -416,13 +402,13 @@ class Wfs_2_0_Factory extends WfsFactory {
 				$myWfs->electronicMailAddress = $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:ContactInfo/ows:Address/ows:ElectronicMailAddress/text()', $wfs20Cap);
 
 				//Operation Metadata Part
-				$myWfs->getCapabilities =  html_entity_decode($this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="GetCapabilities"]/ows:DCP/ows:HTTP/ows:Get/@xlink:href', $wfs20Cap));
+				$myWfs->getCapabilities =  html_entity_decode((string) $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="GetCapabilities"]/ows:DCP/ows:HTTP/ows:Get/@xlink:href', $wfs20Cap));
 
-				$myWfs->describeFeatureType =  html_entity_decode($this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="DescribeFeatureType"]/ows:DCP/ows:HTTP/ows:Get/@xlink:href', $wfs20Cap));
+				$myWfs->describeFeatureType =  html_entity_decode((string) $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="DescribeFeatureType"]/ows:DCP/ows:HTTP/ows:Get/@xlink:href', $wfs20Cap));
 				
-				$myWfs->getFeature =  html_entity_decode($this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="GetFeature"]/ows:DCP/ows:HTTP/ows:Post/@xlink:href', $wfs20Cap));
+				$myWfs->getFeature =  html_entity_decode((string) $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="GetFeature"]/ows:DCP/ows:HTTP/ows:Post/@xlink:href', $wfs20Cap));
 
-				$myWfs->transaction =  html_entity_decode($this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="Transaction"]/ows:DCP/ows:HTTP/ows:Post/@xlink:href', $wfs20Cap));
+				$myWfs->transaction =  html_entity_decode((string) $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation[@name="Transaction"]/ows:DCP/ows:HTTP/ows:Post/@xlink:href', $wfs20Cap));
 //get supported formats [mimetypes]
 				$allowedValuesArray = $this->getValue($xpath, '/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Parameter[@name="outputFormat"]/ows:AllowedValues', $wfs20Cap);
 				$wfsOutputFormatsArray = $xpath->query('./ows:Value', $allowedValuesArray);
@@ -436,7 +422,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 				$i = 1; //cause index of xml objects begin with 1
 				foreach ($capFeatureTypes as $featureType) {
 					//Ticket #8491: Fix for otherCRS-Array declaration
-					$featuretype_crsArray = array();
+					$featuretype_crsArray = [];
 					$featuretype_name = $this->stripEndlineAndCarriageReturn($this->getValue($xpath, './wfs:Name/text()', $featureType));
 					$featuretype_title = $this->stripEndlineAndCarriageReturn($this->getValue($xpath, './wfs:Title/text()', $featureType));
 					$featuretype_abstract = $this->stripEndlineAndCarriageReturn($this->getValue($xpath, './wfs:Abstract/text()', $featureType));
@@ -456,7 +442,7 @@ class Wfs_2_0_Factory extends WfsFactory {
 					}
 					//<wfs:MetadataURL type="FGDC" format="text/xml">http://www.ogccatservice.com/csw.cgi?service=CSW&amp;version=2.0.0&amp;request=GetRecords&amp;constraintlanguage=CQL&amp;constraint="recordid=urn:uuid:4ee8b2d3-9409-4a1d-b26b-6782e4fa3d59"</wfs:MetadataURL>
 					$metadataURLArray = $xpath->query('./wfs:MetadataURL', $featureType);
-					$featuretype_metadataUrl = array();
+					$featuretype_metadataUrl = [];
 					$i_mdu = 0;
 					foreach ($metadataURLArray as $metadataURL) {
 						//$e = new mb_exception("other srs: ".$otherSRS);
@@ -469,9 +455,9 @@ class Wfs_2_0_Factory extends WfsFactory {
 						$i_mdu++;
 					}
 					//<ows:WGS84BoundingBox dimensions="2"><ows:LowerCorner>-9.16611817848171e+15 -3.4016616708962e+32</ows:LowerCorner><ows:UpperCorner>464605646503609 3.4016616708962e+32</ows:UpperCorner></ows:WGS84BoundingBox>
-                    $lowerCorner = explode(" ", $this->getValue($xpath, './ows:WGS84BoundingBox/ows:LowerCorner/text()', $featureType));
+                    $lowerCorner = explode(" ", (string) $this->getValue($xpath, './ows:WGS84BoundingBox/ows:LowerCorner/text()', $featureType));
 
-					$upperCorner = explode(" ",$this->getValue($xpath, './ows:WGS84BoundingBox/ows:UpperCorner/text()', $featureType));
+					$upperCorner = explode(" ",(string) $this->getValue($xpath, './ows:WGS84BoundingBox/ows:UpperCorner/text()', $featureType));
 					
 					$featuretype_latlon_minx = $lowerCorner[0];
 					$featuretype_latlon_miny = $lowerCorner[1];
@@ -506,16 +492,16 @@ class Wfs_2_0_Factory extends WfsFactory {
 				//get list of wfs operations
 				
 				$capOperations = $xpath->query('/wfs:WFS_Capabilities/ows:OperationsMetadata/ows:Operation', $wfs20Cap);
-				$wfsOperations = array();
+				$wfsOperations = [];
 				$listStoredQueriesUrl = "";
 				$describeStoredQueriesUrl = "";
 				$k = 1; //cause index of xml objects begin with 1
 				foreach ($capOperations as $operation) {
 					//debug
 					#$e = new mb_notice("wfs operation: ".$operation->asXML());
-					$wfsOperations[$k]->name = html_entity_decode($this->getValue($xpath, './@name', $operation));
-					$wfsOperations[$k]->httpGet = html_entity_decode($this->getValue($xpath, './ows:DCP/ows:HTTP/ows:Get/@xlink:href', $operation));
-					$wfsOperations[$k]->httpPost = html_entity_decode($this->getValue($xpath, './ows:DCP/ows:HTTP/ows:Post/@xlink:href', $operation));
+					$wfsOperations[$k]->name = html_entity_decode((string) $this->getValue($xpath, './@name', $operation));
+					$wfsOperations[$k]->httpGet = html_entity_decode((string) $this->getValue($xpath, './ows:DCP/ows:HTTP/ows:Get/@xlink:href', $operation));
+					$wfsOperations[$k]->httpPost = html_entity_decode((string) $this->getValue($xpath, './ows:DCP/ows:HTTP/ows:Post/@xlink:href', $operation));
 					
 					//get url for ListStoredQueries request to go further on with createStoredQueryListFromUrlGet
 					if($wfsOperations[$k]->name == "ListStoredQueries") {
@@ -535,8 +521,8 @@ class Wfs_2_0_Factory extends WfsFactory {
 					$myWfs->storedQueriesArray = $this->createStoredQueryFromUrlGet($myWfs, $listStoredQueriesUrl, $describeStoredQueriesUrl);
 					#if (count($storedQueries) > 0) {
 					#	$myWfs->storedQueriesArray = $storedQueries;
-						
-						
+
+
 					#}
 				}
 				catch (Exception $e) {
@@ -578,7 +564,7 @@ class Wfs_2_0_Factory extends WfsFactory {
             } else {
                 return null;
             }
-        } catch (Exception $E) {
+        } catch (Exception) {
             return null;
         }
     }

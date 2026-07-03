@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place 
 
 $e_id="deleteGui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -26,7 +26,7 @@ require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
 //import_request_variables("PG");
 $guiList=$_POST["guiList"];
 $del=$_POST["del"];
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 security_patch_log(__FILE__,__LINE__); 
 ?>
 
@@ -60,15 +60,15 @@ function validate(){
 <body>
 
 <?php
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 $logged_user_name=Mapbender::session()->get("mb_user_name");
 $logged_user_id=Mapbender::session()->get("mb_user_id");
 
 ###delete
 if($guiList){
 	 $sql = "DELETE FROM gui WHERE gui_id = $1";
-	 $v = array($guiList);
-	 $t = array("s");
+	 $v = [$guiList];
+	 $t = ["s"];
 	 $res = db_prep_query($sql, $v, $t);
 }
 

@@ -1,7 +1,7 @@
 <?php
 //some security tests for mapbender php scripts to prevent xss attacks
 //TBD - extend them ;-)
-if (strpos($_SERVER['PHP_SELF'],'<script>') !== false ) {
+if (str_contains((string) $_SERVER['PHP_SELF'],'<script>') ) {
 	echo "Mapbender invested a XSS attack - script stopped executing!";
 	die();
 }
@@ -12,7 +12,8 @@ if (strpos($_SERVER['PHP_SELF'],'<script>') !== false ) {
 //echo $_SERVER['SCRIPT_NAME']."<br>";
 //test ob php_self auf script_name ended!
 //get last string 
-$phpScriptName = end(explode("/", $_SERVER['SCRIPT_NAME']));
+$_pathParts = explode("/", (string) $_SERVER['SCRIPT_NAME']);
+$phpScriptName = end($_pathParts);
 //echo $phpScriptName."<br>";
 //echo json_encode(endsWith($_SERVER['PHP_SELF'], $phpScriptName))."<br>";
 if (!endsWith($_SERVER['PHP_SELF'], $phpScriptName)) {
@@ -21,6 +22,6 @@ if (!endsWith($_SERVER['PHP_SELF'], $phpScriptName)) {
 }
 #https://stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php
 function endsWith($haystack, $needle) {
-    return substr($haystack,-strlen($needle))===$needle;
+    return str_ends_with((string) $haystack, (string) $needle);
 }
 ?>

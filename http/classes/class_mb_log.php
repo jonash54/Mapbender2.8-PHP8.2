@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../conf/mapbender.conf";
-require_once(dirname(__FILE__)."/../classes/class_mb_notice.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_warning.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once __DIR__ . "/../../conf/mapbender.conf";
+require_once(__DIR__."/../classes/class_mb_notice.php");
+require_once(__DIR__."/../classes/class_mb_warning.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 
 /**
  * @package exceptionHandling

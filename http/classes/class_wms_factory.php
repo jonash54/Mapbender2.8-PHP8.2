@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/class_administration.php";
-require_once dirname(__FILE__) . "/class_ows_factory.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/class_administration.php";
+require_once __DIR__ . "/class_ows_factory.php";
 
 abstract class WmsFactory extends OwsFactory {
 	/**

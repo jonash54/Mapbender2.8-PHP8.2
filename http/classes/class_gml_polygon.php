@@ -17,15 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_geometry.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_geometry.php");
 
 
 class GMLPolygon extends GmlGeometry {
 
-	var $pointArray = array();
-	var $innerRingArray = array();
+	public $pointArray = [];
+	public $innerRingArray = [];
 
 	public function __construct() {
 		
@@ -33,7 +33,7 @@ class GMLPolygon extends GmlGeometry {
 
 	
 	public function addPoint ($x, $y) {
-		array_push($this->pointArray, array("x" => $x, "y" => $y));
+		array_push($this->pointArray, ["x" => $x, "y" => $y]);
 	}
 	
 	/**
@@ -45,9 +45,9 @@ class GMLPolygon extends GmlGeometry {
 	 */
 	public function addPointToRing ($i, $x, $y) {
 		if (count($this->innerRingArray) < $i) {
-			array_push($this->innerRingArray, array());
+			array_push($this->innerRingArray, []);
 		}
-		array_push($this->innerRingArray[$i-1], array("x" => $x, "y" => $y));
+		array_push($this->innerRingArray[$i-1], ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGml2 () {
@@ -55,7 +55,7 @@ class GMLPolygon extends GmlGeometry {
 			"<gml:polygonMember><gml:Polygon><gml:outerBoundaryIs>" . 
 			"<gml:LinearRing><gml:coordinates>";
 
-		$ptArray = array();
+		$ptArray = [];
 		foreach ($this->pointArray as $point) {
 			$ptArray[] = $point["x"] . "," . $point["y"];
 		}
@@ -65,7 +65,7 @@ class GMLPolygon extends GmlGeometry {
 				
 		foreach ($this->innerRingArray as $ring) {
 			$str .= "<gml:innerBoundaryIs><gml:LinearRing><gml:coordinates>";
-			$ptArray = array();
+			$ptArray = [];
 			foreach ($ring as $point) {
 				$ptArray[] = $point["x"] . "," . $point["y"];
 			}
@@ -82,7 +82,7 @@ class GMLPolygon extends GmlGeometry {
 			"<gml:surfaceMember><gml:Polygon><gml:exterior>" . 
 			"<gml:LinearRing>";
 
-		$ptArray = array();
+		$ptArray = [];
 		foreach ($this->pointArray as $point) {
 			$ptArray[] = "<gml:pos>" . $point["x"] . " " . $point["y"] . "</gml:pos>";
 		}
@@ -92,7 +92,7 @@ class GMLPolygon extends GmlGeometry {
 				
 		foreach ($this->innerRingArray as $ring) {
 			$str .= "<gml:interior><gml:LinearRing>";
-			$ptArray = array();
+			$ptArray = [];
 			foreach ($ring as $point) {
 				$ptArray[] = "<gml:pos>" . $point["x"] . " " . $point["y"] . "</gml:pos>";
 			}
@@ -153,7 +153,7 @@ class GMLPolygon extends GmlGeometry {
 	}
 	
 	public function getBbox () {
-		$bboxArray = array();
+		$bboxArray = [];
         for ($i = 0; $i < count($this->pointArray); $i++) {
         	if($this->pointArray[$i]["x"] && $this->pointArray[$i]["y"]) {
             	$p = new Mapbender_point(

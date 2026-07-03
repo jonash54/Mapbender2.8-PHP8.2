@@ -1,6 +1,6 @@
 <?php
 
-include_once(dirname(__FILE__).'/class.pdf.php');
+include_once(__DIR__.'/class.pdf.php');
 
 class Cezpdf extends Cpdf {
 //==============================================================================
@@ -18,10 +18,10 @@ class Cezpdf extends Cpdf {
 // Wayne Munro, R&OS Ltd, http://www.ros.co.nz/pdf
 //==============================================================================
 
-var $ez=array('fontSize'=>10); // used for storing most of the page configuration parameters
-var $y; // this is the current vertical positon on the page of the writing point, very important
-var $ezPages=array(); // keep an array of the ids of the pages, making it easy to go back and add page numbers etc.
-var $ezPageCount=0;
+public $ez=['fontSize'=>10]; // used for storing most of the page configuration parameters
+public $y; // this is the current vertical positon on the page of the writing point, very important
+public $ezPages=[]; // keep an array of the ids of the pages, making it easy to go back and add page numbers etc.
+public $ezPageCount=0;
 
 // ------------------------------------------------------------------------------
 
@@ -41,58 +41,58 @@ function __construct($paper='a4',$orientation='portrait'){
 	// -------------------------
 
 	if (!is_array($paper)){
-		switch (strtoupper($paper)){
-			case '4A0': {$size = array(0,0,4767.87,6740.79); break;}
-			case '2A0': {$size = array(0,0,3370.39,4767.87); break;}
-			case 'A0': {$size = array(0,0,2383.94,3370.39); break;}
-			case 'A1': {$size = array(0,0,1683.78,2383.94); break;}
-			case 'A2': {$size = array(0,0,1190.55,1683.78); break;}
-			case 'A3': {$size = array(0,0,841.89,1190.55); break;}
-			case 'A4': default: {$size = array(0,0,595.28,841.89); break;}
-			case 'A5': {$size = array(0,0,419.53,595.28); break;}
-			case 'A6': {$size = array(0,0,297.64,419.53); break;}
-			case 'A7': {$size = array(0,0,209.76,297.64); break;}
-			case 'A8': {$size = array(0,0,147.40,209.76); break;}
-			case 'A9': {$size = array(0,0,104.88,147.40); break;}
-			case 'A10': {$size = array(0,0,73.70,104.88); break;}
-			case 'B0': {$size = array(0,0,2834.65,4008.19); break;}
-			case 'B1': {$size = array(0,0,2004.09,2834.65); break;}
-			case 'B2': {$size = array(0,0,1417.32,2004.09); break;}
-			case 'B3': {$size = array(0,0,1000.63,1417.32); break;}
-			case 'B4': {$size = array(0,0,708.66,1000.63); break;}
-			case 'B5': {$size = array(0,0,498.90,708.66); break;}
-			case 'B6': {$size = array(0,0,354.33,498.90); break;}
-			case 'B7': {$size = array(0,0,249.45,354.33); break;}
-			case 'B8': {$size = array(0,0,175.75,249.45); break;}
-			case 'B9': {$size = array(0,0,124.72,175.75); break;}
-			case 'B10': {$size = array(0,0,87.87,124.72); break;}
-			case 'C0': {$size = array(0,0,2599.37,3676.54); break;}
-			case 'C1': {$size = array(0,0,1836.85,2599.37); break;}
-			case 'C2': {$size = array(0,0,1298.27,1836.85); break;}
-			case 'C3': {$size = array(0,0,918.43,1298.27); break;}
-			case 'C4': {$size = array(0,0,649.13,918.43); break;}
-			case 'C5': {$size = array(0,0,459.21,649.13); break;}
-			case 'C6': {$size = array(0,0,323.15,459.21); break;}
-			case 'C7': {$size = array(0,0,229.61,323.15); break;}
-			case 'C8': {$size = array(0,0,161.57,229.61); break;}
-			case 'C9': {$size = array(0,0,113.39,161.57); break;}
-			case 'C10': {$size = array(0,0,79.37,113.39); break;}
-			case 'RA0': {$size = array(0,0,2437.80,3458.27); break;}
-			case 'RA1': {$size = array(0,0,1729.13,2437.80); break;}
-			case 'RA2': {$size = array(0,0,1218.90,1729.13); break;}
-			case 'RA3': {$size = array(0,0,864.57,1218.90); break;}
-			case 'RA4': {$size = array(0,0,609.45,864.57); break;}
-			case 'SRA0': {$size = array(0,0,2551.18,3628.35); break;}
-			case 'SRA1': {$size = array(0,0,1814.17,2551.18); break;}
-			case 'SRA2': {$size = array(0,0,1275.59,1814.17); break;}
-			case 'SRA3': {$size = array(0,0,907.09,1275.59); break;}
-			case 'SRA4': {$size = array(0,0,637.80,907.09); break;}
-			case 'LETTER': {$size = array(0,0,612.00,792.00); break;}
-			case 'LEGAL': {$size = array(0,0,612.00,1008.00); break;}
-			case 'EXECUTIVE': {$size = array(0,0,521.86,756.00); break;}
-			case 'FOLIO': {$size = array(0,0,612.00,936.00); break;}
-		}
-		switch (strtolower($orientation)){
+		$size = match (strtoupper((string) $paper)) {
+      '4A0' => [0, 0, 4767.87, 6740.79],
+      '2A0' => [0, 0, 3370.39, 4767.87],
+      'A0' => [0, 0, 2383.94, 3370.39],
+      'A1' => [0, 0, 1683.78, 2383.94],
+      'A2' => [0, 0, 1190.55, 1683.78],
+      'A3' => [0, 0, 841.89, 1190.55],
+      'A5' => [0, 0, 419.53, 595.28],
+      'A6' => [0, 0, 297.64, 419.53],
+      'A7' => [0, 0, 209.76, 297.64],
+      'A8' => [0, 0, 147.40, 209.76],
+      'A9' => [0, 0, 104.88, 147.40],
+      'A10' => [0, 0, 73.70, 104.88],
+      'B0' => [0, 0, 2834.65, 4008.19],
+      'B1' => [0, 0, 2004.09, 2834.65],
+      'B2' => [0, 0, 1417.32, 2004.09],
+      'B3' => [0, 0, 1000.63, 1417.32],
+      'B4' => [0, 0, 708.66, 1000.63],
+      'B5' => [0, 0, 498.90, 708.66],
+      'B6' => [0, 0, 354.33, 498.90],
+      'B7' => [0, 0, 249.45, 354.33],
+      'B8' => [0, 0, 175.75, 249.45],
+      'B9' => [0, 0, 124.72, 175.75],
+      'B10' => [0, 0, 87.87, 124.72],
+      'C0' => [0, 0, 2599.37, 3676.54],
+      'C1' => [0, 0, 1836.85, 2599.37],
+      'C2' => [0, 0, 1298.27, 1836.85],
+      'C3' => [0, 0, 918.43, 1298.27],
+      'C4' => [0, 0, 649.13, 918.43],
+      'C5' => [0, 0, 459.21, 649.13],
+      'C6' => [0, 0, 323.15, 459.21],
+      'C7' => [0, 0, 229.61, 323.15],
+      'C8' => [0, 0, 161.57, 229.61],
+      'C9' => [0, 0, 113.39, 161.57],
+      'C10' => [0, 0, 79.37, 113.39],
+      'RA0' => [0, 0, 2437.80, 3458.27],
+      'RA1' => [0, 0, 1729.13, 2437.80],
+      'RA2' => [0, 0, 1218.90, 1729.13],
+      'RA3' => [0, 0, 864.57, 1218.90],
+      'RA4' => [0, 0, 609.45, 864.57],
+      'SRA0' => [0, 0, 2551.18, 3628.35],
+      'SRA1' => [0, 0, 1814.17, 2551.18],
+      'SRA2' => [0, 0, 1275.59, 1814.17],
+      'SRA3' => [0, 0, 907.09, 1275.59],
+      'SRA4' => [0, 0, 637.80, 907.09],
+      'LETTER' => [0, 0, 612.00, 792.00],
+      'LEGAL' => [0, 0, 612.00, 1008.00],
+      'EXECUTIVE' => [0, 0, 521.86, 756.00],
+      'FOLIO' => [0, 0, 612.00, 936.00],
+      default => [0, 0, 595.28, 841.89],
+  };
+		switch (strtolower((string) $orientation)){
 			case 'landscape':
 				$a=$size[3];
 				$size[3]=$size[2];
@@ -145,28 +145,23 @@ function ezSetCmMargins($top,$bottom,$left,$right){
 // ------------------------------------------------------------------------------
 
 
-function ezColumnsStart($options=array()){
+function ezColumnsStart($options=[]){
   // start from the current y-position, make the set number of columne
   if (isset($this->ez['columns']) && $this->ez['columns']==1){
     // if we are already in a column mode then just return.
     return;
   }
-  $def=array('gap'=>10,'num'=>2);
+  $def=['gap'=>10, 'num'=>2];
   foreach($def as $k=>$v){
     if (!isset($options[$k])){
       $options[$k]=$v;
     }
   }
   // setup the columns
-  $this->ez['columns']=array('on'=>1,'colNum'=>1);
+  $this->ez['columns']=['on'=>1, 'colNum'=>1];
 
   // store the current margins
-  $this->ez['columns']['margins']=array(
-     $this->ez['leftMargin']
-    ,$this->ez['rightMargin']
-    ,$this->ez['topMargin']
-    ,$this->ez['bottomMargin']
-  );
+  $this->ez['columns']['margins']=[$this->ez['leftMargin'], $this->ez['rightMargin'], $this->ez['topMargin'], $this->ez['bottomMargin']];
   // and store the settings for the columns
   $this->ez['columns']['options']=$options;
   // then reset the margins to suit the new columns
@@ -195,7 +190,7 @@ function ezInsertMode($status=1,$pageNum=1,$pos='before'){
     case '1':
       if (isset($this->ezPages[$pageNum])){
         $this->ez['insertMode']=1;
-        $this->ez['insertOptions']=array('id'=>$this->ezPages[$pageNum],'pos'=>$pos);
+        $this->ez['insertOptions']=['id'=>$this->ezPages[$pageNum], 'pos'=>$pos];
       }
       break;
     case '0':
@@ -284,17 +279,17 @@ function ezStartPageNumbers($x,$y,$size,$pos='left',$pattern='{PAGENUM} of {TOTA
   // be adjusted to account for this.
   // Adjust this function so that each time you 'start' page numbers then you effectively start a different batch
   // return the number of the batch, so that they can be stopped in a different order if required.
-  if (!$pos || !strlen($pos)){
+  if (!$pos || !strlen((string) $pos)){
     $pos='left';
   }
-  if (!$pattern || !strlen($pattern)){
+  if (!$pattern || !strlen((string) $pattern)){
     $pattern='{PAGENUM} of {TOTALPAGENUM}';
   }
   if (!isset($this->ez['pageNumbering'])){
-    $this->ez['pageNumbering']=array();
+    $this->ez['pageNumbering']=[];
   }
   $i = count($this->ez['pageNumbering']);
-  $this->ez['pageNumbering'][$i][$this->ezPageCount]=array('x'=>$x,'y'=>$y,'pos'=>$pos,'pattern'=>$pattern,'num'=>$num,'size'=>$size);
+  $this->ez['pageNumbering'][$i][$this->ezPageCount]=['x'=>$x, 'y'=>$y, 'pos'=>$pos, 'pattern'=>$pattern, 'num'=>$num, 'size'=>$size];
   return $i;
 }
 
@@ -315,7 +310,7 @@ function ezWhatPageNumber($pageNum,$i=0){
     if ($k<=$pageNum){
       if (is_array($v)){
         // start block
-        if (strlen($v['num'])){
+        if (strlen((string) $v['num'])){
           // a start was specified
           $start=$v['num'];
           $startNum=$k;
@@ -337,7 +332,7 @@ function ezStopPageNumbers($stopTotal=0,$next=0,$i=0){
   // if $next=1, then do this page, but not the next, else do not do this page either
   // if $i is set, then stop that particular pagenumbering sequence.
   if (!isset($this->ez['pageNumbering'])){
-    $this->ez['pageNumbering']=array();
+    $this->ez['pageNumbering']=[];
   }
   if ($next && isset($this->ez['pageNumbering'][$i][$this->ezPageCount]) && is_array($this->ez['pageNumbering'][$i][$this->ezPageCount])){
     // then this has only just been started, this will over-write the start, and nothing will appear
@@ -419,7 +414,7 @@ function ezPRVTaddPageNumbers(){
         }
         if ($status){
           // then add the page numbering to this page
-          if (strlen($info['num'])){
+          if (strlen((string) $info['num'])){
             $num=$pageNum+$info['dnum'];
           } else {
             $num=$pageNum;
@@ -527,7 +522,7 @@ function ezPrvtTableDrawLines($pos,$gap,$x0,$x1,$y0,$y1,$y2,$col,$inner,$outer,$
 
 // ------------------------------------------------------------------------------
 
-function ezPrvtTableColumnHeadings($cols,$pos,$maxWidth,$height,$decender,$gap,$size,&$y,$optionsAll=array()){
+function ezPrvtTableColumnHeadings($cols,$pos,$maxWidth,$height,$decender,$gap,$size,&$y,$optionsAll=[]){
   // uses ezText to add the text, and returns the height taken by the largest heading
   // this page will move the headings to a new page if they will not fit completely on this one
   // transaction support will be used to implement this
@@ -535,7 +530,7 @@ function ezPrvtTableColumnHeadings($cols,$pos,$maxWidth,$height,$decender,$gap,$
   if (isset($optionsAll['cols'])){
     $options = $optionsAll['cols'];
   } else {
-    $options = array();
+    $options = [];
   }
   
   $mx=0;
@@ -561,7 +556,7 @@ function ezPrvtTableColumnHeadings($cols,$pos,$maxWidth,$height,$decender,$gap,$
       } else {
         $justification = 'left';
       }
-      $this->ezText($colHeading,$size,array('aleft'=> $pos[$colName],'aright'=>($maxWidth[$colName]+$pos[$colName]),'justification'=>$justification));
+      $this->ezText($colHeading,$size,['aleft'=> $pos[$colName], 'aright'=>($maxWidth[$colName]+$pos[$colName]), 'justification'=>$justification]);
       $dy = $y-$this->y;
       if ($dy>$mx){
         $mx=$dy;
@@ -596,7 +591,7 @@ function ezPrvtGetTextWidth($size,$text){
   // will calculate the maximum width, taking into account that the text may be broken
   // by line breaks.
   $mx=0;
-  $lines = explode("\n",$text);
+  $lines = explode("\n",(string) $text);
   foreach ($lines as $line){
     $w = $this->getTextWidth($size,$line);
     if ($w>$mx){
@@ -653,26 +648,23 @@ function ezTable(&$data,$cols='',$title='',$options=''){
   if (!is_array($cols)){
     // take the columns from the first row of the data set
     reset($data);
-    list($k,$v)=each($data);
+    $k = key($data);
+    $v = current($data);
+    next($data);
     if (!is_array($v)){
       return;
     }
-    $cols=array();
+    $cols=[];
     foreach($v as $k1=>$v1){
       $cols[$k1]=$k1;
     }
   }
   
   if (!is_array($options)){
-    $options=array();
+    $options=[];
   }
 
-  $defaults = array(
-    'shaded'=>1,'showLines'=>1,'shadeCol'=>array(0.8,0.8,0.8),'shadeCol2'=>array(0.7,0.7,0.7),'fontSize'=>10,'titleFontSize'=>12
-    ,'titleGap'=>5,'lineCol'=>array(0,0,0),'gap'=>5,'xPos'=>'centre','xOrientation'=>'centre'
-    ,'showHeadings'=>1,'textCol'=>array(0,0,0),'width'=>0,'maxWidth'=>0,'cols'=>array(),'minRowSpace'=>-100,'rowGap'=>2,'colGap'=>5
-    ,'innerLineThickness'=>1,'outerLineThickness'=>1,'splitRows'=>0,'protectRows'=>1
-    );
+  $defaults = ['shaded'=>1, 'showLines'=>1, 'shadeCol'=>[0.8, 0.8, 0.8], 'shadeCol2'=>[0.7, 0.7, 0.7], 'fontSize'=>10, 'titleFontSize'=>12, 'titleGap'=>5, 'lineCol'=>[0, 0, 0], 'gap'=>5, 'xPos'=>'centre', 'xOrientation'=>'centre', 'showHeadings'=>1, 'textCol'=>[0, 0, 0], 'width'=>0, 'maxWidth'=>0, 'cols'=>[], 'minRowSpace'=>-100, 'rowGap'=>2, 'colGap'=>5, 'innerLineThickness'=>1, 'outerLineThickness'=>1, 'splitRows'=>0, 'protectRows'=>1];
 
   foreach($defaults as $key=>$value){
     if (is_array($value)){
@@ -689,7 +681,7 @@ function ezTable(&$data,$cols='',$title='',$options=''){
   
   $middle = ($this->ez['pageWidth']-$this->ez['rightMargin'])/2+($this->ez['leftMargin'])/2;
   // figure out the maximum widths of the text within each column
-  $maxWidth=array();
+  $maxWidth=[];
   foreach($cols as $colName=>$colHeading){
     $maxWidth[$colName]=0;
   }
@@ -711,7 +703,7 @@ function ezTable(&$data,$cols='',$title='',$options=''){
   }
   
   // calculate the start positions of each of the columns
-  $pos=array();
+  $pos=[];
   $x=0;
   $t=$x;
   $adjustmentWidth=0;
@@ -741,8 +733,8 @@ function ezTable(&$data,$cols='',$title='',$options=''){
 
   if ($options['width'] && $adjustmentWidth>0 && $setWidth<$options['width']){
     // first find the current widths of the columns involved in this mystery
-    $cols0 = array();
-    $cols1 = array();
+    $cols0 = [];
+    $cols1 = [];
     $xq=0;
     $presentWidth=0;
     $last='';
@@ -771,12 +763,12 @@ function ezTable(&$data,$cols='',$title='',$options=''){
       while ($presentWidth>$neededWidth && $cnt<100){
         $cnt++; // insurance policy
         // find the widest columns, and the next to widest width
-        $aWidest = array();
+        $aWidest = [];
         $nWidest=0;
         $widest=0;
         foreach($cols0 as $colName=>$w){
           if ($w>$widest){
-            $aWidest=array($colName);
+            $aWidest=[$colName];
             $nWidest = $widest;
             $widest=$w;
           } else if ($w==$widest){
@@ -823,21 +815,12 @@ function ezTable(&$data,$cols='',$title='',$options=''){
   }
 
   // now adjust the table to the correct location across the page
-  switch ($options['xPos']){
-    case 'left':
-      $xref = $this->ez['leftMargin'];
-      break;
-    case 'right':
-      $xref = $this->ez['pageWidth'] - $this->ez['rightMargin'];
-      break;
-    case 'centre':
-    case 'center':
-      $xref = $middle;
-      break;
-    default:
-      $xref = $options['xPos'];
-      break;
-  }
+  $xref = match ($options['xPos']) {
+      'left' => $this->ez['leftMargin'],
+      'right' => $this->ez['pageWidth'] - $this->ez['rightMargin'],
+      'centre', 'center' => $middle,
+      default => $options['xPos'],
+  };
   switch ($options['xOrientation']){
     case 'left':
       $dx = $xref-$t;
@@ -888,7 +871,7 @@ function ezTable(&$data,$cols='',$title='',$options=''){
 
 
   // if the title is set, then do that
-  if (strlen($title)){
+  if (strlen((string) $title)){
     $w = $this->getTextWidth($options['titleFontSize'],$title);
     $this->y -= $this->getFontHeight($options['titleFontSize']);
     if ($this->y < $this->ez['bottomMargin']){
@@ -1036,32 +1019,32 @@ function ezTable(&$data,$cols='',$title='',$options=''){
       // if these cells need to be split over a page, then $newPage will be set, and the remaining
       // text will be placed in $leftOvers
       $newPage=0;
-      $leftOvers=array();
+      $leftOvers=[];
 
       foreach($cols as $colName=>$colTitle){
         $this->ezSetY($y+$height);
         $colNewPage=0;
         if (isset($row[$colName])){
-          if (isset($options['cols'][$colName]) && isset($options['cols'][$colName]['link']) && strlen($options['cols'][$colName]['link'])){
+          if (isset($options['cols'][$colName]) && isset($options['cols'][$colName]['link']) && strlen((string) $options['cols'][$colName]['link'])){
             
-            $lines = explode("\n",$row[$colName]);
-            if (isset($row[$options['cols'][$colName]['link']]) && strlen($row[$options['cols'][$colName]['link']])){
+            $lines = explode("\n",(string) $row[$colName]);
+            if (isset($row[$options['cols'][$colName]['link']]) && strlen((string) $row[$options['cols'][$colName]['link']])){
               foreach($lines as $k=>$v){
                 $lines[$k]='<c:alink:'.$row[$options['cols'][$colName]['link']].'>'.$v.'</c:alink>';
               }
             }
           } else {
-            $lines = explode("\n",$row[$colName]);
+            $lines = explode("\n",(string) $row[$colName]);
           }
         } else {
-          $lines = array();
+          $lines = [];
         }
         $this->y -= $options['rowGap'];
         foreach ($lines as $line){
           $line = $this->ezProcessText($line);
           $start=1;
 
-          while (strlen($line) || $start){
+          while (strlen((string) $line) || $start){
             $start=0;
             if (!$colNewPage){
               $this->y=$this->y-$height;
@@ -1199,14 +1182,14 @@ function ezTable(&$data,$cols='',$title='',$options=''){
 function ezProcessText($text){
   // this function will intially be used to implement underlining support, but could be used for a range of other
   // purposes
-  $search = array('<u>','<U>','</u>','</U>');
-  $replace = array('<c:uline>','<c:uline>','</c:uline>','</c:uline>');
+  $search = ['<u>', '<U>', '</u>', '</U>'];
+  $replace = ['<c:uline>', '<c:uline>', '</c:uline>', '</c:uline>'];
   return str_replace($search,$replace,$text);
 }
 
 // ------------------------------------------------------------------------------
 
-function ezText($text,$size=0,$options=array(),$test=0){
+function ezText($text,$size=0,$options=[],$test=0){
   // this will add a string of text to the document, starting at the current drawing
   // position.
   // it will wrap to keep within the margins, including optional offsets from the left
@@ -1264,10 +1247,10 @@ function ezText($text,$size=0,$options=array(),$test=0){
 	}
 
   
-  $lines = explode("\n",$text);
+  $lines = explode("\n",(string) $text);
   foreach ($lines as $line){
     $start=1;
-    while (strlen($line) || $start){
+    while (strlen((string) $line) || $start){
       $start=0;
       $this->y=$this->y-$height;
       if ($this->y < $this->ez['bottomMargin']){
@@ -1304,7 +1287,7 @@ function ezText($text,$size=0,$options=array(),$test=0){
 
 function ezImage($image,$pad = 5,$width = 0,$resize = 'full',$just = 'center',$border = ''){
 	//beta ezimage function
-	if (stristr($image,'://'))//copy to temp file
+	if (stristr((string) $image,'://'))//copy to temp file
 	{
 		$fp = @fopen($image,"rb");
 		while(!feof($fp))
@@ -1439,10 +1422,10 @@ function loadTemplate($templateFile){
   }
 
   $code = trim($code);
-  if (substr($code,0,5)=='<?php'){
+  if (str_starts_with($code, '<?php')){
     $code = substr($code,5);
   }
-  if (substr($code,-2)=='?>'){
+  if (str_ends_with($code, '?>')){
     $code = substr($code,0,strlen($code)-2);
   }
   if (isset($this->ez['numTemplates'])){
@@ -1451,7 +1434,7 @@ function loadTemplate($templateFile){
   } else {
     $newNum=0;
     $this->ez['numTemplates']=1;
-    $this->ez['templates']=array();
+    $this->ez['templates']=[];
   }
 
   $this->ez['templates'][$newNum]['code']=$code;
@@ -1461,7 +1444,7 @@ function loadTemplate($templateFile){
 
 // ------------------------------------------------------------------------------
 
-function execTemplate($id,$data=array(),$options=array()){
+function execTemplate($id,$data=[],$options=[]){
   // execute the given template on the current document.
   if (!isset($this->ez['templates'][$id])){
     return;
@@ -1483,10 +1466,10 @@ function alink($info,$internal=0){
       // the beginning of the link
       // this should contain the URl for the link as the 'p' entry, and will also contain the value of 'nCallback'
       if (!isset($this->ez['links'])){
-        $this->ez['links']=array();
+        $this->ez['links']=[];
       }
       $i = $info['nCallback'];
-      $this->ez['links'][$i] = array('x'=>$info['x'],'y'=>$info['y'],'angle'=>$info['angle'],'decender'=>$info['decender'],'height'=>$info['height'],'url'=>$info['p']);
+      $this->ez['links'][$i] = ['x'=>$info['x'], 'y'=>$info['y'], 'angle'=>$info['angle'], 'decender'=>$info['decender'], 'height'=>$info['height'], 'url'=>$info['p']];
       if ($internal==0){
         $this->saveState();
         $this->setColor(0,0,1);
@@ -1528,10 +1511,10 @@ function uline($info){
     
       // the beginning of the underline zone
       if (!isset($this->ez['links'])){
-        $this->ez['links']=array();
+        $this->ez['links']=[];
       }
       $i = $info['nCallback'];
-      $this->ez['links'][$i] = array('x'=>$info['x'],'y'=>$info['y'],'angle'=>$info['angle'],'decender'=>$info['decender'],'height'=>$info['height']);
+      $this->ez['links'][$i] = ['x'=>$info['x'], 'y'=>$info['y'], 'angle'=>$info['angle'], 'decender'=>$info['decender'], 'height'=>$info['height']];
       $this->saveState();
       $thick = $info['height']*$lineFactor;
       $this->setLineStyle($thick);

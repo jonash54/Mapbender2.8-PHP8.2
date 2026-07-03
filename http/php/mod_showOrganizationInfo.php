@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_group.php");
-require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_group.php");
+require_once(__DIR__."/../classes/class_Uuid.php");
 
 $uuid = false;
 $id = false;
@@ -11,7 +11,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["id"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>id</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -22,7 +22,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 
 if (isset($_REQUEST["uuid"]) & $_REQUEST["uuid"] != "") {
 	$uuidClass = new Uuid();
-	if ($uuidClass->isValid($_REQUEST["uuid"])) {
+	if ($uuidClass->isValid()) {
 		$uuid = $_REQUEST["uuid"];
 	} else {
 		echo 'Parameter <b>uuid</b> is not a valid mapbender uuid.<br/>'; 

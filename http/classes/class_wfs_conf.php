@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_json.php");
 
-class WfsConf {
-	var $confArray = array();
+class WfsConf implements \Stringable {
+	public $confArray = [];
 
 	/**
 	 * Gets the configuration from the database
@@ -32,9 +32,9 @@ class WfsConf {
 
 	}
 	
-	function __toString () {
+	function __toString (): string {
 		$json = new Mapbender_JSON();
-		return $json->encode($this->confArray);
+		return (string) $json->encode($this->confArray);
 	}
 	
 	/**
@@ -49,16 +49,16 @@ class WfsConf {
 			
 			// parameter is a number	
 			if (!is_array($idOrIdArray) && is_numeric($idOrIdArray)) {
-				$idOrIdArray = array(intval($idOrIdArray));
+				$idOrIdArray = [intval($idOrIdArray)];
 			}
 
 			// parameter is an array of numbers
 			if (is_array($idOrIdArray)) {
-				$idArray = array();
+				$idArray = [];
 				foreach ($idOrIdArray as $id) {
 					if (!is_numeric($id)) {
 						$e = new mb_exception("Wfs_conf: constructor: wrong parameter: ".$id." is not a number.");
-						return array();
+						return [];
 					}
 					array_push($idArray, intval($id));
 				}
@@ -74,7 +74,7 @@ class WfsConf {
 			// parameter is invalid
 			else {
 				$e = new mb_exception("Wfs_conf: constructor: parameter must be number or an array of numbers.");
-				return array();
+				return [];
 			}
 		}
 		else {
@@ -93,7 +93,7 @@ class WfsConf {
 	 * @param $idArray Array an array of integer values representing WFS conf IDs.
 	 */
 	private static function getWfsConfFromDbByArray ($idArray) {
-		$rowArray = array();
+		$rowArray = [];
 		if(!is_array($idArray)) {
 			return $rowArray;
 		}
@@ -102,8 +102,8 @@ class WfsConf {
                 $sql .= "JOIN wfs ON wfs_conf.fkey_wfs_id = wfs.wfs_id ";
                 $sql .= "WHERE wfs_conf.wfs_conf_id = $1 LIMIT 1";
         
-                $v = array($id);
-                $t = array("i");
+                $v = [$id];
+                $t = ["i"];
                 $res = db_prep_query($sql, $v, $t);
                 $row = db_fetch_array($res);
                 array_push($rowArray, $row);
@@ -134,31 +134,13 @@ class WfsConf {
 		#filtered on client side
 		#$sql .= "AND wfs_conf_element.f_search = 1 ";
 		$sql .= "ORDER BY wfs_conf_element.f_pos";
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 	
-		$elementArray = array();
+		$elementArray = [];
 		while ($row = db_fetch_array($res)) {
-			$currentElement = array("element_name" => $row["element_name"],
-									"element_type" => $row["element_type"],
-									"f_search" => $row["f_search"],
-									"f_style_id" => $row["f_style_id"],
-									"f_toupper" => $row["f_toupper"],
-									"f_label" => $row["f_label"],
-									"f_label_id" => $row["f_label_id"],
-									"f_geom" => $row["f_geom"],
-									"f_show" => $row["f_show"],
-									"f_mandatory" => $row["f_mandatory"],
-									"f_respos" => $row["f_respos"],
-									"f_min_input" => $row["f_min_input"],
-									"f_form_element_html" => $row["f_form_element_html"],
-									"f_auth_varname" => $row["f_auth_varname"],
-									"f_detailpos" => $row["f_detailpos"],
-									"f_operator" => $row["f_operator"],
-									"f_show_detail" => $row["f_show_detail"],
-									"f_helptext" => $row["f_helptext"] == null? "":$row["f_helptext"]
-									);
+			$currentElement = ["element_name" => $row["element_name"], "element_type" => $row["element_type"], "f_search" => $row["f_search"], "f_style_id" => $row["f_style_id"], "f_toupper" => $row["f_toupper"], "f_label" => $row["f_label"], "f_label_id" => $row["f_label_id"], "f_geom" => $row["f_geom"], "f_show" => $row["f_show"], "f_mandatory" => $row["f_mandatory"], "f_respos" => $row["f_respos"], "f_min_input" => $row["f_min_input"], "f_form_element_html" => $row["f_form_element_html"], "f_auth_varname" => $row["f_auth_varname"], "f_detailpos" => $row["f_detailpos"], "f_operator" => $row["f_operator"], "f_show_detail" => $row["f_show_detail"], "f_helptext" => $row["f_helptext"] == null? "":$row["f_helptext"]];
 			array_push($elementArray, $currentElement);
 		}
 		return $elementArray;
@@ -173,12 +155,12 @@ class WfsConf {
 	 */
 	private static function getWfsFeatureTypeFromDb($wfsId, $featuretypeId) {
 		$sql = "SELECT * FROM wfs_featuretype WHERE fkey_wfs_id = $1 AND featuretype_id = $2";
-		$v = array($wfsId, $featuretypeId);
-		$t = array("i", "i");
+		$v = [$wfsId, $featuretypeId];
+		$t = ["i", "i"];
 	
 		$res = db_prep_query($sql, $v, $t);
 
-		$currentRow = array();
+		$currentRow = [];
 		
 		if($row = db_fetch_array($res)){
 			$currentRow["featuretype_name"] = $row["featuretype_name"];
@@ -187,10 +169,10 @@ class WfsConf {
 			//get OtherSRS if available
 			$sqlEpsg = "SELECT * FROM wfs_featuretype_epsg";
 			$sqlEpsg .= " WHERE fkey_featuretype_id = $1";
-			$vEpsg = array($featuretypeId);
-			$tEpsg = array('i');
+			$vEpsg = [$featuretypeId];
+			$tEpsg = ['i'];
 			$res = db_prep_query($sqlEpsg,$vEpsg,$tEpsg);
-			$currentRow["featuretype_other_srs"] = array();
+			$currentRow["featuretype_other_srs"] = [];
 			$cnt = 0;
 			while($rowEpsg = db_fetch_array($res)){
 				$currentRow["featuretype_other_srs"][$cnt]['epsg'] = $rowEpsg['epsg'];
@@ -214,20 +196,14 @@ SELECT * FROM wfs_stored_query_params
 WHERE fkey_wfs_conf_id = $1 AND stored_query_id = $2
 ORDER BY query_param_id
 SQL;
-		$v = array($id, $storedQueryId);
-		$t = array('i', 's');
+		$v = [$id, $storedQueryId];
+		$t = ['i', 's'];
 		$res = db_prep_query($sql, $v, $t);
 		
-		$storedQueryElementArray = array();
+		$storedQueryElementArray = [];
 		
 		while ($row = db_fetch_array($res)) {
-			$currentElement = array(
-					"id" => $row["query_param_id"],
-					"name" => $row["query_param_name"],
-					"type" => $row["query_param_type"],
-					"wfsConfId" => $row["fkey_wfs_conf_id"],
-					"storedQueryId" => $row["stored_query_id"]
-			);
+			$currentElement = ["id" => $row["query_param_id"], "name" => $row["query_param_name"], "type" => $row["query_param_type"], "wfsConfId" => $row["fkey_wfs_conf_id"], "storedQueryId" => $row["stored_query_id"]];
 			array_push($storedQueryElementArray, $currentElement);
 		}
 	
@@ -248,26 +224,7 @@ SQL;
 			for ($i=0; $i < count($rowArray); $i++) {
 	
 				// WFS conf data				
-				$currentRow = array("g_label" => $rowArray[$i]["g_label"], 
-									"wfs_conf_abstract" => $rowArray[$i]["wfs_conf_abstract"],
-			                        "g_label_id" => $rowArray[$i]["g_label_id"],
-									"g_style" => $rowArray[$i]["g_style"],
-									"g_button" => $rowArray[$i]["g_button"],
-									"g_button_id" => $rowArray[$i]["g_button_id"],
-									"g_buffer" => $rowArray[$i]["g_buffer"],
-									"g_res_style" => $rowArray[$i]["g_res_style"],
-									"g_use_wzgraphics" => $rowArray[$i]["g_use_wzgraphics"],
-									"wfs_id" => $rowArray[$i]["fkey_wfs_id"],
-									"featuretype_id" => $rowArray[$i]["fkey_featuretype_id"],
-									"wfs_getfeature" => $rowArray[$i]["wfs_getfeature"],
-									"wfs_describefeaturetype" => $rowArray[$i]["wfs_describefeaturetype"],
-									"wfs_transaction" => $rowArray[$i]["wfs_transaction"],
-									"wfs_conf_id" => $rowArray[$i]["wfs_conf_id"],
-									"wfs_conf_type" => $rowArray[$i]["wfs_conf_type"],
-									"element" => $elementArray,
-									"stored_query_id" => $rowArray[$i]["stored_query_id"],
-									"storedQueryElement" => $storedQueryElementArray,
-									);
+				$currentRow = ["g_label" => $rowArray[$i]["g_label"], "wfs_conf_abstract" => $rowArray[$i]["wfs_conf_abstract"], "g_label_id" => $rowArray[$i]["g_label_id"], "g_style" => $rowArray[$i]["g_style"], "g_button" => $rowArray[$i]["g_button"], "g_button_id" => $rowArray[$i]["g_button_id"], "g_buffer" => $rowArray[$i]["g_buffer"], "g_res_style" => $rowArray[$i]["g_res_style"], "g_use_wzgraphics" => $rowArray[$i]["g_use_wzgraphics"], "wfs_id" => $rowArray[$i]["fkey_wfs_id"], "featuretype_id" => $rowArray[$i]["fkey_featuretype_id"], "wfs_getfeature" => $rowArray[$i]["wfs_getfeature"], "wfs_describefeaturetype" => $rowArray[$i]["wfs_describefeaturetype"], "wfs_transaction" => $rowArray[$i]["wfs_transaction"], "wfs_conf_id" => $rowArray[$i]["wfs_conf_id"], "wfs_conf_type" => $rowArray[$i]["wfs_conf_type"], "element" => $elementArray, "stored_query_id" => $rowArray[$i]["stored_query_id"], "storedQueryElement" => $storedQueryElementArray];
 
 				// get WFS conf element data of current WFS conf
 				$id = $rowArray[$i]["wfs_conf_id"];
@@ -290,7 +247,7 @@ SQL;
 		}
 		else {
 			$e = new mb_warning("class_wfs_conf.php: getWfsConfFromDB: You don't have access to any WFS confs. Check EDIT WFS.");
-			return array();
+			return [];
 		}
 	}
 	
@@ -301,32 +258,32 @@ SQL;
  */
 class wfs_conf{
 	
-	var $wfs_id;
-	var $wfs_name;
-	var $wfs_title;
-	var $wfs_abstract;
-	var $wfs_getcapabilities;
-	var $wfs_describefeaturetype;
-	var $wfs_getfeature;
+	public $wfs_id;
+	public $wfs_name;
+	public $wfs_title;
+	public $wfs_abstract;
+	public $wfs_getcapabilities;
+	public $wfs_describefeaturetype;
+	public $wfs_getfeature;
 	
-	var $features;
-	var $elements;
-	var $namespaces;
+	public $features;
+	public $elements;
+	public $namespaces;
 		
 
 	function getallwfs($userid){
-		$this->wfs_id = array();
-		$this->wfs_name = array();
-		$this->wfs_title = array();
-		$this->wfs_abstract = array();
+		$this->wfs_id = [];
+		$this->wfs_name = [];
+		$this->wfs_title = [];
+		$this->wfs_abstract = [];
 		
 		global $DBSERVER,$DB,$OWNER,$PW;
 		$con = db_connect($DBSERVER,$OWNER,$PW);
 		db_select_db($DB,$con);
 		if($userid){
 		 	$sql = "SELECT * FROM wfs WHERE wfs_owner = $1 ORDER BY wfs_id";
-			$v = array($userid);
-			$t = array('i');
+			$v = [$userid];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 		}
 		else{
@@ -348,10 +305,10 @@ class wfs_conf{
 		}	
 	}
 	public function getowned($userId) {
-		$wfsConfIdArray = array();
+		$wfsConfIdArray = [];
 		$sql = "SELECT wfs_conf_id FROM wfs_conf INNER JOIN wfs ON wfs.wfs_id = wfs_conf.fkey_wfs_id WHERE wfs.wfs_owner = $1";
-		$v = array($userId);
-		$t = array('i');
+		$v = [$userId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		while ($row = db_fetch_array($res)){
 			$wfsConfIdArray[] = $row['wfs_conf_id'];
@@ -370,24 +327,24 @@ class wfs_conf{
 }
 class features extends wfs_conf{
 	
-	var $featuretype_id;
-	var $featuretype_name;
-	var $featuretype_title;
-	var $featuretype_srs;
+	public $featuretype_id;
+	public $featuretype_name;
+	public $featuretype_title;
+	public $featuretype_srs;
 	
 	function __construct($id){		
 		
-		$featuretype_id = array();
-		$featuretype_name = array();
-		$featuretype_title = array();
-		$featuretype_srs = array();
+		$featuretype_id = [];
+		$featuretype_name = [];
+		$featuretype_title = [];
+		$featuretype_srs = [];
 		
 		global $DBSERVER,$DB,$OWNER,$PW;
 		$con = db_connect($DBSERVER,$OWNER,$PW);
 		db_select_db($DB,$con);
 		$sql = "SELECT * FROM wfs_featuretype WHERE fkey_wfs_id = $1";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$cnt = 0;
 		while ($row = db_fetch_array($res)){
@@ -408,22 +365,22 @@ class features extends wfs_conf{
 }
 class elements extends wfs_conf{
 	
-	var $element_id;
-	var $element_name;
-	var $element_type;
+	public $element_id;
+	public $element_name;
+	public $element_type;
 	
         function __construct($fid){
 		
-		$element_id = array();
-		$element_name = array();
-		$element_type = array();
+		$element_id = [];
+		$element_name = [];
+		$element_type = [];
 		
 		global $DBSERVER,$DB,$OWNER,$PW;
 		$con = db_connect($DBSERVER,$OWNER,$PW);
 		db_select_db($DB,$con);
 		$sql = "SELECT * FROM wfs_element WHERE fkey_featuretype_id = $1";
-		$v = array($fid);
-		$t = array("s");
+		$v = [$fid];
+		$t = ["s"];
 		$res = db_prep_query($sql, $v, $t);
 		$cnt = 0;
 		while ($row = db_fetch_array($res)){
@@ -444,20 +401,20 @@ class elements extends wfs_conf{
 
 class namespaces extends wfs_conf{
 	
-	var $namespace_name;
-	var $namespace_location;
+	public $namespace_name;
+	public $namespace_location;
 	
 	function __construct($fid){
 		
-		$namespace_name = array();
-		$namespace_location = array();
+		$namespace_name = [];
+		$namespace_location = [];
 		
 		global $DBSERVER,$DB,$OWNER,$PW;
 		$con = db_connect($DBSERVER,$OWNER,$PW);
 		db_select_db($DB,$con);
 		$sql = "SELECT * FROM wfs_featuretype_namespace WHERE fkey_featuretype_id = $1";
-		$v = array($fid);
-		$t = array("s");
+		$v = [$fid];
+		$t = ["s"];
 		$res = db_prep_query($sql, $v, $t);
 		$cnt = 0;
 		while ($row = db_fetch_array($res)){

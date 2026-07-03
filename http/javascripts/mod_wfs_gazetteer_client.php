@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 $target = $_REQUEST["e_target"];
 $isLoaded = $_REQUEST["isLoaded"];
@@ -107,8 +107,8 @@ include '../include/dyn_css.php';
 	include '../include/dyn_js.php';
 	include '../extensions/jquery-ui-1.7.2.custom/js/jquery-1.3.2.min.js';
 	include '../include/dyn_php.php';
-	include(dirname(__FILE__) . "/../../conf/" . $wfs_spatial_request_conf_filename);
-	include(dirname(__FILE__) . "/../../core/epsg.php");
+	include(__DIR__ . "/../../conf/" . $wfs_spatial_request_conf_filename);
+	include(__DIR__ . "/../../core/epsg.php");
 
 	echo "var targetString = '" . $target . "';";
 	echo "var wfsConfIdString = '" . $wfsConfIdString . "';";

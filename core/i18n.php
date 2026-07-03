@@ -20,7 +20,7 @@
 	    if ($someString === "") {
 	    	return "";
 	    }
-		$arg = array();
+		$arg = [];
 	    for($i = 1 ; $i < func_num_args(); $i++) {
 	        $arg[] = func_get_arg($i);
 	    }

@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="createCategory";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done 
  */ 
@@ -42,8 +42,8 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 <?php
 if(isset($newCategory) && $newCategory != ""){
   $sql = "SELECT category_name FROM gui_category WHERE category_name = $1";
-  $v = array($newCategory);
-  $t = array('s');
+  $v = [$newCategory];
+  $t = ['s'];
   $res = db_prep_query($sql,$v,$t);
   if(db_fetch_row($res)){
      echo "<script type='text/javascript'>";
@@ -53,8 +53,8 @@ if(isset($newCategory) && $newCategory != ""){
   else{
 	$sql = "INSERT INTO gui_category (category_name,category_description) ";
 	$sql .= "VALUES($1, $2)";
-	$v = array($newCategory,$newDesc);
-	$t = array('s','s');
+	$v = [$newCategory, $newDesc];
+	$t = ['s', 's'];
 	
 	$res = db_prep_query($sql,$v,$t);
 	$categoryCreated=true;
@@ -88,8 +88,8 @@ function validate(){
 <form name='form1' action="<?php echo $self; ?>" method="POST">
 
 <?php
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$c = 1;
 	$sql = "SELECT * from gui_category";
 	$sql .= " order by lower(category_name);";

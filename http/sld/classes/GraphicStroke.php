@@ -31,24 +31,24 @@ class GraphicStroke
 	 * @see Graphic
 	 * @var object
 	 */
-	var $graphic = "";
+	public $graphic = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * Default constructor that automatically creates a Graphic object.
 	 */
-	function GraphicStroke()
+	function __construct()
 	{
 		$this->graphic = new Graphic();
 	}

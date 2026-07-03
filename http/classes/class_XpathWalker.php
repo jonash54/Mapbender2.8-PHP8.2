@@ -13,7 +13,7 @@ class XpathWalker
 
     public function __construct($xpath)
     {
-        $this->xpath   = explode(XmlBuilder::SLASH, $xpath);
+        $this->xpath   = explode(XmlBuilder::SLASH, (string) $xpath);
         $this->pointer = count($this->xpath) - 1;
         $this->added   = false;
     }

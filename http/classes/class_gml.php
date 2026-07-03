@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_feature_collection.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_feature_collection.php");
 
 abstract class Gml {
-	var $featureCollection = null;
-	var $doc;
+	public $featureCollection = null;
+	public $doc;
 	
 	abstract public function toGml ();
 	
@@ -97,7 +97,7 @@ abstract class Gml {
 			$e = new mb_exception("class_gml.php: Filehandler error (" . $file . ").");
 			return false;
 		}
-		if (!fwrite($handle,$xml)) {
+		if (!fwrite($handle,(string) $xml)) {
 			$e = new mb_exception("class_gml.php: Could not write file (" . $file . ").");
 			fclose($handle);
 			return false;

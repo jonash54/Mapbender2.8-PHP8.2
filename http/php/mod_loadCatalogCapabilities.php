@@ -19,7 +19,7 @@
 
 //Include required files
 $e_id="loadCSW";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done
  */ 
@@ -107,7 +107,7 @@ function validate(value){
 <?php
 
 //Get GUIs for present user
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner($_SESSION["mb_user_id"],true);
 
@@ -119,8 +119,8 @@ echo "<td>";
 if (count($ownguis)>0){
 	echo"GUI";
 	echo"<br>";
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT * FROM gui WHERE gui_id IN ("; 
 	for($i=0; $i<count($ownguis); $i++){
 		if($i>0){ $sql .= ",";}
@@ -151,8 +151,8 @@ if (count($ownguis)>0){
 		$sql = "SELECT DISTINCT cat.cat_title from gui_cat JOIN ";
 		$sql .= "gui on gui_cat.fkey_gui_id = gui.gui_id JOIN cat ON gui_cat.fkey_cat_id = cat.cat_id ";
 		$sql .= "and gui_cat.fkey_gui_id = gui.gui_id where gui.gui_name = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$count=0;
 		echo"<select size='8' name='catList' style='width:200px'>";

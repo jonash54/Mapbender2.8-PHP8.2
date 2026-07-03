@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__file__)."/spatial_security.php";
+require_once __DIR__."/spatial_security.php";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -81,17 +81,11 @@ if($action == 'save'){
 		$changes->homepage = $homepage;
 		$changes->admin_code = $admin_code;
 		$changes->external_id = $external_id;
-		switch ($searchable) {
-			case "on":
-				$changes->searchable = 't';
-				break;
-			case "off":
-				$changes->searchable = 'f';
-				break;
-			default: 
-				$changes->searchable = 'f';
-				break;
-		}
+		$changes->searchable = match ($searchable) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
 		$group->change($changes);	
 		
 		$group->create();	
@@ -126,17 +120,11 @@ if ($action == 'update') {
 		$changes->homepage = $homepage;
 		$changes->admin_code = $admin_code;
 		$changes->external_id = $external_id;
-		switch ($searchable) {
-			case "on":
-				$changes->searchable = 't';
-				break;
-			case "off":
-				$changes->searchable = 'f';
-				break;
-			default: 
-				$changes->searchable = 'f';
-				break;
-		}
+		$changes->searchable = match ($searchable) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
 		$group->change($changes);		
 
 		$group->commit();	
@@ -185,7 +173,7 @@ echo "<select name='selected_group' onchange='submit()'>";
 	$groupArray = Group::getList($filter);
 	foreach ($groupArray as $group) {
 		echo "<option value='" . 
-			htmlentities($group->getId(), ENT_QUOTES. "UTF-8") . "' ";
+			htmlentities((string) $group->getId(), ENT_QUOTES. "UTF-8") . "' ";
 
 		if ($selected_group && intval($selected_group) == $group->getId()) {
 			echo "selected";
@@ -232,7 +220,7 @@ echo "<tr>";
    echo "<td>"._mb("Name").":</td>";
    echo "<td>";
       echo "<input type='text' size='30' name='name' value='" . 
-	  	htmlentities($name, ENT_QUOTES, "UTF-8") . "'>";
+	  	htmlentities((string) $name, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -241,7 +229,7 @@ echo "<tr>";
    echo "<td>"._mb("Title").":</td>";
    echo "<td>";
       echo "<input type='text' size='30' name='title' value='" . 
-	  	htmlentities($title, ENT_QUOTES, "UTF-8") . "'>";
+	  	htmlentities((string) $title, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -251,9 +239,9 @@ echo "<tr>";
    echo "<td>"._mb("Owner").": </td>";
    echo "<td>";
 	echo "<input type='text' size='30' name='owner_name' value='" . 
-	  	htmlentities($owner_name, ENT_QUOTES, "UTF-8") . "' readonly>";
+	  	htmlentities((string) $owner_name, ENT_QUOTES, "UTF-8") . "' readonly>";
       echo "<input type='hidden' size='30' name='owner_id' value='" . 
-	  	htmlentities($owner_id, ENT_QUOTES, "UTF-8") . "' readonly>";
+	  	htmlentities((string) $owner_id, ENT_QUOTES, "UTF-8") . "' readonly>";
    echo "</td>";
 echo "</tr>";
 
@@ -262,7 +250,7 @@ echo "<tr>";
    echo "<td>"._mb("Description").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='description' value='" . 
-	  	htmlentities($description, ENT_QUOTES, "UTF-8") . "'>";
+	  	htmlentities((string) $description, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -271,7 +259,7 @@ echo "<tr>";
    echo "<td>"._mb("Address").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='address' value='" . 
-	  htmlentities($address, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $address, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -280,7 +268,7 @@ echo "<tr>";
    echo "<td>"._mb("Postcode").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='postcode' value='" . 
-	  	htmlentities($postcode, ENT_QUOTES, "UTF-8") . "'>";
+	  	htmlentities((string) $postcode, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -289,7 +277,7 @@ echo "<tr>";
    echo "<td>"._mb("City").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='city' value='" . 
-	  	htmlentities($city, ENT_QUOTES, "UTF-8") . "'>";
+	  	htmlentities((string) $city, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -298,7 +286,7 @@ echo "<tr>";
    echo "<td>"._mb("Province").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='stateorprovince' value='" . 
-	  htmlentities($stateorprovince, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $stateorprovince, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -307,7 +295,7 @@ echo "<tr>";
    echo "<td>"._mb("Country").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='country' value='" . 
-	  htmlentities($country, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $country, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -316,7 +304,7 @@ echo "<tr>";
    echo "<td>"._mb("Voicetelephone").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='voicetelephone' value='" . 
-	  htmlentities($voicetelephone, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $voicetelephone, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -325,7 +313,7 @@ echo "<tr>";
    echo "<td>"._mb("Facsimiletelephone").": </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='facsimiletelephone' value='" . 
-	  htmlentities($facsimiletelephone, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $facsimiletelephone, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -334,7 +322,7 @@ echo "<tr>";
    echo "<td>Email: </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='email' value='" . 
-	  htmlentities($email, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $email, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -343,7 +331,7 @@ echo "<tr>";
    echo "<td>Logo: </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='logo_path' value='" . 
-	  htmlentities($logo_path, ENT_QUOTES, "UTF-8") . "'>";
+	  htmlentities((string) $logo_path, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -352,7 +340,7 @@ echo "<tr>";
    echo "<td>Homepage: </td>";
    echo "<td>";
       echo "<input type='text' size='30' name='homepage' value='" .
-          htmlentities($homepage, ENT_QUOTES, "UTF-8") . "'>";
+          htmlentities((string) $homepage, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -361,7 +349,7 @@ echo "<tr>";
    echo "<td>Verwaltungseinheit: </td>";
    echo "<td>";
    echo "<input type='text' size='30' name='admin_code' value='" .
-          htmlentities($admin_code, ENT_QUOTES, "UTF-8") . "'>";
+          htmlentities((string) $admin_code, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 
@@ -370,7 +358,7 @@ echo "<tr>";
    echo "<td>Externe ID: </td>";
    echo "<td>";
    echo "<input type='text' size='30' name='external_id' value='" .
-          htmlentities($external_id, ENT_QUOTES, "UTF-8") . "'>";
+          htmlentities((string) $external_id, ENT_QUOTES, "UTF-8") . "'>";
    echo "</td>";
 echo "</tr>";
 

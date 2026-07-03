@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $e_id="Group_Gui";
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -77,7 +77,7 @@ $cnt_gui_group = 0;
 $cnt_gui_group = 0;
 $exists = false;
 
-$gui_id_array = array();
+$gui_id_array = [];
 
 /*handle remove, update and insert*****************************************************************/
 if($insert){
@@ -86,15 +86,15 @@ if($insert){
 			$exists = false;
 			$sql_insert = "SELECT * FROM gui_mb_group WHERE fkey_mb_group_id = $1 ";
 			$sql_insert .= " and fkey_gui_id = $2 ";
-			$v = array($selected_group,$selected_gui[$i]);
-			$t = array('i','s');
+			$v = [$selected_group, $selected_gui[$i]];
+			$t = ['i', 's'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO gui_mb_group(fkey_mb_group_id, fkey_gui_id) ";
 				$sql_insert .= "VALUES($1, $2);";
-				$v = array($selected_group,$selected_gui[$i]);
-				$t = array('i','s');
+				$v = [$selected_group, $selected_gui[$i]];
+				$t = ['i', 's'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -105,8 +105,8 @@ if($remove){
 		for($i=0; $i<count($remove_gui); $i++){
 			$sql_remove = "DELETE FROM gui_mb_group WHERE fkey_gui_id = $1";
 			$sql_remove .= " and fkey_mb_group_id = $2";
-			$v = array($remove_gui[$i],$selected_group);
-			$t = array('s','i');
+			$v = [$remove_gui[$i], $selected_group];
+			$t = ['s', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -135,9 +135,9 @@ $sql_group_mb_gui = "SELECT gui.gui_id, gui.gui_name, gui_mb_group.fkey_mb_group
 $sql_group_mb_gui .= "INNER JOIN gui ON gui_mb_group.fkey_gui_id = gui.gui_id ";
 $sql_group_mb_gui .= "WHERE gui_mb_group.fkey_mb_group_id = $1 ";
 $sql_group_mb_gui .= " ORDER BY gui.gui_name";
-if(!$selected_group){$v = array($group_id[0]);}
-if($selected_group){$v = array($selected_group);}
-$t = array('i');
+if(!$selected_group){$v = [$group_id[0]];}
+if($selected_group){$v = [$selected_group];}
+$t = ['i'];
 
 $res_group_mb_gui = db_prep_query($sql_group_mb_gui,$v,$t);
 while($row = db_fetch_array($res_group_mb_gui)){

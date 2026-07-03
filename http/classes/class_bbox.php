@@ -17,16 +17,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_point.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_point.php");
 
 /**
  * A bounding box consisting of an lower left and an upper right point, and an EPSG.
  */
-class Mapbender_bbox {
-	var $min;
-	var $max;
-	var $epsg;
+class Mapbender_bbox implements \Stringable {
+	public $min;
+	public $max;
+	public $epsg;
 	
 	/**
 	 * @constructor
@@ -173,7 +173,7 @@ class Mapbender_bbox {
 		return (string) $this->min->toHtml() . " | " . $this->max->toHtml(); 
 	}
 	
-	function __toString() {
+	function __toString(): string {
 		return (string) "[" . $this->min . $this->max . " " . $this->epsg . "]"; 
 	}
 	

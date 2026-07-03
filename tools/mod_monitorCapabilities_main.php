@@ -13,17 +13,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) ."/../core/globalSettings.php";
-require_once dirname(__FILE__) ."/../http/classes/class_administration.php";
-require_once dirname(__FILE__) ."/../tools/mod_monitorCapabilities_defineGetMapBbox.php";
-require_once dirname(__FILE__) ."/../http/classes/class_bbox.php";
+require_once __DIR__ ."/../core/globalSettings.php";
+require_once __DIR__ ."/../http/classes/class_administration.php";
+require_once __DIR__ ."/../tools/mod_monitorCapabilities_defineGetMapBbox.php";
+require_once __DIR__ ."/../http/classes/class_bbox.php";
 
 //require_once dirname(__FILE__) ."/../http/classes/class_universal_wfs_factory.php";
 //require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
 $wfsToExclude = [];
 $wmsToExclude = [];
 
-if (file_exists ( dirname ( __FILE__ ) . "/../conf/excludeFromMonitoring.json" )) {
+if (file_exists ( __DIR__ . "/../conf/excludeFromMonitoring.json" )) {
 	$configObject = json_decode ( file_get_contents ( "../conf/excludeFromMonitoring.json" ) );
 }
 if (isset ( $configObject ) && isset ( $configObject->wms ) && count($configObject->wms) > 0 ) {
@@ -75,11 +75,11 @@ if ($_SERVER["argc"] > 0) {
 	echo "Invoked from cli\n\n";
 	if ($_SERVER["argc"] > 1 && $_SERVER["argv"][1] !== "") {
 		$param = $_SERVER["argv"][1];
-		if (substr($param, 0,5) == "user:") {
-			$user = substr($param, 5);
+		if (str_starts_with((string) $param, "user:")) {
+			$user = substr((string) $param, 5);
 		}
-		if (substr($param, 0,6) == "group:") {
-			$group = substr($param, 6);
+		if (str_starts_with((string) $param, "group:")) {
+			$group = substr((string) $param, 6);
 		}
 	}
 	else {
@@ -120,8 +120,8 @@ if (!is_null($group)) {
 	$sql = "SELECT DISTINCT fkey_mb_user_id FROM mb_user_mb_group WHERE " . 
 		"fkey_mb_group_id = (SELECT mb_group_id FROM mb_group WHERE " . 
 		"mb_group_id = $1)";
-	$v = array($group);
-	$t = array('i');
+	$v = [$group];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	$userIdArray = [];
 	while ($row = db_fetch_array($res)) {
@@ -133,7 +133,7 @@ else if (!is_null($user)) {
 		echo _mb("Parameter 'user' must be numeric.");
 		die;
 	}
-	$userIdArray = array($user);
+	$userIdArray = [$user];
 }
 else {
 	if ($_SERVER["argc"] > 0) {
@@ -159,11 +159,11 @@ $user_id_all = $userIdArray;
 echo $br ."Count of registrating users: " . count($user_id_all) . $br;
 //$e = new mb_exception("mod_monitorCapabilities_main.php: count of group members: ".count($user_id_all));
 //delete all temporary files (.xml and .png) from last monitoring
-array_map('unlink', glob(dirname(__FILE__)."/tmp/*.xml"));
-array_map('unlink', glob(dirname(__FILE__)."/tmp/*.png"));
+array_map('unlink', glob(__DIR__."/tmp/*.xml"));
+array_map('unlink', glob(__DIR__."/tmp/*.png"));
 // loop for serviceType
 //define service types which should be monitored
-$serviceTypes = array('WMS','WFS');
+$serviceTypes = ['WMS', 'WFS'];
 //for testing
 
 //$serviceTypes = array('WMS');
@@ -221,8 +221,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 				"WHERE wfs_id = $1";
 				break;
 		}
-		$v = array($service_id_own[$k]);
-		$t = array('i');
+		$v = [$service_id_own[$k]];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$someArray = db_fetch_array($res);
 		$url = $someArray['service_upload_url'];
@@ -266,17 +266,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 					"upload_url, updated)";
 				$sql .= "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
-				$v = array(
-					$time,
-					$service_id_own[$k],
-					"-2",
-					"Monitoring is still in progress...", 
-					time(),
-					"0",
-					$url,
-					"0"
-				);
-				$t = array('s', 'i', 's', 's', 's', 's', 's', 's');
+				$v = [$time, $service_id_own[$k], "-2", "Monitoring is still in progress...", time(), "0", $url, "0"];
+				$t = ['s', 'i', 's', 's', 's', 's', 's', 's'];
 				$res = db_prep_query($sql,$v,$t);
 				break;
 			case "WFS":
@@ -285,17 +276,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 					"upload_url, updated)";
 				$sql .= "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
-				$v = array(
-					$time,
-					$service_id_own[$k],
-					"-2",
-					"Monitoring is still in progress...", 
-					time(),
-					"0",
-					$url,
-					"0"
-				);
-				$t = array('s', 'i', 's', 's', 's', 's', 's', 's');
+				$v = [$time, $service_id_own[$k], "-2", "Monitoring is still in progress...", time(), "0", $url, "0"];
+				$t = ['s', 'i', 's', 's', 's', 's', 's', 's'];
 				$res = db_prep_query($sql,$v,$t);
 				break;
 		}
@@ -307,7 +289,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		// look in class_monitor.php !
 		$currentFilename = strtolower($serviceType)."_monitor_report_" . $time . "_" . 
 			$service_id_own[$k] . "_" . $userid . ".xml";
- 		$report = fopen(dirname(__FILE__)."/tmp/".$currentFilename,"a");
+ 		$report = fopen(__DIR__."/tmp/".$currentFilename,"a");
 		//$e = new mb_notice("mod_monitorCapabilities_main.php: currentFilename: ".dirname(__FILE__)."/tmp/".$currentFilename);
 		$lb = chr(13).chr(10);
 
@@ -324,15 +306,15 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		}
 		fwrite($report,"<upload_id>".$time."</upload_id>".$lb);
 		fwrite($report,"<getcapbegin></getcapbegin>".$lb);
-		fwrite($report,"<getcapurl>".urlencode($url)."</getcapurl>".$lb);
-		fwrite($report,"<getcapdoclocal>".urlencode($capDoc)."</getcapdoclocal>".$lb);
+		fwrite($report,"<getcapurl>".urlencode((string) $url)."</getcapurl>".$lb);
+		fwrite($report,"<getcapdoclocal>".urlencode((string) $capDoc)."</getcapdoclocal>".$lb);
 		fwrite($report,"<getcapdocremote></getcapdocremote>".$lb);
 		fwrite($report,"<getcapdiff></getcapdiff>".$lb);
 		fwrite($report,"<getcapend></getcapend>".$lb);
 		fwrite($report,"<getcapduration></getcapduration>".$lb);
 		switch ($serviceType) {
 			case "WMS":
-				fwrite($report,"<getmapurl>".urlencode($getMapUrl)."</getmapurl>".$lb);
+				fwrite($report,"<getmapurl>".urlencode((string) $getMapUrl)."</getmapurl>".$lb);
 				break;
 			case "WFS":
 				//get list of featuretype names and other information
@@ -352,7 +334,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 				fwrite($report,"<image></image>".$lb);
 				break;
 			case "WFS":
-				
+
 				break;
 		}
 		fwrite($report,"<comment>Monitoring in progress...</comment>".$lb);
@@ -375,7 +357,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		}
 		switch ($serviceType) {
 			case "WMS":
-				$exec = PHP_PATH . "php " . dirname(__FILE__) . "/mod_monitorCapabilities_write.php " . 
+				$exec = PHP_PATH . "php " . __DIR__ . "/mod_monitorCapabilities_write.php " . 
 					$currentFilename ." ".$serviceType." 0 > /dev/null &";
 				/*
 		 		* @security_patch exec done
@@ -385,7 +367,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 				exec($exec);
 				break;
 			case "WFS":
-				$exec = PHP_PATH . "php " . dirname(__FILE__) . "/mod_monitorCapabilities_write.php " . 
+				$exec = PHP_PATH . "php " . __DIR__ . "/mod_monitorCapabilities_write.php " . 
 					$currentFilename ." ".$serviceType." 0 > /dev/null &";
 				exec($exec);
 				break;
@@ -416,21 +398,21 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 	//get the old upload_id from the monitoring to identify it in the database
 	$time = $time_array[$userid];	
 	//get all owned services
-	
+
 	switch ($serviceType) {
 		case "WMS":
 			$service_id_own = $admin->getWmsByWmsOwner($userid);
-			$tagsToReturn = array("status", "comment", "getcapdiff", "image", "getcapbegin", "getcapend", "getmapurl");
+			$tagsToReturn = ["status", "comment", "getcapdiff", "image", "getcapbegin", "getcapend", "getmapurl"];
 			break;
 		case "WFS":
 			$service_id_own = $admin->getWfsByWfsOwner($userid);
-			$tagsToReturn = array("status", "comment", "getcapdiff", "getcapbegin", "getcapend", "feature_content");
+			$tagsToReturn = ["status", "comment", "getcapdiff", "getcapbegin", "getcapend", "feature_content"];
 			break;
 	}
 	for ($k = 0; $k < count($service_id_own); $k++) {
-		$monitorFile = dirname(__FILE__)."/tmp/".strtolower($serviceType)."_monitor_report_" . $time . "_" . 
+		$monitorFile = __DIR__."/tmp/".strtolower($serviceType)."_monitor_report_" . $time . "_" . 
 			$service_id_own[$k] . "_".$userid.".xml";
-		
+
 		$tags = getTagsOutOfXML($monitorFile, $tagsToReturn, strtolower($serviceType));
 		$status = $tags['status'];
 		$status_comment = $tags['comment'];
@@ -440,8 +422,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		//logit("try to update ".$serviceType." with id ".$service_id_own[$k]);
 		switch ($serviceType) {
 			case "WMS":
-				$map_url = rawurldecode($tags['getmapurl']);
-				$image = rawurldecode($tags['image']);
+				$map_url = rawurldecode((string) $tags['getmapurl']);
+				$image = rawurldecode((string) $tags['image']);
 				break;
 			case "WFS":
 				//TODO
@@ -463,19 +445,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 					array_push($problemOWS,$service_id_own[$k]);
 					array_push($commentProblemOWS,$status_comment);
 				} 
-				$v = array(
-					'0', 
-					intval($status), 
-					intval($image), 
-					$status_comment, 
-					(string)intval($timestamp_end), 
-					$map_url, 
-					(string)intval($timestamp_begin), 
-					$cap_diff,
-					(string)$time, 
-					$service_id_own[$k]
-				);
-				$t = array('s', 'i', 'i', 's', 's', 's', 's', 's','s','s');
+				$v = ['0', intval($status), intval($image), $status_comment, (string)intval($timestamp_end), $map_url, (string)intval($timestamp_begin), $cap_diff, (string)$time, $service_id_own[$k]];
+				$t = ['s', 'i', 'i', 's', 's', 's', 's', 's', 's', 's'];
 				$res = db_prep_query($sql,$v,$t);
 				break;
 			case "WFS":
@@ -492,19 +463,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 					array_push($problemOWS,$service_id_own[$k]);
 					array_push($commentProblemOWS,$status_comment);
 				} 
-				$v = array(
-					'0', 
-					intval($status), 
-					$feature_content, 
-					$status_comment, 
-					(string)intval($timestamp_end), 
-					"feature_urls - json", 
-					(string)intval($timestamp_begin), 
-					$cap_diff,
-					(string)$time, 
-					$service_id_own[$k]
-				);
-				$t = array('s', 'i', 's', 's', 's', 's', 's', 's','s','s');
+				$v = ['0', intval($status), $feature_content, $status_comment, (string)intval($timestamp_end), "feature_urls - json", (string)intval($timestamp_begin), $cap_diff, (string)$time, $service_id_own[$k]];
+				$t = ['s', 'i', 's', 's', 's', 's', 's', 's', 's', 's'];
 				$res = db_prep_query($sql,$v,$t);
 				break;
 		}
@@ -539,7 +499,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 				$admin->getEmailByUserId($userid), 
 				$user, 
 				"Mapbender monitoring report " . date("F j, Y, G:i:s", $time), 
-				utf8_decode($body), 
+				mb_convert_encoding($body, 'ISO-8859-1'), 
 				$error_msg
 			);
 		}

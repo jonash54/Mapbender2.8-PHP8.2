@@ -16,14 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //TODO - make a class of it - with url, and return mimetype as attributes
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
 
 function validateInspire($xml) {
 	//$validatorUrl = 'http://localhost/mapbender_trunk/geoportal/log_requests.php';
 	//$validatorUrl = 'http://inspire-geoportal.ec.europa.eu/GeoportalProxyWebServices/resources/INSPIREResourceTester';
 	if (defined("INSPIRE_VALIDATOR_URL") && INSPIRE_VALIDATOR_URL != '') {
 		$validatorUrl = INSPIRE_VALIDATOR_URL;
-		$urlParts = parse_url($validatorUrl);
+		$urlParts = parse_url((string) $validatorUrl);
 		$inspireHost = $urlParts['host'];
 	} else {
 		echo "No validation service defined! Please check your mapbender.conf";
@@ -50,23 +50,9 @@ function validateInspire($xml) {
                 	$auth = base64_encode('$CONNECTION_USER:$CONNECTION_PASSWORD');
                 	$header .= 'Proxy-Authorization: Basic '.$auth;
                 }
-		$context_options = array (
-        			'http' => array (
-					'proxy' => "tcp://".CONNECTION_PROXY.":".CONNECTION_PORT,
-            				'method' => 'POST',
-                                        'request_fulluri' => true,
-            				'header' => $header,
-            				'content' => $data
-            				)
-        			);
+		$context_options = ['http' => ['proxy' => "tcp://".CONNECTION_PROXY.":".CONNECTION_PORT, 'method' => 'POST', 'request_fulluri' => true, 'header' => $header, 'content' => $data]];
 	} else {
-		$context_options = array (
-        			'http' => array (
-            				'method' => 'POST',
-            				'header' => $header,
-            				'content' => $data
-            				)
-        			);
+		$context_options = ['http' => ['method' => 'POST', 'header' => $header, 'content' => $data]];
 	}
 	$context = stream_context_create($context_options);
 	$response = @file_get_contents($validatorUrl, FILE_TEXT, $context);
@@ -107,22 +93,9 @@ function validateInspireXml($xml){
                 	$auth = base64_encode('$CONNECTION_USER:$CONNECTION_PASSWORD');
                 	$header .= 'Proxy-Authorization: Basic '.$auth;
                 }
-		$context_options = array (
-        			'http' => array (
-					'proxy' => "tcp://".CONNECTION_PROXY.":".CONNECTION_PORT,
-            				'method' => 'POST',
-            				'header' => $header,
-            				'content' => $data
-            				)
-        			);
+		$context_options = ['http' => ['proxy' => "tcp://".CONNECTION_PROXY.":".CONNECTION_PORT, 'method' => 'POST', 'header' => $header, 'content' => $data]];
 	} else {
-		$context_options = array (
-        			'http' => array (
-            				'method' => 'POST',
-            				'header' => $header,
-            				'content' => $data
-            				)
-        			);
+		$context_options = ['http' => ['method' => 'POST', 'header' => $header, 'content' => $data]];
 	}
 	$context = stream_context_create($context_options);
 	$response = @file_get_contents($validatorUrl, FILE_TEXT, $context);

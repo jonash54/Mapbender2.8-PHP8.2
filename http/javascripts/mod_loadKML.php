@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_kml.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_kml.php");
 
 echo "var loadKmlTarget = '".$e_target[0]."';\n";
 
@@ -30,7 +30,7 @@ var loadKmlImg = new Image();
 loadKmlImg.src = "<?php echo $e_src; ?>";
 
 var loadKmlImgOver = new Image(); 
-loadKmlImgOver.src = "<?php  echo preg_replace("/_off/","_over",$e_src);  ?>";
+loadKmlImgOver.src = "<?php  echo preg_replace("/_off/","_over",(string) $e_src);  ?>";
 
 var mpbn_loadKml = function () {
 	windowKml = window.open("../php/mb_listKMLs.php?<?php echo $urlParameters;?>","displayKml","width=500, height=600, scrollbars=yes, dependent=yes");

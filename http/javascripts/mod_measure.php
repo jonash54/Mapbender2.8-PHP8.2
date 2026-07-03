@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 echo "var mod_measure_target = '".$e_target[0]."';";
 ?>
@@ -46,9 +46,9 @@ var mod_measure_TotalDist = new Array();
 // global variable
 window.eventAfterMeasure = new MapbenderEvent();
 
-var mod_measure_img_on = new Image(); mod_measure_img_on.src = "<?php  echo preg_replace("/_off/","_on",$e_src);  ?>";
+var mod_measure_img_on = new Image(); mod_measure_img_on.src = "<?php  echo preg_replace("/_off/","_on",(string) $e_src);  ?>";
 var mod_measure_img_off = new Image(); mod_measure_img_off.src = "<?php  echo $e_src;  ?>";
-var mod_measure_img_over = new Image(); mod_measure_img_over.src = "<?php  echo preg_replace("/_off/","_over",$e_src);  ?>";
+var mod_measure_img_over = new Image(); mod_measure_img_over.src = "<?php  echo preg_replace("/_off/","_over",(string) $e_src);  ?>";
 
 
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:WFS_Capabilities version="1.1.0"
+    xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:ows="http://www.opengis.net/ows"
+    xmlns:gml="http://www.opengis.net/gml"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:mock="http://wms-mock/mock">
+  <ows:ServiceIdentification>
+    <ows:Title>Test WFS (mock)</ows:Title>
+    <ows:Abstract>Deterministic mock for characterization tests</ows:Abstract>
+    <ows:ServiceType>WFS</ows:ServiceType>
+    <ows:ServiceTypeVersion>1.1.0</ows:ServiceTypeVersion>
+  </ows:ServiceIdentification>
+  <ows:ServiceProvider>
+    <ows:ProviderName>Mock</ows:ProviderName>
+  </ows:ServiceProvider>
+  <ows:OperationsMetadata>
+    <ows:Operation name="GetCapabilities">
+      <ows:DCP><ows:HTTP>
+        <ows:Get xlink:href="http://wms-mock/wfs?"/>
+      </ows:HTTP></ows:DCP>
+    </ows:Operation>
+    <ows:Operation name="DescribeFeatureType">
+      <ows:DCP><ows:HTTP>
+        <ows:Get xlink:href="http://wms-mock/wfs?"/>
+      </ows:HTTP></ows:DCP>
+    </ows:Operation>
+    <ows:Operation name="GetFeature">
+      <ows:DCP><ows:HTTP>
+        <ows:Get xlink:href="http://wms-mock/wfs?"/>
+      </ows:HTTP></ows:DCP>
+    </ows:Operation>
+  </ows:OperationsMetadata>
+  <FeatureTypeList>
+    <Operations>
+      <Operation>Query</Operation>
+    </Operations>
+    <FeatureType>
+      <Name>mock:mock_feature_1</Name>
+      <Title>Mock Feature 1</Title>
+      <Abstract>Mock feature type for testing</Abstract>
+      <DefaultSRS>urn:ogc:def:crs:EPSG::25832</DefaultSRS>
+      <OtherSRS>urn:ogc:def:crs:EPSG::4326</OtherSRS>
+      <ows:WGS84BoundingBox>
+        <ows:LowerCorner>6.0 48.9</ows:LowerCorner>
+        <ows:UpperCorner>8.5 51.0</ows:UpperCorner>
+      </ows:WGS84BoundingBox>
+    </FeatureType>
+  </FeatureTypeList>
+</wfs:WFS_Capabilities>

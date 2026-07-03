@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -33,7 +33,7 @@ include '../include/dyn_css.php';
 </head>
 <body leftmargin="5" topmargin="0">
 <?php
-echo "<div class='text4'>".htmlentities($gui_id,ENT_QUOTES)."</div>";
+echo "<div class='text4'>".htmlentities((string) $gui_id,ENT_QUOTES)."</div>";
 ?>
 </body>
 </html>

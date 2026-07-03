@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../classes/class_wfs_conf.php");
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 ?>
 <html>
 <head>
@@ -78,8 +78,8 @@ div.helptext input {
 echo "var global_mb_log_js = '".LOG_JS."';";
 echo "var global_mb_log_level = '".LOG_LEVEL."';";
 echo "var global_log_levels = '".LOG_LEVEL_LIST."';";
-require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js");
-require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.8.1.custom/development-bundle/ui/jquery-ui-1.8.1.custom.js");
+require_once(__DIR__ . "/../extensions/jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js");
+require_once(__DIR__ . "/../extensions/jquery-ui-1.8.1.custom/development-bundle/ui/jquery-ui-1.8.1.custom.js");
 require_once "../extensions/jqjson.js";
 require_once "../../lib/ajax.js";
 require_once "../../lib/exception.js";

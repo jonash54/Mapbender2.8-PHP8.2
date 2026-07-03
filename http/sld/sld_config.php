@@ -24,18 +24,18 @@
  * @author Markus Krzyzanowski
  */
 
-include_once(dirname(__FILE__)."/classes/StyledLayerDescriptor.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-include_once(dirname(__FILE__)."/sld_parse.php");
+include_once(__DIR__."/classes/StyledLayerDescriptor.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+include_once(__DIR__."/sld_parse.php");
 
 // this should come from mapbender.conf
 $SLD_MAIN = "sld_main.php?".$urlParameters;
 $SLD_FUNCTION_HANDLER = "sld_function_handler.php?".$urlParameters;
-$MAPBENDER_URL = "http://".$_SERVER["HTTP_HOST"].dirname($_SERVER['SCRIPT_NAME']);
+$MAPBENDER_URL = "http://".$_SERVER["HTTP_HOST"].dirname((string) $_SERVER['SCRIPT_NAME']);
 
 function char_encode($s){
 	if(CHARSET == 'UTF-8'){
-		$s = utf8_encode($s);
+		$s = mb_convert_encoding($s, 'UTF-8', 'ISO-8859-1');
 	}
 	return $s;
 }
@@ -57,12 +57,12 @@ if (isset($_SESSION["sld_wms_id"]) && isset($_SESSION["sld_layer_name"]))
 	$wms_id = $_SESSION["sld_wms_id"];
 
 	//Read from DB
-	require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+	require_once(__DIR__."/../../conf/mapbender.conf");
 	$con = db_connect($DBSERVER,$OWNER,$PW);
 	db_select_db($DB,$con);
 	$sql = "SELECT * FROM wms WHERE wms_id = $1"; 
-	$v = array($wms_id);
-	$t = array('i');
+	$v = [$wms_id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	
 	$mapfileUrl = "";

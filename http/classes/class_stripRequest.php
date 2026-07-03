@@ -17,12 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/class_mb_exception.php");
+require_once(__DIR__."/class_mb_exception.php");
 
 
 class stripRequest{
-	var $url;
-	var $encodeParams = array("LAYERS", "QUERY_LAYERS");
+	public $url;
+	public $encodeParams = ["LAYERS", "QUERY_LAYERS"];
         
 	function __construct($mr){
 		if(!$mr || $mr == ""){
@@ -42,12 +42,12 @@ class stripRequest{
 	
 	function set($key,$value){
 		$exists = false;
-		$a = explode("?",$this->url);
+		$a = explode("?",(string) $this->url);
 		$patterns = explode("&", $a[1]);
 		for($i=0; $i<count($patterns); $i++){
 			$tmp = explode("=", $patterns[$i]);
-			if(mb_strtoupper($tmp[0]) == mb_strtoupper($key)){
-				$replacement = mb_strtoupper($key) . "=" . $value;
+			if(mb_strtoupper($tmp[0]) == mb_strtoupper((string) $key)){
+				$replacement = mb_strtoupper((string) $key) . "=" . $value;
 				$currentPattern = $patterns[$i];
 				$this->url = str_replace($currentPattern, $replacement, $this->url);
 				$exists = true;
@@ -64,11 +64,11 @@ class stripRequest{
 	
 	function get($key){
 		$exists = false;
-		$a = explode("?",$this->url);
+		$a = explode("?",(string) $this->url);
 		$patterns = explode("&", $a[1]);
 		for($i=0; $i<count($patterns); $i++){
 			$tmp = explode("=", $patterns[$i]);
-			if(mb_strtoupper($tmp[0]) == mb_strtoupper($key)){
+			if(mb_strtoupper($tmp[0]) == mb_strtoupper((string) $key)){
 				$exists = true;
 				return $tmp[1];
 			}
@@ -138,21 +138,21 @@ class stripRequest{
 		return $this->url;
 	}
 	function remove($key){
-		$a = explode("?",$this->url);
+		$a = explode("?",(string) $this->url);
 		$patterns = explode("&", $a[1]);
 		for($i=0; $i<count($patterns); $i++){
 			$tmp = explode("=", $patterns[$i]);
-			if(mb_strtoupper($tmp[0]) == mb_strtoupper($key)){
+			if(mb_strtoupper($tmp[0]) == mb_strtoupper((string) $key)){
 				$replacement = "";
 				$currentPattern = "/" . $patterns[$i] . "/";
-				$this->url = preg_replace($currentPattern, $replacement, $this->url);
+				$this->url = preg_replace($currentPattern, $replacement, (string) $this->url);
 			}
 		}		
 		$this->encodeGET();
 		return $this->url;
 	}
 	function encodeGET($encode = true){
-		$a = explode("?",$this->url);
+		$a = explode("?",(string) $this->url);
 		$patterns = explode("&", $a[1]);
 		$a[0].= "?";
 		for($i=0; $i<count($patterns); $i++){
@@ -184,7 +184,7 @@ class stripRequest{
 	}
 	
 	function encodeLegGET(){
-		$this->url = preg_replace("/&amp;/", "\&", $this->url); 
+		$this->url = preg_replace("/&amp;/", "\&", (string) $this->url); 
 		return $this->url;
 	}
 }

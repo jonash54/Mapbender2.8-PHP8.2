@@ -23,9 +23,9 @@
 * get/post '___' separated maprequests
 *
 **/
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_mb_exception.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_mb_exception.php");
+require_once(__DIR__."/class_connector.php");
 
 class weldOverview2PNG{
 
@@ -66,7 +66,7 @@ class weldOverview2PNG{
 		$objx = new stripRequest($url_extent);
 		$ex_width = $objx->get("width");
 		$ex_height = $objx->get("height");
-		$extent = explode(",",$objx->get("BBOX"));
+		$extent = explode(",",(string) $objx->get("BBOX"));
 
 		$lowerleft = $this->makeRealWorld2mapPos($url_overview, round($extent[0]), round($extent[1]));
 		$upperright = $this->makeRealWorld2mapPos($url_overview, $extent[2], $extent[3]);
@@ -136,7 +136,7 @@ class weldOverview2PNG{
 		#$e = new mb_exception("weld_url: ".$url);
 		#$e = new mb_exception("w: ".$width."height".$height);
 
-	   $arrayBBox = explode(",",$obj->get("BBOX"));
+	   $arrayBBox = explode(",",(string) $obj->get("BBOX"));
 	   $minX = $arrayBBox[0];
 	   $minY = $arrayBBox[1];
 	   $maxX = $arrayBBox[2];
@@ -150,7 +150,7 @@ class weldOverview2PNG{
 	   $pixPos_x = (($rw_posx - $minX)/$xtentx)*$width;
 	   $pixPos_y = (($maxY - $rw_posy)/$xtenty)*$height;
 
-	   $pixPos = array($pixPos_x, $pixPos_y);
+	   $pixPos = [$pixPos_x, $pixPos_y];
 	   
 	   return $pixPos;
 	}

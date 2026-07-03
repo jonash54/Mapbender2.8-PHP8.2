@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-include(dirname(__FILE__).'/../include/dyn_js.php');
+require_once(__DIR__."/../php/mb_validateSession.php");
+include(__DIR__.'/../include/dyn_js.php');
 ?>
 
 var mod_perimeter_target = "<?php echo $e_target[0]; ?>";
 mb_registerInitFunctions("mod_perimeter_prepare()");
 mb_registerSubFunctions("mod_perimeter_draw()");
 mb_registerPanSubElement("perimeter");
-var mod_perimeter_img_on = new Image(); mod_perimeter_img_on.src =  "<?php  echo preg_replace("/_off/","_on",$e_src);  ?>";
+var mod_perimeter_img_on = new Image(); mod_perimeter_img_on.src =  "<?php  echo preg_replace("/_off/","_on",(string) $e_src);  ?>";
 var mod_perimeter_img_off = new Image(); mod_perimeter_img_off.src ="<?php  echo $e_src;  ?>";
-var mod_perimeter_img_over = new Image(); mod_perimeter_img_over.src = "<?php  echo preg_replace("/_off/","_over",$e_src);  ?>";
+var mod_perimeter_img_over = new Image(); mod_perimeter_img_over.src = "<?php  echo preg_replace("/_off/","_over",(string) $e_src);  ?>";
 var mod_perimeter_prevEvent = null;
 var mod_perimeter_x = null;
 var mod_perimeter_y = null;

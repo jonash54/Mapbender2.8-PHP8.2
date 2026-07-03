@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__)."/class_XpathWalker.php";
+require_once __DIR__."/class_XpathWalker.php";
 
 class XmlBuilder
 {
@@ -21,12 +21,12 @@ class XmlBuilder
     protected $xpath;
     protected $namespaces;
 
-    public function __construct(DOMDocument $doc, $namespaces = array())
+    public function __construct(DOMDocument $doc, $namespaces = [])
     {
         $this->doc        = $doc;
         $this->xpath      = new DOMXpath($this->doc);
         $this->xpath->registerNamespace("xs", "http://www.w3.org/2001/XMLSchema");
-        $this->namespaces = array("xs" => "http://www.w3.org/2001/XMLSchema");
+        $this->namespaces = ["xs" => "http://www.w3.org/2001/XMLSchema"];
         $namespaceList    = $this->xpath->query("//namespace::*");
         foreach ($namespaceList as $namespaceNode) {
             $namespaces[$namespaceNode->localName] = $namespaceNode->nodeValue;
@@ -117,11 +117,11 @@ class XmlBuilder
         if ($nextChunk === self::TEXT) { // text(), only last chunk
             $node->nodeValue = $this->getString($value);
             $walker->setAdded()->fromRoot();
-        } elseif (strpos($nextChunk, self::AT) === 0) { // @, only last chunk
+        } elseif (str_starts_with((string) $nextChunk, self::AT)) { // @, only last chunk
             $this->setAttribute($node, $walker, $nextChunk, $value);
             $walker->setAdded()->fromRoot();
-        } elseif (strpos($nextChunk, self::BR_ST) !== false) { // [num] or [expression], break by expression
-            $help = explode(self::BR_ST, $nextChunk);
+        } elseif (str_contains((string) $nextChunk, self::BR_ST)) { // [num] or [expression], break by expression
+            $help = explode(self::BR_ST, (string) $nextChunk);
             $int  = substr($help[1], 0, strpos($help[1], self::BR_END));
             if (ctype_digit($int)) {
                 $num   = intval($int);
@@ -137,9 +137,9 @@ class XmlBuilder
                 }
                 $walker->fromRoot();
             }
-        } elseif (strpos($nextChunk, self::DP_2) !== false) { // ::
+        } elseif (str_contains((string) $nextChunk, self::DP_2)) { // ::
             throw new Exception('A "next" "::" is not implemented yet');
-        } elseif (strpos($nextChunk, self::DP) !== false) { // :, element
+        } elseif (str_contains((string) $nextChunk, self::DP)) { // :, element
             $this->addElement($node, $nextChunk);
             $walker->fromRoot();
         } else {
@@ -149,13 +149,13 @@ class XmlBuilder
 
     private function addElement(DOMElement $node, $xpathChunk)//, $value)
     {
-        $help = explode(self::DP, $xpathChunk);
+        $help = explode(self::DP, (string) $xpathChunk);
         $node->appendChild(new DOMElement($xpathChunk, '', $this->namespaces[$help[0]]));
     }
 
     private function setAttribute(DOMElement $node, XpathWalker $walker, $xpathChunk, $value)
     {
-        $qualified = substr($xpathChunk, 1);
+        $qualified = substr((string) $xpathChunk, 1);
         $help      = explode(self::DP, $qualified);
         if (count($help) === 2) { // with prefix
             $node->setAttributeNS($this->namespaces[$help[0]], $qualified, $this->getString($value));
@@ -166,6 +166,6 @@ class XmlBuilder
 
     private function getString($value)
     {
-        return htmlspecialchars($value ? $value : '');
+        return htmlspecialchars((string) ($value ?: ''));
     }
 }

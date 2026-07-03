@@ -20,8 +20,8 @@
 if(isset($gui_id))
 {
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 and fkey_e_id = $2 and var_type='php_var' ORDER BY var_name";
-	$v = array($gui_id, $e_id);
-	$t = array('s', 's');
+	$v = [$gui_id, $e_id];
+	$t = ['s', 's'];
    	$res = db_prep_query($sql,$v,$t);
 
         // there used to be a echo "\n"; here, but that doesn't make any common sense (problem with return value of printFactory.php)
@@ -29,12 +29,12 @@ if(isset($gui_id))
 	while($row = db_fetch_array($res))
 	{
 		//$e = new mb_exception("found element var: ".$row["var_name"]." - ".$row["var_value"]);
-		if (preg_match("/\w+\[\d+\]/", $row["var_name"])) {
-			$varname = mb_substr($row["var_name"], 0, mb_strpos($row["var_name"], "["));	
-			array_push(${$varname}, stripslashes($row["var_value"])); //php7!!!
+		if (preg_match("/\w+\[\d+\]/", (string) $row["var_name"])) {
+			$varname = mb_substr((string) $row["var_name"], 0, mb_strpos((string) $row["var_name"], "["));	
+			array_push(${$varname}, stripslashes((string) $row["var_value"])); //php7!!!
 		}
 		else {
-			${$row["var_name"]} = stripslashes($row["var_value"]);
+			${$row["var_name"]} = stripslashes((string) $row["var_value"]);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <?php
-	require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+	require_once __DIR__ . "/../../core/globalSettings.php";
 	
 	function displayCategories ($sql) {
 		if (Mapbender::session()->get("mb_lang") === "de") {
@@ -10,7 +10,7 @@
 		$res = db_query($sql);
 		while ($row = db_fetch_assoc($res)) {
 			$str .= "<option value='" . $row["id"] . "'>" . 
-				htmlentities($row["name"], ENT_QUOTES, CHARSET) . 
+				htmlentities((string) $row["name"], ENT_QUOTES, CHARSET) . 
 				"</option>";
 		}
 		return $str;

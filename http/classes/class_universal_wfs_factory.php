@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_ows_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_1_0_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_1_1_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_2_0_factory.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_ows_factory.php");
+require_once(__DIR__."/../classes/class_wfs_factory.php");
+require_once(__DIR__."/../classes/class_wfs_1_0_factory.php");
+require_once(__DIR__."/../classes/class_wfs_1_1_factory.php");
+require_once(__DIR__."/../classes/class_wfs_2_0_factory.php");
 
 /**
  * 
@@ -43,10 +43,17 @@ class UniversalWfsFactory extends WfsFactory {
 
 		$admin = new administration();
 		$values = $admin->parseXml($xml);
-		
+
 		foreach ($values as $element) {
-			if($this->sepNameSpace(strtoupper($element['tag'])) == "WFS_CAPABILITIES" && $element['type'] == "open"){
-				return $element['attributes'][version];
+			if($this->sepNameSpace(strtoupper((string) $element['tag'])) == "WFS_CAPABILITIES" && $element['type'] == "open"){
+				// XML attribute names are case-sensitive; real WFS providers
+				// use lowercase "version" per W3C, but historic code looked
+				// up "VERSION". Match both.
+				foreach ($element['attributes'] as $k => $v) {
+					if (strcasecmp($k, 'version') === 0) {
+						return $v;
+					}
+				}
 			}
 		}
 		throw new Exception("WFS version could not be determined from XML.");
@@ -64,23 +71,13 @@ class UniversalWfsFactory extends WfsFactory {
 	public function createFromXml ($xml, $auth=false) {
 		try {
 			$version = $this->getVersionFromXml($xml);
-			switch ($version) {
-				case "1.0.0":
-					$factory = new Wfs_1_0_Factory();
-					break;
-				case "1.1.0":
-					$factory = new Wfs_1_1_Factory();
-					break;
-				case "2.0.0":
-					$factory = new Wfs_2_0_Factory();
-					break;
-				case "2.0.2":
-					$factory = new Wfs_2_0_Factory();
-					break;
-				default:
-					throw new Exception("Unknown WFS version " . $version);
-					break;
-			}
+			$factory = match ($version) {
+       "1.0.0" => new Wfs_1_0_Factory(),
+       "1.1.0" => new Wfs_1_1_Factory(),
+       "2.0.0" => new Wfs_2_0_Factory(),
+       "2.0.2" => new Wfs_2_0_Factory(),
+       default => throw new Exception("Unknown WFS version " . $version),
+   };
 			return $factory->createFromXml($xml, $auth);
 		}
 		catch (Exception $e) {
@@ -92,27 +89,19 @@ class UniversalWfsFactory extends WfsFactory {
 	public function createFromDb ($id) {
 		try {
 			$sql = "SELECT wfs_version FROM wfs WHERE wfs_id = $1";
-			$v = array($id);
-			$t = array("i");
+			$v = [$id];
+			$t = ["i"];
 			$res = db_prep_query($sql, $v, $t);
 			$row = db_fetch_array($res);
 			if ($row) {
 				$version = $row["wfs_version"];
 				
-				switch ($version) {
-					case "1.0.0":
-						$factory = new Wfs_1_0_Factory();
-						break;
-					case "1.1.0":
-						$factory = new Wfs_1_1_Factory();
-						break;
-					case "2.0.0":
-						$factory = new Wfs_2_0_Factory();
-						break;
-					default:
-						throw new Exception("Unknown WFS version " . $version);
-						break;
-				}
+				$factory = match ($version) {
+        "1.0.0" => new Wfs_1_0_Factory(),
+        "1.1.0" => new Wfs_1_1_Factory(),
+        "2.0.0" => new Wfs_2_0_Factory(),
+        default => throw new Exception("Unknown WFS version " . $version),
+    };
 				return $factory->createFromDb($id);
 			}
 		}

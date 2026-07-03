@@ -1,12 +1,12 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmcToXml.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once(dirname(__FILE__) . "/../extensions/phpqrcode/phpqrcode.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_user.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
+require_once(__DIR__ . "/../classes/class_wmcToXml.php");
+require_once(__DIR__ . "/../classes/class_json.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once(__DIR__ . "/../extensions/phpqrcode/phpqrcode.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 $json = new Mapbender_JSON();
@@ -15,7 +15,7 @@ $currentUser = new User($userId);
 
 $wmc = new wmc();
 
-$resultObj = array();
+$resultObj = [];
 
 switch ($ajaxResponse->getMethod()) {
 
@@ -70,7 +70,7 @@ switch ($ajaxResponse->getMethod()) {
 			$ajaxResponse->setSuccess(false);
 		}
 		else {
-			$resultObj["wmc"] = array("document" => $doc);
+			$resultObj["wmc"] = ["document" => $doc];
 			$ajaxResponse->setResult($resultObj);
 			$ajaxResponse->setSuccess(true);		
 		}
@@ -240,74 +240,46 @@ switch ($ajaxResponse->getMethod()) {
 		
 		if ($checkLayerIdExists) {
 			$withoutIdsArray = $wmc->getWmsWithoutId();
-			$withoutIdsTitles = array();
+			$withoutIdsTitles = [];
 			foreach ($withoutIdsArray as $i) {
-				$withoutIdsTitles[]= array(
-					"id" => $i["id"],
-					"index" => $i["index"],
-					"title" => $i["title"]
-				);
+				$withoutIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 			}
-			$resultObj["withoutId"] = array(
-				"message" => "Folgende Layer stammen aus einer dem " .
+			$resultObj["withoutId"] = ["message" => "Folgende Layer stammen aus einer dem " .
 					"Geoportal.rlp unbekannten Quelle. Es kann daher nicht " . 
 					"überprüft werden, ob die Links verwaist sind oder ob " .
-					"die Dienste überhaupt Daten liefern.",
-				"wms" => $withoutIdsTitles
-			);
+					"die Dienste überhaupt Daten liefern.", "wms" => $withoutIdsTitles];
 		}
 		if ($checkLayerIdValid) {
 			$invalidIdsArray = $wmc->getInvalidWms();
-			$invalidIdsTitles = array();
+			$invalidIdsTitles = [];
 			foreach ($invalidIdsArray as $i) {
-				$invalidIdsTitles[]= array(
-					"id" => $i["id"],
-					"index" => $i["index"],
-					"title" => $i["title"]
-				);
+				$invalidIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 			}
-			$resultObj["invalidId"] = array(
-				"message" => "Folgende Dienste/Layer sind aus der " .
+			$resultObj["invalidId"] = ["message" => "Folgende Dienste/Layer sind aus der " .
 					"Registrierungsstelle gelöscht worden. Es kann daher nicht " . 
 					"überprüft werden, ob die Links verwaist sind oder ob " . 
-					"die Dienste überhaupt Daten liefern.",
-				"wms" => $invalidIdsTitles
-			);
+					"die Dienste überhaupt Daten liefern.", "wms" => $invalidIdsTitles];
 		}
 		if ($checkLayerPermission) {
 			$deniedIdsArray = $wmc->getWmsWithoutPermission($currentUser);
-			$deniedIdsTitles = array();
+			$deniedIdsTitles = [];
 			foreach ($deniedIdsArray as $i) {
-				$deniedIdsTitles[]= array(
-					"id" => $i["id"],
-					"index" => $i["index"],
-					"title" => $i["title"]
-				);
+				$deniedIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 			}
-			$resultObj["noPermission"] = array(
-				"message" => "Sie als Nutzer '" . 
+			$resultObj["noPermission"] = ["message" => "Sie als Nutzer '" . 
 					Mapbender::session()->get("mb_user_name") . "' " . 
-					"haben keine Berechtigung auf folgende Layer zuzugreifen.",
-				"wms" => $deniedIdsTitles
-			);
+					"haben keine Berechtigung auf folgende Layer zuzugreifen.", "wms" => $deniedIdsTitles];
 		}
 		if ($checkLayerAvailability) {
 			$unavailableIdsArray = $wmc->getAllUnavailableWms();
-			$unavailableIdsTitles = array();
+			$unavailableIdsTitles = [];
 			foreach ($unavailableIdsArray as $i) {
-				$unavailableIdsTitles[]= array(
-					"id" => $i["id"],
-					"index" => $i["index"],
-					"title" => $i["title"]
-				);
+				$unavailableIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 			}
-			$resultObj["unavailable"] = array(
-				"message" => "Bei folgenden Diensten kam es während " . 
+			$resultObj["unavailable"] = ["message" => "Bei folgenden Diensten kam es während " . 
 					"des letzten Monitorings zu Problemen. Es ist möglich, dass " . 
 					"diese Dienste derzeit keine Informationen zur Verfügung stellen " .
-					"können.",
-				"wms" => $unavailableIdsTitles
-			);
+					"können.", "wms" => $unavailableIdsTitles];
 		}
 		$ajaxResponse->setResult($resultObj); 
 		$ajaxResponse->setSuccess(true);

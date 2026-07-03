@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_user.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 /**
  * encodes and delivers the data
@@ -18,7 +18,7 @@ function sendOutput($out){
 
 $json = new Mapbender_JSON();
 $queryObj = $json->decode($_REQUEST['queryObj']);
-$resultObj = array();
+$resultObj = [];
 
 $e = new mb_exception("command: " . $queryObj->command);
 
@@ -40,8 +40,8 @@ switch($queryObj->command){
 			$sql = "UPDATE gui_element SET e_left = $1, e_top = $2, " .
 					"e_width = $3, e_height = $4 " .  
 					"WHERE e_id = $5 AND fkey_gui_id = $6"; 
-			$v = array($left, $top, $width, $height, $id, $app);
-			$t = array("i", "i", "i", "i", "s", "s");
+			$v = [$left, $top, $width, $height, $id, $app];
+			$t = ["i", "i", "i", "i", "s", "s"];
 			$res = db_prep_query($sql, $v, $t);
 			$e = new mb_notice("updating element '" . $id . "'");
 		}

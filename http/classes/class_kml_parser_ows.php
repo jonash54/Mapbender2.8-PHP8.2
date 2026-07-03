@@ -17,22 +17,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_point.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_polygon.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_linearring.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_line.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_point.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_multigeometry.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_point.php");
+require_once(__DIR__."/../classes/class_kml_polygon.php");
+require_once(__DIR__."/../classes/class_kml_linearring.php");
+require_once(__DIR__."/../classes/class_kml_line.php");
+require_once(__DIR__."/../classes/class_kml_point.php");
+require_once(__DIR__."/../classes/class_kml_multigeometry.php");
+require_once(__DIR__."/../classes/class_kml_placemark.php");
 
 /**
  * @package KML
  */
  class KmlOwsParser {
-	var $placemarkArray = array();
-	var $featureCollectionMD = array();
+	public $placemarkArray = [];
+	public $featureCollectionMD = [];
 
 	public function __construct() {
 	}
@@ -165,7 +165,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 		//$xpath->registerNamespace("kml","http://earth.google.com/kml/2.2");
 		//$xpath->registerNamespace("http://www.opengis.net/kml/2.2");
 		$xpath->registerNamespace("kml","http://www.opengis.net/kml/2.2");
-		$styles =array();
+		$styles =[];
 		$styleNodes = $xpath->query("/kml:kml/kml:Document/kml:Style");
 
 		//$e = new mb_exception("found this many styles:". $styleNodes->length);
@@ -173,9 +173,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 		    $hrefNodes = $styleNode->getElementsByTagName("href");
 		    if($hrefNodes->length > 0){
 			    $href = $hrefNodes->item(0)->nodeValue;
-			    $styles[$styleNode->getAttribute("id")] = array(
-			        "href" => $href
-			    );
+			    $styles[$styleNode->getAttribute("id")] = ["href" => $href];
 		    }
 		}
 
@@ -194,9 +192,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
         		            $hrefNodes = $styleNodes->item(0)->getElementsByTagName("href");
         		            if($hrefNodes->length > 0){
         			            $href = $hrefNodes->item(0)->nodeValue;
-        			            $styles[$styleMapNode->getAttribute("id")] = array(
-        			        	"href" => $href
-        			            );
+        			            $styles[$styleMapNode->getAttribute("id")] = ["href" => $href];
         			            continue;
         		            }
     		            }
@@ -206,11 +202,9 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 		                $styleUrlNodes = $child->findElementsByTagName("styleUrl");
 		                if($styleUrlNodes->length > 0){
 		                    $id = $styleUrlNodes->item(0)->nodeValue;
-		                	if(substr($id,0,1) == "#"){
+		                	if(str_starts_with($id, "#")){
 					            $id = substr($id,1);
-					            $styles[$styleMapNode->getAttribute("id")] = array(
-					                "href" => $styles[$id]["href"]
-					            );
+					            $styles[$styleMapNode->getAttribute("id")] = ["href" => $styles[$id]["href"]];
 					        }else{
 					            $e = new mb_exception("External style references not supported in KML parser");
 					        }
@@ -219,9 +213,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 		            }
 		        }
 		    }
-		    $styles[$styleMapNode->getAttribute("id")] = array(
-				"href" => $href
-			);
+		    $styles[$styleMapNode->getAttribute("id")] = ["href" => $href];
 		}
 		/*
 		 * Get geometry information only, store it in placemarkArray
@@ -262,7 +254,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 					// $currentPlacemark->setProperty("description", $description);
 
 					//get style information for KML point objects
-					if(get_class($geometryArray[$i]) == "KMLPoint") {
+					if($geometryArray[$i]::class == "KMLPoint") {
     					//Inline Styles take precedence over shared styles
     					$styleNodes = $node->getElementsByTagName('Style');
     					if($styleNodes->length > 0) {
@@ -279,7 +271,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
     					        // cut off leading #
     					        $id = $styleUrlNode->nodeValue;
                                 $e = new mb_notice("found style url reference, id is '$id'");
-    					        if(substr($id,0,1) == "#"){
+    					        if(str_starts_with($id, "#")){
     					            $id = substr($id,1);
     					        }else{
     					            $e = new mb_exception("External style references not supported in KML parser");
@@ -334,20 +326,20 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 	private function getMetadataFromPlacemarkNode ($node) {
 	    $children = $node->childNodes;
 
-	    $metadataArray = array();
+	    $metadataArray = [];
 
 		// search "ExtendedData" tag
 		foreach ($children as $child) {
-			if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "EXTENDEDDATA") {
+			if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "EXTENDEDDATA") {
 				$extendedDataNode = $child;
 				$extDataChildren = $extendedDataNode->childNodes;
 
 				// search "Data" or "SchemaData" tag
 				foreach ($extDataChildren as $extDataChild) {
-					if (mb_strtoupper($this->sepNameSpace($extDataChild->nodeName)) == "SCHEMADATA") {
+					if (mb_strtoupper((string) $this->sepNameSpace($extDataChild->nodeName)) == "SCHEMADATA") {
 						$simpleDataNode = $extDataChild->firstChild;
 						while ($simpleDataNode !== NULL) {
-							if (mb_strtoupper($this->sepNameSpace($simpleDataNode->nodeName)) == "SIMPLEDATA") {
+							if (mb_strtoupper((string) $this->sepNameSpace($simpleDataNode->nodeName)) == "SIMPLEDATA") {
 								$name = $simpleDataNode->getAttribute("name");
 								$value = $simpleDataNode->nodeValue;
 								$metadataArray[$name] = $value;
@@ -355,14 +347,14 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 							$simpleDataNode = $simpleDataNode->nextSibling;
 						}
 					}
-					if (mb_strtoupper($this->sepNameSpace($extDataChild->nodeName)) == "DATA") {
+					if (mb_strtoupper((string) $this->sepNameSpace($extDataChild->nodeName)) == "DATA") {
 						$dataNode = $extDataChild;
 						$name = $dataNode->getAttribute("name");
 						$metadataArray[$name] = $dataNode->nodeValue;
 					}
 				}
 			}
-			if(mb_strtoupper($this->sepNameSpace($child->nodeName)) == "STYLE"){
+			if(mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "STYLE"){
 			$hrefNodes = $child->getElementsByTagName("href");
 			if($hrefNodes->length > 0){
 				$href = $hrefNodes->item(0)->nodeValue;
@@ -405,8 +397,8 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 
 		// create new KMLPolygon
 		foreach ($children as $child) {
-			if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "EXTERIOR" ||
-				mb_strtoupper($this->sepNameSpace($child->nodeName)) == "OUTERBOUNDARYIS") {
+			if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "EXTERIOR" ||
+				mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "OUTERBOUNDARYIS") {
 				// create a new Linear Ring
 				$outerBoundary = $this->getGeometryFromLinearRingNode($child);
 				$polygon = new KMLPolygon($outerBoundary);
@@ -416,8 +408,8 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 		if ($polygon !== null) {
 			// append inner boundaries to KMLPolygon
 			foreach ($children as $child) {
-				if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "INTERIOR" ||
-					mb_strtoupper($this->sepNameSpace($child->nodeName)) == "INNERBOUNDARYIS") {
+				if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "INTERIOR" ||
+					mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "INNERBOUNDARYIS") {
 					// create a new Linear Ring
 					$innerBoundary = $this->getGeometryFromLinearRingNode($child);
 					$polygon->appendInnerBoundary($innerBoundary);
@@ -434,7 +426,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 	private function getGeometryFromLinearRingNode ($node) {
 	    $children = $node->childNodes;
 		foreach($children as $child) {
-			if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "LINEARRING") {
+			if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "LINEARRING") {
 				$coordinatesNode = $this->getCoordinatesNode($child);
 				$geomString = $coordinatesNode->nodeValue;
 				return new KMLLinearRing($geomString, 4326);
@@ -448,20 +440,20 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 	 * returns an array of geometries (KMLPoint, KMLPolygon, KMLLinestring and KMLMultigeometry)
 	 */
 	private function getGeometryArrayFromPlacemarkOrMultigeometryNode ($node) {
-	    $geometryArray = array();
+	    $geometryArray = [];
 
 	    $children = $node->childNodes;
 		foreach($children as $child) {
-		    if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "POINT") {
+		    if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "POINT") {
 				array_push($geometryArray, $this->getGeometryFromPointNode($child));
 			}
-			elseif (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "POLYGON") {
+			elseif (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "POLYGON") {
 				array_push($geometryArray, $this->getGeometryFromPolygonNode($child));
 			}
-			elseif (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "LINESTRING") {
+			elseif (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "LINESTRING") {
 				array_push($geometryArray, $this->getGeometryFromLinestringNode($child));
 			}
-			elseif (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "MULTIGEOMETRY") {
+			elseif (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "MULTIGEOMETRY") {
 				$geometryArray = $this->getGeometryArrayFromPlacemarkOrMultigeometryNode($child);
 				$multigeometry = new KMLMultiGeometry();
 
@@ -481,9 +473,9 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 	private function getCoordinatesNode ($node) {
 	    $children = $node->childNodes;
 		foreach($children as $child) {
-			if (mb_strtoupper($this->sepNameSpace($child->nodeName)) == "POSLIST" ||
-				mb_strtoupper($this->sepNameSpace($child->nodeName)) == "POS" ||
-				mb_strtoupper($this->sepNameSpace($child->nodeName)) == "COORDINATES") {
+			if (mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "POSLIST" ||
+				mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "POS" ||
+				mb_strtoupper((string) $this->sepNameSpace($child->nodeName)) == "COORDINATES") {
 				return $child;
 			}
 		}
@@ -491,9 +483,9 @@ require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
 	}
 
 	private function sepNameSpace($s){
-		$c = mb_strpos($s,":");
+		$c = mb_strpos((string) $s,":");
 		if($c>0){
-			return mb_substr($s,$c+1);
+			return mb_substr((string) $s,$c+1);
 		}
 		else{
 			return $s;

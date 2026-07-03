@@ -17,14 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require_once(__DIR__."/../../core/globalSettings.php");
+
 (isset($_SERVER["argv"][1]))? ($user_id = $_SERVER["argv"][1]) : ($e = new mb_exception("geom: user lacks!"));
 (isset($_SERVER["argv"][2]))? ($sstr = $_SERVER["argv"][2]) : ($e = new mb_exception("geom: string lacks!"));
 (isset($_SERVER["argv"][3]))? ($epsg = $_SERVER["argv"][3]) : ($e = new mb_exception("geom: epsg lacks!"));
-
-
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../../conf/geoportal.conf");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 
 $con = pg_connect("host=".GEOMDB_HOST." port=".GEOMDB_PORT." dbname=".GEOMDB_NAME." user=".GEOMDB_USER." password=".GEOMDB_PASSWORD)
 or die('Verbindungsaufbau fehlgeschlagen: ' . pg_last_error());
@@ -52,41 +51,41 @@ $factor = 1;
 if (intval($epsg) == 4326) $factor = 0.00001; 
 /******* wohnplätze *******************/
 $bufferWP = 1000*$factor;
-$arrayWP = array();
-$arrayWPKey = array();
+$arrayWP = [];
+$arrayWPKey = [];
 
 /******* gemeinde *********************/	
 $bufferG = 100*$factor;
-$arrayG = array();
+$arrayG = [];
 $toleranceG = 100*$factor;
 
 /******* kreis *********************/	
 $bufferK = 100*$factor;
-$arrayK = array();
+$arrayK = [];
 $toleranceK = 1000*$factor;
 /******* verbandsgemeinde *********************/	
 $bufferV = 100*$factor;
-$arrayV = array();
+$arrayV = [];
 $toleranceV = 1000*$factor;
 /******* strasse *********************/	
 $bufferSTR = 175*$factor;
-$arraySTR = array();
+$arraySTR = [];
 $toleranceSTR = 100*$factor;
 /******* Strasse / Hsnr ****************/
 $bufferSH = 75*$factor;
-$arraySH = array();
+$arraySH = [];
 $toleranceSH = 1000*$factor;
 
 /****** Workflow *********************************/
 /**/
 $astr = mbw_split(",",replaceChars($sstr));
 if(count($astr) == 1){
-	$astr[0] = trim($astr[0]);
+	$astr[0] = trim((string) $astr[0]);
 	$plz = getPlz($astr[0]);
 	$hsnr = getNr($astr[0]);
 	if($plz != false){
 		//checkSize($astr[0]);
-		checkWP($plz, strtoupper(getCity($astr[0])));
+		checkWP($plz, strtoupper((string) getCity($astr[0])));
 		checkGfromWP();
 	}
 	else if($hsnr != false){
@@ -101,18 +100,18 @@ if(count($astr) == 1){
 	}
 }
 else if(count($astr) == 2){
-	$astr[0] = trim($astr[0]);
-	$astr[1] = trim($astr[1]);
-	$ckeys = array();
-	$cnames = array();
-	$cmissing = array();
+	$astr[0] = trim((string) $astr[0]);
+	$astr[1] = trim((string) $astr[1]);
+	$ckeys = [];
+	$cnames = [];
+	$cmissing = [];
 	
 	$myplz = false;
 	$mycity = false;
 	$mystr = false;
 	$mynr = false;
 	$myzs = false;
-	$both = array();
+	$both = [];
 	
 	// 1. 
 	if(getPlz($astr[0])){
@@ -154,10 +153,10 @@ else if(count($astr) == 2){
 	}
 	// workflow
 	if(count($both) == 2){
-		$a = "%".strtoupper(trim($both[0]))."%";
+		$a = "%".strtoupper(trim((string) $both[0]))."%";
 		$b = "%".strtoupper(trim($both[1]))."%";
-		$v = array($a, $a);
-		$t = array('s', 's');
+		$v = [$a, $a];
+		$t = ['s', 's'];
 		$sql = "SELECT DISTINCT * FROM (SELECT DISTINCT gem_schl_neu,gemeinde_neu AS gem FROM gemeinden ";
 		$sql .= "WHERE gemeinde_upper LIKE $1";
 		$sql .= "UNION SELECT DISTINCT gem_schl_neu,gemeinde_gem_teile AS gem FROM wohnplatz ";
@@ -168,8 +167,8 @@ else if(count($astr) == 2){
 			array_push($cnames, encode($row['gem']));
 			array_push($cmissing, $b);
 		}
-		$v = array($b, $b);
-		$t = array('s', 's');
+		$v = [$b, $b];
+		$t = ['s', 's'];
 		$sql = "SELECT DISTINCT * FROM (SELECT DISTINCT gem_schl_neu,gemeinde_neu AS gem FROM gemeinden ";
 		$sql .= "WHERE gemeinde_upper LIKE $1";
 		$sql .= "UNION SELECT DISTINCT gem_schl_neu,gemeinde_gem_teile AS gem FROM wohnplatz ";
@@ -184,8 +183,8 @@ else if(count($astr) == 2){
 		if(count($ckeys)>0){
 			for($i=0; $i<count($ckeys); $i++){	
 				
-				$v = array($ckeys[$i], $cmissing[$i]);
-				$t = array('i', 's');
+				$v = [$ckeys[$i], $cmissing[$i]];
+				$t = ['i', 's'];
 				$sql = "SELECT DISTINCT strassenname, ";
 				$sql .= "SRID(the_geom) AS srid, AsGML(the_geom) AS gml ,";
 				$sql .= "(xmin(the_geom) - ".$bufferSTR.") as minx, ";
@@ -224,7 +223,7 @@ else if(count($astr) == 2){
 xml_output();
 
 function checkMinLength($str) {
-	if (strlen($str) < 3) {
+	if (strlen((string) $str) < 3) {
 		//errorOutput();
 		null_output();
 		die();
@@ -235,13 +234,13 @@ function checkSH($s,$h,$z,$p,$o){
 	global $bufferSH, $arraySH, $epsg;
 	
 	if ($o && $s) {
-		$str_schl = array();
-		$str_schl_gem = array();
-		$ckeys = array();
-		$cnames = array();
-		$a = "%".strtoupper(trim($o))."%";
-		$v = array($a, $a);
-		$t = array('s', 's');
+		$str_schl = [];
+		$str_schl_gem = [];
+		$ckeys = [];
+		$cnames = [];
+		$a = "%".strtoupper(trim((string) $o))."%";
+		$v = [$a, $a];
+		$t = ['s', 's'];
 		$sql = "SELECT DISTINCT * FROM (SELECT DISTINCT gem_schl_neu, gemeinde_neu AS gem FROM gemeinden ";
 		$sql .= "WHERE gemeinde_upper LIKE $1";
 		$sql .= "UNION SELECT DISTINCT gem_schl_neu, gemeinde_gem_teile AS gem FROM wohnplatz ";
@@ -255,8 +254,8 @@ function checkSH($s,$h,$z,$p,$o){
 		if(count($ckeys)>0){
 			for($i=0; $i<count($ckeys); $i++){	
 				
-				$v = array($ckeys[$i], "%".strtoupper(trim($s)). "%");
-				$t = array('i', 's');
+				$v = [$ckeys[$i], "%".strtoupper(trim((string) $s)). "%"];
+				$t = ['i', 's'];
 				$sql = "SELECT DISTINCT strassenschluessel ";
 				$sql .= "FROM strassenschluessel WHERE gem_schl = $1 ";
 				$sql .= " AND strassenname_upper ILIKE $2";
@@ -271,8 +270,8 @@ function checkSH($s,$h,$z,$p,$o){
 				}
 			}
 			if (count($str_schl > 0)) {
-				$v = array($h);
-				$t = array('i');
+				$v = [$h];
+				$t = ['i'];
 				$sql = "SELECT DISTINCT name, hausnummer, zusatz, plz, post_ortsname, ";
 				$sql .= "SRID(the_geom) AS srid, AsGML(the_geom) AS gml ,";
 				$sql .= "(xmin(the_geom) - ".$bufferSH.") as minx, ";
@@ -326,8 +325,8 @@ $show = $row["name"]." ".$row["hausnummer"].$row["zusatz"];
 		$sql .= "(ymax(the_geom) + ".$bufferSH.") as maxy ";
 		$sql .= "FROM hauskoordinaten ";
 		$sql .= "WHERE name ILIKE $1 AND hausnummer = $2 ";
-		$v = array("%".$s."%",$h);
-		$t = array('s','i');
+		$v = ["%".$s."%", $h];
+		$t = ['s', 'i'];
 		if($z){
 			$sql .= "AND zusatz = $" . (count($v)+1);
 			array_push($v,$z);
@@ -367,8 +366,8 @@ $show = $row["name"]." ".$row["hausnummer"].$row["zusatz"];
 //Wohnplatz
 function checkWP($plz,$name){	
 	global $bufferWP, $arrayWP, $arrayWPKey, $epsg;
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	checkMinLength($name);
 	$sql = "SELECT DISTINCT gemeinde_gem_teile, gem_schl_neu, postleitzahl,";
 	$sql .= "SRID(the_geom) AS srid, AsGML(the_geom) AS gml ,";
@@ -415,8 +414,8 @@ function checkGfromWP(){
 	if(count($arrayWPKey) == 0){
 		return false;	
 	}
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT DISTINCT gemeinde, ";
 	$sql .= "SRID(the_geom) AS srid, AsGML(Simplify(the_geom,$toleranceG)) AS gml ,";
 	$sql .= "(xmin(the_geom) - ".$bufferG.") as minx, ";
@@ -442,7 +441,7 @@ function checkGfromWP(){
 function checkG($str){
 	global $bufferG, $arrayG, $toleranceG, $arrayWPKey, $epsg;
 	checkMinLength($str);
-	$tmp = array();
+	$tmp = [];
 	$sql = "SELECT DISTINCT gemeinde, gem_schl_neu, ";
 	$sql .= "SRID(the_geom) AS srid, AsGML(Simplify(the_geom,$toleranceG)) AS gml ,";
 	$sql .= "(xmin(the_geom) - ".$bufferG.") as minx, ";
@@ -454,8 +453,8 @@ function checkG($str){
 	if (isset($epsg) && is_numeric($epsg) && intval($epsg) != 25832) {
 		$sql = str_replace("the_geom", "transform(the_geom,".$epsg.")", $sql);
 	}				
-	$v = array("%".$str."%");
-	$t = array('s');
+	$v = ["%".$str."%"];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		stack_it($arrayG,"gemeinde",encode($row["gemeinde"]." (Gemeinde)"),"g",$row["srid"],$row["minx"],$row["miny"],$row["maxx"],$row["maxy"],$row["gml"]);
@@ -477,8 +476,8 @@ function checkK($str){
 	if (isset($epsg) && is_numeric($epsg) && intval($epsg) != 25832) {
 		$sql = str_replace("the_geom", "transform(the_geom,".$epsg.")", $sql);
 	}				
-	$v = array("%".$str."%");
-	$t = array('s');
+	$v = ["%".$str."%"];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		stack_it($arrayK,"kreis",encode($row["kreis"]." (Landkreis)"),"k",$row["srid"],$row["minx"],$row["miny"],$row["maxx"],$row["maxy"],$row["gml"]);
@@ -497,8 +496,8 @@ function checkVg($str){
 	if (isset($epsg) && is_numeric($epsg) && intval($epsg) != 25832) {
 		$sql = str_replace("the_geom", "transform(the_geom,".$epsg.")", $sql);
 	}				
-	$v = array("%".$str."%");
-	$t = array('s');
+	$v = ["%".$str."%"];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		stack_it($arrayV,"verbandsgemeinde",encode($row["vg"]." (Verbandsgemeinde)"),"vg",$row["srid"],$row["minx"],$row["miny"],$row["maxx"],$row["maxy"],$row["gml"]);
@@ -531,7 +530,7 @@ function stack_it(&$stack,$category,$showtitle,$prefix,$srid,$minx,$miny,$maxx,$
 	$title->appendChild($ttitle);
 	$geom = $doc->createElement("the_geom");
 	$wp->appendChild($geom);		
-	$myNode = @simplexml_load_string($gml);
+	$myNode = @simplexml_load_string((string) $gml);
 	$mySNode = dom_import_simplexml($myNode);
 	$domNode = $doc->importNode($mySNode, true);
 	$geom->appendChild($domNode);	 
@@ -600,8 +599,8 @@ function encode($s){
 }
 function getPlz($str){
 	$p = "/.*(\d{5}).*/";	
-	$am = array();
- 	if(preg_match($p, $str, $am)){
+	$am = [];
+ 	if(preg_match($p, (string) $str, $am)){
  		return $am[1];
  	}
  	else{
@@ -610,8 +609,8 @@ function getPlz($str){
 }
 function getCity($str){
 	$p = "/(^\d{5}){0,1}(.*)/";	
-	$am = array();
- 	if(preg_match($p, $str, $am)){
+	$am = [];
+ 	if(preg_match($p, (string) $str, $am)){
  		return trim($am[2]);
  	}
  	else{
@@ -620,8 +619,8 @@ function getCity($str){
 }
 function getNr($str){
 	$p = "/.*[^0-9](\d{1,4})[^0-9]*/";
-	$am = array();
- 	if(preg_match($p, $str, $am)){
+	$am = [];
+ 	if(preg_match($p, (string) $str, $am)){
  		return $am[(count($am)-1)];
  	}
  	else{
@@ -630,8 +629,8 @@ function getNr($str){
 }
 function getStrn($str){
 	$p = "/^(\D+)\d/";	
-	$am = array();
- 	if(preg_match($p, $str, $am)){
+	$am = [];
+ 	if(preg_match($p, (string) $str, $am)){
  		return trim($am[1]);
  	}
  	else{
@@ -640,8 +639,8 @@ function getStrn($str){
 }
 function getAppendix($str){
 	$p = "/.*\d+.*(\D{1})/";	
-	$am = array();
- 	if(preg_match($p, $str, $am)){
+	$am = [];
+ 	if(preg_match($p, (string) $str, $am)){
  		return $am[1];
  	}
  	else{
@@ -650,11 +649,11 @@ function getAppendix($str){
 }
 function getCKeysByName($city){
 	global $ckeys;
-	$city = "%".strtoupper(trim($city))."%";
+	$city = "%".strtoupper(trim((string) $city))."%";
 	$sql = "SELECT gem_schl_neu FROM wohnplatz ";
 	$sql .= "WHERE gemeinde_gem_teile_upper ILIKE $1 ";
-	$v = array($city);
-	$t = array('s');
+	$v = [$city];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 		array_push($ckeys, $row['gem_schl_neu']);

@@ -37,7 +37,7 @@
  * and Simplified BSD license.
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 $apiVisibleLayers = Mapbender::session()->get("visiblelayers");
 $apiQueryLayers = Mapbender::session()->get("querylayers");

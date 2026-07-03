@@ -53,10 +53,10 @@ $sys_database_type='pgsql';
  *  Notice the global vars $sys_dbhost,$sys_dbuser,$sys_dbpasswd,$sys_dbname that must be set up 
  *  in other functions in this library
  */
-include_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
-include_once(dirname(__FILE__)."/../http/classes/class_checkInput.php");
+include_once(__DIR__."/../http/classes/class_mb_exception.php");
+include_once(__DIR__."/../http/classes/class_checkInput.php");
 function db_escape_string($unescaped_string){
-	return @pg_escape_string(stripslashes($unescaped_string));
+	return @pg_escape_string(stripslashes((string) $unescaped_string));
 }
 $DB = DB;
 
@@ -160,12 +160,12 @@ function db_prep_query($qstring, $params, $types){
 			else{
 				$tmp .= "NULL";
 			}
-			$posa = mb_strpos($qstring, $needle);
+			$posa = mb_strpos((string) $qstring, $needle);
 			if(!$posa) { 
  				$e = new mb_exception("Error while preparing statement in ".$_SERVER['SCRIPT_FILENAME']. ": Sql :". $orig_qstring .",Error: parameter '$needle' not found ");
  			}
 			$posb = mb_strlen($needle);
-			$qstring = mb_substr($qstring,0,$posa).$tmp.mb_substr($qstring,($posa + $posb));	
+			$qstring = mb_substr((string) $qstring,0,$posa).$tmp.mb_substr((string) $qstring,($posa + $posb));	
 		}
 		$r = db_query($qstring);
 		if(!$r){
@@ -210,7 +210,7 @@ function db_commit() {
  * Rollback a transaction for databases that support them
  * may cause unexpected behavior in databases that don't
  */
-function db_rollback() {
+function db_rollback(): never {
 	$str = db_error();
 	db_query("ROLLBACK");
 	die('sql error: ' . $str . " ROLLBACK performed....");
@@ -224,7 +224,7 @@ function db_rollback() {
 function db_numrows($qhandle) {
 	// return only if qhandle exists, otherwise 0
 	if ($qhandle) {
-		return @pg_numrows($qhandle);
+		return @pg_num_rows($qhandle);
 	} else {
 		return 0;
 	}
@@ -250,7 +250,7 @@ function db_num_rows($qhandle) {
  *  @param	$qhandle (string)	Query result set handle
  */
 function db_free_result($qhandle) {
-	return @pg_freeresult($qhandle);
+	return @pg_free_result($qhandle);
 }
 
 /**
@@ -275,7 +275,8 @@ function db_reset_result($qhandle,$row=0) {
  *  @param		$field (string)	Field name
  */
 function db_result($qhandle,$row,$field) {
-	return @pg_result($qhandle,$row,$field);
+	if (!$qhandle) { return false; }
+	return @pg_fetch_result($qhandle,$row,$field);
 }
 
 /**
@@ -284,7 +285,8 @@ function db_result($qhandle,$row,$field) {
  *  @param		$lhandle (string)	Query result set handle
  */
 function db_numfields($lhandle) {
-	return @pg_numfields($lhandle);
+	if (!$lhandle) { return 0; }
+	return @pg_num_fields($lhandle);
 }
 
 /**
@@ -294,6 +296,7 @@ function db_numfields($lhandle) {
  *	php >4.2
  */
 function db_num_fields($lhandle) {
+	if (!$lhandle) { return 0; }
 	return @pg_num_fields($lhandle);
 }
 
@@ -304,7 +307,8 @@ function db_num_fields($lhandle) {
  *  @param		$fnumber (int)	Column number
  */
 function db_fieldname($lhandle,$fnumber) {
-	   return @pg_fieldname($lhandle,$fnumber);
+	if (!$lhandle) { return false; }
+	return @pg_field_name($lhandle,$fnumber);
 }
 
 /**
@@ -313,8 +317,8 @@ function db_fieldname($lhandle,$fnumber) {
  *  @param		$qhandle (string)	Query result set handle
  */
 function db_affected_rows($qhandle) {
-	
-	return @pg_cmdtuples($qhandle);
+	if (!$qhandle) { return 0; }
+	return @pg_affected_rows($qhandle);
 }
 
 /**
@@ -327,6 +331,7 @@ function db_affected_rows($qhandle) {
  *  @param		$qhandle (string)	Query result set handle
  */
 function db_fetch_array($qhandle) {
+	if (!$qhandle) { return false; }
 	return @pg_fetch_array($qhandle);
 }
 /**                                                       
@@ -336,11 +341,18 @@ function db_fetch_array($qhandle) {
  *  @param		$fnumber (int)	Column number
  */
 function db_fetch_assoc($qhandle) {
+	// PHP 8 throws TypeError on false. Caller relies on the historic behaviour
+	// where a failed query just returns false here.
+	if ($qhandle === false || $qhandle === null) {
+		return false;
+	}
 	return @pg_fetch_assoc($qhandle);
-
 }
 function db_fetch_all($qhandle){
-		return @pg_fetch_all($qhandle);
+	if ($qhandle === false || $qhandle === null) {
+		return false;
+	}
+	return @pg_fetch_all($qhandle);
 }
 /**                                                       
  * fetch a row into an array 
@@ -349,7 +361,8 @@ function db_fetch_all($qhandle){
  *  @param		$fnumber (int)	Column number
  */
 function db_fetch_row($qhandle,$fnumber=0) {
-	  return pg_fetch_row($qhandle);
+	if (!$qhandle) { return false; }
+	return @pg_fetch_row($qhandle);
 }
 
 /**
@@ -397,7 +410,7 @@ function db_last_oid()
       	global $sys_dbhost,$sys_dbuser,$sys_dbpasswd,$sys_dbname,$db_debug,
 		$conn,$conn_update,$QUERY_COUNT;
         global $DBSERVER,$OWNER,$PW,$DB	;
-             return pg_getlastoid($conn);
+             return pg_last_oid($conn);
       }
 
 
@@ -432,7 +445,7 @@ function db_field_flags($lhandle,$fnumber) {
  */                                                       
                                                           
 function db_field_type($lhandle,$fnumber) {               
-	   return @pg_fieldtype($lhandle,$fnumber);         
+	   return @pg_field_type($lhandle,$fnumber);         
 }                                                         
 
 /**                                                       

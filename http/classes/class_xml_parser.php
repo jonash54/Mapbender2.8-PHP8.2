@@ -7,10 +7,10 @@
  * @version 0.1
  */
 
-class XMLParser {
+class MbXMLParser {
     private static $xp;
     private static $doc;
-    private static $schema = array();
+    private static $schema = [];
     private static $removeEmptyValues = true;
     
     /**
@@ -45,7 +45,7 @@ class XMLParser {
 
     public static function loadJsonSchemaFromString($string) {
         $array = self::objectToArray(
-            json_decode($string)
+            json_decode((string) $string)
         );
         
         if(is_array($array) AND !empty($array)) {
@@ -77,7 +77,7 @@ class XMLParser {
     }
     
     public static function registerNamespaces($namespaces) {
-        if(!empty($namespaces) and is_object(self::$xp) and get_class(self::$xp) === "DOMXPath") {
+        if(!empty($namespaces) and is_object(self::$xp) and self::$xp::class === "DOMXPath") {
             foreach($namespaces AS $namespaceKey => $namespaceValue) {
                 self::$xp->registerNamespace($namespaceKey,$namespaceValue);
             }
@@ -94,7 +94,7 @@ class XMLParser {
     }
     
     private static function objectToArray($object) {
-        $array = array();
+        $array = [];
         $object = (array)$object;
         
         if(!empty($object)) {
@@ -106,24 +106,24 @@ class XMLParser {
     }
     
     private static function parseRecursive($object, $name = "", $context = null, $path = "", $recursive = false, $asArray = false) {
-        $result = array();
+        $result = [];
 
         foreach($object as $key => $val) {
             switch($key) {
                 case "cmd" : 
-                    continue;
+                    break;
                 case "path" : 
                     $path .= $val;
-                    continue;
+                    break;
                 case "asArray" : 
                     $asArray = $val;
-                    continue;
+                    break;
                 case "recursive":
                     $recursive = true;
-                    continue;
+                    break;
                 case "data" :
                     $result = self::parseData($val, $name, $path, $context, $recursive, $asArray);
-                    continue;
+                    break;
                 default :
                     if(is_object($val)) {
                         $tmp = self::parseRecursive($val, $key, $context, $path, $recursive);
@@ -148,8 +148,8 @@ class XMLParser {
                         $tmp = self::getValue($path.$val, $context); 
                     }
                     
-                    if(self::$removeEmptyValues && ($tmp === "" || $tmp === array())) {
-                        continue;
+                    if(self::$removeEmptyValues && ($tmp === "" || $tmp === [])) {
+                        break;
                     }
                     
                     $result[$key] = $tmp;
@@ -160,8 +160,8 @@ class XMLParser {
     }
     
     private static function parseData($data, $name, $path, $context, $recursive, $asArray = false) {
-        if(!is_object($data)) return array();
-        $tmp = array();
+        if(!is_object($data)) return [];
+        $tmp = [];
         
         if($context == null) {
             $nodes = self::$xp->query($path);
@@ -171,7 +171,7 @@ class XMLParser {
         
         if($nodes) {
             foreach($nodes as $node) {
-                $dataRecTmp = array();
+                $dataRecTmp = [];
                 
                 if($recursive) {
                     $dataRecTmp = self::parseData($data, $name, $path, $node, $recursive);
@@ -181,7 +181,7 @@ class XMLParser {
                 
                 $tmp[] = empty($dataRecTmp) ? $dataTmp : array_merge(
                     $dataTmp,
-                    array($name => $dataRecTmp)
+                    [$name => $dataRecTmp]
                 );
             }
         }
@@ -205,7 +205,7 @@ class XMLParser {
     }
     
     private static function getValue($xpath, $context = null) {
-        $result = array();
+        $result = [];
         $nodes = self::$xp->query($xpath, $context);
         
         if($nodes) {

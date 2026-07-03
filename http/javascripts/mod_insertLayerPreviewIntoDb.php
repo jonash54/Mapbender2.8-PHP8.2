@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 #include(dirname(__FILE__)."/../../conf/geoportal.conf");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_connector.php");
 
 function savePreview($fileName, $fileContent) {
-	if (strlen($fileContent) > 0) {
+	if (strlen((string) $fileContent) > 0) {
 		$fileMapImg = fopen("..".LAYER_PREVIEW_URL."/".$fileName, 'w+');
 		if ($fileMapImg) {
 			rewind($fileMapImg);
-			$bytesWritten = fwrite($fileMapImg, $fileContent);
+			$bytesWritten = fwrite($fileMapImg, (string) $fileContent);
 			if ($bytesWritten) {
 				fflush($fileMapImg);
 				ftruncate($fileMapImg, ftell($fileMapImg));
@@ -45,13 +45,13 @@ function savePreview($fileName, $fileContent) {
 }
 
 if ($_POST["data"]) {
-	$d = explode("____", $_POST["data"]);	
+	$d = explode("____", (string) $_POST["data"]);	
 
 	$mapurl = $d[0];
 	$legendurl = $d[1];
 	
 	$mapurl = preg_replace("(&width=)[0-9]+($|[^0-9])", "\\1".LAYER_PREVIEW_WIDTH."\\2", $mapurl);
-	$mapurl = preg_replace("(&height=)[0-9]+($|[^0-9])", "\\1".LAYER_PREVIEW_HEIGHT."\\2", $mapurl);
+	$mapurl = preg_replace("(&height=)[0-9]+($|[^0-9])", "\\1".LAYER_PREVIEW_HEIGHT."\\2", (string) $mapurl);
 		
 	$adm = new administration();
 	$layer_id = Mapbender::session()->get("layer_preview");
@@ -73,25 +73,25 @@ if ($_POST["data"]) {
 		if (!$success) $fileNameLegend = "";
  		
 //		$rlp_4326_box = array(6.10988942079081,48.987785376052,8.58790010810365,50.9273496139233);
-		$rlp_4326_box = array(6.05,48.9,8.6,50.96);
+		$rlp_4326_box = [6.05, 48.9, 8.6, 50.96];
 		
 		$sql = "SELECT * FROM layer_epsg WHERE fkey_layer_id = $1 AND epsg = 'EPSG:4326'";
-		$v = array($layer_id);
-		$t = array('i');
+		$v = [$layer_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if ($row['minx'] && $row['miny'] && $row['maxx'] && $row['maxy']) {
 			$extent_layer_id = $layer_id;
-			$layer_4326_box = array($row['minx'], $row['miny'], $row['maxx'], $row['maxy']);
+			$layer_4326_box = [$row['minx'], $row['miny'], $row['maxx'], $row['maxy']];
 		}
 		else {
 			$sql = "SELECT * FROM (SELECT fkey_wms_id FROM layer WHERE layer_id = $1 LIMIT 1) AS w, layer_epsg AS e, layer AS l WHERE l.fkey_wms_id = w.fkey_wms_id AND l.layer_pos = 0 AND l.layer_id = e.fkey_layer_id AND e.epsg = 'EPSG:4326'";
-			$v = array($layer_id);
-			$t = array('i');
+			$v = [$layer_id];
+			$t = ['i'];
 			$res = db_prep_query($sql, $v, $t);
 			$row = db_fetch_array($res);
 			if ($row['epsg'] && $row['minx'] && $row['miny'] && $row['maxx'] && $row['maxy']) {
-				$layer_4326_box = array($row['minx'], $row['miny'], $row['maxx'], $row['maxy']);
+				$layer_4326_box = [$row['minx'], $row['miny'], $row['maxx'], $row['maxy']];
 				$extent_layer_id = $row['layer_id'];
 			}
 			else {
@@ -134,24 +134,24 @@ if ($_POST["data"]) {
 		if (!$success) $fileNameExtent = "";
 
 		$sql = "SELECT * FROM layer_preview WHERE fkey_layer_id = $1";
-		$v = array($layer_id);
-		$t = array('i');
+		$v = [$layer_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if ($row['fkey_layer_id'] == $layer_id) {
 			$sql = "UPDATE layer_preview SET layer_map_preview_filename = $1, layer_extent_preview_filename = $2, layer_legend_preview_filename = $3 WHERE fkey_layer_id = $4";
-			$v = array($fileNameMap, $fileNameExtent, $fileNameLegend, $layer_id);
-			$t = array('s', 's', 's', 'i');
+			$v = [$fileNameMap, $fileNameExtent, $fileNameLegend, $layer_id];
+			$t = ['s', 's', 's', 'i'];
 		}
 		else {
 			$sql = "INSERT INTO layer_preview (fkey_layer_id, layer_map_preview_filename, layer_extent_preview_filename, layer_legend_preview_filename) VALUES ($1, $2, $3, $4)";
-			$v = array($layer_id, $fileNameMap, $fileNameExtent, $fileNameLegend);
-			$t = array('i', 's', 's', 's');
+			$v = [$layer_id, $fileNameMap, $fileNameExtent, $fileNameLegend];
+			$t = ['i', 's', 's', 's'];
 		}
 			
 		$res = db_prep_query($sql, $v, $t);
 		if (db_error()) {
-			 echo "<script>alert(\"Error while saving layer preview: ".addslashes(db_error())."\");</script>";
+			 echo "<script>alert(\"Error while saving layer preview: ".addslashes((string) db_error())."\");</script>";
 		}
 		else {
 			 echo "<script>try{parent.opener.document.getElementById('".$layer_id."_dp').style.display='';}catch(e){};alert(\"Layer preview has been saved!\")</script>";

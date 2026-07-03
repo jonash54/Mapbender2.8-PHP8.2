@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__) . "/../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../http/classes/class_iso19139.php");
-require_once(dirname(__FILE__) . "/../http/classes/class_Uuid.php");
+require_once(__DIR__ . "/../core/globalSettings.php");
+require_once(__DIR__ . "/../http/classes/class_iso19139.php");
+require_once(__DIR__ . "/../http/classes/class_Uuid.php");
 
 $startTimeForAll = microtime(true);
 $metadataClass = new Iso19139();
@@ -35,10 +35,10 @@ if (defined("MAPBENDER_REGISTRY_UUID") && MAPBENDER_REGISTRY_UUID != "") {
 }
 // load translation of inspire categories from database to allow
 $sql_categories = "SELECT * FROM inspire_category";
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res_categories = db_prep_query($sql_categories,$v,$t);
-$inspireCatArray = array();
+$inspireCatArray = [];
 while($row = db_fetch_array($res_categories)){
     //$mb_user_groups[$cnt_groups] = db_result($res_groups,$cnt_groups,"fkey_mb_group_id");
     $inspireCatArray[$row["inspire_category_code_en"]] = $row["inspire_category_code_de"];
@@ -79,7 +79,7 @@ if ($handle = opendir($metadataDir)) {
 
 				logMessages("fileIdentifier: ".$metadataObject->fileIdentifier);
 				logMessages("type: ".$metadataObject->hierarchyLevel);
-				
+
 				if (in_array('inspireidentifiziert', $metadataObject->keywords) && !in_array('Regional', $metadataObject->keywords) && !in_array('Lokal', $metadataObject->keywords) && !in_array('bplan', $metadataObject->keywords) && $metadataObject->hierarchyLevel == 'dataset') {
 					//echo $metadataObject->title."<br>";
 					//echo $metadataDir."/".$file." has keyword inspireidentifiziert!<br>";
@@ -131,7 +131,7 @@ if ($handle = opendir($metadataDir)) {
 				//save xml to file	
 			}
 			fclose($h); //close file for read
-			
+
 			$metadataXml = exchangeLanguageAndDeletePolygon( $metadataXml );
 			$metadataXml = str_replace('http://www.opengis.net/gml/3.2', 'http://www.opengis.net/gml', $metadataXml);
 		    	$metadataXml = str_replace('http://www.opengis.net/gml', 'http://www.opengis.net/gml/3.2', $metadataXml);
@@ -210,10 +210,7 @@ function exchangeLanguageAndDeletePolygon($metadataXml) {
 		$inputNodeList = $xpathInput->query ( '/gmd:language' );
 		// $inputNode = $inputNodeList->item(0)->firstChild; responsible party
 		$inputNode = $inputNodeList->item ( 0 );
-		$languagePathToExchange = array (
-				'//gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:language',
-				'//gmd:MD_Metadata/gmd:language' 
-		);
+		$languagePathToExchange = ['//gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:language', '//gmd:MD_Metadata/gmd:language'];
 		foreach ( $languagePathToExchange as $languagePath ) {
 			// get contact node or node list
 			$languageNodeList = $xpath->query ( $languagePath );
@@ -311,11 +308,7 @@ function addKeywords($metadataXml, $keywordsArray, $inspireCategoriesArray=false
         // first check, if hierachyLevel is dataset or series or tile
         $hierarchyLevelNodeList = $xpath->query('//gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue');
         if ($hierarchyLevelNodeList->length == 1) {
-            if (in_array($hierarchyLevelNodeList->item(0)->nodeValue, array(
-                "dataset",
-                "series",
-                "tile"
-            ))) {
+            if (in_array($hierarchyLevelNodeList->item(0)->nodeValue, ["dataset", "series", "tile"])) {
                 // if gmd:spatialRepresentationType does not exists - add it to the metadata rercord for dataset metadata ;-)
                 $spatialRepresentationTypeNodeList = $xpath->query("//gmd:MD_Metadata/gmd:identificationInfo/*/gmd:spatialRepresentationType");
                 if ($spatialRepresentationTypeNodeList->length == 0) {

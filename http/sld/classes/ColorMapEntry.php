@@ -29,37 +29,37 @@ class ColorMapEntry
 	 * The color attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $color = "";
+	public $color = "";
 	
 	/**
 	 * The opacity attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $opacity = "";
+	public $opacity = "";
 	
 	/**
 	 * The quantity attribute from the xml-scheme.
 	 * @var int
 	 */
-	var $quantity = "";
+	public $quantity = "";
 	
 	/**
 	 * The label attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $label = "";
+	public $label = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -96,7 +96,7 @@ class ColorMapEntry
 		$temp .= $offset."  <td style=\"width: 100px;\">\n";
 		$temp .= $offset."   ColormapEntry<br>\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		
 		$temp .= $offset."   <a class='edit' href=\"sld_function_handler.php?function=deletecolormapentry&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";

@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../php/mb_validateSession.php");
 
 $e_target = $_GET["e_target"];
 ?>
@@ -111,7 +111,7 @@ function htmlspecialchars(p_string) {
 	//	p_string = p_string.replace(/'/g, '&#039;');
 	return p_string;
 };
-   
+
 //default definition of image directory for digitize buttons, might
 //be overwritten with digitize conf data
 var buttonDig_imgdir = "../img/button_digitize/";
@@ -130,7 +130,7 @@ var mapType = "";
 var DigitizeHistory = function () {
 	var historyItemArray = [];
 	var currentIndex = 0;
-	
+
 	this.addItem = function (obj) {
 		if (typeof obj == "object" 
 		&& obj.back && typeof obj.back === "function"
@@ -148,7 +148,7 @@ var DigitizeHistory = function () {
 		}
 		return false;
 	};
-	
+
 	this.back = function () {
 		if (currentIndex > 0) {
 			currentIndex --;
@@ -158,7 +158,7 @@ var DigitizeHistory = function () {
 		}
 		return false;
 	};
-	
+
 	this.forward = function () {
 		if (currentIndex < historyItemArray.length) {
 			historyItemArray[currentIndex].forward();
@@ -201,7 +201,7 @@ var registerAnotherFunction = function () {
 			showWfs(obj.index);
 		});
 	}
-	
+
 	/**
 	 * Property: events
 	 * 
@@ -299,7 +299,7 @@ var registerAnotherFunction = function () {
 
 <?php
 echo "var mod_digitize_target = '".$e_target."';";
-$digitizeConfFilenameAndPath = dirname(__FILE__) . "/../../conf/" . $digitize_conf_filename;
+$digitizeConfFilenameAndPath = __DIR__ . "/../../conf/" . $digitize_conf_filename;
 if ($digitize_conf_filename && file_exists($digitizeConfFilenameAndPath)) {
 	/*
 	 * @security_patch finc done
@@ -375,25 +375,25 @@ function toggleTabs(tabId) {
 
 	var tabHeaders = wfsWindow.document.getElementsByTagName('a');
 	var tabs       = wfsWindow.document.getElementsByTagName('div');
-	
+
 	for(var i = 0; i < tabHeaders.length; i++) {
 		if(tabHeaders[i].id.indexOf('tabheader') != -1) {
 			tabHeaders[i].className = 'tabheader';
 		}
 	}
-	
+
 	for(var i = 0; i < tabs.length; i++) {
 		if(tabs[i].className === 'tabcontent') {
 			tabs[i].style.visibility = 'hidden';
 			tabs[i].style.display    = 'none';
 		}
 	}
-	
+
 	wfsWindow.document.getElementById('tabheader_' + tabId).className += ' active';
-	
+
 	wfsWindow.document.getElementById('tab_' + tabId).style.visibility = 'visible';
 	wfsWindow.document.getElementById('tab_' + tabId).style.display    = 'block';
-	
+
 	return false;
 }
 
@@ -412,7 +412,7 @@ function hideHelptext(helptextId) {
 	}
 
 	var helptext = wfsWindow.document.getElementsByTagName('div');
-	
+
 	for(var i = 0; i < helptext.length; i++) {
 		if(helptext[i].className === 'helptext') {
 			helptext[i].style.visibility = 'hidden';
@@ -547,7 +547,7 @@ function mod_digitize_start(e){
 		alert(msgObj.errorMessageNoGeometrySelected);
 		return false;
 	}
-	
+
 	(function () {
 		//
 		// get the last point the user digitized
@@ -616,7 +616,7 @@ function mod_digitize_start(e){
 					d.getGeometry(i, -1).reopen();
 					currentGeomIndex = i;
 					_currentGeomIndex = i;
-					
+
 					parent.mb_enableButton(d.get(i).geomType);
 					break;
 				}
@@ -800,7 +800,7 @@ function handleBasepoint(obj,memberIndex, geometryIndex, ringIndex, pointIndex){
 	) { 
 		return false; 
 	}
-	
+
 	basepointObject = obj;
 	basepointMemberIndex = memberIndex;
 	basepointGeometryIndex = geometryIndex;
@@ -813,7 +813,7 @@ function handleBasepoint(obj,memberIndex, geometryIndex, ringIndex, pointIndex){
 		basepointRingIndex = ringIndex;
 	}
 	basepointPointIndex = pointIndex;
-	
+
     // The eventhandlers get unbound before being bound again to ensure
     // they are only called once - see http://trac.osgeo.org/mapbender/ticket/879 
 	if(mod_digitizeEvent == button_move){
@@ -833,7 +833,7 @@ function handleBasepoint(obj,memberIndex, geometryIndex, ringIndex, pointIndex){
 
 function convertLinepointToBasepoint(obj, memberIndex, geomIndex, ringIndex, pointIndex){
 	if(!(mod_digitizeEvent == button_insert)){ return false; }
-	
+
 	if(mod_digitizeEvent == button_insert){
 		mod_digitize_timeout();
 		obj.style.cursor = 'crosshair';
@@ -855,7 +855,7 @@ function insertBasepoint(e){
 	var j = basepointGeometryIndex;
 	var k = basepointRingIndex;
 	var l = basepointPointIndex;
-	
+
 	var currentPos = getMousePosition(e);
 
 	var ind = parent.getMapObjIndexByName(mod_digitize_target);
@@ -898,7 +898,7 @@ function selectBasepoint(e){
 		basepointObject.style.height = mod_digitize_height + "px";
 		basepointObject.style.left = "0px";
 		basepointObject.style.top = "0px";
-			
+
 		if (parent.ie) {
 			// ie cannot handle backgroundColor = 'transparent'
 			basepointObject.style.background = "url(../img/transparent.gif)";
@@ -919,7 +919,7 @@ function dragBasepoint(e){
 
 	}
 }
-	
+
 function updateAllPointsOfNonTransactionalLike(oldP, newP){ 
 	for (var i = 0; i < d.count(); i++) {
 		if (isTransactional(d.get(i))) {
@@ -928,15 +928,15 @@ function updateAllPointsOfNonTransactionalLike(oldP, newP){
 	}
 }
 
-	
+
 function releaseBasepoint(e){
-	
+
 	var i = basepointMemberIndex;
 	var j = basepointGeometryIndex;
 	var k = basepointRingIndex;
 	var l = basepointPointIndex;
 	basepointDragActive = false;
-	
+
 	var currentPos = getMousePosition(e);
 	var basepointDragEnd = currentPos;
 	parent.$(basepointObject).unbind("mousedown");
@@ -971,7 +971,7 @@ function releaseBasepoint(e){
 	basepointMemberIndex = null;
 	basepointGeometryIndex = null;
 	basepointPointIndex = null;	
-		
+
 	executeDigitizeSubFunctions();
 
 	var isPoint = d.get(i).geomType === parent.geomType.point;
@@ -988,7 +988,7 @@ function releaseBasepoint(e){
 }
 // --- basepoint handling (end) -----------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------
-	
+
 // ------------------------------------------------------------------------------------------------------------------------
 // --- registered functions (begin) ---------------------------------------------------------------------------------------
 
@@ -1030,7 +1030,7 @@ function completeInitialization() {
 }
 
 function registerFunctions(){
-	
+
 	mod_digitizePreFunctions = [];
 	mod_digitizeSubFunctions = [];
 	registerDigitizePreFunctions("updateExtent()");
@@ -1057,10 +1057,10 @@ function registerFunctions(){
 function checkDigitizeTag(){
 	var digitizeTagName = "digitizeDiv";
 	var digitizeTagStyle;
-	
+
 
 	if (mapType == "DIV") {
-		
+
 		digitizeTagStyle = {"z-index":digitizeTransactionalZIndex, "font-size":"10px"};
 		digitizeDivTag = new parent.DivTag(digitizeTagName, "", digitizeTagStyle, mapDomElement);
 	}	 
@@ -1271,7 +1271,7 @@ function digitizeEnable(obj) {
 			obj.id == button_split || obj.id == button_merge ||
 			obj.id == button_difference || obj.id == button_line_continue ||
 			obj.id == button_line_merge){
-					
+
 		var el = mapDomElement;
 		$(el).mousemove(function (e) {
 			mod_digitize_go(e);
@@ -1289,7 +1289,7 @@ function digitizeEnable(obj) {
 				s.store(d);
 			}
 		}
-		
+
 		if (mod_digitizeEvent == button_point || mod_digitizeEvent == button_line || mod_digitizeEvent == button_polygon || mod_digitizeEvent == button_insert ) {
 			//
 			// complete a previously unfinished geometry
@@ -1300,7 +1300,7 @@ function digitizeEnable(obj) {
 					!d.get(_currentGeomIndex).get(-1).isComplete() &&
 					mod_digitizeEvent !== d.get(_currentGeomIndex).geomType);
 				var currentGeometryType = mod_digitizeEvent;
-				
+
 				if (currentGeometryDoesNotCorrespondToTheCurrentButton) {
 					var currentEpsg = parent.mb_mapObj[parent.getMapObjIndexByName(mod_digitize_target)].epsg;
 					digitizeHistory.addItem({
@@ -1325,7 +1325,7 @@ function digitizeEnable(obj) {
 					digitizeHistory.forward();
 				}
 			})();
-	
+
 		}
 
 		executeDigitizePreFunctions();
@@ -1389,7 +1389,7 @@ function digitizeEnable(obj) {
 				parent.mb_disableThisButton(mod_digitizeEvent);
 				return false;
 			}
-			
+
 			parent.mb_ajax_post("../php/mod_digitize_mergePolygon.php", {polygons: polygonTextArray.join(";")}, function(json, status) {
 				var response = json;
 				var polygon = response.polygon;
@@ -1415,7 +1415,7 @@ function digitizeEnable(obj) {
 				parent.mb_disableThisButton(mod_digitizeEvent);
 				return false;
 			}
-			
+
 			var splitCallback = function (json, status) {
 				var response = json;
 				var resultArray = response.geometries;
@@ -1445,7 +1445,7 @@ function digitizeEnable(obj) {
 			if (d.get(0).geomType == parent.geomType.polygon) {
 				var polygonText = d.get(0).toText();
 				var lineText = d.get(1).toText();
-				
+
 				parent.mb_ajax_post("../php/mod_digitize_splitPolygon.php", {
 					polygon: polygonText, 
 					line: lineText
@@ -1454,7 +1454,7 @@ function digitizeEnable(obj) {
 			else {
 				var line1text = d.get(0).toText();
 				var line2text = d.get(1).toText();
-				
+
 				parent.mb_ajax_post("../php/mod_digitize_splitLine.php", {
 					line1: line1text, 
 					line2: line2text
@@ -1470,10 +1470,10 @@ function digitizeEnable(obj) {
 				parent.mb_disableThisButton(mod_digitizeEvent);
 				return false;
 			}
-			
+
 			var polygon1Text = d.get(0).toText();
 			var polygon2Text = d.get(1).toText();
-			
+
 			parent.mb_ajax_post("../php/mod_digitize_differencePolygon.php", {polygon1: polygon1Text, polygon2: polygon2Text}, function(json, status) {
 				var response = json;
 				var polygonArray = response.polygons;
@@ -1498,7 +1498,7 @@ function digitizeEnable(obj) {
 		}
 		else if (obj.id == button_line_merge) {
 			//var applicable = (d.count() > 1);
-			
+
 /*			var lineTextArray = [];
 			for (var i = 0; i < d.count(); i++) {
 				if (d.get(i).geomType != parent.geomType.line) {
@@ -1521,7 +1521,7 @@ function digitizeEnable(obj) {
 
 			var line1Text = d.get(0).toText();
 			var line2Text = d.get(1).toText();
-				
+
 			parent.mb_ajax_post("../php/mod_digitize_mergeLines.php", {line1: line1Text, line2: line2Text}, function(json, status) {
 				var response = json;
 				var line = response.line;
@@ -1533,7 +1533,7 @@ function digitizeEnable(obj) {
 				var wfsConfId = d.get(-1).wfs_conf;
 				var wfsProperties = d.get(-1).e;
 				var mapIndex = parent.getMapObjIndexByName(mod_digitize_target);
-				
+
 				d.importGeometryFromText(line, parent.mb_mapObj[mapIndex].epsg);
 				d.get(-1).wfs_conf = wfsConfId;
 				for (var i = 0; i < wfsProperties.count(); i++) {
@@ -1562,18 +1562,18 @@ function digitizeEnable(obj) {
 					d.del(0);
 				}
 				parent.mb_disableThisButton(mod_digitizeEvent);
-				
+
 				var res = true;	
 				res = parent.Mapbender.modules.digitize.events.mergeLines.trigger({
 					mergedFeatureId: mergedFeatureId,
 					obsoleteFeature: obsoleteFeatureArray
-					
+
 				}, "AND");
-				
+
 				if (res === false) {
 					return;	
 				}
-				
+
 				if(mergedFeatureId !== false) {
 					parent.Mapbender.modules.digitize.events.afterWfs.register(function (obj) {
 						for(var j = 0; j < obsoleteFeatureArray.length; j++) {
@@ -1650,7 +1650,7 @@ function drawDashedLine(){
 			+ "<img src='"+parent.mb_trans.src+"' width='"+mod_digitize_width+"' height='0'></div>"
 			+ "<div class='t_img'>"
 			+ "<img src='"+parent.mb_trans.src+"' width='0' height='"+mod_digitize_height+"'></div>";
-	
+
 	var mapObj = parent.mb_mapObj[parent.getMapObjIndexByName(mod_digitize_target)];
 	var width = mapObj.width;
 	var height = mapObj.height;
@@ -1695,7 +1695,7 @@ function drawDashedLine(){
 										totalDistMeasureTag = "<p class='measure'>"+currentGeometry.getAggregatedDist(k-1, 2)+"</p>";
 									}
 								}	
-								
+
 							}
 							else {
 								smPArray[smPArray.length] = "<div class='bp' style='top:"+(currentPointMap.y-2)+"px;left:"+(currentPointMap.x-2)+"px;z-index:"+parseInt(digitizeTransactionalZIndex+10, 10)+";'";
@@ -1708,11 +1708,11 @@ function drawDashedLine(){
 										totalDistMeasureTag = "<p class='measure'>"+currentGeometry.getAggregatedDist(k-1, 2)+"</p>";
 									}
 								}
-								
+
 							}
 							if(k==0 && isPolygon && !isComplete){
 								smPArray[smPArray.length] = " title='"+msgObj.closePolygon_title+"' ";
-								
+
 							}
 							if(isMoveOrInsertOrDelete) {
 								smPArray[smPArray.length] = "onmouseover='window.frames[\""+mod_digitize_elName+"\"].handleBasepoint(this,"+i+","+j+","+k+")' ;";
@@ -1723,7 +1723,7 @@ function drawDashedLine(){
 							}	
 							smPArray[smPArray.length] = "</div>";
 							lastPaintedPoint = currentPointMap;
-							
+
 						}
 						if (k > 0) {
 							points = parent.calculateVisibleDash(currentPointMap, previousPointMap, width, height);
@@ -1740,11 +1740,11 @@ function drawDashedLine(){
 					for (var l = 0, lenRings = currentGeometry.innerRings.count(); l < lenRings; l++) {
 						var currentRing = currentGeometry.innerRings.get(l);
 						var lastPaintedPoint = false;
-						
+
 						for (var m = 0, lenPoint = currentRing.count(); m < lenPoint; m++) {
 							var currentPoint = currentRing.get(m);
 							var currentPointMap = new Point(Math.round((currentPoint.x - minX) * cx), Math.round((maxY - currentPoint.y) * cy));
-							
+
 							//					var isTooCloseToPrevious = lastPaintedPoint && (k > 0) && Math.abs(currentPointMap.x-lastPaintedPoint.x) <= minDist && Math.abs(currentPointMap.y-lastPaintedPoint.y) <= minDist;
 							//					if (!isTooCloseToPrevious) {
 							var currentPointIsVisible = currentPointMap.x > 0 && currentPointMap.x < width && currentPointMap.y > 0 && currentPointMap.y < height;
@@ -1798,18 +1798,18 @@ function evaluateDashes(start, end, memberIndex, geomIndex, ringIndex, pointInde
 		pointIndex = ringIndex;
 		ringIndex = undefined;
 	}
-	
+
 	var strArray = [];
 	var delta = new parent.Point(end.x - start.x, end.y - start.y);
 	var lastGeomIsComplete = d.getGeometry(-1,-1).isComplete(); 
-	 
+
 	var vecLength = start.dist(end);
 	var n = Math.round(vecLength/dotDistance);
 	if (n > 0) {
 		var step = delta.dividedBy(n);
 	}
 	var lineCenter = Math.round(n/2);
-	
+
 	for(var i=1; i < n; i++){
 		var x = Math.round(start.x + i * step.x) - 2;
 		var y = Math.round(start.y + i * step.y) - 2;
@@ -1920,14 +1920,14 @@ function updateListOfGeometries(){
 						listOfGeom += "<img src = '"+buttonDig_imgdir+buttonDig_clone_src+"' title='"+msgObj.buttonDig_clone_title+"' onclick='d.addCopy(d.get("+i+"));d.get(-1).e.delElement(\"fid\");eventCloseGeometry.trigger({index: d.count() - 1, geometry: d.get(-1)});executeDigitizeSubFunctions();'>";
 					}
 				}
-					
+
 				// button: remove geometry from database
 				if (d.get(i).e.getElementValueByName('fid')) {
 					listOfGeom += "<img src = '"+buttonDig_imgdir+buttonDig_removeDb_src + 
 						"' title='"+msgObj.buttonDig_removeDb_title + 
 						"' onclick=\"deleteFeature("+i+")\">";
 				}
-				
+
 				listOfGeom += "<div class='digitizeGeometryListItem' onmouseover='parent.mb_wfs_perform(\"over\",d.get("+i+"),\""+geomHighlightColour+"\");' ";
 				listOfGeom += " onmouseout='parent.mb_wfs_perform(\"clean\",d.get("+i+"),\""+geomHighlightColour+"\")' ";
 				listOfGeom += " onclick='parent.mb_wfs_perform(\"click\",d.get("+i+"),\""+geomHighlightColour+"\");' ";
@@ -1947,7 +1947,7 @@ function updateListOfGeometries(){
 					multi = "multi";
 				}
 				listOfGeom += ">" + htmlspecialchars(geomName) +" (" + multi + currentGeomType + ")</div>";
-				
+
 				// multigeometries
 				listOfGeom += "<ul>";
 				for (var j = 0; j < d.get(i).count(); j++) {
@@ -1974,7 +1974,7 @@ function updateListOfGeometries(){
 							listOfGeom += " onmouseout='parent.mb_wfs_perform(\"clean\",d.getGeometry("+i+","+j+").innerRings.get(" + k + "),\""+geomHighlightColour+"\")' ";
 							listOfGeom += " onclick='parent.mb_wfs_perform(\"click\",d.getGeometry("+i+","+j+").innerRings.get(" + k + "),\""+geomHighlightColour+"\");' ";
 							listOfGeom += ">inner ring #" + (k+1) +"</div></li>";
-							
+
 						}
 						listOfGeom += "</ul>";
 					}
@@ -2002,7 +2002,7 @@ function formCorrect(doc, formId) {
 	var errorMessage = "";
 	var result;
 	var form = doc.getElementById(formId);
-	
+
 	result = mandatoryFieldsNotEmpty(doc, form);
 	isCorrect = isCorrect && result.isCorrect;
 	errorMessage += result.errorMessage;
@@ -2039,7 +2039,7 @@ function validBoxEntrySelected(form){
 			var res = validBoxEntrySelected(form.childNodes[i]);
 			errorMessage = res.errorMessage + errorMessage;
 			isCorrect = res.isCorrect;
-			
+
 		}
 	}
 	return {"isCorrect":isCorrect, "errorMessage":errorMessage};
@@ -2048,7 +2048,7 @@ function validBoxEntrySelected(form){
 function mandatoryFieldsNotEmpty(doc, node){
 	var isCorrect = true;
 	var errorMessage = "";
-	
+
 	var $nodeArray = $(".mandatory", doc);
 	for (var i = 0; i < $nodeArray.size() && isCorrect; i++) {
 		var $currentNode = $nodeArray.eq(i);
@@ -2057,7 +2057,7 @@ function mandatoryFieldsNotEmpty(doc, node){
 			isCorrect = false;
 			errorMessage += "'"+ $currentNode.attr("name") +"': "+ msgObj.messageErrorFieldIsEmpty +"\n";
 		}
-		
+
 		if (tagName == "SELECT" && parseInt($currentNode.get(0).selectedIndex) == 0) {
 			isCorrect = false;
 			errorMessage += "'"+ $currentNode.attr("name") +"': "+ msgObj.messageErrorFieldIsEmpty +"\n";
@@ -2095,13 +2095,13 @@ function replaceCommaByDecimalPoint(str) {
 function dataTypeIsCorrect(doc, node){
 	var isCorrect = true;
 	var errorMessage = "";
-	
+
 	nodeArray = doc.getElementsByName("datatype");
 	for (var i = 0; i < nodeArray.length ; i++) {
 		if (nodeArray[i].nodeName.toUpperCase() == "INPUT" && nodeArray[i].type == "hidden" && nodeArray[i].id.substr(0,9) == "datatype_") {
 			var nodeId = nodeArray[i].id.substr(9);
 			var nodeValue = doc.getElementById(nodeId).value;
-			
+
 			if (nodeArray[i].value == "int") {
 				if (!isInteger(nodeValue)) {
 					isCorrect = false;
@@ -2127,7 +2127,7 @@ function dataTypeIsCorrect(doc, node){
 
 function getAvailableWfsForGeom(geom, wfsConf) {	
 	var wfsConfIndices = [];
-	
+
 	for (var attr in wfsConf) {
 		var isTrans = (wfsConf[attr]['wfs_transaction'] != "");
 		if (!isTrans) {
@@ -2182,7 +2182,7 @@ function getAvailableWfsForGeom(geom, wfsConf) {
 					var isMultiPoint = (geom.geomType == parent.geomType.point && wfsConf[attr]['element'][elementIndex]['element_type'] == 'MultiPointPropertyType');
 //					alert(isMultiPolygon + " " + isPolygon + " " + isMultiLine + " " + isLine + " " + isPoint);
 					if (isMultiPolygon || isPolygon || isMultiLine || isLine || isMultiPoint || isPoint || wfsConf[attr]['element'][elementIndex]['element_type'] == 'GeometryPropertyType') {
-						
+
 						wfsConfIndices.push(attr);
 					}
 				}
@@ -2211,7 +2211,7 @@ function showGeoJsonImportForm() {
 				      width: 50
 				});
 
-		
+
 	} );
 }
 
@@ -2220,7 +2220,7 @@ function showWfsKml (geometryIndex) {
 	wfsKmlWindow.document.open("text/html");
 	wfsKmlWindow.document.writeln("<html><head><meta http-equiv='Content-Type' content='text/html; charset=<?php echo CHARSET;?>'></head><body><div id='linkToKml'></div><div id='elementForm'></div></body></html>");
 	wfsKmlWindow.document.close();
-	
+
 	str = "<form id = 'wmsKmlForm' onsubmit='return false;'><table>";
 
 	var properties = d.get(geometryIndex).e;
@@ -2242,7 +2242,7 @@ function showWfsKml (geometryIndex) {
 	var deleteOnClickText = "var deltrans = confirm('This geometry will be removed from the KML.');";
 	deleteOnClickText += "if (deltrans){";
 	deleteOnClickText += "this.disabled=true;window.opener.updateKmlInDb("+geometryIndex+", 'delete')}";
-	
+
 	str += "\t\t\t<td><input type='button' name='updateButton' value='Update' onclick=\""+updateOnClickText+"\"/></td>\n";
 // delete button not yet implemented
 //	str += "\t\t\t<td><input type='button' name='deleteButton' value='Delete' onclick=\""+deleteOnClickText+"\"/></td>\n";
@@ -2319,13 +2319,13 @@ function showWfs(geometryIndex) {
 	if(typeof wfsWindow != 'undefined') {
 		wfsWindow.close();
 	}
-	
+
 	wfsWindow = open("", "wfsattributes", "width="+wfsWindowWidth+", height="+wfsWindowHeight+", resizable, dependent=yes, scrollbars=yes");
 	wfsWindow.document.open("text/html");
 	setTimeout(function () {
 		wfsWindow.focus();
 	}, 100);
-	
+
 	var str = "";
 	var strStyle = "";
 	var defaultIndex = -1;
@@ -2346,10 +2346,10 @@ function showWfs(geometryIndex) {
 		"var settings = $.extend({}, defaults, data);" + 
 		"$(this).datepicker(settings);" + 
 		"});";
-	
+
 	onChangeText += datePickerText;
 
-	
+
 	var uploaderText = 
 		"deleteUploadedFile = function (domNode) {" + 
 			"$(domNode).siblings('input').val('');" + 
@@ -2376,7 +2376,7 @@ function showWfs(geometryIndex) {
 			"}" + 
 		"});" + 
 	"});";
-	
+
 	onChangeText += uploaderText;
 
         var targetObject = parent.getMapObjByName("mapframe1");
@@ -2391,7 +2391,7 @@ function showWfs(geometryIndex) {
 		"$(this).mapdependentSelect(settings);\n" +
 		"});\n";
 	onChangeText  += mapSelectBoxText;
-	
+
 	str += "\t<select name='wfs' size='" + wfsConf.length + "'";
 	str += " onChange=\""+ onChangeText +"\"";
 	str += ">\n\t\t";
@@ -2415,9 +2415,9 @@ function showWfs(geometryIndex) {
 		str += "</option>\n\t\t";
 	}
 
-	
+
 	str += "</select>\n\t\t</form>\n\t";
-	
+
 	var elForm = "";
 	if (defaultIndex != -1) {
 		elForm = buildElementForm(defaultIndex, geometryIndex);
@@ -2486,7 +2486,7 @@ function prepareSelectBox (formElementHtml, categoryName, isMandatory, elementLa
 		pattern = new RegExp(patternString);
 		formElementHtml = formElementHtml.replace(pattern, "<select name='" + elementLabel + "'");
 	}
-	
+
 	// preselect the correct entry of the box
 	patternString = "option( )+value( )*=( )*('|\")"+elementValue+"('|\")";
 	pattern = new RegExp(patternString);
@@ -2535,7 +2535,7 @@ function prepareDatepicker (formElementHtml, categoryName, isMandatory, elementL
 	var classString = (styleId == '0') ? "" : styleId;
 	var patternString = "<input";
 	var pattern = new RegExp(patternString);
-		
+
 	// set category
 	if (categoryName) {
 		formElementHtml = formElementHtml.replace(pattern, patternString + " category='" + categoryName + "' ");
@@ -2559,7 +2559,7 @@ function prepareDatepicker (formElementHtml, categoryName, isMandatory, elementL
 		pattern = new RegExp(patternString);
 		formElementHtml = formElementHtml.replace(pattern, "<input name='" + elementLabel + "'");
 	}
-	
+
 	// preselect the correct entry of the box
 	patternString = "<input";
 	pattern = new RegExp(patternString);
@@ -2572,7 +2572,7 @@ function prepareCheckbox (formElementHtml, categoryName, isMandatory, elementLab
 	var classString = (styleId == '0') ? "" : styleId;
 	var patternString = "<input";
 	var pattern = new RegExp(patternString);
-		
+
 	// set category
 	if (categoryName) {
 		formElementHtml = formElementHtml.replace(pattern, patternString + " category='" + categoryName + "' ");
@@ -2596,7 +2596,7 @@ function prepareCheckbox (formElementHtml, categoryName, isMandatory, elementLab
 		pattern = new RegExp(patternString);
 		formElementHtml = formElementHtml.replace(pattern, "<input name='" + elementLabel + "'");
 	}
-	
+
 	// preselect the correct entry
 	patternString = "<input";
 	pattern = new RegExp(patternString);
@@ -2637,7 +2637,7 @@ function prepareTextArea (formElementHtml, categoryName, isMandatory, elementLab
 		pattern = new RegExp(patternString);
 		formElementHtml = formElementHtml.replace(pattern, "<textarea name='" + elementLabel + "'");
 	}
-	
+
 	// preselect the correct entry of the box
 	patternString = "<\/textarea>";
 	pattern = new RegExp(patternString);
@@ -2651,7 +2651,7 @@ function prepareUploadField (formElementHtml, categoryName, isMandatory, element
 	var classString = (styleId == '0') ? "" : styleId;
 	var patternString = "<div";
 	var pattern = new RegExp(patternString);
-		
+
 	// set category
 	if (categoryName) {
 		formElementHtml = formElementHtml.replace(pattern, patternString + " category='" + categoryName + "' ");
@@ -2659,7 +2659,7 @@ function prepareUploadField (formElementHtml, categoryName, isMandatory, element
 
 	classString = (classString !== "") ? " class='"+classString+"' " : " ";
 	formElementHtml = formElementHtml.replace(pattern, patternString + classString);
-	
+
 	// preselect the correct entry of the box
 	if(elementValue !== "") {
 		formElementHtml = "<a title='show uploaded file' target='_blank' href='" + 
@@ -2674,7 +2674,7 @@ function prepareUploadField (formElementHtml, categoryName, isMandatory, element
 	pattern = new RegExp(patternString);
 	replaceString = "class='hiddenUploadField' " + " value='"+elementValue+"'";
 	formElementHtml = formElementHtml.replace(pattern, replaceString);
-	
+
 	return formElementHtml;
 }
 
@@ -2697,7 +2697,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 		memberElements = d.get(memberIndex).e;
 		fid = memberElements.getElementValueByName('fid');
 	}
-	
+
 	if (typeof(featureTypeArray["element"]) !== "undefined") {
 		featureTypeElementArray = featureTypeArray["element"];
 
@@ -2708,26 +2708,26 @@ function buildElementForm(wfsConfIndex, memberIndex){
 		for(var i = 0; i < featureTypeElementArray.length; i++){
 			var categoryName         = featureTypeElementArray[i].f_category_name;
 			var categoryNameIsUnique = true;
-			
+
 			if(categoryName.length === 0) { continue; }
-			
+
 			for(var j = 0; j < elementCategories.length; j++) {
 				if(elementCategories[j] == categoryName) {
 					categoryNameIsUnique = false;
 				}
 			}
-			
+
 			if(categoryNameIsUnique) {
 				elementCategories.push(categoryName);
 			}
 		}
 
 		str += "<form id='"+featureTypeElementFormId+"'>\n\t";
-		
+
 		var hasCategories = (elementCategories.length > 0);
 		if (hasCategories) {
 			elementCategories.sort();
-			
+
 			initialTab = elementCategories[0];
 			str +='<table><tr><td>';
 			for (var currentCategory = 0; currentCategory < elementCategories.length; currentCategory++) {
@@ -2735,7 +2735,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 			}
 			str +='</td></tr></table>';
 		}
-			
+
 		for (var currentCategory = 0; currentCategory < elementCategories.length || !hasCategories; currentCategory++) {
 			if (hasCategories) {
 				str += '<div id="tab_' + elementCategories[currentCategory] + '" class="tabcontent">';
@@ -2757,7 +2757,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 				if(hasCategories && featureTypeElement.f_category_name != elementCategories[currentCategory] && !isGeomColumn) {
 					continue;
 				}
-			
+
 
 				var elementLabelExists = (featureTypeElement['f_label'] != "");
 				var elementLabel = ""; 
@@ -2793,7 +2793,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 							}
 
 							classString = (classString !== "") ? " class='"+classString+"' " : " ";
-							
+
 							str += "\t\t\t\t<input id = 'datatype_mb_digitize_form_" + elementName + "' name='datatype' type='hidden' value = '" + elementType + "'>\n";
 							if (!hasCategories) {
 								str += "\t\t\t\t<input id = 'mb_digitize_form_" + elementName + "' name='" + elementLabel + "' type='text' "+classString+" size=20 value = '" + elementValue + "'>\n";
@@ -2842,7 +2842,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 							}
 							str += formElementHtml;
 						}
-						
+
 						if(featureTypeElement.f_helptext.length > 0) {
 							str += ' <a href="#" onclick="return window.opener.showHelptext(' + i + ')"><img src="../img/help.png" width="16" height="16" alt="?" /></a> ';
 							str += '<div id="helptext' +i+ '" class="helptext">';
@@ -2852,7 +2852,7 @@ function buildElementForm(wfsConfIndex, memberIndex){
 							str += '</p>';
 							str += '</div>';
 						}
-						
+
 						str += "\t\t\t</td>\n\t\t</tr>\n";
 					}
 				}
@@ -2891,11 +2891,11 @@ function buildElementForm(wfsConfIndex, memberIndex){
 				onClickText += 	"else {";
 				onClickText += 		"alert(result.errorMessage);this.disabled=false;"
 				onClickText += 	"}";
-				
+
 				if (options[i] == "insert" && hasGeometryColumn && (!fid || showSaveButtonForExistingGeometries)) {
 					str += "\t\t\t<td><input type='button' name='saveButton' value='"+msgObj.buttonLabelSaveGeometry+"' onclick=\""+onClickText+"\" /></td>\n";
 				}
-				
+
 				if (!featureTypeMismatch && fid) {
 					if (options[i] == "update" && hasGeometryColumn) {
 						str += "\t\t\t<td><input type='button' name='updateButton' value='"+msgObj.buttonLabelUpdateGeometry+"' onclick=\""+onClickText+"\"/></td>\n";
@@ -2939,7 +2939,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 		wfsConf = parent.get_complete_wfs_conf();
 	}
 	var myconf = wfsConf[d.get(m).wfs_conf];
-	
+
 	var mapObjInd = parent.getMapObjIndexByName(mod_digitize_target);
 
 	var proceed = true;
@@ -2954,7 +2954,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 		var errorMessage = "";
 		if (typeof(wfsWindow) != 'undefined' && !wfsWindow.closed && (type === "insert" || type === "update")) {
 			myform = wfsWindow.document.getElementById(featureTypeElementFormId);
-		
+
 			for (var i=0; i<myform.length; i++){
 				if (myform.elements[i].id == "fid") {
 					fid = myform.elements[i].value;
@@ -2965,7 +2965,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 						d.get(m).e.setElement('fid', fid);
 					}
 				}
-				
+
 				//else if (myform.elements[i].type == 'text' { //merging geoportal.rlp
 				else if (myform.elements[i].type == "text" || 
 						myform.elements[i].tagName.toUpperCase() == "TEXTAREA" ||
@@ -3045,7 +3045,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 			if (module.dataCheck) {
 				return;
 			}
-			
+
 			if (module.cancelAjaxRequest) {
 				alert(module.cancelAjaxRequestMessage);
 				module.cancelAjaxRequest = false;
@@ -3053,7 +3053,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 				return;
 			}
 		}
-		
+
 		// Extract the current, possibly new WfsConf
                 var newWfsConfId = d.get(m).wfs_conf
 		if (typeof(wfsWindow) != 'undefined' && !wfsWindow.closed) {
@@ -3070,7 +3070,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
                         if(e.name[i] === "fid") {
                             continue;
                         }
-                        
+
                         var validElement = false;
 			for(var j in newWfsConf.element) {
 				if(e.name[i] == newWfsConf.element[j]['element_name'] && newWfsConf.element[j]['f_edit'] === "1") {
@@ -3082,7 +3082,7 @@ function dbGeom(type, m, callback, dbWfsConfId) {
 				elementsToDelete.push(i);
 			}
 		}
-		
+
 		// Delete. As the arrays shrink, the indices into the arrays are shrunk, too
 		for(var i in elementsToDelete) {
 			e.name.splice(elementsToDelete[i] - i, 1);
@@ -3141,7 +3141,7 @@ function wfsSubWrite(m, type, status, success, fid, callback) {
 		feature: (type === 'delete') ? null : d.get(m),
 		type: type
 	});
-	
+
 	parent.mb_execWfsWriteSubFunctions();
 
 	if (updatePointGeometriesInstantly && 
@@ -3196,20 +3196,20 @@ function getMultiGeometryIdsByPlacemarkId (placemarkId) {
 function updateKmlInDb (geometryIndex, command) {
 	var properties = d.get(geometryIndex).e;
 	var placemarkId = properties.getElementValueByName("Mapbender:placemarkId");
-	
+
 	var multiGeometryIdArray = getMultiGeometryIdsByPlacemarkId(placemarkId);
 
 	if (typeof(wfsKmlWindow) != 'undefined' && !wfsKmlWindow.closed) {
 
 		// update properties from form
 		myform = wfsKmlWindow.document.getElementById("wmsKmlForm");
-	
+
 		for (var i=0; i < myform.length; i++){
 			if (myform.elements[i].type == 'text' ){
 				if (myform.elements[i].id) {
 					var key = myform.elements[i].name;
 					var value = myform.elements[i].value;
-					
+
 					// update all geometries with the same placemark id
 					for (var j = 0; j < multiGeometryIdArray.length; j++) {
 						var currentProperties = d.get(j).e; 
@@ -3219,7 +3219,7 @@ function updateKmlInDb (geometryIndex, command) {
 			}
 		}
 		var kmlId = properties.getElementValueByName("Mapbender:id");
-	
+
 		parent.mb_ajax_post("../php/mod_updateKmlInDb.php", {command:command, kmlId:kmlId, placemarkId:placemarkId, geoJSON:d.placemarkToString(placemarkId)}, function(obj, status) {
 			if (obj === "1") {
 				wfsKmlWindow.alert("KML updated.");

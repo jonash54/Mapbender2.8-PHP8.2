@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_administration.php");
-require_once(dirname(__FILE__)."/class_wfs.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_administration.php");
+require_once(__DIR__."/class_wfs.php");
 
 class Wfs_1_0 extends Wfs {
 	const VERSION = "1.0.0";
@@ -42,9 +42,9 @@ class Wfs_1_0 extends Wfs {
 		$result->message = "";
 		$result->xml = $xml;
 
-		$data = mb_eregi_replace("^[^<]*", "", $xml);
+		$data = mb_eregi_replace("^[^<]*", "", (string) $xml);
 		$data = mb_eregi_replace("[^>]*$", "", $data);
-		$resObj = array();
+		$resObj = [];
 		if (mb_strpos(mb_strtoupper($data), "SUCCESS") !== false) {
 			$result->success = true;
 			if (mb_ereg("^.*ogc:FeatureId fid=\"(.+)\"/>.*$", $data)) {

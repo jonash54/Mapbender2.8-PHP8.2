@@ -17,23 +17,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_csw.php");
-require_once(dirname(__FILE__)."/class_iso19139.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_csw.php");
+require_once(__DIR__."/class_iso19139.php");
 /**
  * CSW client class to make requests to and handle results from catalogues
  * @author armin11
  *
  */
 class cswClient {
-	var $cswId;
-	var $operationName;
-	var $operationResult;
-	var $additionalFilter;
+	public $cswId;
+	public $operationName;
+	public $operationResult;
+	public $additionalFilter;
 	//var $operationStatus;
-	var $operationSuccessful;
-	var $operationException;
-	var $operationExceptionText;
+	public $operationSuccessful;
+	public $operationException;
+	public $operationExceptionText;
 	
 	public function __construct() {
 		$this->cswId = null;
@@ -54,7 +54,7 @@ class cswClient {
 		$operationNameCsw = $operationName;
 		//$e = new mb_exception($csw->cat_op_values[$operationName]['post']);
 		//check for operation support
-		switch (strtolower($operationName)) {
+		switch (strtolower((string) $operationName)) {
 			case "getrecords":
 				if (isset($csw->cat_op_values[$operationName]['get']) ||  isset($csw->cat_op_values[$operationName]['post'])) {
 					//all ok
@@ -119,7 +119,7 @@ class cswClient {
 		}*/
 		$metadataRecordArray = explode("\n", $record->metadata, 2);
 		$metadataRecordString = $metadataRecordArray[1];
-		switch (strtolower($operationName)) {
+		switch (strtolower((string) $operationName)) {
 			case "getrecordbyid":
 				//define standard xml request
 				//maybe from xsd?
@@ -238,7 +238,7 @@ class cswClient {
 					}
 					if ($recordtype == 'spatialData') {
 						$postRequest .= '<ogc:Or>';
-						foreach (array('dataset','series','tile') as $spatiaDataRecordType) {
+						foreach (['dataset', 'series', 'tile'] as $spatiaDataRecordType) {
                     					$postRequest .= '<ogc:PropertyIsEqualTo>';
                        					$postRequest .= '<ogc:PropertyName>Type</ogc:PropertyName>';
                         				$postRequest .= '<ogc:Literal>'.$spatiaDataRecordType.'</ogc:Literal>';
@@ -295,7 +295,7 @@ class cswClient {
 						}
 						if ($recordtype == 'spatialData') {
 							$postRequest .= '<ogc:Or>';
-							foreach (array('dataset','series','tile') as $spatiaDataRecordType) {
+							foreach (['dataset', 'series', 'tile'] as $spatiaDataRecordType) {
                     						$postRequest .= '<ogc:PropertyIsEqualTo>';
                        						$postRequest .= '<ogc:PropertyName>Type</ogc:PropertyName>';
                         					$postRequest .= '<ogc:Literal>'.$spatiaDataRecordType.'</ogc:Literal>';
@@ -340,7 +340,7 @@ class cswClient {
 		//$e = new mb_exception("postdata: ".$postRequest);
 		//do request and return result
 		//$e = new mb_exception($csw->cat_op_values[$operationName]['post']);
-		if (strpos($operationNameCsw, "transaction") === false) {
+		if (!str_contains((string) $operationNameCsw, "transaction")) {
 			//$e = new mb_exception("test: ".$csw->cat_op_values[$operationNameCsw]['post']);
 			if ($cswId != false) {
 				$this->operationResult = $this->getResult($csw->cat_op_values[$operationNameCsw]['post'], $postRequest);
@@ -369,7 +369,7 @@ class cswClient {
 		//parse response
 		libxml_use_internal_errors(true);
 		try {
-			$cswResponseObject = simplexml_load_string($this->operationResult);
+			$cswResponseObject = simplexml_load_string((string) $this->operationResult);
 			if ($cswResponseObject === false) {
 				foreach(libxml_get_errors() as $error) {
         				$err = new mb_exception("class_cswClient:".$error->message);
@@ -402,7 +402,7 @@ class cswClient {
 				$err = new mb_exception("class_cswClient first exception that occured: ".$this->operationException[0]->asXML());
 				$this->operationResult = "An ows exception occured!";
 			} else {
-				switch (strtolower($operationName)) {
+				switch (strtolower((string) $operationName)) {
 					case "getrecordbyid":
 						//try to handle metadata - count the returned records
 						$metadataRecord = $cswResponseObject->xpath('/csw:GetRecordByIdResponse/gmd:MD_Metadata');
@@ -499,7 +499,7 @@ class cswClient {
 	private function getResult($url, $postData, $auth=false) {
 			$cswInterfaceObject = new connector();
 			$cswInterfaceObject->set('httpType','POST');
-			$postData = stripslashes($postData);
+			$postData = stripslashes((string) $postData);
 //$e = new mb_exception("classes/class_cswClient.php: post xml: ".$postData);
 			$dataXMLObject = new SimpleXMLElement($postData);
 			$postData = $dataXMLObject->asXML();

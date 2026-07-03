@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../conf/atomFeedClient.conf";
+require_once __DIR__ . "/../../conf/atomFeedClient.conf";
 //require_once dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf";
 ?>
 
@@ -104,7 +104,7 @@ function init(){
 		zIndex: 100,
 		gazetteerFrontImageOn: "../img/button_blue_red/gazetteer3_on.png"
 	}
-	
+
 	var formContainer = $(document.createElement('form')).attr({'id':'json-autocomplete-gazetteer'}).appendTo('#' + options.id);
 	formContainer.submit(function() {
 		return false;
@@ -127,7 +127,7 @@ function init(){
 		inputAddress.val('');
 	});
 	inputAddress.css('width',options.inputWidth);
-	
+
 	$(function() {
 		$( "#geographicName" ).autocomplete({
 			source: function( request, response ) {
@@ -184,7 +184,7 @@ function init(){
 			},
 			close: function() {
 				$( "#search_field" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
-				
+
 			}
 		});
 	});	
@@ -266,9 +266,9 @@ function callServer(data,method,id) {
 				//select tab
 				//$('#mytabs a[href="#representations"]').tab('show');
 				showDatasetEntryList(result, id);
-				
+
 			}
-			
+
  		}
 	});
 	return false;
@@ -343,7 +343,7 @@ function showDatasetList(featureCollection,id) {
 			identifierAnchor.text(featureCollection.features[i].properties.namespace+"#"+featureCollection.features[i].properties.code);
 		}
 		selectOptions = selectOptions+"<option value='"+featureCollection.features[i].properties.datasetFeedLink+"' url='"+featureCollection.features[i].properties.datasetFeedLink+"' optionid='"+i+"'>"+featureCollection.features[i].properties.title+"</option>";
-	
+
 	}
 	//add number of datasets to tab header
 	$("#tab_header_number_datasets").text(" "+"("+featureCollection.features.length+")");
@@ -368,7 +368,7 @@ function showDatasetList(featureCollection,id) {
         	data = $this.val();
 		//resetForm();
 		callServer(data,method);
-		
+
 	});
 	method =  "getDatasetFeedObjectFromUrl";
 	//call second feed with first entry for default
@@ -461,7 +461,7 @@ function fillSectionList(featureCollection, k) {
                 		bboxFiles.addFeatures(box);
 				//selectFOptions = selectFOptions+"<option value='"+i+"' url='"+featureCollection.features[k].properties.link[i]['@attributes'].href+"' title='"+featureCollection.features[k].properties.link[i]['@attributes'].title+"' onclick='highlightFeatureIndexById("+i+",true);' onmouseover='highlightFeatureIndexById("+i+",false);'>"+featureCollection.features[k].properties.link[i]['@attributes'].title+"</option>";
 			}
-				
+
                	}
 		//set number of links:
 		$("#number_of_tiles").text(" "+"("+numberOfLinks+"<?php echo " tile(s)"?>"+")");
@@ -499,7 +499,7 @@ function fillSectionList(featureCollection, k) {
                     'featureunselected': function(feature) {
                         document.getElementById('number_of_selected_tiles').innerHTML = this.selectedFeatures.length;
                     }
-                    
+
                 });
     			//
     			drawControls = {
@@ -517,7 +517,7 @@ function fillSectionList(featureCollection, k) {
                             		return false;
                             	}
                             	//console.log(e);
-                            	
+
                             },
                             box: true,
                             maxFeatures: 20
@@ -625,4 +625,4 @@ function highlightFeatureIndexById(id, open) {
 
 
 
-		
+

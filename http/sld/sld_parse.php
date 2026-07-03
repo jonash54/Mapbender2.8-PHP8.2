@@ -32,8 +32,8 @@
  * @package sld_parse
  * @author Markus Krzyzanowski
  */
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_connector.php");
 /**
  *  Creates a empty SLD object up to the rule object
  * 
@@ -88,15 +88,15 @@ function parseSld($data)
 	xml_parser_free($xml_parser);
 	
 	$styledlayerdescriptor;
-	$parent = array();
-	$objects = array();
+	$parent = [];
+	$objects = [];
 	$parentactual = 0;
 	
 	for ($i=0; $i<count($vals); $i++)
 	{
 		$element = $vals[$i];
 		$tag = $element["tag"];
-		$tagname=strtoupper($tag);
+		$tagname=strtoupper((string) $tag);
 		switch($tagname)
 		{
 			// uh, the server responded with an error, should be break or start with an empty sld?
@@ -878,7 +878,7 @@ function parseSld($data)
 						$temp .= "</".$tag.">";
 					}
 					//Wenn Parent vom Typ Rule, dann muss es ein Filter sein, also hinzuf�gen
-					if (strtoupper(get_class($objects[$parentactual])) == "RULE")
+					if (strtoupper($objects[$parentactual]::class) == "RULE")
 					{
 						$objects[$parentactual]->filter .= $temp;
 						$temp = "";

@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
-require_once(dirname(__FILE__)."/../classes/class_point.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
+require_once(__DIR__."/../classes/class_point.php");
+require_once(__DIR__."/../classes/class_kml_geometry.php");
 
 /**
  * Represents a line string, consisting of an array of points.
  *  
  * @package KML 
  */
-class KMLLine extends KMLGeometry {
+class KMLLine extends KMLGeometry implements \Stringable {
 	/**
 	 * @param string the content of the geometry tag of a KML. Note: KML 2.2 uses a 
 	 *               comma separated list, while KML OWS uses the GML syntax with 
@@ -35,9 +35,9 @@ class KMLLine extends KMLGeometry {
 	 */
 	public function __construct ($geometryString, $epsg) {
 		# KML 2.2
-		if (preg_match("/,/", $geometryString)) {
+		if (preg_match("/,/", (string) $geometryString)) {
 		    
-		    $geometryString = trim(preg_replace('/\s+/', ' ', $geometryString));
+		    $geometryString = trim(preg_replace('/\s+/', ' ', (string) $geometryString));
 			$pointArray = explode(" ", $geometryString);
 			for ($i=0; $i < count($pointArray); $i++) {
 				#
@@ -52,13 +52,13 @@ class KMLLine extends KMLGeometry {
 					if (isset($epsg) && $epsg != 4326) {
 						$pt->transform(4326);
 					}
-					$point = array("x" => $pt->x, "y" => $pt->y, "z" => $pt->z);
+					$point = ["x" => $pt->x, "y" => $pt->y, "z" => $pt->z];
 					array_push($this->pointArray, $point);
 				}
 			}
 		}
 		else {
-			$pointArray = explode(" ", $geometryString);
+			$pointArray = explode(" ", (string) $geometryString);
 			for ($i=0; $i < count($pointArray); $i+=3) {
 				#
 				# Some KMLs have a lot of whitespaces; this "if" is an
@@ -71,7 +71,7 @@ class KMLLine extends KMLGeometry {
 					if (isset($epsg) && $epsg != 4326) {
 						$pt->transform(4326);
 					}
-					$point = array("x" => $pt->x, "y" => $pt->y, "z" => $pt->z);
+					$point = ["x" => $pt->x, "y" => $pt->y, "z" => $pt->z];
 					array_push($this->pointArray, $point);
 				}
 			}
@@ -81,7 +81,7 @@ class KMLLine extends KMLGeometry {
 	/**
 	 * @return string a string representation of the object, currently geoJSON.
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toGeoJSON();
 	}
 
@@ -134,6 +134,6 @@ class KMLLine extends KMLGeometry {
 	 * An array of points, with a point being an associative 
 	 * array consisting of attributes "x" and "y" and "z"
 	 */
-	protected $pointArray = array();
+	protected $pointArray = [];
 }
 ?>

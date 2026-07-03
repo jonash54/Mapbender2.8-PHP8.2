@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__)."/mb_validateSession.php");
+require(__DIR__."/mb_validateSession.php");
 
-$epsgObj = array();
+$epsgObj = [];
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -56,7 +56,7 @@ function transform ($x, $y, $oldEPSG, $newEPSG) {
 		$resMiny = pg_query($con,$sqlMiny);
 		$miny = floatval(pg_fetch_result($resMiny,0,"miny"));
 	}
-	return array("x" => $minx, "y" => $miny);
+	return ["x" => $minx, "y" => $miny];
 	
 }
 
@@ -73,18 +73,15 @@ switch ($ajaxResponse->getMethod()) {
 		$x = $ajaxResponse->getParameter("x");
 		$y = $ajaxResponse->getParameter("y");
 		$bboxStr = $ajaxResponse->getParameter("bbox");
-		$bbox = explode(",", $bboxStr);
+		$bbox = explode(",", (string) $bboxStr);
 		$response = null;
 
-		$oldEPSG = preg_replace("/EPSG:/","", $fromSrs);
-		$newEPSG = preg_replace("/EPSG:/","", $toSrs);
+		$oldEPSG = preg_replace("/EPSG:/","", (string) $fromSrs);
+		$newEPSG = preg_replace("/EPSG:/","", (string) $toSrs);
 		
 		if (!is_null($bbox) && is_array($bbox) && count($bbox) === 4) {
 
-			$response = array(
-				"newSrs" => $toSrs,
-				"points" => array()
-			);
+			$response = ["newSrs" => $toSrs, "points" => []];
 			for ($i = 0; $i < count($bbox); $i+=2) {
 				$pt = transform(
 					floatval($bbox[$i]), 
@@ -94,10 +91,7 @@ switch ($ajaxResponse->getMethod()) {
 				);
 		
 				if (!is_null($pt)) {
-					$response["points"][]= array(
-						"x" => $pt["x"],
-						"y" => $pt["y"]
-					);
+					$response["points"][]= ["x" => $pt["x"], "y" => $pt["y"]];
 				}
 				else {
 					$response = null;
@@ -111,13 +105,7 @@ switch ($ajaxResponse->getMethod()) {
 			$pt = transform($x, $y, $oldEPSG, $newEPSG);
 	
 			if (!is_null($pt)) {
-				$response = array(
-					"newSrs" => $toSrs,
-					"points" => array(array(
-						"x" => $pt["x"],
-						"y" => $pt["y"]
-					))
-				);
+				$response = ["newSrs" => $toSrs, "points" => [["x" => $pt["x"], "y" => $pt["y"]]]];
 			}
 		}
 		

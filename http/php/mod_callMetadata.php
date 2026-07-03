@@ -13,11 +13,11 @@
 #http://www.geoportal.rlp.de/mapbender/php/mod_callMetadata.php?searchId=wa&searchText=e&outputFormat=json&languageCode=de&resultTarget=debug&searchResources=wms&maxResults=5&registratingDepartments=44,31&inspireThemes=11&isoCategories=5,10&searchBbox=7,48,9,51
 #http://www.geoportal.rlp.de/mapbender/php/mod_callMetadata.php?searchId=wa&searchText=e&outputFormat=json&languageCode=de&resultTarget=debug&searchResources=wms&maxResults=99&registratingDepartments=44,31,52&inspireThemes=11&isoCategories=5,10&searchBbox=7,48,9,51&regTimeBegin=2001-12-24&regTimeEnd=2020-10-10
 #http://www.geoportal.rlp.de/mapbender/php/mod_callMetadata.php?searchId=wa&outputFormat=json&languageCode=de&resultTarget=debug&searchResources=wms&maxResults=99&registratingDepartments=44,31,52&inspireThemes=11&isoCategories=5,10&searchBbox=7,48,9,51&regTimeBegin=2001-12-24&regTimeEnd=2020-10-10
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 //require_once(dirname(__FILE__)."/../../conf/geoportal.conf");#???
-require_once(dirname(__FILE__)."/../classes/class_metadata.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_metadata.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 //initialize request parameters:
 $searchId = "dummysearch";
@@ -50,7 +50,7 @@ $outputFormat = 'json';
 $resourceIds = NULL; //resourceIds is used to get a comma separated list with ids of the resources - layer - featuretypes - wmc
 //it will be used to filter some results 
 $resultTarget = "web";
-$preDefinedMaxResults = array(5,10,15,20,25,30);
+$preDefinedMaxResults = [5, 10, 15, 20, 25, 30];
 $searchEPSG = "EPSG:31466";
 $resolveCoupledResources = false;
 $classJSON = new Mapbender_JSON;
@@ -79,10 +79,10 @@ foreach ($headers as $header => $value) {
 $searchURL = $_SERVER['QUERY_STRING'];
 //$e = new mb_exception("mod_callMetadata.php: searchURL".$searchURL);
 //decode it !
-$searchURL = urldecode($searchURL);
+$searchURL = urldecode((string) $searchURL);
 //control if some request variables are not set and set them explicit to NULL
 
-$checkForNullRequests = array("registratingDepartments","isoCategories","inspireThemes","customCategories","regTimeBegin","regTimeEnd","timeBegin","timeEnd","searchBbox","searchTypeBbox","searchResources","orderBy","hostName","resourceIds","restrictToOpenData", "restrictToHvd");
+$checkForNullRequests = ["registratingDepartments", "isoCategories", "inspireThemes", "customCategories", "regTimeBegin", "regTimeEnd", "timeBegin", "timeEnd", "searchBbox", "searchTypeBbox", "searchResources", "orderBy", "hostName", "resourceIds", "restrictToOpenData", "restrictToHvd"];
 
 for($i=0; $i < count($checkForNullRequests); $i++){
 	if (!$_REQUEST[$checkForNullRequests[$i]] or $_REQUEST[$checkForNullRequests[$i]] == 'false' or $_REQUEST[$checkForNullRequests[$i]] == 'undefined') {
@@ -94,14 +94,14 @@ for($i=0; $i < count($checkForNullRequests); $i++){
 //Read out request Parameter:
 if (isset($_REQUEST["searchId"]) & $_REQUEST["searchId"] != "") {
 	//gernerate md5 representation, cause the id is used as a filename later on! - no validation needed
-	$searchId = md5($_REQUEST["searchId"]);
+	$searchId = md5((string) $_REQUEST["searchId"]);
 }
 if (isset($_REQUEST["searchText"]) & $_REQUEST["searchText"] != "") {
 	$test="(SELECT\s[\w\*\)\(\,\s]+\sFROM\s[\w]+)| (UPDATE\s[\w]+\sSET\s[\w\,\'\=]+)| (INSERT\sINTO\s[\d\w]+[\s\w\d\)\(\,]*\sVALUES\s\([\d\w\'\,\)]+)| (DELETE\sFROM\s[\d\w\'\=]+)";
 	//validate to csv integer list
 	$testMatch = $_REQUEST["searchText"];
 	$pattern = '/(\%27)|(\')|(\-\-)|(\")|(\%22)/';		
- 	if (preg_match($pattern,$testMatch)){
+ 	if (preg_match($pattern,(string) $testMatch)){
 		//echo 'searchText: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>searchText</b> is not valid.<br/>'; 
 		die(); 		
@@ -118,7 +118,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 	//validate to csv integer list
 	$testMatch = $_REQUEST["registratingDepartments"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'registratingDepartments: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>registratingDepartments</b> is not valid (integer or cs integer list).<br/>';
 		die(); 		
@@ -130,7 +130,7 @@ if (isset($_REQUEST["resourceIds"]) & $_REQUEST["resourceIds"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["resourceIds"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'resourceIds: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>resourceIds</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -142,7 +142,7 @@ if (isset($_REQUEST["isoCategories"]) & $_REQUEST["isoCategories"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["isoCategories"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'isoCategories: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>isoCategories</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -154,7 +154,7 @@ if (isset($_REQUEST["inspireThemes"]) & $_REQUEST["inspireThemes"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["inspireThemes"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'inspireThemes: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>inspireThemes</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -167,7 +167,7 @@ if (isset($_REQUEST["customCategories"]) & $_REQUEST["customCategories"] != "") 
 	//validate to csv integer list
 	$testMatch = $_REQUEST["customCategories"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
  		//echo 'customCategories: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>customCategories</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -180,7 +180,7 @@ if (isset($_REQUEST["timeBegin"]) & $_REQUEST["timeBegin"] != "") {
 	//validate to iso date format YYYY-MM-DD
 	$testMatch = $_REQUEST["timeBegin"];
 	$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';		
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'timeBegin: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>timeBegin</b> is not valid.<br/>'; 
 		die(); 		
@@ -191,7 +191,7 @@ if (isset($_REQUEST["timeBegin"]) & $_REQUEST["timeBegin"] != "") {
 if (isset($_REQUEST["timeEnd"]) & $_REQUEST["timeEnd"] != "") {
 	$testMatch = $_REQUEST["timeEnd"];
 	$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'timeEnd: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>timeEnd</b> is not valid.<br/>'; 
 		die(); 		
@@ -203,7 +203,7 @@ if (isset($_REQUEST["regTimeBegin"]) & $_REQUEST["regTimeBegin"] != "") {
 	//validate to iso date format YYYY-MM-DD
 	$testMatch = $_REQUEST["regTimeBegin"];
 	$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'regTimeBegin: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>regTimeBegin</b> is not valid.<br/>'; 
 		die(); 		
@@ -215,7 +215,7 @@ if (isset($_REQUEST["regTimeEnd"]) & $_REQUEST["regTimeEnd"] != "") {
 	//validate to iso date format YYYY-MM-DD
 	$testMatch = $_REQUEST["regTimeEnd"];
 	$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'regTimeEnd: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>regTimeEnd</b> is not valid.<br/>';
 		die(); 		
@@ -228,7 +228,7 @@ if (isset($_REQUEST["maxResults"]) & $_REQUEST["maxResults"] != "") {
 	$testMatch = $_REQUEST["maxResults"];
 	//give max 99 entries - more will be to slow
 	$pattern = '/^([0-9]{0,1})([0-9]{1})$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'maxResults: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>maxResults</b> is not valid (integer < 99).<br/>'; 
 		die(); 		
@@ -241,7 +241,7 @@ if (isset($_REQUEST["searchBbox"]) & $_REQUEST["searchBbox"] != "") {
 	$testMatch = $_REQUEST["searchBbox"];
 	//$pattern = '/^[-\d,]*$/';	
 	$pattern = '/^[-+]?([0-9]*\.[0-9]+|[0-9]+)*$/';
-	$testMatchArray = explode(',',$testMatch);
+	$testMatchArray = explode(',',(string) $testMatch);
  	if (count($testMatchArray) != 4) {
 		echo 'Parameter <b>searchBbox</b> has a wrong amount of entries.<br/>'; 
 		die(); 
@@ -371,7 +371,7 @@ if (isset($_REQUEST["hostName"]) & $_REQUEST["hostName"] != "") {
 	if (!in_array($testMatch,$HOSTNAME_WHITELIST_array)) {
 		//echo "Requested hostname <b>".$testMatch."</b> not whitelist! Please control your mapbender.conf.";
 		echo "Requested <b>hostName</b> not in whitelist! Please control your mapbender.conf.";
-		
+
 		$e = new mb_notice("Whitelist: ".HOSTNAME_WHITELIST);
 		$e = new mb_notice("hostName not found in whitelist!");
 		die(); 	
@@ -395,13 +395,13 @@ if (isset($_REQUEST["searchResources"]) & $_REQUEST["searchResources"] != "") {
 	//validate to wms,wfs,wmc,georss
 	$testMatch = $_REQUEST["searchResources"];
 	#$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';
-	$countSR = count(explode(',',$testMatch));
+	$countSR = count(explode(',',(string) $testMatch));
  	if (!($countSR >= 1 && $countSR <= 4)){ 
 		//echo 'searchResources: <b>'.$testMatch.'</b> count of requested resources out of sync.<br/>'; 
 		echo 'Parameter <b>searchResources</b> count of requested resources out of sync.<br/>'; 
 		die(); 		
  	} else {
-		$testArray = explode(',',$testMatch);
+		$testArray = explode(',',(string) $testMatch);
 		for($i=0; $i<count($testArray);$i++){
 			if (!($testArray[$i] == 'wms' or $testArray[$i] == 'wfs' or $testArray[$i] == 'wmc' or $testArray[$i] == 'dataset' or $testArray[$i] == 'application')) {
 			//echo 'searchResources: <b>'.$testMatch.'</b>at least one of them does not exists!<br/>'; 
@@ -418,12 +418,12 @@ if (isset($_REQUEST["searchPages"]) & $_REQUEST["searchPages"] != "") {
 	//validate to csv integer list with dimension of searchResources list
 	$testMatch = $_REQUEST["searchPages"];
 	$pattern = '/^[-\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'searchPages: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>searchPages</b> is not valid (integer).<br/>';
 		die(); 		
  	}
-	if (count(explode(',',$testMatch)) != count(explode(',',$searchResources))) {
+	if (count(explode(',',(string) $testMatch)) != count(explode(',',(string) $searchResources))) {
 		//echo 'searchPages: <b>'.$testMatch.'</b> has a wrong amount of entries.<br/>'; 
 		echo 'Parameter <b>searchPages</b> has a wrong amount of entries.<br/>';
 		die(); 
@@ -432,7 +432,7 @@ if (isset($_REQUEST["searchPages"]) & $_REQUEST["searchPages"] != "") {
 	$testMatch = NULL;
 #$searchPages = $_REQUEST["searchPages"];
 	#$searchPages = split(',',$searchPages);
-	
+
 }
 if (isset($_REQUEST["resultTarget"]) & $_REQUEST["resultTarget"] != "") {
 	//validate to web,debug,file
@@ -454,7 +454,7 @@ if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
         $testMatch = $_REQUEST["userId"];
         //give max 99 entries - more will be to slow
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
              	//echo 'userId: <b>'.$testMatch.'</b> is not valid.<br/>';
                 echo 'Parameter <b>userId</b> is not valid (integer).<br/>';
                 die();
@@ -504,7 +504,7 @@ if ($resultTarget == 'file' or $resultTarget == 'webclient') {
 
 }
 if (!isset($searchPages) OR ($searchPages == "")) {
-	for($i=0;$i<count(explode(",",$searchResources));$i++) {
+	for($i=0;$i<count(explode(",",(string) $searchResources));$i++) {
 		$searchPages[$i] = 1;
 	}
 	$searchPages = implode(",",$searchPages);
@@ -523,8 +523,8 @@ if (DEFINED("SEARCH_LOG") && SEARCH_LOG == true) {
 }
 
 //convert the respources and the pagenumbers into arrays
-$searchResourcesArray = explode(",",$searchResources);
-$searchPages = explode(",",$searchPages);
+$searchResourcesArray = explode(",",(string) $searchResources);
+$searchPages = explode(",",(string) $searchPages);
 
 //Generate search filter file. This file holds the defined search filter to allow the user to see how he searched 
 //The user should become the possibility to drop the search filters by clicking in some buttons
@@ -552,9 +552,9 @@ $searchPages = explode(",",$searchPages);
 //function to get the information about the registrating departments (mb_groups) out of the mapbender database
 function get_registratingDepartmentsArray($departmentIds,$languageCode) {
 			$sql = "SELECT mb_group_id, mb_group_name FROM mb_group WHERE mb_group_id IN (";
-			$v = array();
-			$t = array();
-			$departmentsArray = array();
+			$v = [];
+			$t = [];
+			$departmentsArray = [];
 			for($i=0; $i<count($departmentIds);$i++){
 				if($i > 0){$sql .= ",";}
 				$sql .= "$".strval($i+1);
@@ -578,9 +578,9 @@ function get_isoCategoriesArray($isoCategoryIds,$languageCode) {
 			$sql = "SELECT md_topic_category_id, md_topic_category_code_".$languageCode;
 			#$e = new mb_exception("php/mod_callMetadata.php: language code: ".$languageCode);
 			$sql .= " FROM md_topic_category WHERE md_topic_category_id IN (";
-			$v = array();
-			$t = array();
-			$isoCategoryArray = array();
+			$v = [];
+			$t = [];
+			$isoCategoryArray = [];
 			for($i=0; $i<count($isoCategoryIds);$i++){
 				if($i > 0){$sql .= ",";}
 				$sql .= "$".strval($i+1);
@@ -602,9 +602,9 @@ function get_isoCategoriesArray($isoCategoryIds,$languageCode) {
 //get the information about the inspireThemes
 function get_inspireThemesArray($inspireThemesIds,$languageCode) {
 			$sql = "SELECT inspire_category_id, inspire_category_code_".$languageCode." FROM inspire_category WHERE inspire_category_id IN (";
-			$v = array();
-			$t = array();
-			$inspireCategoryArray = array();
+			$v = [];
+			$t = [];
+			$inspireCategoryArray = [];
 			for($i=0; $i<count($inspireThemesIds);$i++){
 				if($i > 0){$sql .= ",";}
 				$sql .= "$".strval($i+1);
@@ -625,9 +625,9 @@ function get_inspireThemesArray($inspireThemesIds,$languageCode) {
 
 function get_customCategoriesArray($customCategoriesIds,$languageCode) {
 			$sql = "SELECT custom_category_id, custom_category_code_".$languageCode." FROM custom_category WHERE custom_category_id IN (";
-			$v = array();
-			$t = array();
-			$customCategoryArray = array();
+			$v = [];
+			$t = [];
+			$customCategoryArray = [];
 			for($i=0; $i<count($customCategoriesIds);$i++){
 				if($i > 0){$sql .= ",";}
 				$sql .= "$".strval($i+1);
@@ -647,7 +647,7 @@ function get_customCategoriesArray($customCategoriesIds,$languageCode) {
 		}
 
 //define where to become the information from - this is relevant for the information which must be pulled out of the database
-$classificationElements = array();
+$classificationElements = [];
 $classificationElements[0]['name'] = 'searchText';
 $classificationElements[1]['name'] = 'registratingDepartments';
 $classificationElements[2]['name'] = 'isoCategories';
@@ -691,12 +691,12 @@ $classificationElements[11]['list'] = false;
 $classificationElements[12]['list'] = false;
 
 //Defining of the different result categories		
-		$resourceCategories = array();
+		$resourceCategories = [];
 		#$resourceCategories[0]['wms'] = 'WMS';
 		#$resourceCategories[1]['wfs'] = 'WFS';
 		#$resourceCategories[2]['wmc'] = 'WMC';
 		#$resourceCategories[3]['georss'] = 'directAccessData';
-		
+
 
 switch($languageCode){
         case 'de':
@@ -729,7 +729,7 @@ switch($languageCode){
 
 			$maxResultsTitle['header'] = 'Treffer pro Seite:'; 
 
-	
+
        	break;
         case 'en':
         	$classificationElements[0]['name2show'] = 'Search Term(s):';
@@ -807,7 +807,7 @@ switch($languageCode){
 			$classificationElements[10]['name2show'] = 'Actuality of dataset from:';
 			$classificationElements[11]['name2show'] = 'Actuality of dataset to:';
 			$classificationElements[12]['name2show'] = 'Only HVD:';
-			
+
 			$resourceCategories['wms'] = 'Kartenebenen';
 			$resourceCategories['wfs'] = 'Such- und Downloaddienste';
 			$resourceCategories['wmc'] = 'Kartenzusammenstellungen';
@@ -828,17 +828,19 @@ switch($languageCode){
 Mapbender::session()->set("mb_lang",$languageCode);
 
 $queryJSON = new stdClass;
-$queryJSON->searchFilter = (object) array();
+$queryJSON->searchFilter = (object) [];
 $queryJSON->searchFilter->origURL = $searchURL;
 #$queryJSON->searchFilter->classes = (object) array();
-for($i=0; $i<count($searchResourcesArray);$i++){
+for($i=0; $i<count($searchResourcesArray ?? []);$i++){
 //fill in the different search classes into the filter - the client can generate the headers out of this information
+	// PHP 8 no longer auto-vivifies properties on null array elements; create the entry first.
+	$queryJSON->searchFilter->classes[$i] = new stdClass();
 	$queryJSON->searchFilter->classes[$i]->title = $resourceCategories[$searchResourcesArray[$i]];
 	$queryJSON->searchFilter->classes[$i]->name = $searchResourcesArray[$i];
 }
 //generate search filter file - if more categories are defined give 
 //echo "<br> number of filter elements: ".count($classificationElements)."<br>";
-for($i=0; $i < count($classificationElements); $i++){
+for($i=0; $i < count($classificationElements ?? []); $i++){
 	//echo "<br> filter for element: ".$classificationElements[$i]['name']."<br>";
 	//echo "<br> variable for element: ". (string)${$classificationElements[$i]['name']}."<br>";
 	if (isset(${$classificationElements[$i]['name']}) & ${$classificationElements[$i]['name']} !='' & ${$classificationElements[$i]['name']} != NULL) {
@@ -846,179 +848,143 @@ for($i=0; $i < count($classificationElements); $i++){
 		//pull register information out of database in arrays
 		if ($classificationElements[$i]['source'] == 'database') {
 			$funcName = "get_".$classificationElements[$i]['name']."Array";
-			${$classificationElements[$i]['name']."Array"} = $funcName(explode(',',${$classificationElements[$i]['name']}),$languageCode);
+			${$classificationElements[$i]['name']."Array"} = $funcName(explode(',',(string) ${$classificationElements[$i]['name']}),$languageCode);
 		}
-		$queryJSON->searchFilter->{$classificationElements[$i]['name']}->title = $classificationElements[$i]['name2show'];
+		// PHP 8 no longer auto-vivifies properties on null; initialise the
+		// container object before populating its fields.
+		$_ce = $classificationElements[$i]['name'];
+		$queryJSON->searchFilter->{$_ce} = new stdClass();
+		$_filter = $queryJSON->searchFilter->{$_ce};
+		$_filter->title = $classificationElements[$i]['name2show'];
 		//check if the filter has subfilters - if not delete the whole filter from query
 		if ($classificationElements[$i]['list'] == false) { //the object has no subsets - like bbox or time filters
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = array();
-			if ($classificationElements[$i]['name'] == 'searchBbox') {
-				$sBboxTitle = $searchTypeBbox." ".${$classificationElements[$i]['name']};
-				$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[0]->title = $sBboxTitle;
+			$_filter->delLink = delTotalFromQuery($_ce, $searchURL);
+			$_filter->item = [new stdClass()];
+			if ($_ce == 'searchBbox') {
+				$sBboxTitle = $searchTypeBbox." ".${$_ce};
+				$_filter->item[0]->title = $sBboxTitle;
 			}
 			else {
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[0]->title = ${$classificationElements[$i]['name']};
+				$_filter->item[0]->title = ${$_ce};
 			}
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[0]->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
+			$_filter->item[0]->delLink = delTotalFromQuery($_ce, $searchURL);
 		} else {
+			$_filter->delLink = delTotalFromQuery($_ce, $searchURL);
+			$_filter->item = [];
 
+			$queryArray = explode(',', (string) ${$_ce});
 
-			//$e = new mb_exception('mod_callMetadata.php: $classificationElements[$i][name]: '.$classificationElements[$i]['name']);
-			//TODO delete all entries of this main category (not for searchText)
-			if ($classificationElements[$i]['name'] != 'searchText' && $classificationElements[$i]['name'] != 'searchResources') { 
-				$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
-			} else {
-				//$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = NULL;
-				$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
-				//$e = new mb_exception('mod_callMetadata.php: dellink: '.$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink);
-			}
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = array();
-
-			$queryArray = explode(',', ${$classificationElements[$i]['name']});
-		
 			//loop for the subcategories
 			for($j=0; $j < count($queryArray); $j++){
-				//$e = new mb_exception('mod_callMetadata.php: queryArrayi: '.$queryArray[$j]);
+				$_filter->item[$j] = new stdClass();
 				if ($classificationElements[$i]['source'] == 'database') {
-					$identArray = ${$classificationElements[$i]['name']."Array"};
+					$identArray = ${$_ce."Array"};
 					$identArray = flipDiagonally($identArray);
-					//find searched id in information from database
 					$key = array_search($queryArray[$j], $identArray['id']);
 					if ($key === false) {
-						$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->title = "no information found in database";
+						$_filter->item[$j]->title = "no information found in database";
 					} else {
-						$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->title = ${$classificationElements[$i]['name']."Array"}[$key]['name'];
+						$_filter->item[$j]->title = ${$_ce."Array"}[$key]['name'];
 					}
 				} else {
-					if ($classificationElements[$i]['name'] != 'searchResources') {
-						$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->title = $queryArray[$j];
+					if ($_ce != 'searchResources') {
+						$_filter->item[$j]->title = $queryArray[$j];
 					} else {
-						$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->title = $resourceCategories[$queryArray[$j]];
+						$_filter->item[$j]->title = $resourceCategories[$queryArray[$j]];
 					}
 				}
 				//generate links to disable filters on a simple way
-				if (($classificationElements[$i]['name'] === 'searchText' || $classificationElements[$i]['name'] === 'searchResources') & count(explode(',',${$classificationElements[$i]['name']})) === 1) { 
-					//$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->delLink = NULL;
-					$newSearchLink = delFromQuery($classificationElements[$i]['name'], $searchURL,$queryArray[$j],$queryArray,${$classificationElements[$i]['name']});
+				$newSearchLink = delFromQuery($_ce, $searchURL, $queryArray[$j], $queryArray, ${$_ce});
+				if (($_ce === 'searchText' || $_ce === 'searchResources') & count(explode(',',(string) ${$_ce})) === 1) {
 					$newSearchLink = delTotalFromQuery('searchId',$newSearchLink);
-					$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->delLink = $newSearchLink;
 				} else {
-					$newSearchLink = delFromQuery($classificationElements[$i]['name'], $searchURL,$queryArray[$j],$queryArray,${$classificationElements[$i]['name']});
 					$newSearchLink = delTotalFromQuery('searchId',$newSearchLink);
-					$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->delLink = $newSearchLink;
 				}
+				$_filter->item[$j]->delLink = $newSearchLink;
 			}
 		}
-	}	
+	}
 }
 
 //generate filter for different maxResults entries
 //$preDefinedMaxResults
+$queryJSON->searchFilter->maxResults = new stdClass();
+$queryJSON->searchFilter->maxResults->item = [];
+$_mr = $queryJSON->searchFilter->maxResults;
+$_mr->header = $maxResultsTitle['header'];
 if ($_REQUEST["maxResults"] == '') {
-	$queryJSON->searchFilter->maxResults->header = $maxResultsTitle['header'];
-	$queryJSON->searchFilter->maxResults->title = $preDefinedMaxResults[0];
+	$_mr->title = $preDefinedMaxResults[0];
 	for ($i=0; $i<(count($preDefinedMaxResults)-1); $i++) {
-		$queryJSON->searchFilter->maxResults->item[$i]->title = $preDefinedMaxResults[$i+1];
-		$queryJSON->searchFilter->maxResults->item[$i]->url = $searchURL."&maxResults=".$preDefinedMaxResults[$i+1];
+		$_mr->item[$i] = new stdClass();
+		$_mr->item[$i]->title = $preDefinedMaxResults[$i+1];
+		$_mr->item[$i]->url = $searchURL."&maxResults=".$preDefinedMaxResults[$i+1];
 	}
 } else {
-	if (in_array($maxResults, $preDefinedMaxResults)) { //is part of preDefined array
-		$queryJSON->searchFilter->maxResults->header = $maxResultsTitle['header'];
-		$queryJSON->searchFilter->maxResults->title = $maxResults;
-		//delete entry from array
-		//$preDefinedMaxResultsRed = deleteEntry($preDefinedMaxResults, $maxResults);
-		for ($i=0; $i<(count($preDefinedMaxResults)); $i++) {
-			$queryJSON->searchFilter->maxResults->item[$i]->title = $preDefinedMaxResults[$i];
-			$queryJSON->searchFilter->maxResults->item[$i]->url = $searchURL."&maxResults=".$preDefinedMaxResults[$i];
-		} 
-	} else { // is some other value 
-		$queryJSON->searchFilter->maxResults->header = $maxResultsTitle['header'];
-		$queryJSON->searchFilter->maxResults->title = $maxResults;
-		for ($i=0; $i<(count($preDefinedMaxResults)); $i++) {
-			$queryJSON->searchFilter->maxResults->item[$i]->title = $preDefinedMaxResults[$i];
-			$queryJSON->searchFilter->maxResults->item[$i]->url = $searchURL."&maxResults=".$preDefinedMaxResults[$i];
-		} 
+	$_mr->title = $maxResults;
+	for ($i=0; $i<count($preDefinedMaxResults); $i++) {
+		$_mr->item[$i] = new stdClass();
+		$_mr->item[$i]->title = $preDefinedMaxResults[$i];
+		$_mr->item[$i]->url = $searchURL."&maxResults=".$preDefinedMaxResults[$i];
 	}
 }
 
 //generate filter for different order possibilities
+$queryJSON->searchFilter->orderFilter = new stdClass();
+$queryJSON->searchFilter->orderFilter->item = [new stdClass(), new stdClass(), new stdClass()];
+$_of = $queryJSON->searchFilter->orderFilter;
+$_of->header = $orderByTitle['header'];
 
-//$queryJSON->searchFilter = (object) array();
 if ($_REQUEST["orderBy"] == '') {
-//echo "<br>orderBy:>".$_REQUEST["orderBy"]."<<br>";
-	$queryJSON->searchFilter->orderFilter->header = $orderByTitle['header'];
-	$queryJSON->searchFilter->orderFilter->title = $orderByTitle['rank'];
-	$queryJSON->searchFilter->orderFilter->item[0]->title = $orderByTitle['title'];
-	$queryJSON->searchFilter->orderFilter->item[0]->url = $searchURL."&orderBy=title";
-	$queryJSON->searchFilter->orderFilter->item[1]->title = $orderByTitle['id'];
-	$queryJSON->searchFilter->orderFilter->item[1]->url = $searchURL."&orderBy=id";
-	$queryJSON->searchFilter->orderFilter->item[2]->title = $orderByTitle['date'];
-	$queryJSON->searchFilter->orderFilter->item[2]->url = $searchURL."&orderBy=date";
-
-
+	$_of->title = $orderByTitle['rank'];
+	$_of->item[0]->title = $orderByTitle['title'];
+	$_of->item[0]->url   = $searchURL."&orderBy=title";
+	$_of->item[1]->title = $orderByTitle['id'];
+	$_of->item[1]->url   = $searchURL."&orderBy=id";
+	$_of->item[2]->title = $orderByTitle['date'];
+	$_of->item[2]->url   = $searchURL."&orderBy=date";
 } else {
-//read out actual order filter
-	$queryJSON->searchFilter->orderFilter->header = $orderByTitle['header'];
-switch ($orderBy) {
-					case "rank":
-						$queryJSON->searchFilter->orderFilter->title = $orderByTitle['rank'];
-						$queryJSON->searchFilter->orderFilter->item[0]->title = $orderByTitle['id'];
-						
-						$queryJSON->searchFilter->orderFilter->item[0]->url = str_replace("orderBy=rank", "orderBy=id", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[1]->title = $orderByTitle['title'];
-
-						$queryJSON->searchFilter->orderFilter->item[1]->url = str_replace("orderBy=rank", "orderBy=title", $searchURL);
-$queryJSON->searchFilter->orderFilter->item[2]->title = $orderByTitle['date'];
-
-						$queryJSON->searchFilter->orderFilter->item[2]->url = str_replace("orderBy=rank", "orderBy=date", $searchURL);
-
-
-						break;
-					case "id":
-						$queryJSON->searchFilter->orderFilter->title = $orderByTitle['id'];
-						$queryJSON->searchFilter->orderFilter->item[0]->title = $orderByTitle['rank'];
-
-						$queryJSON->searchFilter->orderFilter->item[0]->url = str_replace("orderBy=id", "orderBy=rank", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[1]->title = $orderByTitle['title'];
-
-						$queryJSON->searchFilter->orderFilter->item[1]->url = str_replace("orderBy=id", "orderBy=title", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[2]->title = $orderByTitle['date'];
-
-						$queryJSON->searchFilter->orderFilter->item[2]->url = str_replace("orderBy=id", "orderBy=date", $searchURL);
-
-
-						break;
-					case "title":
-						$queryJSON->searchFilter->orderFilter->title = $orderByTitle['title'];
-						$queryJSON->searchFilter->orderFilter->item[0]->title = $orderByTitle['rank'];
-
-						$queryJSON->searchFilter->orderFilter->item[0]->url = str_replace("orderBy=title", "orderBy=rank", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[1]->title = $orderByTitle['id'];
-
-						$queryJSON->searchFilter->orderFilter->item[1]->url = str_replace("orderBy=title", "orderBy=id", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[2]->title = $orderByTitle['date'];
-
-						$queryJSON->searchFilter->orderFilter->item[2]->url = str_replace("orderBy=title", "orderBy=date", $searchURL);
-						break;
-					case "date":
-						$queryJSON->searchFilter->orderFilter->title = $orderByTitle['date'];
-						$queryJSON->searchFilter->orderFilter->item[0]->title = $orderByTitle['rank'];
-
-						$queryJSON->searchFilter->orderFilter->item[0]->url = str_replace("orderBy=date", "orderBy=rank", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[1]->title = $orderByTitle['id'];
-
-						$queryJSON->searchFilter->orderFilter->item[1]->url = str_replace("orderBy=date", "orderBy=id", $searchURL);
-						$queryJSON->searchFilter->orderFilter->item[2]->title = $orderByTitle['title'];
-
-						$queryJSON->searchFilter->orderFilter->item[2]->url = str_replace("orderBy=date", "orderBy=title", $searchURL);
-						break;
-					
-}
+	switch ($orderBy) {
+		case "rank":
+			$_of->title = $orderByTitle['rank'];
+			$_of->item[0]->title = $orderByTitle['id'];
+			$_of->item[0]->url   = str_replace("orderBy=rank", "orderBy=id", $searchURL);
+			$_of->item[1]->title = $orderByTitle['title'];
+			$_of->item[1]->url   = str_replace("orderBy=rank", "orderBy=title", $searchURL);
+			$_of->item[2]->title = $orderByTitle['date'];
+			$_of->item[2]->url   = str_replace("orderBy=rank", "orderBy=date", $searchURL);
+			break;
+		case "id":
+			$_of->title = $orderByTitle['id'];
+			$_of->item[0]->title = $orderByTitle['rank'];
+			$_of->item[0]->url   = str_replace("orderBy=id", "orderBy=rank", $searchURL);
+			$_of->item[1]->title = $orderByTitle['title'];
+			$_of->item[1]->url   = str_replace("orderBy=id", "orderBy=title", $searchURL);
+			$_of->item[2]->title = $orderByTitle['date'];
+			$_of->item[2]->url   = str_replace("orderBy=id", "orderBy=date", $searchURL);
+			break;
+		case "title":
+			$_of->title = $orderByTitle['title'];
+			$_of->item[0]->title = $orderByTitle['rank'];
+			$_of->item[0]->url   = str_replace("orderBy=title", "orderBy=rank", $searchURL);
+			$_of->item[1]->title = $orderByTitle['id'];
+			$_of->item[1]->url   = str_replace("orderBy=title", "orderBy=id", $searchURL);
+			$_of->item[2]->title = $orderByTitle['date'];
+			$_of->item[2]->url   = str_replace("orderBy=title", "orderBy=date", $searchURL);
+			break;
+		case "date":
+			$_of->title = $orderByTitle['date'];
+			$_of->item[0]->title = $orderByTitle['rank'];
+			$_of->item[0]->url   = str_replace("orderBy=date", "orderBy=rank", $searchURL);
+			$_of->item[1]->title = $orderByTitle['id'];
+			$_of->item[1]->url   = str_replace("orderBy=date", "orderBy=id", $searchURL);
+			$_of->item[2]->title = $orderByTitle['title'];
+			$_of->item[2]->url   = str_replace("orderBy=date", "orderBy=title", $searchURL);
+			break;
+	}
 }
 
 //write out json to file or web
-	
+
 $queryFilter = $classJSON->encode($queryJSON);
 
 if ($resultTarget == 'debug') {
@@ -1041,11 +1007,11 @@ if ($resultTarget == 'file' or $resultTarget == 'webclient') {
 		$e = new mb_notice("php/callMetdata.php: cannot create filter_file!");
 		}
 	}*/
-	
+
 }
 //function to transpose a matrix - sometimes needed to do an array search
 function flipDiagonally($arr) {
-    	$out = array();
+    	$out = [];
     	foreach ($arr as $key => $subarr) {
       		foreach ($subarr as $subkey => $subvalue) {
         		$out[$subkey][$key] = $subvalue;
@@ -1086,7 +1052,7 @@ function delFromQuery($paramName,$queryString,$string,$queryArray,$queryList) {
 		//echo "string to search: ".$str2search."<br>";
 		$str2exchange = $paramName."=".$objectList;
 		//echo "string to exchange: ".$str2exchange."<br>";
-		$queryStringNew = str_replace($str2search, $str2exchange, urldecode($queryString));
+		$queryStringNew = str_replace($str2search, $str2exchange, urldecode((string) $queryString));
 	}
 	return $queryStringNew;
 }
@@ -1104,13 +1070,13 @@ function delTotalFromQuery($paramName,$queryString) {
 		$str2exchange = "searchResources=dataset,wms,wfs,wmc&";
 	} 
 	$queryStringNew = preg_replace('/\b'.$paramName.'\=[^&]*&?/',$str2exchange,$queryString); //TODO find empty get params
-	$queryStringNew = ltrim($queryStringNew,'&');
+	$queryStringNew = ltrim((string) $queryStringNew,'&');
 	$queryStringNew = rtrim($queryStringNew,'&');
 	return $queryStringNew;
 }
 //delete all string entries from array
 function deleteEntry($arrayname, $entry) {
-	$n = $arrayname.length;
+	$n = $arrayname.\LENGTH;
 	for($i=0; $i<($n+1); $i++){
 		if ($arrayname[$i] == $entry) {
 			$arrayname.splice($i, 1);
@@ -1153,7 +1119,7 @@ if ($resultTarget == 'file') {
 		$str .= " & ";
 		$e = new mb_notice($str);
 		exec($str);*/
-		
+
 		$metadata = new searchMetadata($userId, $searchId, $searchText, $registratingDepartments, $isoCategories, $inspireThemes, $timeBegin, $timeEnd, $regTimeBegin, $regTimeEnd, $maxResults, $searchBbox, $searchTypeBbox, $accessRestrictions, $languageCode, $searchEPSG, $searchResourcesArray[$i], $searchPages[$i], $outputFormat, $resultTarget, $searchURL, $customCategories, $hostName, $orderBy, $resourceIds, $restrictToOpenData, $originFromHeader, $resolveCoupledResources, $https, $restrictToHvd);
 	}
 }

@@ -34,24 +34,24 @@ class LabelPlacement
 	 * @see Pointplacement
 	 * @var object
 	 */
-	var $placement = "";
+	public $placement = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * Default constructor that automatically creates a PointPlacement object.
 	 */
-	function LabelPlacement()
+	function __construct()
 	{
 		//Only PointPlacement is supported by MapServer
 		$this->placement = new PointPlacement();

@@ -17,28 +17,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__)."/mb_validateSession.php");
+require(__DIR__."/mb_validateSession.php");
 
-$epsgObj = array();
+$epsgObj = [];
 
 $ajaxResponse = new AjaxResponse($_POST);
 
 switch ($ajaxResponse->getMethod()) {
 	case "translateServiceData" :
 		$msg_obj = $ajaxResponse->getParameter("data");
-		$newMsgObj = array();
+		$newMsgObj = [];
 		
 		if (is_array($msg_obj)) {
 			foreach ($msg_obj as $wmsId => $wmsObj) {
-				$newMsgObj[$wmsId] = array(
-					"title" => _mb($wmsObj->title),
-					"layer" => array()
-				);
+				$newMsgObj[$wmsId] = ["title" => _mb($wmsObj->title), "layer" => []];
 				if (is_array($msg_obj->layer)) {
 					foreach ($wmsObj->layer as $layerId => $layerObj) {
-						$newMsgObj[$wmsId]["layer"][$layerId] = array(
-							"title" => _mb($layerObj->title)
-						);
+						$newMsgObj[$wmsId]["layer"][$layerId] = ["title" => _mb($layerObj->title)];
 					}
 				}
 			}

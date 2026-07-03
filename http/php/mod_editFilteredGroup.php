@@ -19,8 +19,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="editFilteredGroup";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../../lib/spatial_security.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../../lib/spatial_security.php");
 
 /*  
  * @security_patch irv done
@@ -47,8 +47,8 @@ $action = $_POST["action"];
 $searchable = $_POST["searchable"];
 $spatialSecurity = spatial_security\read_post();
 
-require_once(dirname(__FILE__)."/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_group.php");
+require_once(__DIR__."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_group.php");
 $myGroup = true;
 
 include "../../lib/editGroup.php";

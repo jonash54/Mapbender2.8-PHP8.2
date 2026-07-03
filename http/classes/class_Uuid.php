@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-class Uuid {
+class Uuid implements \Stringable {
 	private $uuid;
 	
 	public function __construct ($aUuid = null) {
@@ -24,7 +24,7 @@ class Uuid {
 	}	
 
 	public function isValid () {
-		if(preg_match('/^\{?[0-9a-f]{8}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?[0-9a-f]{12}\}?$/i', $this->uuid)){
+		if(preg_match('/^\{?[0-9a-f]{8}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?[0-9a-f]{12}\}?$/i', (string) $this->uuid)){
 			return true;
 		}
 		return false;
@@ -35,8 +35,8 @@ class Uuid {
 		return $obj->isValid();
 	}
 
-	public function __toString () {
-		return $this->uuid;
+	public function __toString (): string {
+		return (string) $this->uuid;
 	}
 }
 ?>

@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 /*  
  * @security_patch irv done
  */ 
 security_patch_log(__FILE__,__LINE__);
-$postvars=array("myElement","var_name","var_value","context","var_type","fkey_gui_id","fkey_e_id","myDelete","mySave");
+$postvars=["myElement", "var_name", "var_value", "context", "var_type", "fkey_gui_id", "fkey_e_id", "myDelete", "mySave"];
 foreach($postvars as $value){
         ${$value}=$_POST[$value];
 }
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET'){
 }
 
 //import_request_variables("PG");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -159,22 +159,22 @@ if((isset($myDelete) && $myDelete == '1') || (isset($mySave) && $mySave == '1'))
 
 if(isset($mySave) && ($mySave == '1')){
 	$sql  = "DELETE FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2 AND var_name = $3";  
-	$v = array($fkey_gui_id,$fkey_e_id,$var_name);
-	$t = array('s','s','s');
+	$v = [$fkey_gui_id, $fkey_e_id, $var_name];
+	$t = ['s', 's', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	$sql  = "INSERT INTO gui_element_vars(fkey_gui_id,fkey_e_id,var_name,var_value,context,var_type) ";
 	$sql .= "VALUES ($1, $2, $3, $4, $5, $6)";
 	//db_escape_string($var_value)?,db_escape_string($context)?
-	$v = array($fkey_gui_id,$fkey_e_id,$var_name,$var_value,$context,$var_type);
-	$t = array('s','s','s','s','s','s');
+	$v = [$fkey_gui_id, $fkey_e_id, $var_name, $var_value, $context, $var_type];
+	$t = ['s', 's', 's', 's', 's', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	$mySave = 0;
 }
 
 if(isset($myDelete) && ($myDelete == '1')){
 	$sql  = "DELETE FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2 AND var_name = $3";  
-	$v = array($fkey_gui_id,$fkey_e_id,$var_name);
-	$t = array('s','s','s');
+	$v = [$fkey_gui_id, $fkey_e_id, $var_name];
+	$t = ['s', 's', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	$myDelete = 0;
 }
@@ -229,8 +229,8 @@ function thisDelete(){
    echo "</div>\n";
 
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2 ORDER BY var_name";
-	$v = array($fkey_gui_id,$fkey_e_id);
-	$t = array('s','s');
+	$v = [$fkey_gui_id, $fkey_e_id];
+	$t = ['s', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	
@@ -256,12 +256,12 @@ function thisDelete(){
    $formOk = 0;
    if(isset($myElement)){
       $sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2 AND var_name = $3";
-      $v = array($fkey_gui_id,$fkey_e_id,$myElement);
-      $t = array('s','s','s');
+      $v = [$fkey_gui_id, $fkey_e_id, $myElement];
+      $t = ['s', 's', 's'];
       $res = db_prep_query($sql,$v,$t);
       if(db_fetch_row($res)){
          echo "<tr><td>Name:</td><td><input type='text' class='textfield' name='var_name' value='".db_result($res,0,"var_name")."'></td></tr>\n";
-         echo "<tr><td>Value:</td><td><textarea cols='32' rows='5'  name='var_value' >".stripslashes(db_result($res,0,"var_value"))."</textarea></td></tr>\n";
+         echo "<tr><td>Value:</td><td><textarea cols='32' rows='5'  name='var_value' >".stripslashes((string) db_result($res,0,"var_value"))."</textarea></td></tr>\n";
          echo "<tr><td>Context:</td><td><input type='text' class='textfield' name='context' value='".db_result($res,0,"context")."'></td></tr>\n";
          echo "<tr><td>Type:</td><td><input type='text' class='textfield' name='var_type' value='".db_result($res,0,"var_type")."'></td></tr>\n";
          $formOk = 1;

@@ -19,9 +19,9 @@
 
 
 $e_id="deleteWMS";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once dirname(__FILE__) . "/../classes/class_iso19139.php";
-require_once(dirname(__FILE__) . "/../classes/class_propagateMetadata.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
+require_once __DIR__ . "/../classes/class_iso19139.php";
+require_once(__DIR__ . "/../classes/class_propagateMetadata.php");
 /*  
  * @security_patch irv done
  */ 
@@ -31,8 +31,8 @@ require_once(dirname(__FILE__) . "/../classes/class_propagateMetadata.php");
 $wmsList = $_POST["wmsList"];
 $del = $_POST["del"];
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_georss_factory.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_georss_factory.php");
 
 
 function getWmsMetadataUrl ($wmsId) {
@@ -93,7 +93,7 @@ function suggest_deletion(email_str)
 </head>
 <body>
 <?php
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 
 $error_msg='';
@@ -104,9 +104,9 @@ if ($_POST["mail"]) {
 		$error_msg .= "The reply-to address is not valid! Please correct it.";
 	}
 	else {
-		$toAddr = array();
-		$toName = array();	
-		$namesAndAddresses = explode(":::" , $_POST["owners"]);
+		$toAddr = [];
+		$toName = [];	
+		$namesAndAddresses = explode(":::" , (string) $_POST["owners"]);
 		for ($i=0; $i<count($namesAndAddresses)-1; $i++) {
 			$nameAndAddress = explode(";;;", $namesAndAddresses[$i]);
 			$toAddr[$i] = $nameAndAddress[0]; 	
@@ -178,8 +178,8 @@ else {
 	// delete WMS
 	if($del){
 		$sql = "select * from gui_wms where fkey_wms_id = $1 ";
-		$v = array($wmsList);
-		$t = array('i');
+		$v = [$wmsList];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 	 	 while($row = db_fetch_array($res))
@@ -187,14 +187,14 @@ else {
 	  	 		 $sql = "UPDATE gui_wms set gui_wms_position = (gui_wms_position -1) ";
 	  			 $sql .= "WHERE fkey_gui_id = $1 ";
 	  			 $sql .= " AND gui_wms_position > $2 ";
-	  			 $v = array($row["fkey_gui_id"],$row["gui_wms_position"]);
-	  			 $t = array('s','i');
+	  			 $v = [$row["fkey_gui_id"], $row["gui_wms_position"]];
+	  			 $t = ['s', 'i'];
 	  			 $res1 = db_prep_query($sql,$v,$t);			
 	    		 $cnt++;				
 	 	 }
 		$sql = "SELECT wms_title, wms_abstract FROM wms WHERE wms_id = $1";
-	   $v = array($wmsList);
-	   $t = array('i');
+	   $v = [$wmsList];
+	   $t = ['i'];
 	   $res = db_prep_query($sql,$v,$t);
 	   if ($res) {
 	   		$row = db_fetch_array($res);
@@ -221,26 +221,23 @@ else {
  	$sql .= " as relation ON ";
 	$sql .= " datalink.datalink_id = relation.fkey_datalink_id AND datalink.datalink_origin = 'capabilities')";
 	
-	$v = array($wmsList);
-	$t = array('i');
+	$v = [$wmsList];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	//before delete the wms get the published layers to delete their metadata afterwards
 	//select all layer which are searchable
 	$sql = "SELECT layer_id, uuid FROM layer WHERE fkey_wms_id = $1 and layer_searchable = 1";
-	$v = array($wmsList);
-	$t = array('i');
+	$v = [$wmsList];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
-	$layerArray = array();
+	$layerArray = [];
 	while($row = db_fetch_array($res)){
-		$layerArray[] = array(
-				"id" => $row['layer_id'],
-				"uuid" => $row['uuid']
-		);
+		$layerArray[] = ["id" => $row['layer_id'], "uuid" => $row['uuid']];
 	}
 	//***
 	   $sql = "DELETE FROM wms WHERE wms_id = $1";
-	   $v = array($wmsList);
-	   $t = array('i');
+	   $v = [$wmsList];
+	   $t = ['i'];
 	   $res = db_prep_query($sql,$v,$t);
 	   
 	   if ($res) {
@@ -260,7 +257,7 @@ else {
 			$geoRss->saveAsFile();	
 			//delete metadata of connected catalogue
 			//Propagate information for each new layer to csw if configured
-			$layerUuid = array();
+			$layerUuid = [];
 			foreach ($layerArray as $layer) {
 					$layerUuid[] = $layer['uuid'];
 			} 
@@ -269,11 +266,11 @@ else {
 		}
 	}
 	// display WMS List
-	$wms_id_own = $admin->getWmsByOwner(Mapbender::session()->get("mb_user_id"),true);
+	$wms_id_own = $admin->getWmsByOwner(Mapbender::session()->get("mb_user_id"));
 	
 	if (count($wms_id_own)>0){
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "Select * from wms WHERE wms_id IN (";
 		for($i=0; $i<count($wms_id_own); $i++){
 		 if($i>0){ $sql .= ",";}
@@ -316,8 +313,8 @@ else {
 			echo "<p class = 'guiList'>";
 			// Show GUIs using chosen WMS
 			$sql = "SELECT fkey_gui_id FROM gui_wms WHERE fkey_wms_id = $1";
-			$v = array($wmsList);
-			$t = array('i');
+			$v = [$wmsList];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 
 			// show WMS-ID for better identifiability
@@ -335,8 +332,8 @@ else {
 			
 			// Show GetCapabilities of chosen WMS
 			$sql = "SELECT wms_getcapabilities FROM wms WHERE wms_id = $1";
-			$v = array($wmsList);
-			$t = array('i');
+			$v = [$wmsList];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			
 			echo "<br><br><b>GetCapabilities</b><br><br>";
@@ -350,8 +347,8 @@ else {
 			
 			// Show Abstract of Chosen WMS
 			$sql = "SELECT wms_abstract FROM wms WHERE wms_id = $1";
-			$v = array($wmsList);
-			$t = array('i');
+			$v = [$wmsList];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			
 			echo "<br><br><b>Abstract</b><br><br>";
@@ -389,7 +386,7 @@ else {
 	    			
 	    				// prepare email-addresses and usernames of all owners
 	    				$owner_ids = $owner;
-	    				$owner_mail_addresses = array();
+	    				$owner_mail_addresses = [];
 	    				$email_str = '';
 	    				$j=0;
 	    				for ($i=0; $i<count($owner_ids); $i++) {

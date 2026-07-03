@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="orphanWMS";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -28,7 +28,7 @@ $wmsList = $_POST["wmsList"];
 $del = $_POST["del"];
 
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -69,8 +69,8 @@ $error_msg='';
 	// delete WMS
 	if($del){
 	   $sql = "DELETE FROM wms WHERE wms_id = $1";
-	   $v = array($wmsList);
-	   $t = array('i');
+	   $v = [$wmsList];
+	   $t = ['i'];
 	   $res = db_prep_query($sql,$v,$t);
 	}
 	// display WMS List
@@ -101,8 +101,8 @@ $error_msg='';
 			
 			// Show wms_id, GetCapabilities, Abstract of chosen WMS
 			$sql = "SELECT wms_id,wms_abstract,wms_getcapabilities FROM wms WHERE wms_id = $1";
-			$v = array($wmsList);
-			$t = array('i');
+			$v = [$wmsList];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 
 			$cnt = 0;

@@ -17,12 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_1_1.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_featuretype.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_wfs_factory.php");
+require_once(__DIR__."/../classes/class_wfs_1_1.php");
+require_once(__DIR__."/../classes/class_wfs_featuretype.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 /**
  * Creates WFS 1.1 objects from a capabilities documents.
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../classes/class_administration.php");
  */
 class Wfs_1_1_Factory extends WfsFactory {
 
-	protected function createFeatureTypeFromUrl ($aWfs, $featureTypeName, $featureTypeNsArray) {
+	protected function createFeatureTypeFromUrl ($aWfs = null, $featureTypeName = null, $featureTypeNsArray = null) {
 		$postData = "<?xml version=\"1.0\"?>\n".
 				"<DescribeFeatureType version=\"" . $aWfs->getVersion() . "\" " .
 				"service=\"WFS\" xmlns=\"http://www.opengis.net/wfs\" ";
@@ -59,14 +59,9 @@ class Wfs_1_1_Factory extends WfsFactory {
 		if (!$nsUrl) {
 			$nsUrl = $featureTypeNsArray[$key];
 		}
-		$paramArray = array(
-			"SERVICE=WFS",
-			"VERSION=1.1.0",
-			"REQUEST=DescribeFeatureType",
-			"TYPENAME=" . urlencode($featureTypeName),
-			"NAMESPACE=" . urlencode(
+		$paramArray = ["SERVICE=WFS", "VERSION=1.1.0", "REQUEST=DescribeFeatureType", "TYPENAME=" . urlencode((string) $featureTypeName), "NAMESPACE=" . urlencode(
 				"xmlns(" . $key . "=" . $nsUrl . ")"
-		));
+		)];
 
 		$url = $aWfs->describeFeatureType .
 			$aWfs->getConjunctionCharacter($aWfs->describeFeatureType) .
@@ -97,7 +92,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 
 		// populate a Namespaces Hastable where we can use the namesopace as a lookup for the prefix
 		// and also keep a 
-		$namespaces = array();
+		$namespaces = [];
 		$namespaceList = $xpath->query("//namespace::*");
 		$targetNamespace = $doc->documentElement->getAttribute("targetNamespace");
 		$targetNamespaceNode = null;
@@ -110,7 +105,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 			$newFeatureType->addNamespace($namespaceNode->localName, $namespaceNode->nodeValue);
 		}
 	
-		list($ftLocalname,$ftTypePrefix) = array_reverse(explode(":",$featureTypeName));
+		[$ftLocalname, $ftTypePrefix] = array_reverse(explode(":",(string) $featureTypeName));
 		// for the sake of simplicity we only care about top level elements. Seems to have worked so far
 		$query = sprintf("/xs:schema/xs:element[@name='%s']",$ftLocalname);
 		$elementList = $xpath->query($query);
@@ -130,7 +125,7 @@ class Wfs_1_1_Factory extends WfsFactory {
                 		// if the prefix is in the targetNamespace, changces are good it's defined in this very document
                 		// if the prefix is not in the targetNamespace, it's likely not defined here, and we bail
 
-                		list($elementTypeLocalname,$elementTypePrefix) = array_reverse(explode(":",$elementType));
+                		[$elementTypeLocalname, $elementTypePrefix] = array_reverse(explode(":",(string) $elementType));
                 		$elementTypeNamespace = $doc->lookupNamespaceURI($elementTypePrefix);
                 		if($elementTypeNamespace !== $targetNamespaceNode->nodeValue){
                     			$e = new mb_warning("Tried to parse FeatureTypeName $featureTypeName : $elementType is not in the targetNamespace");	
@@ -159,7 +154,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 					</xs:element>*/
 					$query = "xs:simpleType/xs:restriction";
 					$restriction = $xpath->query($query,$subElement);
-						
+
 					if (gettype($restriction->item(0)) == 'object') {
 						$type = $restriction->item(0)->getAttribute('base');
 					} else {
@@ -200,7 +195,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 				$e = new mb_notice("class_wfs_1_1_factory.php - createFromXml - no authentication info given!");
 			}
 			$myWfs->auth = $auth; //always!
-			$featuretype_crsArray = array();//new for wfs 1.1.0
+			$featuretype_crsArray = [];//new for wfs 1.1.0
 			try {
 				$xml = str_replace('xlink:href', 'xlinkhref', $xml);
 				#http://forums.devshed.com/php-development-5/simplexml-namespace-attributes-problem-452278.html
@@ -326,7 +321,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 					//<DefaultSRS>urn:ogc:def:crs:EPSG::4326</DefaultSRS><OtherSRS>urn:ogc:def:crs:EPSG::4269</OtherSRS><OtherSRS>urn:ogc:def:crs:EPSG::3978</OtherSRS><OtherSRS>urn:ogc:def:crs:EPSG::3857</OtherSRS><OtherSRS>urn:ogc:def:crs:EPSG::31466</OtherSRS><OtherSRS>urn:ogc:def:crs:EPSG::25832</OtherSRS><OtherSRS>urn:ogc:def:crs:EPSG::4258</OtherSRS>
 					$featuretype_srs = $featureType->DefaultSRS[0];
 					$otherSRSArray = $featureType->OtherSRS;
-					$featuretype_crsArray = array();
+					$featuretype_crsArray = [];
 					foreach ($otherSRSArray as $otherSRS) {
 						$e = new mb_notice("other srs: ".$otherSRS);
 						$featuretype_crsArray[] = $otherSRS;
@@ -334,7 +329,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 					}
 					//outputFormats
 					/*<OutputFormats><Format>text/xml; subtype=gml/3.1.1</Format></OutputFormats>*/
-					$featuretypeOutputFormats = array();
+					$featuretypeOutputFormats = [];
 					$outputFormats = $featureType->OutputFormats->Format;
 					foreach ($outputFormats as $outputFormat) {
 						$featuretypeOutputFormats[] = $outputFormat;
@@ -343,7 +338,7 @@ class Wfs_1_1_Factory extends WfsFactory {
 
 					//<wfs:MetadataURL type="FGDC" format="text/xml">http://www.ogccatservice.com/csw.cgi?service=CSW&amp;version=2.0.0&amp;request=GetRecords&amp;constraintlanguage=CQL&amp;constraint="recordid=urn:uuid:4ee8b2d3-9409-4a1d-b26b-6782e4fa3d59"</wfs:MetadataURL>
 					$metadataURLArray = $featureType->MetadataURL;
-					$featuretype_metadataUrl = array();
+					$featuretype_metadataUrl = [];
 					$i_mdu = 0;
 					foreach ($metadataURLArray as $metadataURL) {
 						//$e = new mb_exception("other srs: ".$otherSRS);

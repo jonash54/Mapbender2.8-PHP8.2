@@ -1,19 +1,19 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class geojson_style {
-	var $geojson;
-	var $geojsonObject;
-	var $defaultStyleJson;
+	public $geojson;
+	public $geojsonObject;
+	public $defaultStyleJson;
 
 	function __construct () {
-		$this->defaultStyleJson = file_get_contents(dirname(__FILE__)."/../../conf/geoJsonDefaultStyle.json");
+		$this->defaultStyleJson = file_get_contents(__DIR__."/../../conf/geoJsonDefaultStyle.json");
 	}
 	
 	public function addDefaultStyles($geojson) {
 		$this->geojson = $geojson;
-		$this->geojsonObject = json_decode($this->geojson);
-		$styleObject = json_decode($this->defaultStyleJson);
+		$this->geojsonObject = json_decode((string) $this->geojson);
+		$styleObject = json_decode((string) $this->defaultStyleJson);
 		//$e = new mb_exception("classes/class_geojson_style.php: before iterating geojson: " . $this->geojson);
 		foreach($this->geojsonObject->features as $feature) {
 		    $e = new mb_exception("classes/class_geojson_style.php: geometry type: " . $feature->geometry->type);

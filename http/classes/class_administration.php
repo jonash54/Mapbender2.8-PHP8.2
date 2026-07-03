@@ -16,20 +16,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_user.php");
-require_once(dirname(__FILE__)."/class_cache.php");
-require_once dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf";
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_user.php");
+require_once(__DIR__."/class_cache.php");
+require_once __DIR__ . "/../../tools/wms_extent/extent_service.conf";
 # changed to Version 6.0.2 due to dprecated/removed functionality (php7+) TODO - check invokation of new class !!!!
 $phpversion = phpversion();
-if (strpos($phpversion, "7.") === 0) {
+if (str_starts_with($phpversion, "7.")) {
     //use new mailer
 //$e = new mb_exception($phpversion);
-    require(dirname(__FILE__) . "/phpmailer-6.0.2/src/PHPMailer.php");
-    require(dirname(__FILE__) . "/phpmailer-6.0.2/src/SMTP.php");
-    require(dirname(__FILE__) . "/phpmailer-6.0.2/src/Exception.php");
+    require(__DIR__ . "/phpmailer-6.0.2/src/PHPMailer.php");
+    require(__DIR__ . "/phpmailer-6.0.2/src/SMTP.php");
+    require(__DIR__ . "/phpmailer-6.0.2/src/Exception.php");
 } else {
-    require(dirname(__FILE__) . "/phpmailer-1.72/class.phpmailer.php");
+    require(__DIR__ . "/phpmailer-1.72/class.phpmailer.php");
 }
 /**
  * class to wrap administration methods
@@ -61,7 +61,7 @@ class administration {
      * @return <boolean> answer to "is the passed over email valid?""
      */
 	function isValidEmail($email) {
-        if(mb_eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $email)) {
+        if(mb_eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", (string) $email)) {
             return true;
 		}
 		return false;
@@ -79,7 +79,7 @@ class administration {
       		$pattern_1 = "/^(http|https|ftp):\/\/((([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+.(com|org|de|net|dk|at|us|tv|info|uk|co.uk|biz|se)$)|localhost)(:(\d+))?\/?/i";
       		$pattern_2 = "/^(www)((\.[A-Z0-9][A-Z0-9_-]*)+.(com|org|de|net|dk|at|us|tv|info|uk|co.uk|biz|se)$)(:(\d+))?\/?/i";  
 		$pattern_3 = "/^(http|https|ftp):\/\//i";     
-      		if(preg_match($pattern_1, $URL) || preg_match($pattern_2, $URL) || preg_match($pattern_3, $URL)){
+      		if(preg_match($pattern_1, (string) $URL) || preg_match($pattern_2, (string) $URL) || preg_match($pattern_3, (string) $URL)){
         		return true;
       		} else{
         		return false;
@@ -110,16 +110,10 @@ class administration {
 		}
 		if ($this->isValidEmail($fromAddr) && $this->isValidEmail($toAddr)) {
 			$phpversion = $this->getPhpVersion();
-			if (strpos($phpversion, "7.") === 0) {
+			if (str_starts_with((string) $phpversion, "7.")) {
     			    //use new mailer
                             $mail = new PHPMailer\PHPMailer\PHPMailer();
-                            $mail->SMTPOptions = array(
-                                'ssl' => array(
-                                    'verify_peer' => false,
-                                    'verify_peer_name' => false,
-                                    'allow_self_signed' => true
-                                 )
-                            );
+                            $mail->SMTPOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
                             $mail->Port = 25;
 			} else {
     			    $mail = new PHPMailer();
@@ -129,7 +123,7 @@ class administration {
 			}
 			$mail->IsSMTP();                  // set mailer to use SMTP
 			$mail->Host = $mailHost;          // specify main and backup server
-                        if (strpos($phpversion, "7.") === 0) {
+                        if (str_starts_with((string) $phpversion, "7.")) {
 			        $mail->setFrom($fromAddr,$fromName);
 			}
 			$mail->AddAddress($toAddr, $toName);
@@ -167,9 +161,9 @@ class administration {
 	 * @param $s String like "ogc:gml"
 	 */
 	public static function sepNameSpace($s) {
-		$c = strpos($s,":"); 
+		$c = strpos((string) $s,":"); 
 		if ($c > 0) {
-			return substr($s,$c+1);	
+			return substr((string) $s,$c+1);	
 		}
 		return $s;
 	}
@@ -194,7 +188,7 @@ class administration {
 		xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "UTF-8");
 
 		// this is the actual parsing process
-		xml_parse_into_struct($parser, $someXml, $values, $tags);
+		xml_parse_into_struct($parser, (string) $someXml, $values, $tags);
 
 		// check if an error occured
 		$code = xml_get_error_code ($parser);
@@ -229,7 +223,7 @@ class administration {
 			//die ASCII-Zeichen 97 - 122 sind die buchstaben a-z (Klein)
 			$ascii = 0;
 			do {
-				$ascii=rand(48,122);
+				$ascii=random_int(48,122);
 			} while ( ($ascii > 57 && $ascii < 65) || ($ascii > 90 && $ascii < 97));
 			$newpass .= chr($ascii);
 		}
@@ -259,9 +253,9 @@ class administration {
 		$sql .= "WHERE gui_mb_group.mb_group_type = 'owner' ";
 		$sql .= "AND gui_mb_group.fkey_gui_id = $2 ";
 		$sql .= "GROUP BY mb_user.mb_user_id)";
-		$owner = array();
-		$v = array($gui_id,$gui_id);
-		$t = array('s','s');
+		$owner = [];
+		$v = [$gui_id, $gui_id];
+		$t = ['s', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 		while($row = db_fetch_array($res)){
@@ -281,12 +275,12 @@ class administration {
 		$sql = "SELECT mb_user_email FROM mb_user ";
 		$sql .= "WHERE mb_user_id = $1 GROUP by mb_user_email";
         // TODO why do we group, when userid is a primary key?
-		$v = array($userid);
-		$t = array('i');
+		$v = [$userid];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		// TODO shall the next two lines be removed?
         $count_g = 0;
-		$array = array();
+		$array = [];
 		$row = db_fetch_array($res);
 		if ($row) {
 			return $row["mb_user_email"];
@@ -306,12 +300,12 @@ class administration {
 		$sql = "SELECT mb_user_name FROM mb_user ";
 		$sql .= "WHERE mb_user_id = $1 GROUP BY mb_user_name";
         // TODO why do we group, when userid is a primary key?
-		$v = array($userid);
-		$t = array("i");
+		$v = [$userid];
+		$t = ["i"];
 		$res = db_prep_query($sql,$v,$t);
         // TODO shall the next two lines be removed?
 		$count_g = 0;
-		$array = array();
+		$array = [];
 		$row = db_fetch_array($res);
 		if ($row) {
 			return $row["mb_user_name"];
@@ -331,11 +325,11 @@ class administration {
  	function getUserIdByEmail($email){
 		$sql = "SELECT  mb_user_id FROM mb_user ";
 		$sql .= "WHERE mb_user_email = $1 GROUP BY mb_user_id";
-		$v = array($email);
-		$t = array('s');
+		$v = [$email];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
   		$count_g = 0;
-  		$array = array();
+  		$array = [];
 		while($row = db_fetch_array($res)){
 			$array[$count_g] = $row["mb_user_id"];
 			$count_g++;
@@ -356,8 +350,8 @@ class administration {
      */
 	function getSubscribersByWms($wms_id){
 		$sql = "SELECT DISTINCT fkey_mb_user_id FROM mb_user_abo_ows WHERE fkey_wms_id = $1";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$count = 0;
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
@@ -383,8 +377,8 @@ class administration {
 	function getOwnerByWms($wms_id){
 		// first get guis which deploy this wms.
         $sql = "SELECT fkey_gui_id FROM gui_wms WHERE fkey_wms_id = $1 GROUP BY fkey_gui_id";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$count=0;
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
@@ -395,8 +389,8 @@ class administration {
 		if ($count > 0) {
 			// this is not needed! count($gui) is always equal to $count
             if(count($gui)>0) {
-				$v = array();
-				$t = array();
+				$v = [];
+				$t = [];
 				$c = 1;
 				$sql = "(SELECT mb_user.mb_user_id FROM mb_user JOIN gui_mb_user ";
 				$sql .= "ON mb_user.mb_user_id = gui_mb_user.fkey_mb_user_id ";
@@ -425,7 +419,7 @@ class administration {
 				}
 				$sql .= ") GROUP BY mb_user.mb_user_id)";
 
-				$user = array();
+				$user = [];
 				$res = db_prep_query($sql,$v,$t);
 			}
 			$cnt = 0;
@@ -452,8 +446,8 @@ class administration {
      */
 	function getOwnerByWfs($wfs_id){
         	$sql = "SELECT wfs_owner FROM wfs WHERE wfs_id = $1";
-		$v = array($wfs_id);
-		$t = array('i');
+		$v = [$wfs_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			return false;
@@ -471,8 +465,8 @@ class administration {
      */
 	function guiExists($id){
 		$sql = "SELECT * FROM gui WHERE gui_id = $1 ";
-		$v = array($id);
-		$t = array('s');
+		$v = [$id];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -509,8 +503,8 @@ class administration {
 	function insertGui($guiId) {
 		if (!$this->guiExists($guiId)) {
 			$sql = "INSERT INTO gui VALUES ($1, $2, '', '1')";
-			$v = array($guiId,$guiId);
-			$t = array('s','s');
+			$v = [$guiId, $guiId];
+			$t = ['s', 's'];
 			$res = db_prep_query($sql,$v,$t);
 			if ($res) {
 				return true;
@@ -528,8 +522,8 @@ class administration {
      */
 	function delAllUsersOfGui($guiId) {
 		$sql = "DELETE FROM gui_mb_user WHERE fkey_gui_id = $1 ";
-		$v = array($guiId);
-		$t = array('s');
+		$v = [$guiId];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			return false;
@@ -557,10 +551,10 @@ class administration {
      */
 	function getWmsByWmsOwner($user_id){
 		$sql = "SELECT wms_id FROM wms WHERE wms_owner = $1 ORDER BY wms_id";
-		$v = array($user_id);
-		$t = array('i');
+		$v = [$user_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$r = array();
+		$r = [];
 		while($row = db_fetch_array($res)){
 			array_push($r,$row["wms_id"]);
 		}
@@ -574,10 +568,10 @@ class administration {
      */
 	function getWfsByWfsOwner($user_id){
 		$sql = "SELECT wfs_id FROM wfs WHERE wfs_owner = $1 ORDER BY wfs_id";
-		$v = array($user_id);
-		$t = array('i');
+		$v = [$user_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$r = array();
+		$r = [];
 		while($row = db_fetch_array($res)){
 			array_push($r,$row["wfs_id"]);
 		}
@@ -592,8 +586,8 @@ class administration {
      */
 	function getUserByWms($wms_id){
 		$sql = "SELECT fkey_gui_id FROM gui_wms WHERE fkey_wms_id = $1 GROUP BY fkey_gui_id";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$count=0;
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
@@ -601,8 +595,8 @@ class administration {
 			$count++;
 		}
 		$c = 1;
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		if(count($gui)>0){
 			$sql = "(SELECT mb_user.mb_user_id FROM mb_user JOIN gui_mb_user ";
 			$sql .= "ON mb_user.mb_user_id = gui_mb_user.fkey_mb_user_id ";
@@ -626,7 +620,7 @@ class administration {
 				$c++;
 			}
 			$sql .= ") GROUP BY mb_user.mb_user_id )";
-			$user = array();
+			$user = [];
 			$res = db_prep_query($sql,$v,$t);
 			$cnt = 0;
 			while($row = db_fetch_array($res)){
@@ -645,8 +639,8 @@ class administration {
      */
 	function getWmsTitleByWmsId($id){
 		$sql = "SELECT wms_title FROM wms WHERE wms_id = $1";
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) return $row["wms_title"]; else return false;
@@ -660,8 +654,8 @@ class administration {
      */
 	function getWfsTitleByWfsId($id){
 		$sql = "SELECT wfs_title FROM wfs WHERE wfs_id = $1";
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) return $row["wfs_title"]; else return false;
@@ -677,8 +671,8 @@ class administration {
      */
 	function getLayerTitleByLayerId($id){
 		$sql = "SELECT layer_title FROM layer WHERE layer_id = $1 GROUP BY layer_title";
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) return $row["layer_title"]; else return false;
@@ -690,12 +684,12 @@ class administration {
      * @param integer			the layer id
      * @return array	                list of sublayer ids
      */
-	function getSubLayers($layerId, $subLayer = array(), $layerPos = null, $wmsId = null) {
+	function getSubLayers($layerId, $subLayer = [], $layerPos = null, $wmsId = null) {
 		if (!isset($layerPos)) {
 			//get layer_pos for requested layer_id
 			$sql = "SELECT layer_pos, fkey_wms_id FROM layer WHERE layer_id = $1";
-			$v = array($layerId);
-			$t = array("i");
+			$v = [$layerId];
+			$t = ["i"];
 			$res = db_prep_query($sql, $v, $t);
 			$layerPosRow = db_fetch_array($res);
 			$layerPos = $layerPosRow['layer_pos'];
@@ -704,8 +698,8 @@ class administration {
 		}
 		//select all childs of given layer
 		$sub_layer_sql = "SELECT layer_id, layer_pos FROM layer WHERE fkey_wms_id = $1 AND layer_parent = $2 ORDER BY layer_pos";
-		$v = array($wmsId, $layerPos);
-		$t = array("i","s");
+		$v = [$wmsId, $layerPos];
+		$t = ["i", "s"];
 		$res_sub_layer_sql = db_prep_query($sub_layer_sql, $v, $t);
 		while ($sub_layer_row = db_fetch_array($res_sub_layer_sql)) {
 			$subLayer[] = $sub_layer_row['layer_id'];
@@ -791,10 +785,8 @@ class administration {
 	            $sql = <<<SQL
 UPDATE si_log SET log_count = log_count + 1 WHERE log_id = $1
 SQL;
-	            $v = array(
-	                $logId
-	            );
-	            $t = array('i');
+	            $v = [$logId];
+	            $t = ['i'];
 	            $res = db_prep_query($sql,$v,$t);
 	            return true;
 	        } else {
@@ -802,14 +794,8 @@ SQL;
 	            $sql = <<<SQL
 INSERT INTO si_log (createdate, referrer, query_string, search_text, user_agent, fkey_catalogue_id, log_count) VALUES (now(), $1, $2, $3, $4, $5, 1)
 SQL;
-	            $v = array(
-	                $referrer,
-	                $query_string,
-	                $search_text,
-	                $user_agent,
-	                $catalogue_id
-	            );
-	            $t = array('s', 's', 's', 's', 'i');
+	            $v = [$referrer, $query_string, $search_text, $user_agent, $catalogue_id];
+	            $t = ['s', 's', 's', 's', 'i'];
 	            $res = db_prep_query($sql,$v,$t);
 	            return true;
 	        }
@@ -821,25 +807,17 @@ SQL;
 	        $sql = <<<SQL
     SELECT log_id FROM si_log WHERE fkey_catalogue_id is null AND query_string = $1 AND user_agent = $2 AND referrer = $3 ORDER BY lastchanged DESC
     SQL;
-	        $v = array(
-	            $query_string,
-	            $user_agent,
-	            $referrer
-	        );
-	        $t = array('s', 's', 's');
+	        $v = [$query_string, $user_agent, $referrer];
+	        $t = ['s', 's', 's'];
 	    } else {
     	    $sql = <<<SQL
     SELECT log_id FROM si_log WHERE fkey_catalogue_id = $1 AND query_string = $2 AND user_agent = $3 AND referrer = $4 ORDER BY lastchanged DESC
     SQL;
-    	    $v = array(
-    	        $catalogue_id,
-    	        $query_string,
-    	        $user_agent,
-    	        $referrer
-    	    );
-    	    $t = array('i', 's', 's', 's');
+    	    $v = [$catalogue_id, $query_string, $user_agent, $referrer];
+    	    $t = ['i', 's', 's', 's'];
 	    }
 	    $res = db_prep_query($sql,$v,$t);
+	    $logId = [];
 	    while ($row = db_fetch_array($res)){
 	        $logId[] = $row['log_id'];
 	    }
@@ -866,10 +844,8 @@ SQL;
 	            $sql = <<<SQL
 UPDATE oaf_proxy_log SET log_count = log_count + 1 WHERE log_id = $1
 SQL;
-	            $v = array(
-	                $logId
-	            );
-	            $t = array('i');
+	            $v = [$logId];
+	            $t = ['i'];
 	            $res = db_prep_query($sql,$v,$t);
 	            return true;
 	        } else {
@@ -877,12 +853,8 @@ SQL;
 	            $sql = <<<SQL
 INSERT INTO oaf_proxy_log (createdate, referrer, fkey_wfs_id, fkey_wfs_featuretype_id, log_count) VALUES (now(), $1, $2, $3, 1)
 SQL;
-	            $v = array(
-	                $referrer,
-	                $wfs_id,
-	                $wfs_featuretype_id
-	            );
-	            $t = array('s','i','i');
+	            $v = [$referrer, $wfs_id, $wfs_featuretype_id];
+	            $t = ['s', 'i', 'i'];
 	            $res = db_prep_query($sql,$v,$t);
 	            return true;
 	        }
@@ -893,12 +865,8 @@ SQL;
 	    $sql = <<<SQL
 SELECT log_id FROM oaf_proxy_log WHERE fkey_wfs_id = $2 AND fkey_wfs_featuretype_id = $3 AND referrer = $1 ORDER BY lastchanged DESC
 SQL;
-	    $v = array(
-	        $referrer,
-	        $wfs_id,
-	        $wfs_featuretype_id
-	    );
-	    $t = array('s',i,i);
+	    $v = [$referrer, $wfs_id, $wfs_featuretype_id];
+	    $t = ['s', \I, \I];
 	    $res = db_prep_query($sql,$v,$t);
 	    while ($row = db_fetch_array($res)){
 	        $logId[] = $row['log_id'];
@@ -925,10 +893,8 @@ SQL;
 				$sql = <<<SQL
 UPDATE external_api_log SET log_count = log_count + 1 WHERE log_id = $1
 SQL;
-				$v = array(
-					$logId
-				);
-				$t = array('i');
+				$v = [$logId];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
 				return true;
 			} else {
@@ -936,12 +902,8 @@ SQL;
 				$sql = <<<SQL
 INSERT INTO external_api_log (createdate, referrer, fkey_wmc_serial_id, api_type, log_count) VALUES (now(), $1, $2, $3, 1)
 SQL;
-				$v = array(
-					$referrer,
-					$wmc_serial_id,
-					$api_type
-				);
-				$t = array('s',i,i);
+				$v = [$referrer, $wmc_serial_id, $api_type];
+				$t = ['s', \I, \I];
 				$res = db_prep_query($sql,$v,$t);
 				return true;
 			}
@@ -952,12 +914,8 @@ SQL;
 		$sql = <<<SQL
 SELECT log_id FROM external_api_log WHERE fkey_wmc_serial_id = $2 AND api_type = $3 AND referrer = $1 ORDER BY lastchanged DESC
 SQL;
-		$v = array(
-			$referrer,
-			$wmc_serial_id,
-			$api_type
-		);
-		$t = array('s',i,i);
+		$v = [$referrer, $wmc_serial_id, $api_type];
+		$t = ['s', \I, \I];
 		$res = db_prep_query($sql,$v,$t);
 		while ($row = db_fetch_array($res)){
 			$logId[] = $row['log_id'];	
@@ -978,8 +936,8 @@ SQL;
 		// TODO: isn't mb_user_login_count a integer?
         $sql = "UPDATE mb_user SET mb_user_login_count = '0' ";
 		$sql .= "WHERE mb_user_id = $1 ";
-		$v = array($userId);
-		$t = array('i');
+		$v = [$userId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			return false;
@@ -990,14 +948,14 @@ SQL;
 	}
 
 	function getAllFilteredUsers($owner) {
-		$allUsers = array();
+		$allUsers = [];
 		$sql = "SELECT mb_user_id,mb_user_name,mb_user_email FROM mb_user ";
 		$sql .= " WHERE mb_user_owner = $1 ORDER BY mb_user_name ";
-		$v = array($owner);
-		$t = array('i'); 
+		$v = [$owner];
+		$t = ['i']; 
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
-			array_push($allUsers, array("mb_user_id" => $row["mb_user_id"], "mb_user_name" => $row["mb_user_name"], "mb_user_email" => $row["mb_user_email"]));
+			array_push($allUsers, ["mb_user_id" => $row["mb_user_id"], "mb_user_name" => $row["mb_user_name"], "mb_user_email" => $row["mb_user_email"]]);
 		}
 		$json = new Mapbender_JSON();
 		$output = $json->encode($allUsers);
@@ -1007,15 +965,15 @@ SQL;
 	}
 
 	function getAllUserColumns($userId) {
-		$userArray = array();
+		$userArray = [];
 		$sql = "SELECT * FROM mb_user WHERE mb_user_id = $1";
-		$v = array($userId); 
-		$t = array('s');
+		$v = [$userId]; 
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		while ($row = db_fetch_array($res)) {
 			foreach ($row as $key => $value){
 				if (is_int($key)==false) {
-					array_push($userArray, array("id" => $key, "value" => $value));
+					array_push($userArray, ["id" => $key, "value" => $value]);
 				}
 			}
 		}
@@ -1032,10 +990,10 @@ SQL;
 	 */
 	function getTableColumns($table) {
 		$sql = "SELECT * FROM $table LIMIT 1";
-		$columnArray = array();
+		$columnArray = [];
 
-		$v = array(); 
-		$t = array();
+		$v = []; 
+		$t = [];
 		$res = db_prep_query($sql,$v,$t);
 
 		$i = 0;
@@ -1055,8 +1013,8 @@ SQL;
 
 	function deleteTableRecord($table,$keyField,$keyFieldValue) {
 		$sql = "DELETE FROM $table WHERE $keyField = $1";
-		$v = array($keyFieldValue); 
-		$t = array('s');
+		$v = [$keyFieldValue]; 
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			return false;
@@ -1069,8 +1027,8 @@ SQL;
 	function getUserIdByUserName($username){
 		$sql = "SELECT mb_user_id FROM mb_user ";
 		$sql .= "WHERE mb_user_name = $1 GROUP BY mb_user_id";
-		$v = array($username);
-		$t = array('s');
+		$v = [$username];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) return $row["mb_user_id"]; else return false;
@@ -1079,8 +1037,8 @@ SQL;
 	function setUserAsGuiOwner($guiId, $userId) {
 		$sql = "UPDATE gui_mb_user SET mb_user_type = 'owner' ";
 		$sql .= "WHERE fkey_gui_id = $1 AND fkey_mb_user_id = $2 ";
-		$v = array($guiId,$userId);
-		$t = array('s','i');
+		$v = [$guiId, $userId];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 
 		if (!$res) {
@@ -1094,11 +1052,11 @@ SQL;
 	function getGuiIdByGuiName($guiTitle){
 		$sql = "SELECT gui_id FROM gui ";
 		$sql .= "WHERE gui_name = $1 GROUP BY gui_id";
-		$v = array($guiTitle);
-		$t = array('s');
+		$v = [$guiTitle];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
   		$count_g = 0;
-  		$array = array();
+  		$array = [];
 		while($row = db_fetch_array($res)){
 			$array[$count_g] = $row["gui_id"];
 			$count_g++;
@@ -1120,11 +1078,11 @@ SQL;
 		}
 		$sql_guis .= " AND gui_mb_user.mb_user_type = 'owner' GROUP BY gui.gui_id";
 		$sql_guis .= " ORDER by gui.gui_id";
-		$v = array($user_id);
-		$t = array('i');
+		$v = [$user_id];
+		$t = ['i'];
 		$res_guis = db_prep_query($sql_guis,$v,$t);
   		$count_g = 0;
-  		$arrayGuis = array();
+  		$arrayGuis = [];
 		while($row = db_fetch_array($res_guis)){
 			$arrayGuis[$count_g] = $row["gui_id"];
 			$count_g++;
@@ -1153,8 +1111,8 @@ SQL;
 
 	function getWmsByOwnGuis($array_gui_ids){
 		if(count($array_gui_ids)>0){
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT fkey_wms_id from gui_wms WHERE gui_wms.fkey_gui_id IN(";
 			for($i=0; $i<count($array_gui_ids); $i++){
 				if($i>0){ $sql .= ",";}
@@ -1164,7 +1122,7 @@ SQL;
 			}
 			$sql .= ") GROUP BY fkey_wms_id ORDER BY fkey_wms_id";
 			$res = db_prep_query($sql,$v,$t);
-			$ownguis = array();
+			$ownguis = [];
 			$i=0;
 			while($row = db_fetch_array($res)){
 				$ownguis[$i] = $row['fkey_wms_id'];
@@ -1176,20 +1134,20 @@ SQL;
 	
 	function getRootLayerByWms($wms_id){
 		$sql = "SELECT layer_id from layer WHERE fkey_wms_id = $1 AND layer_pos = '0' LIMIT 1";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$layer_id_array = array();
+		$layer_id_array = [];
 		$row = db_fetch_array($res);
 		return $row['layer_id'];
 	}	
 
 	function getLayerByWms($wms_id){
 		$sql = "SELECT layer_id from layer WHERE fkey_wms_id = $1 AND layer_pos NOT IN ('0') GROUP BY layer_id, layer_title ORDER BY layer_title";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$layer_id_array = array();
+		$layer_id_array = [];
 		while($row = db_fetch_array($res)){
 			$layer_id_array[count($layer_id_array)] = $row['layer_id'];
 		}
@@ -1198,10 +1156,10 @@ SQL;
 
  	function getAllLayerByWms($wms_id){
                 $sql = "SELECT layer_id from layer WHERE fkey_wms_id = $1 GROUP BY layer_id, layer_title ORDER BY layer_title";
-                $v = array($wms_id);
-                $t = array('i');
+                $v = [$wms_id];
+                $t = ['i'];
                 $res = db_prep_query($sql,$v,$t);
-                $layer_id_array = array();
+                $layer_id_array = [];
                 while($row = db_fetch_array($res)){
                         $layer_id_array[count($layer_id_array)] = $row['layer_id'];
                 }
@@ -1211,8 +1169,8 @@ SQL;
 	function getParentLayers($wms_id, $layer_id){
 		//build tree
 		$parent_layer_srs_sql = "SELECT layer_id, layer_pos, layer_parent FROM layer WHERE fkey_wms_id = $1";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$res = db_prep_query($parent_layer_srs_sql, $v, $t);
 		while ($layerTree = db_fetch_array($res)) {
 			$layerTreeArray['layer_id'][] = $layerTree['layer_id'];
@@ -1220,7 +1178,7 @@ SQL;
 			$layerTreeArray['layer_parent'][] = $layerTree['layer_parent'];
 		}
 		$rootLayerFound = false;
-		$layerStructure = array();
+		$layerStructure = [];
 		$searchLayerId = $layer_id;
 		while ($rootLayerFound == false) {
 			$layerStructure[] = $searchLayerId; //pull only parent layerIds
@@ -1244,16 +1202,16 @@ SQL;
 
 	function getWmsOwner($wms_id){
 		$sql = "SELECT fkey_gui_id FROM gui_wms WHERE fkey_wms_id = $1 GROUP BY fkey_gui_id";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$count=0;
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
 			$gui[$count] = $row["fkey_gui_id"];
 			$count++;
 		}
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		if(count($gui)>0){
 			$sql = "SELECT mb_user.mb_user_id FROM mb_user JOIN gui_mb_user ";
 			$sql .= "ON mb_user.mb_user_id = gui_mb_user.fkey_mb_user_id WHERE";
@@ -1268,7 +1226,7 @@ SQL;
 			$sql .= " AND gui_mb_user.mb_user_type = 'owner' GROUP BY mb_user.mb_user_id";
 			$res = db_prep_query($sql,$v,$t);
 			$i=0;
-			$wmsowner = array();
+			$wmsowner = [];
 			while($row = db_fetch_array($res)){
 				$wmsowner[$i]=$row['mb_user_id'];
 				$i++;
@@ -1279,8 +1237,8 @@ SQL;
 
 	function insertUserAsGuiOwner($guiId, $userId){
 		$sql = "INSERT INTO gui_mb_user VALUES ($1, $2, 'owner')";
-		$v = array($guiId,$userId);
-		$t = array('s','i');
+		$v = [$guiId, $userId];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
 			return false;
@@ -1295,8 +1253,8 @@ SQL;
    		if($check == true){
 	   		$perm = false;
 	   		if(count($arrayGuis)>0){
-	   			$v = array();
-	   			$t = array();
+	   			$v = [];
+	   			$t = [];
 		   		$sql = "SELECT ".$column." FROM gui_element WHERE fkey_gui_id IN(";
 		   		for($i=0; $i<count($arrayGuis); $i++){
 		   			if($i > 0){ $sql .= ","; }
@@ -1308,7 +1266,7 @@ SQL;
 				$res = db_prep_query($sql,$v,$t);
 				$cnt = 0;
 				while($row = db_fetch_array($res)){
-					if(mb_strpos(stripslashes($row[$column]),$modulePath) !== false){
+					if(mb_strpos(stripslashes((string) $row[$column]),(string) $modulePath) !== false){
 						$perm = true;
 					}
 					$cnt++;
@@ -1348,8 +1306,8 @@ SQL;
 			}
 
 	   		if ($column && count($arrayGuis) > 0) {
-	   			$v = array();
-	   			$t = array();
+	   			$v = [];
+	   			$t = [];
 		   		$sql = "SELECT DISTINCT ".$column." FROM gui_element WHERE fkey_gui_id IN (";
 		   		for($i=0; $i<count($arrayGuis); $i++){
 		   			if($i > 0){ $sql .= ","; }
@@ -1361,11 +1319,11 @@ SQL;
 				$res = db_prep_query($sql,$v,$t);
 				while($row = db_fetch_array($res)){
 					if ($row[$column]) {
-						if (preg_match($pattern, stripslashes($row[$column]))) {
-							$dbFilename = preg_replace($pattern, $replace, stripslashes($row[$column]));
+						if (preg_match($pattern, stripslashes((string) $row[$column]))) {
+							$dbFilename = preg_replace($pattern, $replace, stripslashes((string) $row[$column]));
 							$e = new mb_notice($dbFilename . " - " . $modulePath);
 
-							if(strpos($modulePath, $dbFilename) !== false){
+							if(str_contains((string) $modulePath, (string) $dbFilename)){
 								return true;
 							}
 						}
@@ -1379,8 +1337,8 @@ SQL;
 	
 	function getWMSOWSstring($wms_id){
    		$sql = "SELECT wms_owsproxy FROM wms WHERE wms_id = $1 ";
-   		$v = array($wms_id);
-   		$t = array("i");
+   		$v = [$wms_id];
+   		$t = ["i"];
    		$res = db_prep_query($sql,$v,$t);
    		if($row = db_fetch_array($res)){
    			return $row["wms_owsproxy"];
@@ -1392,21 +1350,21 @@ SQL;
 
    	function setWMSOWSstring($wms_id, $status){
    		$sql = "UPDATE wms SET wms_owsproxy = $1 WHERE wms_id = $2 ";
-   		$t = array("s","i");
+   		$t = ["s", "i"];
    		if($status == 1){
    			$time = md5(uniqid());
-			$v = array($time,$wms_id);
+			$v = [$time, $wms_id];
    		}
    		else{
-   			$v = array("",$wms_id);
+   			$v = ["", $wms_id];
    		}
    		$res = db_prep_query($sql,$v,$t);
    	}
 
 	function getWFSOWSstring($wfs_id){
    		$sql = "SELECT wfs_owsproxy FROM wfs WHERE wfs_id = $1 ";
-   		$v = array($wfs_id);
-   		$t = array("i");
+   		$v = [$wfs_id];
+   		$t = ["i"];
    		$res = db_prep_query($sql,$v,$t);
    		if($row = db_fetch_array($res)){
    			return $row["wfs_owsproxy"];
@@ -1418,13 +1376,13 @@ SQL;
 
    	function setWFSOWSstring($wfs_id, $status){
    		$sql = "UPDATE wfs SET wfs_owsproxy = $1 WHERE wfs_id = $2 ";
-   		$t = array("s","i");
+   		$t = ["s", "i"];
    		if($status == 1){
    			$time = md5(uniqid());
-			$v = array($time,$wfs_id);
+			$v = [$time, $wfs_id];
    		}
    		else{
-   			$v = array("",$wfs_id);
+   			$v = ["", $wfs_id];
    		}
    		$res = db_prep_query($sql,$v,$t);
    	}
@@ -1438,8 +1396,8 @@ SQL;
 
    	function setWmsExchangeUrlTag($wms_id,$value){
    		$sql = "UPDATE wms set wms_proxy_exchange_external_urls=$2 WHERE wms_id = $1 ";
-   		$t = array("i","i");
-		$v = array($wms_id,$value);
+   		$t = ["i", "i"];
+		$v = [$wms_id, $value];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1452,8 +1410,8 @@ SQL;
 
    	function getWmsExchangeUrlTag($wms_id){
    		$sql = "SELECT wms_proxy_exchange_external_urls from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wms_proxy_exchange_external_urls"];
@@ -1465,21 +1423,15 @@ SQL;
    	
    	function getWMSSpatialSecurity($wms_id){
    		$sql = "SELECT wms_spatial_security FROM wms WHERE wms_id = $1";
-   		$v = array($wms_id);
-   		$t = array("i");
+   		$v = [$wms_id];
+   		$t = ["i"];
    		$res = db_prep_query($sql,$v,$t);
    		if($row = db_fetch_array($res)){
-   			switch ($row["wms_spatial_security"]) {
-   				case "t":
-   					return 1;
-   					break;
-   				case "f":
-   					return 0;
-   					break;
-   				default:
-   					return 0;
-   					break;
-   			}
+   			return match ($row["wms_spatial_security"]) {
+          "t" => 1,
+          "f" => 0,
+          default => 0,
+      };
    		} else {
    			return false;
    		}
@@ -1487,8 +1439,8 @@ SQL;
    	
    	function setWMSSpatialSecurity($wms_id, $status){
    		$sql = "UPDATE wms SET wms_spatial_security = $1 WHERE wms_id = $2 ";
-   		$t = array("s","i");
-   		$v = array($status,$wms_id);
+   		$t = ["s", "i"];
+   		$v = [$status, $wms_id];
    		$res = db_prep_query($sql,$v,$t);
    	}
    	
@@ -1501,8 +1453,8 @@ SQL;
 
    	function setWmsLogTag($wms_id,$value){
    		$sql = "UPDATE wms set wms_proxylog=$2 WHERE  wms_id = $1 ";
-   		$t = array("i","i");
-		$v = array($wms_id,$value);
+   		$t = ["i", "i"];
+		$v = [$wms_id, $value];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1515,8 +1467,8 @@ SQL;
 
    	function getWmsLogTag($wms_id){
    		$sql = "SELECT wms_proxylog from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wms_proxylog"];
@@ -1535,8 +1487,8 @@ SQL;
 
    	function setWmsPrice($price,$wms_id){
    		$sql = "UPDATE wms set wms_pricevolume=$1 WHERE  wms_id = $2 ";
-   		$t = array("i","i");
-		$v = array($price,$wms_id);
+   		$t = ["i", "i"];
+		$v = [$price, $wms_id];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1549,8 +1501,8 @@ SQL;
 
    	function getWmsPrice($wms_id){
    		$sql = "SELECT wms_pricevolume from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wms_pricevolume"];
@@ -1569,8 +1521,8 @@ SQL;
 
    	function setWfsLogTag($wfs_id,$value){
    		$sql = "UPDATE wfs set wfs_proxylog=$2 WHERE  wfs_id = $1 ";
-   		$t = array("i","i");
-		$v = array($wfs_id,$value);
+   		$t = ["i", "i"];
+		$v = [$wfs_id, $value];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1583,8 +1535,8 @@ SQL;
 
    	function getWfsLogTag($wfs_id){
    		$sql = "SELECT wfs_proxylog from wfs WHERE  wfs_id = $1 ";
-   		$t = array("i");
-		$v = array($wfs_id);
+   		$t = ["i"];
+		$v = [$wfs_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wfs_proxylog"];
@@ -1602,8 +1554,8 @@ SQL;
 
    	function setWfsPrice($price,$wfs_id){
    		$sql = "UPDATE wfs set wfs_pricevolume=$1 WHERE  wfs_id = $2 ";
-   		$t = array("i","i");
-		$v = array($price,$wfs_id);
+   		$t = ["i", "i"];
+		$v = [$price, $wfs_id];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1616,8 +1568,8 @@ SQL;
 
    	function getWfsPrice($wfs_id){
    		$sql = "SELECT wfs_pricevolume from wfs WHERE  wfs_id = $1 ";
-   		$t = array("i");
-		$v = array($wfs_id);
+   		$t = ["i"];
+		$v = [$wfs_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wfs_pricevolume"];
@@ -1636,8 +1588,8 @@ SQL;
 
    	function setWmsfiPrice($price,$wms_id){
    		$sql = "UPDATE wms set wms_price_fi=$1 WHERE  wms_id = $2 ";
-   		$t = array("i","i");
-		$v = array($price,$wms_id);
+   		$t = ["i", "i"];
+		$v = [$price, $wms_id];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1650,8 +1602,8 @@ SQL;
 
    	function getWmsfiPrice($wms_id){
    		$sql = "SELECT wms_price_fi from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wms_price_fi"];
@@ -1670,8 +1622,8 @@ SQL;
 
    	function setWmsfiLogTag($wms_id,$value){
    		$sql = "UPDATE wms set wms_proxy_log_fi=$2 WHERE  wms_id = $1 ";
-   		$t = array("i","i");
-		$v = array($wms_id,$value);
+   		$t = ["i", "i"];
+		$v = [$wms_id, $value];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1684,8 +1636,8 @@ SQL;
 
    	function getWmsfiLogTag($wms_id){
    		$sql = "SELECT wms_proxy_log_fi from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			return $row["wms_proxy_log_fi"];
@@ -1704,8 +1656,8 @@ SQL;
 
    	function unsetWmsProxy($wms_list){
    		$sql = "UPDATE wms set wms_owsproxy='', wms_pricevolume=0,wms_proxylog=0,wms_proxy_log_fi=0,wms_price_fi=0  WHERE  wms_id IN ($1)";
-   		$t = array("s");
-		$v = array($wms_list);
+   		$t = ["s"];
+		$v = [$wms_list];
    		$res = db_prep_query($sql,$v,$t);
    	}	
 
@@ -1719,18 +1671,18 @@ SQL;
    	function logWmsProxyRequest($wms_id,$user_id,$getmap,$price){
    		$sql = "INSERT INTO mb_proxy_log (fkey_wms_id,fkey_mb_user_id, request, pixel, price, got_result)"
             ." VALUES ($1, $2, $3, $4, $5, $6)";
-   		$t = array("i","i","s","i","r", "i");
+   		$t = ["i", "i", "s", "i", "r", "i"];
 		#extract height and width
 		#use regexpr
 		$pattern_height = '~HEIGHT=(\d+)&~i';
 		$pattern_width = '~WIDTH=(\d+)&~i';
-		preg_match($pattern_width, $getmap,$sub_width);
-		preg_match($pattern_height, $getmap,$sub_height);
+		preg_match($pattern_width, (string) $getmap,$sub_width);
+		preg_match($pattern_height, (string) $getmap,$sub_height);
 		$width=intval($sub_width[1]);
 		$height=intval($sub_height[1]);
 		$pixel=intval($width*$height);
 		$pricePx=$pixel*$price/1000000;
-		$v = array(intval($wms_id),intval($user_id),$getmap,$pixel,$pricePx, 0);
+		$v = [intval($wms_id), intval($user_id), $getmap, $pixel, $pricePx, 0];
    	        #echo print_r($v,true)."<br>";
 		#var_dump($v);
 		#echo $sql."<br>";	
@@ -1738,12 +1690,12 @@ SQL;
 		$res = db_prep_query($sql,$v,$t) or die(db_error());
 		#echo "test<br>";
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Writing table mb_proxy_log failed.");
 			return false;
 		}
 		return true;
-		
+
 		#if($row = db_fetch_array($res)){
    			#return $row["wms_proxylog"];
    		#}
@@ -1762,12 +1714,12 @@ SQL;
    	function logWfsProxyRequest($wfs_id, $user_id, $getfeature, $price, $numberOfFeatures, $featuretype){
    		$sql = "INSERT INTO mb_proxy_log (fkey_wms_id, fkey_mb_user_id, request, price, got_result, features, fkey_wfs_id, layer_featuretype_list)"
             ." VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
-   		$t = array("i","i","s","i","r", "i", "i", "s");
+   		$t = ["i", "i", "s", "i", "r", "i", "i", "s"];
 		$priceFeatures=$price;
-		$v = array(0,intval($user_id),$getfeature,$priceFeatures, 0, $numberOfFeatures, intval($wfs_id), $featuretype);
+		$v = [0, intval($user_id), $getfeature, $priceFeatures, 0, $numberOfFeatures, intval($wfs_id), $featuretype];
 		$res = db_prep_query($sql,$v,$t) or die(db_error());
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Writing table mb_proxy_log failed.");
 			return false;
 		}
@@ -1785,21 +1737,21 @@ SQL;
    		$sql = "INSERT INTO mb_proxy_log "
             ."(fkey_wms_id,fkey_mb_user_id, request, pixel, price, layer_featuretype_list, request_type, got_result) "
             ."VALUES ($1, $2, $3, $4, $5, $6, 'getMap', $7)";
-   		$t = array("i","i","s","i","r","s","i");
+   		$t = ["i", "i", "s", "i", "r", "s", "i"];
 		#extract height and width
 		#use regexpr
 		$pattern_height = '~HEIGHT=(\d+)&~i';
 		$pattern_width = '~WIDTH=(\d+)&~i';
         $pattern_layers = '~LAYERS=([^&.])+~i';
-		preg_match($pattern_width, $getmap,$sub_width);
-		preg_match($pattern_height, $getmap,$sub_height);
-        preg_match($pattern_layers, $getmap,$sub_layers);
+		preg_match($pattern_width, (string) $getmap,$sub_width);
+		preg_match($pattern_height, (string) $getmap,$sub_height);
+        preg_match($pattern_layers, (string) $getmap,$sub_layers);
         $layers = explode("=", $sub_layers[0]);
 		$width=intval($sub_width[1]);
 		$height=intval($sub_height[1]);
 		$pixel= $got_result === -1 ? 0 : ($set0Pixels ? 0 : intval($width*$height));
 		$pricePx=$pixel*$price/1000000;
-		$v = array(intval($wms_id),intval($user_id),$getmap,$pixel,$pricePx,isset($layers[1]) ? urldecode($layers[1]) : '',$got_result);
+		$v = [intval($wms_id), intval($user_id), $getmap, $pixel, $pricePx, isset($layers[1]) ? urldecode($layers[1]) : '', $got_result];
    	        #echo print_r($v,true)."<br>";
 		#var_dump($v);
 		#echo $sql."<br>";	
@@ -1807,7 +1759,7 @@ SQL;
 		$res = db_prep_query($sql,$v,$t) or die(db_error());
 		#echo "test<br>";
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Writing table mb_proxy_log failed.");
 			return false;
 		}
@@ -1828,12 +1780,12 @@ SQL;
     function updateWmsLog($got_result, $error_message, $error_mime_type, $log_id){
         $sql = "UPDATE mb_proxy_log SET got_result=$1,error_message=$2,error_mime_type=$3"
             . ($got_result === -1 ? ',pixel=0' : '') ." WHERE log_id=$4";
-        $t = array("i","s","s","i");
-        $v = array($got_result, $error_message, $error_mime_type, $log_id);
+        $t = ["i", "s", "s", "i"];
+        $v = [$got_result, $error_message, $error_mime_type, $log_id];
         $res = db_prep_query($sql,$v,$t) or die(db_error());
 		#echo "test<br>";
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Updating table mb_proxy_log failed.");
 			return false;
 		}
@@ -1843,18 +1795,18 @@ SQL;
     function updateWfsLog($got_result, $error_message, $error_mime_type, $features, $log_id){
         $sql = "UPDATE mb_proxy_log SET got_result=$1,error_message=$2,error_mime_type=$3"
             . ($got_result === -1 ? ',features=0' : ',features=$5') ." WHERE log_id=$4";
-        $t = array("i","s","s","i","i");
-        $v = array($got_result, $error_message, $error_mime_type, $log_id, $features);
+        $t = ["i", "s", "s", "i", "i"];
+        $v = [$got_result, $error_message, $error_mime_type, $log_id, $features];
         $res = db_prep_query($sql,$v,$t) or die(db_error());
 	if(!$res){
-		include_once(dirname(__FILE__)."/class_mb_exception.php");
+		include_once(__DIR__."/class_mb_exception.php");
 		$e = new mb_exception("class_log: Updating table mb_proxy_log failed.");
 		return false;
 	}
         //calculate total price
 	$sql = "UPDATE mb_proxy_log SET price = price * features WHERE log_id = $1";
-	$t = array("i");
-	$v = array($log_id);
+	$t = ["i"];
+	$v = [$log_id];
 	$res = db_prep_query($sql,$v,$t);
         return true;
     }	
@@ -1863,13 +1815,13 @@ SQL;
    		$sql = "INSERT INTO mb_proxy_log "
             ."(fkey_wms_id,fkey_mb_user_id, request, price, layer_featuretype_list, request_type) "
             ."VALUES ($1, $2, $3, $4, $5, 'getFeatureInfo')";
-   		$t = array("i","i","s","r","s");
+   		$t = ["i", "i", "s", "r", "s"];
 		#extract height and width
 		#use regexpr
         $pattern_layers = '~LAYERS=([^&.])+~i';
-        preg_match($pattern_layers, $getmap,$sub_layers);
+        preg_match($pattern_layers, (string) $getmap,$sub_layers);
         $layers = explode("=", $sub_layers[0]);
-		$v = array(intval($wms_id), intval($user_id), $getmap, $price, isset($layers[1]) ? urldecode($layers[1]) : '');
+		$v = [intval($wms_id), intval($user_id), $getmap, $price, isset($layers[1]) ? urldecode($layers[1]) : ''];
    	        #echo print_r($v,true)."<br>";
 		#var_dump($v);
 		#echo $sql."<br>";	
@@ -1877,7 +1829,7 @@ SQL;
 		$res = db_prep_query($sql,$v,$t) or die(db_error());
 		#echo "test<br>";
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Writing table mb_proxy_log failed.");
 			return false;
 		}
@@ -1898,18 +1850,18 @@ SQL;
         if($error_message != null) {
             $sql = "UPDATE mb_proxy_log SET price=0"
                 .",error_message=$1,error_mime_type=$2  WHERE log_id=$3";
-            $t = array("s","s","i");
-            $v = array($error_message, $error_mime_type, $log_id);
+            $t = ["s", "s", "i"];
+            $v = [$error_message, $error_mime_type, $log_id];
         } else {
             $sql = "UPDATE mb_proxy_log SET error_message=$1,error_mime_type=$2  WHERE log_id=$3";
-            $t = array("s","s","i");
-            $v = array($error_message, $error_mime_type, $log_id);
+            $t = ["s", "s", "i"];
+            $v = [$error_message, $error_mime_type, $log_id];
         }
         
         $res = db_prep_query($sql,$v,$t) or die(db_error());
 		#echo "test<br>";
 		if(!$res){
-			include_once(dirname(__FILE__)."/class_mb_exception.php");
+			include_once(__DIR__."/class_mb_exception.php");
 			$e = new mb_exception("class_log: Updating table mb_proxy_log failed.");
 			return false;
 		}
@@ -1924,8 +1876,8 @@ SQL;
 	   	
    	function getWfsOwsproxyString($wfs_id){
    		$sql = "SELECT wfs_owsproxy FROM wfs WHERE wfs_id = $1 ";
-   		$v = array($wfs_id);
-   		$t = array("i");
+   		$v = [$wfs_id];
+   		$t = ["i"];
    		$res = db_prep_query($sql,$v,$t);
    		if($row = db_fetch_array($res)){
    			return $row["wfs_owsproxy"];
@@ -1944,14 +1896,14 @@ SQL;
 	 */
    	function setWfsOwsproxyString($wfs_id, $status){
    		$sql = "UPDATE wfs SET wfs_owsproxy = $1 WHERE wfs_id = $2 ";
-   		$t = array("s","i");
+   		$t = ["s", "i"];
    		if($status == true){
    			$time = md5(microtime(1));
-			$v = array($time,$wfs_id);
+			$v = [$time, $wfs_id];
    		}
    		else{
    			$n = new mb_notice("removed owsproxy for wfs:".$wfs_id);
-   			$v = array("",$wfs_id);
+   			$v = ["", $wfs_id];
    		}
    		
    		$res = db_prep_query($sql,$v,$t);
@@ -1969,8 +1921,8 @@ SQL;
 
    	function getAuthInfoOfWMS($wms_id){
    		$sql = "SELECT wms_username, wms_password, wms_auth_type from wms WHERE  wms_id = $1 ";
-   		$t = array("i");
-		$v = array($wms_id);
+   		$t = ["i"];
+		$v = [$wms_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			$auth['username'] = $row["wms_username"];
@@ -1992,8 +1944,8 @@ SQL;
 
    	function getAuthInfoOfWFS($wfs_id){
    		$sql = "SELECT wfs_username, wfs_password, wfs_auth_type from wfs WHERE  wfs_id = $1 ";
-   		$t = array("i");
-		$v = array($wfs_id);
+   		$t = ["i"];
+		$v = [$wfs_id];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
    			$auth['username'] = $row["wfs_username"];
@@ -2015,8 +1967,8 @@ SQL;
 
    	function getWmsIdFromOwsproxyString($owsproxy){
    		$sql = "SELECT wms_id from wms WHERE  wms_owsproxy = $1 ";
-   		$t = array("s");
-		$v = array($owsproxy);
+   		$t = ["s"];
+		$v = [$owsproxy];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row["wms_id"];
@@ -2035,8 +1987,8 @@ SQL;
 
    	function getWfsIdFromOwsproxyString($owsproxy){
    		$sql = "SELECT wfs_id from wfs WHERE  wfs_owsproxy = $1 ";
-   		$t = array("s");
-		$v = array($owsproxy);
+   		$t = ["s"];
+		$v = [$owsproxy];
    		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row["wfs_id"];
@@ -2048,8 +2000,8 @@ SQL;
 
 
    	function checkURL($url){
-		$pos_qm = strpos($url,"?");
-		if($pos_qm > 0 && $pos_qm < (mb_strlen($url)-1) && mb_substr($url,(mb_strlen($url)-1)) != "&"){
+		$pos_qm = strpos((string) $url,"?");
+		if($pos_qm > 0 && $pos_qm < (mb_strlen((string) $url)-1) && mb_substr((string) $url,(mb_strlen((string) $url)-1)) != "&"){
 			$url = $url."&";
 			return $url;
 		}
@@ -2065,8 +2017,8 @@ SQL;
 		$g = $this->getGuisByPermission($userID,true);
 		if(in_array($guiID,$g)){
 			$sql = "SELECT * FROM gui_element WHERE fkey_gui_id = $1 AND e_id = $2 ";
-			$v = array($guiID,$elementID);
-			$t = array('s','s');
+			$v = [$guiID, $elementID];
+			$t = ['s', 's'];
 			$res = db_prep_query($sql,$v,$t);
 			if($row = db_fetch_array($res)){
 				return true;
@@ -2083,7 +2035,7 @@ SQL;
 	// deprecated! use User->isLayerAccessible
 	function getLayerPermission($wms_id, $layer_name, $user_id){
 		//prohibit problems with layer names
-		$layer_name = urldecode($layer_name);
+		$layer_name = urldecode((string) $layer_name);
 		$layer_id = $this->getLayerIdByLayerName($wms_id,$layer_name);
 		if (!is_int($layer_id)) {//TODO: do this also in User->isLayerAccessible
 			$e = new mb_exception("No id for the requested layer with name ".$layer_name." found in database!");
@@ -2091,8 +2043,8 @@ SQL;
 		}
 		$array_guis = $this->getGuisByPermission($user_id,true);
 		if (count($array_guis) > 0) {
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT * FROM gui_layer WHERE fkey_gui_id IN (";
 			$c = 1;
 			for($i=0; $i<count($array_guis); $i++){
@@ -2118,8 +2070,8 @@ SQL;
 	}
 	
 	function getInspireDownloadOptionsForLayers($layerIdArray) {
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT layer_id, f_get_download_options_for_layer(layer_id) as options from layer where layer_id in(";
 		$c = 1;
 		for($i=0; $i<count($layerIdArray); $i++){
@@ -2145,8 +2097,8 @@ SQL;
 	// deprecated! use User->isWmsAccessible
 	function getWmsPermission($wms_id, $user_id) {
 		$array_guis = $this->getGuisByPermission($user_id,true);
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT * FROM gui_wms WHERE fkey_gui_id IN (";
 		$c = 1;
 		for($i=0; $i<count($array_guis); $i++){
@@ -2171,8 +2123,8 @@ SQL;
 	function getLayerIdByLayerName($wms_id, $layer_name){
 		$sql = "SELECT layer_id FROM layer WHERE ";
 		$sql .= "fkey_wms_id = $1 AND layer_name = $2";
-		$v = array($wms_id,$layer_name);
-		$t = array('i','s');
+		$v = [$wms_id, $layer_name];
+		$t = ['i', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			if (is_numeric($row['layer_id'])) {
@@ -2186,8 +2138,8 @@ SQL;
 	function getWmsIdByWmsGetmap($getmap) {
 		$sql = "SELECT wms_id FROM wms WHERE ";
 		$sql .= "wms_getmap LIKE $1 LIMIT 1";
-		$v = array($getmap."%");
-		$t = array('s');
+		$v = [$getmap."%"];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			return $row['wms_id'];
@@ -2200,7 +2152,7 @@ SQL;
 	function delFromStorage($filename, $cacheType, $hashLocalFilename=False) {
 		switch ($cacheType) {
 			case "memcache":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$memcache_obj = new Memcache;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcache_obj->connect(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2213,7 +2165,7 @@ SQL;
 				return $result;
 				break;
 			case "memcached":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$memcached_obj = new Memcached;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcached_obj->addServer(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2227,7 +2179,7 @@ SQL;
 				return $result;
 				break;
 			case "cache":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$cache = new Cache();
 				if ($cache->isActive && $cache->cachedVariableExists($filename)) {
 					$result = $cache->cachedVariableDelete($filename);
@@ -2238,14 +2190,14 @@ SQL;
 				break;
 			case "file":
 			    if ($hashLocalFilename){
-			        return unlink(md5($filename));
+			        return unlink(md5((string) $filename));
 			    } else {
 			        return unlink($filename);
 			    }
 				break;
 			default:
 			    if ($hashLocalFilename){
-			        return unlink(md5($filename));
+			        return unlink(md5((string) $filename));
 			    } else {
 			        return unlink($filename);
 			    }
@@ -2255,7 +2207,7 @@ SQL;
 	function putToStorage($filename, $content, $cacheType, $maxAge, $hashLocalFilename=False) {
 		switch ($cacheType) {
 			case "memcache":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$memcache_obj = new Memcache;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcache_obj->connect(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2277,7 +2229,7 @@ SQL;
 				return true;
 			break;
 			case "memcached":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$memcached_obj = new Memcached;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcached_obj->addServer(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2292,7 +2244,7 @@ SQL;
 				return true;
 			break;
 			case "cache":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$cache = new Cache();
 				if ($cache->isActive) {
 					if ($cache->cachedVariableExists($filename)) {
@@ -2305,14 +2257,14 @@ SQL;
 			break;
 			case "file":
 			    if ($hashLocalFilename){
-			        file_put_contents(md5($filename), $content);
+			        file_put_contents(md5((string) $filename), $content);
 			    } else {
 			        file_put_contents($filename, $content);
 			    }
 			break;
 			default:
 			    if ($hashLocalFilename){
-			        file_put_contents(md5($filename), $content);
+			        file_put_contents(md5((string) $filename), $content);
 			    } else {
 			        file_put_contents($filename, $content);
 			    }
@@ -2323,7 +2275,7 @@ SQL;
 	function getFromStorage($filename, $cacheType, $hashLocalFilename=False) {
 		switch ($cacheType) {
 			case "memcache":
-				$filename = "mapbender:" . md5($filename);
+				$filename = "mapbender:" . md5((string) $filename);
 				$memcache_obj = new Memcache;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcache_obj->connect(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2336,7 +2288,7 @@ SQL;
 				return $content;
 			break;
 			case "memcached":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$memcached_obj = new Memcached;
 				if (defined("MEMCACHED_IP") && MEMCACHED_IP != "" && defined("MEMCACHED_PORT") && MEMCACHED_PORT != "") {
 					$memcached_obj->addServer(MEMCACHED_IP, MEMCACHED_PORT);
@@ -2350,7 +2302,7 @@ SQL;
 				return $content;
 			break;
 			case "cache":
-			    $filename = "mapbender:" . md5($filename);
+			    $filename = "mapbender:" . md5((string) $filename);
 				$cache = new Cache();
 				if ($cache->isActive && $cache->cachedVariableExists($filename)) {
 					$content = $cache->cachedVariableFetch($filename);
@@ -2361,7 +2313,7 @@ SQL;
 			break;
 			case "file":
 			    if ($hashLocalFilename){
-			        $content = file_get_contents(md5($filename));
+			        $content = file_get_contents(md5((string) $filename));
 			    } else {
 			        $content = file_get_contents($filename);
 			    }
@@ -2369,7 +2321,7 @@ SQL;
 			break;
 			default:
 			    if ($hashLocalFilename){
-			        $content = file_get_contents(md5($filename));
+			        $content = file_get_contents(md5((string) $filename));
 			    } else {
 			        $content = file_get_contents($filename);
 			    }
@@ -2387,7 +2339,7 @@ SQL;
 	    }
 	    else
 	    {
-	        return (utf8_encode(utf8_decode($string)) == $string);
+	        return (mb_convert_encoding(mb_convert_encoding($string, 'ISO-8859-1'), 'UTF-8', 'ISO-8859-1') == $string);
 	    }  
     /*
     		return preg_match('%(?:
@@ -2403,7 +2355,7 @@ SQL;
 	}
 	
 	function is_utf8_xml($xml) {
-		return preg_match('/<\?xml[^>]+encoding="utf-8"[^>]*\?>/is', $xml);
+		return preg_match('/<\?xml[^>]+encoding="utf-8"[^>]*\?>/is', (string) $xml);
 	}
 	
 	function is_utf8 ($data) {
@@ -2412,16 +2364,16 @@ SQL;
 	
 	public static function convertIncomingString ($str) {
 		if (CHARSET == "ISO-8859-1") {
-			$e = new mb_notice("Conversion to UTF-8: " . $str . " to " . utf8_encode($str));
-			return utf8_encode($str);
+			$e = new mb_notice("Conversion to UTF-8: " . $str . " to " . mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1'));
+			return mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1');
 		}
 		return $str;
 	}
 	
 	public static function convertOutgoingString ($str) {
 		if (CHARSET == "ISO-8859-1") {
-			$e = new mb_notice("Conversion to ISO-8859-1: " . $str . " to " . utf8_decode($str));
-			return utf8_decode($str);
+			$e = new mb_notice("Conversion to ISO-8859-1: " . $str . " to " . mb_convert_encoding($str, 'ISO-8859-1'));
+			return mb_convert_encoding($str, 'ISO-8859-1');
 		}
 		return $str;
 	}
@@ -2430,13 +2382,13 @@ SQL;
 		if (CHARSET == "UTF-8") {
 			if (!$this->is_utf8($data)) {
 				$e = new mb_notice("Conversion: ISO-8859-1 to UTF-8");
-				return utf8_encode($data);
+				return mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
 			}
 		}
 		else {
 			if ($this->is_utf8($data)) {
 				$e = new mb_notice("Conversion: UTF-8 to ISO-8859-1");
-				return utf8_decode($data);
+				return mb_convert_encoding($data, 'ISO-8859-1');
 			}
 		}
 		$e = new mb_notice("No conversion: is " . CHARSET);
@@ -2447,7 +2399,7 @@ SQL;
 		if (CHARSET == "UTF-8") {
 			if ($this->is_utf8($data)) {
 				$e = new mb_notice("Conversion: UTF-8 to ISO-8859-1");
-				return utf8_decode($data);
+				return mb_convert_encoding($data, 'ISO-8859-1');
 			}
 		}
 		$e = new mb_notice("no conversion: is " . CHARSET);
@@ -2462,10 +2414,10 @@ SQL;
 	 */
 	 function getWfsByOwner($userid){
 	 	$sql = "SELECT wfs_id FROM wfs WHERE wfs_owner = $1";
-		$v = array($userid);
-		$t = array('i');
+		$v = [$userid];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$r = array();
+		$r = [];
 		while($row = db_fetch_array($res)){
 			array_push($r,$row["wfs_id"]);
 		}
@@ -2480,8 +2432,8 @@ SQL;
 	 */
 	 function getLayersByPermission($user_id){
 			$arrayGuis = $this->getGuisByPermission($user_id,true);
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT DISTINCT fkey_layer_id FROM gui_layer WHERE fkey_gui_id IN (";
 			$c = 1;
 			for($i=0; $i<count($arrayGuis); $i++){
@@ -2494,7 +2446,7 @@ SQL;
 			$sql .= ") AND gui_layer_status = 1";
 			//array_push($t,'i');
 			$res = db_prep_query($sql,$v,$t);
-			$arrayLayers = array();
+			$arrayLayers = [];
 			if($row = db_fetch_array($res)){
 				while($row = db_fetch_array($res)){
 					array_push($arrayLayers,$row["fkey_layer_id"]);
@@ -2537,8 +2489,8 @@ SQL;
  	                break;
 	}
 	//get resource owner information
-	$v = array($resourceId);
-	$t = array('i');
+	$v = [$resourceId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$owningInfo = db_fetch_array($res);
 	if (!isset($owningInfo['id'])) {
@@ -2550,23 +2502,23 @@ SQL;
 		$e = new mb_notice("classes/class_administration.php: fkey_mb_group_id not found!");
 		//Get information about owning user of the relation mb_user_mb_group (primary group of user) - alternatively the defined fkey_mb_group_id from the resource must be used!
 		$sql = "SELECT mb_group_name, mb_group_title, mb_group_id, mb_group_logo_path, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_voicetelephone, mb_group_facsimiletelephone, mb_group_homepage, mb_group_registry_url, a.timestamp FROM mb_group AS a, mb_user AS b, mb_user_mb_group AS c WHERE b.mb_user_id = $1  AND b.mb_user_id = c.fkey_mb_user_id AND c.fkey_mb_group_id = a.mb_group_id AND c.mb_user_mb_group_type=2 LIMIT 1";
-		$v = array($owningInfo['owner']);
-		$t = array('i');
+		$v = [$owningInfo['owner']];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$departmentMetadata = db_fetch_array($res);
 	} else {
 		$e = new mb_notice("classes/class_administration.php: fkey_mb_group_id found!");
 		$sql = "SELECT mb_group_name , mb_group_title, mb_group_id, mb_group_logo_path , mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_voicetelephone, mb_group_facsimiletelephone, mb_group_homepage, mb_group_registry_url, timestamp FROM mb_group WHERE mb_group_id = $1 LIMIT 1";
-		$v = array($owningInfo['fkey_mb_group_id']);
-		$t = array('i');
+		$v = [$owningInfo['fkey_mb_group_id']];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$departmentMetadata = db_fetch_array($res);
 	}
 	unset($sql, $v, $t, $res);
 	//infos about the owner of the service - he is the man who administrate the metadata - register the service
 	$sql = "SELECT mb_user_email, timestamp FROM mb_user WHERE mb_user_id = $1";
-	$v = array((integer)$owningInfo['owner']);
-	$t = array('i');
+	$v = [(integer)$owningInfo['owner']];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	$userMetadata = db_fetch_array($res);
 	$e = new mb_notice("classes/class_administration.php (getOrgaInfoFromRegistry): mb_group_name  : ".$departmentMetadata['mb_group_name']);
@@ -2583,28 +2535,28 @@ SQL;
      */
     function getIdentifierCodespaceFromRegistry($departmentMetadata, $metadataArray) {
 	if (isset($metadataArray['datasetid_codespace']) && $metadataArray['datasetid_codespace'] != "") {
-		if (substr($metadataArray['datasetid_codespace'], -1) !== '/') {
+		if (!str_ends_with((string) $metadataArray['datasetid_codespace'], '/')) {
 			$uniqueResourceIdentifierCodespace = $metadataArray['datasetid_codespace'].'/';	
 		} else {
 			$uniqueResourceIdentifierCodespace =  $metadataArray['datasetid_codespace'];	
 		}
 	} else {
 		if (isset($departmentMetadata['mb_group_registry_url']) && $departmentMetadata['mb_group_registry_url'] !== "") {
-			if (substr($departmentMetadata['mb_group_registry_url'], -1) !== '/') {
+			if (!str_ends_with((string) $departmentMetadata['mb_group_registry_url'], '/')) {
 				$uniqueResourceIdentifierCodespace = $departmentMetadata['mb_group_registry_url'].'/';	
 			} else {
 				$uniqueResourceIdentifierCodespace =  $departmentMetadata['mb_group_registry_url'];	
 			}
 		} else {
 			if (isset($departmentMetadata['mb_group_homepage']) && $departmentMetadata['mb_group_homepage'] !== "") {
-				if (substr($departmentMetadata['mb_group_homepage'], -1) !== '/') {
+				if (!str_ends_with((string) $departmentMetadata['mb_group_homepage'], '/')) {
 					$uniqueResourceIdentifierCodespace = $departmentMetadata['mb_group_homepage'].'/'.'registry/spatial/dataset/';	
 				} else {
 					$uniqueResourceIdentifierCodespace =  $departmentMetadata['mb_group_homepage'].'registry/spatial/dataset/';	
 				}
 			} else {
 				if (defined('METADATA_DEFAULT_CODESPACE')) {
-					if (substr($departmentMetadata['mb_group_homepage'], -1) !== '/') {
+					if (!str_ends_with((string) $departmentMetadata['mb_group_homepage'], '/')) {
 						$uniqueResourceIdentifierCodespace = METADATA_DEFAULT_CODESPACE.'/'.'registry/spatial/dataset/';	
 					} else {
 						$uniqueResourceIdentifierCodespace =  METADATA_DEFAULT_CODESPACE.'registry/spatial/dataset/';	
@@ -2628,13 +2580,13 @@ SQL;
         $sql = "SELECT * FROM mapviewer_types";
         $res = db_query($sql);
         $jsonResult = new stdClass();
-	$jsonResult->mapviewer_types = array();
+	$jsonResult->mapviewer_types = [];
 	$i = 0;
 	while($row = db_fetch_array($res)){
 	    $jsonResult->mapviewer_types[$i]->id = $row["mapviewer_id"];
 	    $jsonResult->mapviewer_types[$i]->name = $row["mapviewer_name"];
             $jsonResult->mapviewer_types[$i]->description = $row["mapviewer_description"];
-            $jsonResult->mapviewer_types[$i]->api = json_decode(stripslashes($row["mapviewer_api_json"]));
+            $jsonResult->mapviewer_types[$i]->api = json_decode(stripslashes((string) $row["mapviewer_api_json"]));
 	    $i++;
 	}
         return json_encode($jsonResult->mapviewer_types);
@@ -2643,11 +2595,11 @@ SQL;
     function getMapviewerInvokeUrl($mapviewerTypeId, $guiId = false, $wmcId = false) {
 	//get mapviewerType json
 	$sql = "SELECT * FROM mapviewer_types WHERE mapviewer_id = $1";
-	$v = array($mapviewerTypeId);
-	$t = array('i');
+	$v = [$mapviewerTypeId];
+	$t = ['i'];
         $res = db_prep_query($sql,$v,$t);
 	$row = db_fetch_array($res);
-	$api = json_decode(stripslashes($row["mapviewer_api_json"]));
+	$api = json_decode(stripslashes((string) $row["mapviewer_api_json"]));
 	if ($api == false) {
 	    $e = new mb_exception("An error occured while decoding mapviewer_api_json field!");
 	}
@@ -2666,7 +2618,7 @@ SQL;
 		}
 	    }
 	}
-	$paramters = array();
+	$paramters = [];
 	if ($guiId && $api->gui_param != null) {
 	    $paramters[$api->gui_param] = $guiId;
 	}
@@ -2684,8 +2636,8 @@ SQL;
    function getMetadataPreviewUrl($metadataId) {
 	//get mapviewerType json
 	$sql = "SELECT preview_image FROM mb_metadata WHERE metadata_id = $1";
-	$v = array($metadataId);
-	$t = array('i');
+	$v = [$metadataId];
+	$t = ['i'];
         $res = db_prep_query($sql,$v,$t);
 	$row = db_fetch_array($res);
 	$previewUrl = $row["preview_image"];
@@ -2704,12 +2656,12 @@ SQL;
 	//GET first! metadata record for this combination - maybe better GET last 
         if ($wmcId == false) {
 	    $sql = "SELECT uuid, title, abstract, f_get_responsible_organization_for_ressource(metadata_id, 'metadata') as orga_id FROM mb_metadata WHERE fkey_gui_id = $1 AND fkey_wmc_serial_id is null ORDER BY lastchanged DESC LIMIT 1";
-	    $v = array($guiId);
-	    $t = array('s');
+	    $v = [$guiId];
+	    $t = ['s'];
 	} else {
 	    $sql = "SELECT uuid, title, abstract, f_get_responsible_organization_for_ressource(metadata_id, 'metadata') as orga_id FROM mb_metadata WHERE fkey_gui_id = $1 AND fkey_wmc_serial_id = $2 ORDER BY lastchanged DESC LIMIT 1";
-	    $v = array($guiId, $wmcId);
-	    $t = array('s', 'i');
+	    $v = [$guiId, $wmcId];
+	    $t = ['s', 'i'];
 	}
         $res = db_prep_query($sql,$v,$t);
 	$row = db_fetch_array($res);
@@ -2736,7 +2688,7 @@ SQL;
 		$res = db_query($sql);
 		$row = db_fetch_array($res);
 		if ($row) {
-			$r = array();	
+			$r = [];	
 			while($row = db_fetch_array($res)){
 				array_push($r,$row["category_id"]);
 			}
@@ -2750,10 +2702,10 @@ SQL;
 	
 	
 	function getGuisByOwnerByGuiCategory($userid,$guicategoryid){
-		$gui_list= array();
+		$gui_list= [];
 		$gui_list = $this->getGuisByOwner($userid,false);
-		$v = array();
-	   	$t = array();
+		$v = [];
+	   	$t = [];
 		
 			$sql = "SELECT fkey_gui_id FROM gui_gui_category ";
 			$sql .= "WHERE gui_gui_category.fkey_gui_category_id = $1 ";
@@ -2772,7 +2724,7 @@ SQL;
 			$e = new mb_notice("getGuisByOwnerByGuiCategories: ".$sql);	
 			$e = new mb_notice("v - t: ".count($v)." -- ".count($t));	
 			$res = db_prep_query($sql,$v,$t);
-			$r = array();
+			$r = [];
 			while($row = db_fetch_array($res)){
 				array_push($r,$row["fkey_gui_id"]);
 			}
@@ -2789,7 +2741,7 @@ SQL;
 			}
 		}
 		else {
-			$parts = pathinfo($fullFilename);
+			$parts = pathinfo((string) $fullFilename);
 			if (!is_writable($parts["dirname"])) {
 				$e = new mb_exception(__FILE__ . 
 					": saveAsFile(): Folder not writable: " . 
@@ -2799,7 +2751,7 @@ SQL;
 		}
 		
 		if($h = fopen($fullFilename,"w")){
-			if(!fwrite($h, $content)){
+			if(!fwrite($h, (string) $content)){
 				$e = new mb_exception(__FILE__ . 
 					": saveAsFile(): failed to write file: " . $fullFilename);
 				return false;

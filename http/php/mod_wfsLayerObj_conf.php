@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_wfs_conf.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -60,8 +60,8 @@ function getWfsConfs($myGui) {
 function saveLayerWfsConnection($myWfsConf, $myGui, $myLayer) {
 	$sql = "UPDATE gui_layer SET gui_layer_wfs_featuretype = $1 ";
 	$sql .= "WHERE fkey_gui_id = $2 AND fkey_layer_id = $3";
-    $v = array($myWfsConf,$myGui,$myLayer);
-	$t = array('s','s','i');
+    $v = [$myWfsConf, $myGui, $myLayer];
+	$t = ['s', 's', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	
 	if($res) {

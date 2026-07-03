@@ -1,4 +1,12 @@
-
+<?php
+// __MB_PHP8_GUARD__ — when this JS template is reached directly, ensure the
+// Mapbender class is loaded; in normal use it is included from a context
+// that has already loaded mapbender.conf + the lib classes.
+if (!class_exists('Mapbender')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+    require_once __DIR__ . '/../../lib/class_Mapbender.php';
+}
+?>
 options.$target.each(function () {
 	var map = $(this).mapbender();
 	if (map && map.zoomToExtent) {

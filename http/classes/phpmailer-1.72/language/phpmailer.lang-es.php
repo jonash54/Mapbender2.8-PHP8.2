@@ -4,7 +4,7 @@
  * Versión en español
  */
 
-$PHPMAILER_LANG = array();
+$PHPMAILER_LANG = [];
 
 $PHPMAILER_LANG["provide_address"] = 'Debe proveer al menos una ' .
                                      'dirección de email como destinatario.';

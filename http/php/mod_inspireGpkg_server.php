@@ -7,8 +7,8 @@
 # and Simplified BSD license.
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require(dirname(__FILE__)."/mb_validateSession.php");
-require_once dirname(__FILE__) . "/../classes/class_user.php";
+require(__DIR__."/mb_validateSession.php");
+require_once __DIR__ . "/../classes/class_user.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -30,7 +30,7 @@ function validateGeojsonPolygon($tmpGeojson) {
 }
 
 function validateType($tmpType) {
-    if (in_array($tmpType, array('raster', 'vector'))) {
+    if (in_array($tmpType, ['raster', 'vector'])) {
         return true;
     } else {
         return false;
@@ -41,10 +41,8 @@ function isDatasetIdAlreadyInDB($datasetId){
     $sql = <<<SQL
 SELECT log_id FROM inspire_dls_log WHERE datasetid = $1 AND linktype = 'GPKG' ORDER BY lastchanged DESC
 SQL;
-    $v = array(
-        $datasetId
-    );
-    $t = array('s');
+    $v = [$datasetId];
+    $t = ['s'];
     $res = db_prep_query($sql,$v,$t);
     while ($row = db_fetch_array($res)){
         $logId[] = $row['log_id'];
@@ -64,10 +62,8 @@ function logGpkgUsage ($datasetId) {
         $sql = <<<SQL
 UPDATE inspire_dls_log SET log_count = log_count + 1 WHERE log_id = $1
 SQL;
-        $v = array(
-            $logId
-        );
-        $t = array('i');
+        $v = [$logId];
+        $t = ['i'];
         $res = db_prep_query($sql,$v,$t);
         return true;
     } else {
@@ -75,10 +71,8 @@ SQL;
         $sql = <<<SQL
 INSERT INTO inspire_dls_log (createdate, datasetid, linktype, log_count) VALUES (now(), $1, 'GPKG', 1)
 SQL;
-        $v = array(
-            $datasetId
-        );
-        $t = array('s');
+        $v = [$datasetId];
+        $t = ['s'];
         $res = db_prep_query($sql,$v,$t);
         return true;
     }
@@ -546,7 +540,7 @@ switch ($ajaxResponse->getMethod()) {
 	    } else {
 	        $ajaxResponse->setSuccess(true);
 	        $ajaxResponse->setMessage(_mb("Method generateCache requested."));
-	        
+
 	        $e = new mb_exception("generateCache configuration: " . "'" . json_encode($configuration) . "'");
 	        //get userId
 	        //get userEmail
@@ -563,7 +557,7 @@ switch ($ajaxResponse->getMethod()) {
 	        }
 	        //check if id and email are the same as from ajax call
 	        $uuid = new Uuid();
-	        
+
 	        //add location for cache
 	        if (defined("GPKG_ABSOLUTE_DOWNLOAD_PATH") && GPKG_ABSOLUTE_DOWNLOAD_PATH != "") {
 	            $outputFolder = GPKG_ABSOLUTE_DOWNLOAD_PATH;
@@ -588,9 +582,9 @@ switch ($ajaxResponse->getMethod()) {
 	        //check values
 	        //invoke python script
 	        $output = exec('/usr/bin/python3.9 ../extensions/inspire-gpkg-cache/cli_invoke.py ' . "'" . json_encode($configuration) . "'" . " " . "'generateCache'" );
-	        
+
 	        //$pythonResult = system('/usr/bin/python3.9 ../extensions/inspire-gpkg-cache/cli_invoke.py ' . "'" . json_encode($configuration) . "'" . " " . "'generateCache' > /dev/null" );
-	        
+
 	        /*
 	         * Log information about download of dataset to inspire_dls_log table like it is done for the atom feeds from the atom feed client
 	         */

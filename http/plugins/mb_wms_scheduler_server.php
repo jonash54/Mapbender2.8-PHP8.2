@@ -1,12 +1,12 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -40,29 +40,13 @@ SELECT scheduler_id, wms_id, wms_title, to_timestamp(wms_timestamp), last_status
 SQL;
 		$res = db_query($sql);
 		$e = new mb_exception($sql);
-		$resultObj = array(
-			"header" => array(
-				_mb("Scheduler ID"),
-				_mb("WMS ID"),
-				_mb("WMS title"),
-				_mb("last change"),
-				_mb("last status"),
-				_mb("last monitoring"),
-				_mb("update interval"),
-				_mb("mail notification"),
-				_mb("publish"),
-				_mb("searchable"),
-				_mb("overwrite"),
-				_mb("overwrite categories"),
-				_mb("update status"),
-				_mb("action")
-			), 
-			"data" => array()
-		);
+		$resultObj = ["header" => [_mb("Scheduler ID"), _mb("WMS ID"), _mb("WMS title"), _mb("last change"), _mb("last status"), _mb("last monitoring"), _mb("update interval"), _mb("mail notification"), _mb("publish"), _mb("searchable"), _mb("overwrite"), _mb("overwrite categories"), _mb("update status"), _mb("action")], "data" => []];
 
 		while ($row = db_fetch_row($res)) {
 		    // convert NULL to '', NULL values cause datatables to crash
-			$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+			$walk = array_walk($row, function (&$s) {
+       $s = strval($s);
+   });
 			$row[] = "<img style='cursor:pointer;' class='deleteImg' title='löschen' src='../img/cross.png' />";
 			//if fkey_upload_id is set, format it to date for dataTables
 			$row[5] = $row[5]?date("Y-m-d",$row[5]) : $row[5];
@@ -79,10 +63,10 @@ SQL;
 SELECT scheduler_id, wms_id, wms_title, wms_owner, scheduler_interval,scheduler_mail,scheduler_publish, scheduler_overwrite, scheduler_overwrite_categories, scheduler_searchable FROM scheduler INNER JOIN wms ON scheduler.fkey_wms_id=wms.wms_id WHERE scheduler.scheduler_id = $1;
 
 SQL;
-		$v = array($wmsSchedulerId);
-		$t = array('i');
+		$v = [$wmsSchedulerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["scheduler_id"] = $row["scheduler_id"];
@@ -115,12 +99,12 @@ scheduler_searchable,scheduler_overwrite,scheduler_overwrite_categories,schedule
 ('wms', $1, $2, $3, $4, $5, $6, $7, now());
 
 SQL;
-		$v = array($data->wms_id, $data->scheduler_interval, $data->scheduler_publish, $data->scheduler_searchable, $data->scheduler_overwrite, $data->scheduler_overwrite_categories, $data->scheduler_mail);
-		$t = array('i','s','i','i','i','i','i');
+		$v = [$data->wms_id, $data->scheduler_interval, $data->scheduler_publish, $data->scheduler_searchable, $data->scheduler_overwrite, $data->scheduler_overwrite_categories, $data->scheduler_mail];
+		$t = ['i', 's', 'i', 'i', 'i', 'i', 'i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not insert wms scheduling in database!"));
 			$ajaxResponse->send();
@@ -143,12 +127,12 @@ SQL;
 UPDATE scheduler SET scheduler_interval = $2, scheduler_publish = $3, scheduler_searchable = $4, scheduler_overwrite = $5, scheduler_mail = $6, scheduler_overwrite_categories = $7, scheduler_change = now() WHERE scheduler_id = $1
 
 SQL;
-		$v = array($schedulerId, $data->scheduler_interval, $data->scheduler_publish, $data->scheduler_searchable, $data->scheduler_overwrite, $data->scheduler_mail, $data->scheduler_overwrite_categories);
-		$t = array('i','s','i','i','i','i','i');
+		$v = [$schedulerId, $data->scheduler_interval, $data->scheduler_publish, $data->scheduler_searchable, $data->scheduler_overwrite, $data->scheduler_mail, $data->scheduler_overwrite_categories];
+		$t = ['i', 's', 'i', 'i', 'i', 'i', 'i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not update wms scheduling in database!"));
 			$ajaxResponse->send();
@@ -163,11 +147,11 @@ SQL;
 SELECT scheduler_id, wms_id, wms_title, wms_owner, scheduler_interval,scheduler_mail,scheduler_publish, scheduler_overwrite, scheduler_overwrite_categories, scheduler_searchable FROM scheduler INNER JOIN wms ON scheduler.fkey_wms_id=wms.wms_id WHERE scheduler.scheduler_id = $1;
 
 SQL;
-		$v = array($schedulerId);
-		$t = array('i');
+		$v = [$schedulerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["scheduler_id"] = $row["scheduler_id"];
@@ -198,12 +182,12 @@ SQL;
 DELETE FROM scheduler WHERE scheduler_id = $1;
 
 SQL;
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not delete wms scheduling in database!"));
 			$ajaxResponse->send();
@@ -228,7 +212,7 @@ $sql = <<<SQL
 
 SQL;
 		$res = db_query($sql);
-		$resultObj = array();
+		$resultObj = [];
 		while ($row = db_fetch_array($res)) {
 			$resultObj[] = $row['fkey_wms_id'];
 			$e = new mb_exception($wmsList);
@@ -248,12 +232,9 @@ WHERE wms_id IN ($wmsList)  ORDER BY wms.wms_id;
 
 SQL;
 		$res = db_query($sql);
-		$resultObj = array();
+		$resultObj = [];
 		while ($row = db_fetch_array($res)) {
-			$resultObj[] = array(
-    			"wmsId" 	=> $row['wms_id'],
-    			"wmsTitle"  =>  $row['wms_title']
-    	    	);
+			$resultObj[] = ["wmsId" 	=> $row['wms_id'], "wmsTitle"  =>  $row['wms_title']];
 		}
         $ajaxResponse->setResult($resultObj);
 		$ajaxResponse->setSuccess(true);

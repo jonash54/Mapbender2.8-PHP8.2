@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $user_id = Mapbender::session()->get("mb_user_id");
 ?>
@@ -33,19 +33,19 @@ $user_id = Mapbender::session()->get("mb_user_id");
 <meta name="DC.Rights" content="WhereGroup GmbH & Co.KG, Bonn">
 <title>Metadata search</title>
 <?php
-include_once(dirname(__FILE__) . "/../include/dyn_css.php");
+include_once(__DIR__ . "/../include/dyn_css.php");
 ?>
 
 <script type="text/javascript">
 <?php
 $sql = "SELECT e_target FROM gui_element WHERE e_id = $1 AND fkey_gui_id = $2";
-$v = array($e_id, $gui_id);
-$t = array('s', "s");
+$v = [$e_id, $gui_id];
+$t = ['s', "s"];
 $res = db_prep_query($sql,$v,$t);
 
-$targetArray = explode(",", db_result($res,0,"e_target"));
+$targetArray = explode(",", (string) db_result($res,0,"e_target"));
 echo "var myTarget = '".$targetArray[0]."';";
-include_once(dirname(__FILE__) . "/../include/dyn_php.php");
+include_once(__DIR__ . "/../include/dyn_php.php");
 echo "var searchColumnsWms = '" . $searchColumnsWms . "';";
 echo "var searchColumnsLayer = '" . $searchColumnsLayer . "';";
 ?>

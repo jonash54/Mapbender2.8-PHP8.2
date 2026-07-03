@@ -19,8 +19,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_user.php");
 /*  
  * @security_patch irv done
  */ 
@@ -135,7 +135,7 @@ if($upd){
 	$t = array('s','i');
 	$res_password = db_prep_query($sql_password,$v,$t);*/
 	$user = new User();
-	$returnObject = json_decode($user->authenticateUserByName($logged_user_name, $oldpassword));
+	$returnObject = json_decode((string) $user->authenticateUserByName($logged_user_name, $oldpassword));
 	if ($returnObject->success !== false) {
 		$userArray = json_decode(json_encode($returnObject->result), JSON_OBJECT_AS_ARRAY);
 		$result = $user->setPasswordWithoutTicket($newpassword);

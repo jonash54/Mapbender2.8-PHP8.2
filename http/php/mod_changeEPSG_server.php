@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__)."/mb_validateSession.php");
+require(__DIR__."/mb_validateSession.php");
 
-$epsgObj = array();
+$epsgObj = [];
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -40,7 +40,7 @@ switch ($ajaxResponse->getMethod()) {
 			$currentEpsg = $epsgArray[$i];
 	
 			$oldEPSG = preg_replace("/EPSG:/","", $currentEpsg->epsg);
-			$newEPSG = preg_replace("/EPSG:/","", $newSrs);
+			$newEPSG = preg_replace("/EPSG:/","", (string) $newSrs);
 			 
 			$extArray = explode(",", $currentEpsg->extent);
 			if (is_numeric($extArray[0]) && is_numeric($extArray[1]) && 
@@ -91,24 +91,10 @@ switch ($ajaxResponse->getMethod()) {
 				}
 
 				if ($currentEpsg->frameName) {
-					$epsgObj[$i] = array(
-						"frameName" => $currentEpsg->frameName,
-						"newSrs" => $newSrs,
-						"minx" => $minx,
-						"miny" => $miny,
-						"maxx" => $maxx,
-						"maxy" => $maxy
-					);
+					$epsgObj[$i] = ["frameName" => $currentEpsg->frameName, "newSrs" => $newSrs, "minx" => $minx, "miny" => $miny, "maxx" => $maxx, "maxy" => $maxy];
 				}
 				else {
-					$epsgObj[$i] = array(
-						"wms" => $currentEpsg->wms,
-						"newSrs" => $newSrs,
-						"minx" => $minx,
-						"miny" => $miny,
-						"maxx" => $maxx,
-						"maxy" => $maxy
-					);
+					$epsgObj[$i] = ["wms" => $currentEpsg->wms, "newSrs" => $newSrs, "minx" => $minx, "miny" => $miny, "maxx" => $maxx, "maxy" => $maxy];
 				}
 			}
 			else {

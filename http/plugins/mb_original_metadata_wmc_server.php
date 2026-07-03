@@ -1,11 +1,11 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wmc.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wmc.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -20,11 +20,7 @@ function getWmcMetadataFromXml($wmcDoc) {
 	$xmlDoc->loadXML($wmcDoc);
 	
 	//define default resultObj
-	$resultObj = array(
-		"original_wmc_title" => "",
-		"original_wmc_abstract" => "",
-		"original_wmc_keyword" => ""
-	);
+	$resultObj = ["original_wmc_title" => "", "original_wmc_abstract" => "", "original_wmc_keyword" => ""];
 	
 	$general_node = $xmlDoc->getElementsByTagName('General'); 
 	foreach ($general_node as $node) {
@@ -40,7 +36,7 @@ function getWmcMetadataFromXml($wmcDoc) {
 			//childnode KeywordList	
 			if (strtoupper($child->nodeName) == "WMC:KEYWORDLIST"){
 				$keywords_list = $child->childNodes;
-				$keywords = array();
+				$keywords = [];
 				foreach ($keywords_list as $keywordlist_child_node) {																		
 					$keyword = $keywordlist_child_node->nodeValue;						
 					array_push($keywords, $keyword);

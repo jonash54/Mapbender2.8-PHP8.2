@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 
@@ -11,19 +11,19 @@ $srs = $_REQUEST["srs"];
 $searchColumnsWms = $_REQUEST["searchColumnsWms"];
 $searchColumnsLayer = $_REQUEST["searchColumnsLayer"];
 
-if ($searchColumnsWms && !preg_match("/^[a-zA-Z_\-, ]+$/", $searchColumnsWms)) {
+if ($searchColumnsWms && !preg_match("/^[a-zA-Z_\-, ]+$/", (string) $searchColumnsWms)) {
 	echo "[]"; die;
 }
 
-if ($searchColumnsLayer && !preg_match("/^[a-zA-Z_\-, ]+$/", $searchColumnsLayer)) {
+if ($searchColumnsLayer && !preg_match("/^[a-zA-Z_\-, ]+$/", (string) $searchColumnsLayer)) {
 	echo "[]"; die;
 }
 
-if (!preg_match("/^[a-zA-Z_\- ]+$/", $query)) {
+if (!preg_match("/^[a-zA-Z_\- ]+$/", (string) $query)) {
 	echo "[]"; die;
 }
 
-if (!preg_match("/^[a-zA-Z_\-:0-9 ]+$/", $srs)) {
+if (!preg_match("/^[a-zA-Z_\-:0-9 ]+$/", (string) $srs)) {
 	echo "[]"; die;
 }
 
@@ -32,25 +32,25 @@ $myguis = $n->getGuisByPermission($user_id, true);
 $mywms = $n->getWmsByOwnGuis($myguis);
 
 if($mywms == false){
-	$mywms = array();	
+	$mywms = [];	
 }
-$mylayer = array();
+$mylayer = [];
 
 for($i = 0; $i < count($mywms); $i++){
 	$mylayer = array_merge($mylayer,$n->getLayerByWms($mywms[$i]));
 }
 
-$res_container_wms = array();
-$res_container_layer = array();
-$obj = array();
+$res_container_wms = [];
+$res_container_layer = [];
+$obj = [];
 
-if(preg_match("/\*/",$_REQUEST["search"])){
-	$search = trim(preg_replace("/\*/i","", $_REQUEST["search"]));
+if(preg_match("/\*/",(string) $_REQUEST["search"])){
+	$search = trim(preg_replace("/\*/i","", (string) $_REQUEST["search"]));
 }
 
 if (count($mywms) > 0) {
-	$v = array();   
-	$t = array();   
+	$v = [];   
+	$t = [];   
 
 	$sql_wms = "SELECT DISTINCT layer.layer_id, wms.wms_title, " . 
 		"wms.wms_getcapabilities, wms.wms_version, " . 
@@ -76,7 +76,7 @@ if (count($mywms) > 0) {
 			if ($j > 0) {
 				$sql_wms .= " OR ";
 			}
-			$sql_wms .= trim($wmsColumnArray[$j]) . " ILIKE '%".$query."%'";
+			$sql_wms .= trim((string) $wmsColumnArray[$j]) . " ILIKE '%".$query."%'";
 		}
 	}
 	
@@ -84,24 +84,13 @@ if (count($mywms) > 0) {
 	$res_wms = db_prep_query($sql_wms,$v,$t);
 
 	while ($row = db_fetch_array($res_wms)) {
-		array_push($obj, array(
-			'wms_getcapabilities' => $row['wms_getcapabilities'], 
-			'wms_version' => $row['wms_version'], 
-			'layer_id' => $row['layer_id'], 
-			'title' => $row['wms_title'],
-			'extent' => array(
-				$row['minx'],
-				$row['miny'],
-				$row['maxx'],
-				$row['maxy']
-			)
-		));
+		array_push($obj, ['wms_getcapabilities' => $row['wms_getcapabilities'], 'wms_version' => $row['wms_version'], 'layer_id' => $row['layer_id'], 'title' => $row['wms_title'], 'extent' => [$row['minx'], $row['miny'], $row['maxx'], $row['maxy']]]);
 	}
 }
 
 if (count($mylayer) > 0) {
-	$v = array();   
-	$t = array();   
+	$v = [];   
+	$t = [];   
 	$sql_layer = "SELECT DISTINCT l.layer_id, l.fkey_wms_id, l.layer_title, " . 
 		"l.layer_name, w.wms_getcapabilities, w.wms_version, " . 
 		"e.minx, e.miny, e.maxx, e.maxy " . 
@@ -132,7 +121,7 @@ if (count($mylayer) > 0) {
 			if ($k > 0) {
 				$sql_layer .= " OR ";
 			}
-			$sql_layer .= trim($layerColumnArray[$k]) . " ILIKE '%".$query."%'";
+			$sql_layer .= trim((string) $layerColumnArray[$k]) . " ILIKE '%".$query."%'";
 		}
 	}
 	
@@ -142,19 +131,7 @@ if (count($mylayer) > 0) {
 
 
 	while ($row = db_fetch_array($res_layer)) {
-		array_push($obj, array(
-			'wms_getcapabilities' => $row['wms_getcapabilities'], 
-			'wms_version' => $row['wms_version'], 
-			'layer_name' => $row['layer_name'], 
-			'layer_id' => $row['layer_id'], 
-			'title' => $row['layer_title'],
-			'extent' => array(
-				$row['minx'],
-				$row['miny'],
-				$row['maxx'],
-				$row['maxy']
-			)
-		));
+		array_push($obj, ['wms_getcapabilities' => $row['wms_getcapabilities'], 'wms_version' => $row['wms_version'], 'layer_name' => $row['layer_name'], 'layer_id' => $row['layer_id'], 'title' => $row['layer_title'], 'extent' => [$row['minx'], $row['miny'], $row['maxx'], $row['maxy']]]);
 	}
 }
 $output = $json->encode($obj);

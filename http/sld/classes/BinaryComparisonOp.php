@@ -26,44 +26,42 @@
 class BinaryComparisonOp
 {
 	/**
-	 * Defines the type of comparison operation.
-	 * @var string
-	 */
-	var $name = "";
-	
-	/**
 	 * Name of the property that is addressed in this comparison.
 	 * @var string
 	 */
-	var $ogcPropertyName = "";
+	public $ogcPropertyName = "";
 	
 	/**
 	 * String that is compared to the property-value.
 	 * Regular Expression?
 	 * @var string
 	 */
-	var $ogcLiteral = "";
+	public $ogcLiteral = "";
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * constructor that directly fills the $name variable.
 	 * @param string $name the type of the comparison operation
 	 */
-	function BinaryComparisonOp($name)
-	{
-		$this->name = $name;
-	}
+	function __construct(
+     /**
+      * Defines the type of comparison operation.
+      */
+     public $name
+ )
+ {
+ }
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -108,16 +106,15 @@ class BinaryComparisonOp
 		$temp .= $offset." </td>\n";
 		$temp .= $offset." <td style=\"width:50px; text-align: center; font-size: large; \">";
 				
-		switch($this->name)
-		{
-			case "PropertyIsEqualTo": $temp .= "="; break;
-			case "PropertyIsNotEqualTo": $temp .= "!="; break;
-			case "PropertyIsGreaterThan": $temp .= "&gt;"; break;
-			case "PropertyIsGreaterThanOrEqualTo": $temp .= "&gt;="; break;
-			case "PropertyIsLessThan": $temp .= "&lt;"; break;
-			case "PropertyIsLessThanOrEqualTo": $temp .= "&lt;="; break;
-			default: $temp .= $this->name;
-		}
+		match ($this->name) {
+      "PropertyIsEqualTo" => $temp .= "=",
+      "PropertyIsNotEqualTo" => $temp .= "!=",
+      "PropertyIsGreaterThan" => $temp .= "&gt;",
+      "PropertyIsGreaterThanOrEqualTo" => $temp .= "&gt;=",
+      "PropertyIsLessThan" => $temp .= "&lt;",
+      "PropertyIsLessThanOrEqualTo" => $temp .= "&lt;=",
+      default => $temp .= $this->name,
+  };
 		$temp .= "\n";
 		$temp .= $offset." </td>\n";
 		$temp .= $offset." <td>\n";
@@ -127,7 +124,7 @@ class BinaryComparisonOp
 		$temp .= $offset." </td>\n";
 		$temp .= $offset." <td>\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."  <a class=\"edit\" href=\"?function=deleteoperation&id=".$this->parent."&number=".$number."\">";
 		$temp .= "<img src='./img/minus.gif' border='0'>&nbsp;l&ouml;schen</a>\n";

@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_wms.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_wms.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
 #require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
 
 $capabilitiesURL = $_REQUEST['caps'];
@@ -28,7 +28,7 @@ $output = "";
 $charset = CHARSET;
 $mywms = new wms();
 $caps = $capabilitiesURL;
-$caps = html_entity_decode($_REQUEST['caps']);
+$caps = html_entity_decode((string) $_REQUEST['caps']);
 $result = $mywms->createObjFromXML($caps);
 
 if (!$result['success']) {

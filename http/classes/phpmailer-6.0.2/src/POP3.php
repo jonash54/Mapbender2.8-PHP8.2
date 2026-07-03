@@ -312,7 +312,7 @@ class POP3
         //So ignore errors here
         try {
             @fclose($this->pop_conn);
-        } catch (Exception $e) {
+        } catch (Exception) {
             //Do nothing
         }
     }
@@ -364,7 +364,7 @@ class POP3
      */
     protected function checkResponse($string)
     {
-        if (substr($string, 0, 3) !== '+OK') {
+        if (!str_starts_with($string, '+OK')) {
             $this->setError("Server reported an error: $string");
 
             return false;

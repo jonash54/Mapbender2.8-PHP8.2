@@ -1,7 +1,7 @@
 <?php
 
 $e_id="gui_spatial_security";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 function get_guis() {
     $conn = db_connect();
@@ -34,7 +34,7 @@ function show_form($guis) {
     echo "<form id=\"gui_spatial_security\" action=\"$self\" method=\"post\">";
     echo "<select size=14 name=\"gui_id\">";
     foreach ($guis as $gui) {
-        $gml = htmlentities($gui['gml_value']);
+        $gml = htmlentities((string) $gui['gml_value']);
         $onclick = "document.querySelector('#gui_spatial_security [name=gml_value]').value = '{$gml}'";
         echo "<option value=\"{$gui['gui_id']}\" onclick=\"$onclick\">{$gui['gui_name']}</option>";
     }

@@ -23,20 +23,20 @@
 * get/post '___' separated maprequests
 *
 **/
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_connector.php");
 
 class weldMaps2PNG{
 
-	private static $cache = array();
+	private static $cache = [];
 
 	function __construct($urls,$filename, $encode = true, $opacities=""){
 		if(!$urls || $urls == ""){
 			$e = new mb_exception("weldMaps2PNG: no maprequests delivered");
 		}
-		$url = explode("___", $urls);
-		$opacities = explode("___",$opacities);
+		$url = explode("___", (string) $urls);
+		$opacities = explode("___",(string) $opacities);
 		$obj1 = new stripRequest($url[0]);
 		$width = $obj1->get("width");
 		$height = $obj1->get("height");
@@ -81,7 +81,7 @@ class weldMaps2PNG{
         * Old constructor to keep PHP downward compatibility
         */
         function weldMaps2PNG($urls,$filename, $encode = true, $opacities=""){
-		self::__construct($urls,$filename, $encode, $opacities);
+		self::__construct($urls,$filename);
 	}
 	
 	function loadpng ($imgurl) {

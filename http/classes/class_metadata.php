@@ -21,79 +21,32 @@
 #We need a parameter for internationalization - it should be send with the search request! Some of the Classes can be provided with different languages.
 #WMC and GeoRSS-Feeds have no or a to complex authorization info - maybe we need to test if wmc consists of info which is fully or only partually available to the anonymous user. 
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/class_administration.php");
-require_once(dirname(__FILE__) . "/class_mb_exception.php");
-require_once(dirname(__FILE__) . "/class_json.php");
-require_once(dirname(__FILE__) . "/../php/mod_getDownloadOptions.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/class_administration.php");
+require_once(__DIR__ . "/class_mb_exception.php");
+require_once(__DIR__ . "/class_json.php");
+require_once(__DIR__ . "/../php/mod_getDownloadOptions.php");
 
 class searchMetadata
 {
-	var $userId;
-	var $searchId;
-	var $searchText;
-	var $registratingDepartments;
-	var $isoCategories;
-	var $inspireThemes;
-	var $customCategories;
-	var $timeBegin;
-	var $timeEnd;
-	var $regTimeBegin;
-	var $regTimeEnd;
-	var $maxResults;
-	var $searchBbox;
-	var $searchTypeBbox;
-	var $accessRestrictions;
-	var $languageCode;
-	var $searchStartTime;
-	var $searchView;
-	var $searchURL;
-	var $searchEPSG;
-	var $searchResources;
-	var $searchPages;
-	var $outputFormat;
-	var $resultTarget; //web,webclient,file,internal
-	var $tempFolder;
-	var $orderBy;
-	var $hostName;
-	var $resourceIds;
-	var $restrictToOpenData;
-	var $restrictToHvd;
-	var $originFromHeader;
-	var $resolveCoupledResources; //only for class of dataset metadata - it pulls the coupled ressources (ogc-services : wms-layer/wfs-featuretypes)
-	var $https;
-	var $protocol;
-	var $hvdInspireCats;
-	var $hvdCustomCats;
-	var $internalProcessCoupledWMS = false;
-	function __construct($userId, $searchId, $searchText, $registratingDepartments, $isoCategories, $inspireThemes, $timeBegin, $timeEnd, $regTimeBegin, $regTimeEnd, $maxResults, $searchBbox, $searchTypeBbox, $accessRestrictions, $languageCode, $searchEPSG, $searchResources, $searchPages, $outputFormat, $resultTarget, $searchURL, $customCategories, $hostName, $orderBy, $resourceIds, $restrictToOpenData, $originFromHeader, $resolveCoupledResources = false, $https = false, $restrictToHvd)
+	public $userId;
+	public $maxResults;
+	public $searchStartTime;
+	public $searchView; //web,webclient,file,internal
+	public $tempFolder;
+	public $restrictToOpenData;
+	public $restrictToHvd;
+	public $protocol;
+	public $hvdInspireCats;
+	public $hvdCustomCats;
+	public $internalProcessCoupledWMS = false;
+	// originFromHeader / restrictToHvd given defaults so the CLI entry
+	// mod_metadataWrite.php (which passes 26 args) works under PHP 8.
+	function __construct($userId, public $searchId, public $searchText, public $registratingDepartments, public $isoCategories, public $inspireThemes, public $timeBegin, public $timeEnd, public $regTimeBegin, public $regTimeEnd, $maxResults, public $searchBbox, public $searchTypeBbox, public $accessRestrictions, public $languageCode, public $searchEPSG, public $searchResources, public $searchPages, public $outputFormat, public $resultTarget, public $searchURL, public $customCategories, public $hostName, public $orderBy, public $resourceIds, $restrictToOpenData, public $originFromHeader = "", $restrictToHvd = "false", public $resolveCoupledResources = false, public $https = false)
 	{
-		$this->userId = (int) $userId;
-		$this->searchId = $searchId;
-		$this->searchText = $searchText;
-		$this->registratingDepartments = $registratingDepartments; //array with ids of the registrating groups in the mb database
-		$this->registratingDepartmentsArray = explode(",", $this->registratingDepartments);
-		$this->isoCategories = $isoCategories;
-		$this->inspireThemes = $inspireThemes;
-		$this->customCategories = $customCategories;
-		$this->timeBegin = $timeBegin;
-		$this->timeEnd = $timeEnd;
-		$this->regTimeBegin = $regTimeBegin;
-		$this->regTimeEnd = $regTimeEnd;
+		$this->userId = (int) $userId; //array with ids of the registrating groups in the mb database
+		$this->registratingDepartmentsArray = explode(",", (string) $this->registratingDepartments);
 		$this->maxResults = (int) $maxResults;
-		$this->searchBbox = $searchBbox;
-		$this->searchTypeBbox = $searchTypeBbox;
-		$this->accessRestrictions = $accessRestrictions;
-		$this->languageCode = $languageCode;
-		$this->searchEPSG = $searchEPSG;
-		$this->searchResources = $searchResources;
-		$this->searchPages = $searchPages;
-		$this->outputFormat = $outputFormat;
-		$this->resultTarget = $resultTarget;
-		$this->searchURL = $searchURL;
-		$this->hostName = $hostName;
-		$this->orderBy = $orderBy;
-		$this->resourceIds = $resourceIds;
 		if ($restrictToOpenData === "true") {
 			$this->restrictToOpenData = true;
 		} else {
@@ -104,11 +57,7 @@ class searchMetadata
 		} else {
 			$this->restrictToHvd = false;
 		}
-		$this->originFromHeader = $originFromHeader;
-		$this->internalResult = null; //will only be filled, if resultTarget = 'internal', includes json for wms or wfs
-		$this->resolveCoupledResources = $resolveCoupledResources;
-		//definitions for generating tagClouds
-		$this->https = $https;
+		$this->internalResult = null;
 		if ($this->https == true) {
 			$this->protocol = "https";
 		} else {
@@ -120,7 +69,7 @@ class searchMetadata
 		$this->scale = 'linear';
 		$this->minFontSize = 10;
 
-		if (file_exists ( dirname ( __FILE__ ) . "/../../conf/hvd_cats.json" )) {
+		if (file_exists ( __DIR__ . "/../../conf/hvd_cats.json" )) {
 			$configObject = json_decode ( file_get_contents ( "../../conf/hvd_cats.json" ) );
 		}
 		if (isset ( $configObject ) && isset ( $configObject->hvd_inspire_cat ) && count($configObject->hvd_inspire_cat) > 0 ) {
@@ -143,7 +92,7 @@ class searchMetadata
 		//set a time to find time consumers
 		$this->searchStartTime = $this->microtime_float();
 		//Defining of the different database categories		
-		$this->resourceClassifications = array();
+		$this->resourceClassifications = [];
 		$this->resourceClassifications[0]['title'] = "ISO 19115"; //TODO: define the translations somewhere? - This is done in call_metadata.php before. Maybe we can get them from there? - It will be shown in the rightside categories table
 		$this->resourceClassifications[0]['tablename'] = 'md_topic_category';
 		$this->resourceClassifications[0]['requestName'] = 'isoCategories';
@@ -173,20 +122,12 @@ class searchMetadata
 		$this->resourceClassifications[1]['relation_dataset'] = 'mb_metadata_inspire_category';
 		$this->resourceClassifications[1]['relation_application'] = 'mb_metadata_inspire_category';
 		//TODO: define this in mapbender
-		switch ($this->languageCode) {
-			case "de":
-				$this->resourceClassifications[2]['title'] = "Sonstige"; //TODO: define the translations somewhere? - This is done in call_metadata.php before. Maybe we can get them from there? - It will be shown in the rightside categories table
-				break;
-			case "en":
-				$this->resourceClassifications[2]['title'] = "Custom";
-				break;
-			case "fr":
-				$this->resourceClassifications[2]['title'] = "Personnaliser";
-				break;
-			default:
-				$this->resourceClassifications[2]['title'] = "Custom";
-				break;
-		}
+		$this->resourceClassifications[2]['title'] = match ($this->languageCode) {
+      "de" => "Sonstige",
+      "en" => "Custom",
+      "fr" => "Personnaliser",
+      default => "Custom",
+  };
 		$this->resourceClassifications[2]['tablename'] = 'custom_category';
 		$this->resourceClassifications[2]['requestName'] = 'customCategories';
 		$this->resourceClassifications[2]['id_wms'] = 'layer_id';
@@ -200,21 +141,15 @@ class searchMetadata
 		$this->resourceClassifications[2]['relation_dataset'] = 'mb_metadata_custom_category';
 		$this->resourceClassifications[2]['relation_application'] = 'mb_metadata_custom_category';
 		//TODO: define this in mapbender
-		switch ($this->languageCode) {
-			case "de":
-				$this->resourceClassifications[3]['title'] = "Organisationen";
-				break;
-			case "en":
-				$this->resourceClassifications[3]['title'] = "Organizations";
-				break;
-			default:
-				$this->resourceClassifications[3]['title'] = "Organizations";
-				break;
-		}
+		$this->resourceClassifications[3]['title'] = match ($this->languageCode) {
+      "de" => "Organisationen",
+      "en" => "Organizations",
+      default => "Organizations",
+  };
 		$this->resourceClassifications[3]['requestName'] = "registratingDepartments";
 
 		//Defining of the different result categories		
-		$this->resourceCategories = array();
+		$this->resourceCategories = [];
 		$this->resourceCategories[0]['name'] = 'WMS';
 		$this->resourceCategories[1]['name'] = 'WFS';
 		$this->resourceCategories[2]['name'] = 'WMC';
@@ -262,25 +197,25 @@ class searchMetadata
 		//not needed til now - maybe usefull for georss output
 		if ($this->outputFormat == "xml") {
 			//Initialize XML documents
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wms") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wms") {
 				$this->wmsDoc = new DOMDocument('1.0');
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wfs") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wfs") {
 				$this->wfsDoc = new DOMDocument('1.0');
 				$this->generateWFSMetadata($this->wfsDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wmc") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wmc") {
 				$this->wmcDoc = new DOMDocument('1.0');
 				$this->generateWMCMetadata($this->wmcDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "georss") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "georss") {
 				$this->georssDoc = new DOMDocument('1.0');
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "dataset") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "dataset") {
 				$this->datasetDoc = new DOMDocument('1.0');
 				$this->generateDatasetMetadata($this->datasetDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "application") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "application") {
 				$this->applicationDoc = new DOMDocument('1.0');
 				$this->generateApplicationMetadata($this->applicationDoc);
 			}
@@ -288,33 +223,24 @@ class searchMetadata
 
 		if ($this->outputFormat === "json") {
 			$this->e = new mb_notice("orderBy old: " . $this->orderBy);
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wfs") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wfs") {
 				$this->databaseIdColumnName = 'featuretype_id';
 				$this->databaseTableName = 'wfs_featuretype';
 				//$this->keywordRelation = 'wfs_featuretype_keyword';
 				$this->searchView = 'wfs_search_table';
 				$this->whereStrCatExtension = " AND custom_category.custom_category_hidden = 0";
-				switch ($this->orderBy) {
-					case "rank":
-						$this->orderBy = " ORDER BY wfs_id,featuretype_id,wfs_conf_id ";
-						break;
-					case "id":
-						$this->orderBy = " ORDER BY wfs_id,featuretype_id,wfs_conf_id ";
-						break;
-					case "title":
-						$this->orderBy = " ORDER BY featuretype_title ";
-						break;
-					case "date":
-						$this->orderBy = " ORDER BY wfs_timestamp DESC ";
-						break;
-					default:
-						$this->orderBy = " ORDER BY wfs_id,featuretype_id,wfs_conf_id ";
-				}
+				$this->orderBy = match ($this->orderBy) {
+        "rank" => " ORDER BY wfs_id,featuretype_id,wfs_conf_id ",
+        "id" => " ORDER BY wfs_id,featuretype_id,wfs_conf_id ",
+        "title" => " ORDER BY featuretype_title ",
+        "date" => " ORDER BY wfs_timestamp DESC ",
+        default => " ORDER BY wfs_id,featuretype_id,wfs_conf_id ",
+    };
 
-				$this->resourceClasses = array(0, 1, 2);
+				$this->resourceClasses = [0, 1, 2];
 				$this->generateWFSMetadata($this->wfsDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wms") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wms") {
 				$this->databaseIdColumnName = 'layer_id';
 				$this->databaseTableName = 'layer';
 				//$this->keywordRelation = 'layer_keyword';
@@ -343,10 +269,10 @@ class searchMetadata
 						$this->orderBy = " ORDER BY load_count DESC";
 				}
 
-				$this->resourceClasses = array(0, 1, 2);
+				$this->resourceClasses = [0, 1, 2];
 				$this->generateWMSMetadata($this->wmsDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "wmc") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "wmc") {
 				//$this->searchView = 'search_wmc_view';
 				$this->searchView = 'wmc_search_table';
 				$this->databaseIdColumnName = 'wmc_serial_id';
@@ -354,74 +280,47 @@ class searchMetadata
 				//the following is needed to give a special filter to the custom cat table!
 				$this->whereStrCatExtension = " AND custom_category.custom_category_hidden = 0";
 
-				switch ($this->orderBy) {
-					case "rank":
-						$this->orderBy = " ORDER BY load_count DESC ";
-						break;
-					case "id":
-						$this->orderBy = " ORDER BY wmc_id";
-						break;
-					case "title":
-						$this->orderBy = " ORDER BY wmc_title ";
-						break;
-					case "date":
-						$this->orderBy = " ORDER BY wmc_timestamp DESC ";
-						break;
-					default:
-						$this->orderBy = " ORDER BY wmc_title ";
-				}
+				$this->orderBy = match ($this->orderBy) {
+        "rank" => " ORDER BY load_count DESC ",
+        "id" => " ORDER BY wmc_id",
+        "title" => " ORDER BY wmc_title ",
+        "date" => " ORDER BY wmc_timestamp DESC ",
+        default => " ORDER BY wmc_title ",
+    };
 
-				$this->resourceClasses = array(0, 1, 2); #TODO adopt to count classifications
+				$this->resourceClasses = [0, 1, 2]; #TODO adopt to count classifications
 				$this->generateWMCMetadata($this->wmcDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "dataset") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "dataset") {
 				$this->databaseIdColumnName = 'metadata_id'; //not metadata_id as in original table!
 				$this->databaseTableName = 'mb_metadata';
 				$this->searchView = 'dataset_search_table';
 				$this->whereStrCatExtension = " AND custom_category.custom_category_hidden = 0";
-				switch ($this->orderBy) {
-					case "rank":
-						$this->orderBy = " ORDER BY load_count DESC";
-						break;
-					case "id":
-						$this->orderBy = " ORDER BY metadata_id ASC";
-						break;
-					case "title":
-						$this->orderBy = " ORDER BY title ASC";
-						break;
-					case "date":
-						$this->orderBy = " ORDER BY dataset_timestamp DESC ";
-						break;
-					default:
-						$this->orderBy = " ORDER BY title DESC";
-				}
+				$this->orderBy = match ($this->orderBy) {
+        "rank" => " ORDER BY load_count DESC",
+        "id" => " ORDER BY metadata_id ASC",
+        "title" => " ORDER BY title ASC",
+        "date" => " ORDER BY dataset_timestamp DESC ",
+        default => " ORDER BY title DESC",
+    };
 
-				$this->resourceClasses = array(0, 1, 2);
+				$this->resourceClasses = [0, 1, 2];
 				$this->generateDatasetMetadata($this->datasetDoc);
 			}
-			if (isset($this->searchResources) & strtolower($this->searchResources) === "application") {
+			if (isset($this->searchResources) & strtolower((string) $this->searchResources) === "application") {
 				$this->databaseIdColumnName = 'metadata_id'; //not metadata_id as in original table!
 				$this->databaseTableName = 'mb_metadata';
 				$this->searchView = 'search_application_view';
 				$this->whereStrCatExtension = " AND custom_category.custom_category_hidden = 0";
-				switch ($this->orderBy) {
-					case "rank":
-						$this->orderBy = " ORDER BY load_count DESC";
-						break;
-					case "id":
-						$this->orderBy = " ORDER BY metadata_id ASC";
-						break;
-					case "title":
-						$this->orderBy = " ORDER BY title ASC";
-						break;
-					case "date":
-						$this->orderBy = " ORDER BY dataset_timestamp DESC ";
-						break;
-					default:
-						$this->orderBy = " ORDER BY title DESC";
-				}
+				$this->orderBy = match ($this->orderBy) {
+        "rank" => " ORDER BY load_count DESC",
+        "id" => " ORDER BY metadata_id ASC",
+        "title" => " ORDER BY title ASC",
+        "date" => " ORDER BY dataset_timestamp DESC ",
+        default => " ORDER BY title DESC",
+    };
 
-				$this->resourceClasses = array(0, 1, 2);
+				$this->resourceClasses = [0, 1, 2];
 				$this->generateApplicationMetadata($this->applicationDoc);
 			}
 		}
@@ -430,7 +329,7 @@ class searchMetadata
 
 	private function microtime_float()
 	{
-		list($usec, $sec) = explode(" ", microtime());
+		[$usec, $sec] = explode(" ", microtime());
 		return ((float) $usec + (float) $sec);
 	}
 	private function generateXMLHead($xmlDoc)
@@ -458,7 +357,7 @@ class searchMetadata
 
 	private function flipDiagonally($arr)
 	{
-		$out = array();
+		$out = [];
 		foreach ($arr as $key => $subarr) {
 			foreach ($subarr as $subkey => $subvalue) {
 				$out[$subkey][$key] = $subvalue;
@@ -471,14 +370,7 @@ class searchMetadata
 	{
 		//initialize object
 		$this->wfsJSON = new stdClass;
-		$this->wfsJSON->wfs = (object) array(
-			'md' => (object) array(
-				'nresults' => $n,
-				'p' => $this->searchPages,
-				'rpp' => $this->maxResults
-			),
-			'srv' => array()
-		);
+		$this->wfsJSON->wfs = (object) ['md' => (object) ['nresults' => $n, 'p' => $this->searchPages, 'rpp' => $this->maxResults], 'srv' => []];
 		//read out records
 		$wfsMatrix = db_fetch_all($res);
 		//sort result for accessing the right services
@@ -508,7 +400,7 @@ class searchMetadata
 			}
 			$this->wfsJSON->wfs->srv[$i - $j]->iso3166 = $spatialSource;
 			//check if a disclaimer has to be shown and give the relevant symbol
-			list($hasConstraints, $symbolLink, $termsOfUseId) = $this->hasConstraints("wfs", $wfsMatrix[$i]['wfs_id']);
+			[$hasConstraints, $symbolLink, $termsOfUseId] = $this->hasConstraints("wfs", $wfsMatrix[$i]['wfs_id']);
 			$this->wfsJSON->wfs->srv[$i - $j]->hasConstraints = $hasConstraints;
 			$this->wfsJSON->wfs->srv[$i - $j]->symbolLink = $symbolLink;
 			$this->wfsJSON->wfs->srv[$i - $j]->license_id = $termsOfUseId;
@@ -525,7 +417,7 @@ class searchMetadata
 			$this->wfsJSON->wfs->srv[$i - $j]->bbox = "-180.0,-90.0,180.0,90.0"; //$wfsMatrix[$i][''];
 			//if featuretype hasn't been created - do it
 			if (!isset($this->wfsJSON->wfs->srv[$i - $j]->ftype)) {
-				$this->wfsJSON->wfs->srv[$i - $j]->ftype = array();
+				$this->wfsJSON->wfs->srv[$i - $j]->ftype = [];
 			}
 			//fill in featuretype infos
 			$this->wfsJSON->wfs->srv[$i - $j]->ftype[$l - $m]->id = (int) $wfsMatrix[$i]['featuretype_id'];
@@ -554,7 +446,7 @@ class searchMetadata
 			if (isset($wfsMatrix[$i]['wfs_conf_id']) && $wfsMatrix[$i]['wfs_conf_id'] != "") {
 				//if modul hasn't been created - do it
 				if (!isset($this->wfsJSON->wfs->srv[$i - $j]->ftype[$l - $m]->modul)) {
-					$this->wfsJSON->wfs->srv[$i - $j]->ftype[$l - $m]->modul = array();
+					$this->wfsJSON->wfs->srv[$i - $j]->ftype[$l - $m]->modul = [];
 				}
 				//fill in modul infos
 				$this->wfsJSON->wfs->srv[$i - $j]->ftype[$l - $m]->modul[$m]->id = $wfsMatrix[$i]['wfs_conf_id'];
@@ -595,14 +487,7 @@ class searchMetadata
 	{
 		//initialize object
 		$this->wmcJSON = new stdClass;
-		$this->wmcJSON->wmc = (object) array(
-			'md' => (object) array(
-				'nresults' => $n,
-				'p' => $this->searchPages,
-				'rpp' => $this->maxResults
-			),
-			'srv' => array()
-		);
+		$this->wmcJSON->wmc = (object) ['md' => (object) ['nresults' => $n, 'p' => $this->searchPages, 'rpp' => $this->maxResults], 'srv' => []];
 
 		//read out records
 		$serverCount = 0;
@@ -631,7 +516,7 @@ class searchMetadata
 				$spatialSource = $wmcMatrix[$i]['mb_group_stateorprovince'];
 			}
 			$this->wmcJSON->wmc->srv[$i - $j]->iso3166 = $spatialSource;
-			$this->wmcJSON->wmc->srv[$i - $j]->bbox = array($wmcMatrix[$i]['bbox']); //TODO: read out bbox from wmc $wmcMatrix[$i][''];
+			$this->wmcJSON->wmc->srv[$i - $j]->bbox = [$wmcMatrix[$i]['bbox']]; //TODO: read out bbox from wmc $wmcMatrix[$i][''];
 		}
 	}
 
@@ -639,33 +524,26 @@ class searchMetadata
 	{
 		//initialize object
 		$this->datasetJSON = new stdClass;
-		$this->datasetJSON->dataset = (object) array(
-			'md' => (object) array(
-				'nresults' => $n,
-				'p' => $this->searchPages,
-				'rpp' => $this->maxResults
-			),
-			'srv' => array()
-		);
+		$this->datasetJSON->dataset = (object) ['md' => (object) ['nresults' => $n, 'p' => $this->searchPages, 'rpp' => $this->maxResults], 'srv' => []];
 		$datasetMatrix = db_fetch_all($res);
 		//sort result for accessing the right services
 		$datasetMatrix = $this->flipDiagonally($datasetMatrix);
 		//TODO check if order by db or order by php is faster! 
 		#array_multisort($wfsMatrix['wfs_id'], SORT_ASC,$wfsMatrix['featuretype_id'], SORT_ASC,$wfsMatrix['wfs_conf_id'], SORT_ASC); //have some problems - the database version is more stable
 		$datasetMatrix = $this->flipDiagonally($datasetMatrix);
-		$allCoupledLayers = array();
-		$allCoupledFeaturetypes = array();
+		$allCoupledLayers = [];
+		$allCoupledFeaturetypes = [];
 		//read out first server entry - maybe this a little bit timeconsuming TODO
 		for ($i = 0; $i < count($datasetMatrix); $i++) {
 			$this->datasetJSON->dataset->srv[$i]->id = $datasetMatrix[$i]['dataset_id'];
 			$this->datasetJSON->dataset->srv[$i]->title = $datasetMatrix[$i]['title'];
 			$this->datasetJSON->dataset->srv[$i]->uuid = $datasetMatrix[$i]['fileidentifier'];
 			$this->datasetJSON->dataset->srv[$i]->abstract = $datasetMatrix[$i]['dataset_abstract'];
-			$this->datasetJSON->dataset->srv[$i]->date = date("Y-m-d", strtotime($datasetMatrix[$i]['dataset_timestamp']));
+			$this->datasetJSON->dataset->srv[$i]->date = date("Y-m-d", strtotime((string) $datasetMatrix[$i]['dataset_timestamp']));
 			$this->datasetJSON->dataset->srv[$i]->loadCount = $datasetMatrix[$i]['load_count'];
 			$this->datasetJSON->dataset->srv[$i]->respOrg = $datasetMatrix[$i]['mb_group_name'];
 			$this->datasetJSON->dataset->srv[$i]->logoUrl = $datasetMatrix[$i]['mb_group_logo_path'];
-			list($hasConstraints, $symbolLink, $termsOfUseId) = $this->hasConstraints("dataset", $datasetMatrix[$i]['dataset_id']);
+			[$hasConstraints, $symbolLink, $termsOfUseId] = $this->hasConstraints("dataset", $datasetMatrix[$i]['dataset_id']);
 			$this->datasetJSON->dataset->srv[$i]->hasConstraints = $hasConstraints;
 			$this->datasetJSON->dataset->srv[$i]->isopen = $datasetMatrix[$i]['isopen'];
 			$this->datasetJSON->dataset->srv[$i]->symbolLink = $symbolLink;
@@ -687,14 +565,14 @@ class searchMetadata
 				$this->datasetJSON->dataset->srv[$i]->isoCategories = $md_topic_categoriesArray;
 			}
 			$this->datasetJSON->dataset->srv[$i]->iso3166 = $spatialSource;
-			$this->datasetJSON->dataset->srv[$i]->bbox = array($datasetMatrix[$i]['bbox']); //TODO: read out bbox from wmc $datasetMatrix[$i][''];
-			$this->datasetJSON->dataset->srv[$i]->timeBegin = date("Y-m-d", strtotime($datasetMatrix[$i]['timebegin']));
-			$this->datasetJSON->dataset->srv[$i]->timeEnd = date("Y-m-d", strtotime($datasetMatrix[$i]['timeend']));
+			$this->datasetJSON->dataset->srv[$i]->bbox = [$datasetMatrix[$i]['bbox']]; //TODO: read out bbox from wmc $datasetMatrix[$i][''];
+			$this->datasetJSON->dataset->srv[$i]->timeBegin = date("Y-m-d", strtotime((string) $datasetMatrix[$i]['timebegin']));
+			$this->datasetJSON->dataset->srv[$i]->timeEnd = date("Y-m-d", strtotime((string) $datasetMatrix[$i]['timeend']));
 			//search for coupled resources!!!!
 			if ($this->resolveCoupledResources == true) {
 				//maybe generate uuid first to find search!!
 				//http://localhost/mb_trunk/php/mod_callMetadata.php?searchId=test2&searchText=wald&outputFormat=json&resultTarget=web&searchResources=dataset&resolveCoupledResources=true
-				$coupledResources = json_decode($datasetMatrix[$i]['coupled_resources']);
+				$coupledResources = json_decode((string) $datasetMatrix[$i]['coupled_resources']);
 				$layerCount = 0;
 				$featuretypeCount = 0;
 				foreach ($coupledResources->coupledResources->layerIds as $layer_id) {
@@ -712,9 +590,9 @@ class searchMetadata
 		}
 		//search for coupled resources and push them into dataset json !
 		if ($this->resolveCoupledResources == true) {
-			$layerSearchArray = array();
-			$featuretypeSearchArray = array();
-			$downloadOptionsArray = array();
+			$layerSearchArray = [];
+			$featuretypeSearchArray = [];
+			$downloadOptionsArray = [];
 			$uniqueAllCoupledLayers = array_unique($allCoupledLayers);
 			$uniqueAllCoupledFeaturetypes = array_unique($allCoupledFeaturetypes);
 			$countUniqueLayers = count($uniqueAllCoupledLayers);
@@ -722,12 +600,12 @@ class searchMetadata
 			if ($countUniqueLayers >= 1) {
 				//Ticket 6655: Changed order of Datasetsearch subservices
 				//als Argument für OrderBy wurde in dem Aufruf 'intern' gesetzt, damit die Layer nach layer_title und wms_id sortiert werden. Dafür wurde oben eine switch - Anweisung um 'intern' erweitert (Zeile 317)
-				$coupledLayers = new self($this->userId, 'dummysearch', '*', null, null, null, null, null, null, null, $countUniqueLayers, null, null, null, $this->languageCode, null, 'wms', 1, 'json', 'internal', null, null, $this->hostName, 'intern', implode(',', $uniqueAllCoupledLayers), $this->restrictToOpenData, $this->originFromHeader, false, $this->https, $this->restrictToHvd);
+				$coupledLayers = new self($this->userId, 'dummysearch', '*', null, null, null, null, null, null, null, $countUniqueLayers, null, null, null, $this->languageCode, null, 'wms', 1, 'json', 'internal', null, null, $this->hostName, 'intern', implode(',', $uniqueAllCoupledLayers), $this->restrictToOpenData, $this->originFromHeader, $this->restrictToHvd, false, $this->https);
 				$srvCount = 0;
 				foreach (json_decode($coupledLayers->internalResult)->wms->srv as $server) {
 					
 					foreach ($server->layer as $layer) {
-						
+
 						$layerSearchArray[$layer->id] = $srvCount;
 						//pull inspire downloadoptions from layer information
 						foreach ($layer->downloadOptions as $downloadOption) {
@@ -737,7 +615,7 @@ class searchMetadata
 						}
 						//TODO!: do this also for the next hierachylevel - maybe invoke it recursive!!!
 						// foreach ($layer->layer as $sublayer) {
-							
+
 						// 	$layerSearchArray[$sublayer->id] = $srvCount;
 						// 	//pull inspire downloadoptions from layer information
 						// 	foreach ($sublayer->downloadOptions as $downloadOption) {
@@ -751,7 +629,7 @@ class searchMetadata
 				}
 			}
 			if ($countUniqueFeaturetypes >= 1) {
-				$coupledFeaturetypes = new self($this->userId, 'dummysearch', '*', null, null, null, null, null, null, null, $countUniqueFeaturetypes, null, null, null, $this->languageCode, null, 'wfs', 1, 'json', 'internal', null, null, $this->hostName, $this->orderBy, implode(',', $uniqueAllCoupledFeaturetypes), $this->restrictToOpenData, $this->originFromHeader, false, $this->https, $this->restrictToHvd);
+				$coupledFeaturetypes = new self($this->userId, 'dummysearch', '*', null, null, null, null, null, null, null, $countUniqueFeaturetypes, null, null, null, $this->languageCode, null, 'wfs', 1, 'json', 'internal', null, null, $this->hostName, $this->orderBy, implode(',', $uniqueAllCoupledFeaturetypes), $this->restrictToOpenData, $this->originFromHeader, $this->restrictToHvd, false, $this->https);
 				$srvCount = 0;
 				foreach (json_decode($coupledFeaturetypes->internalResult)->wfs->srv as $server) {
 					foreach ($server->ftype as $featuretype) {
@@ -767,7 +645,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 
 
 */
-			$layer_id_sorted = array();
+			$layer_id_sorted = [];
 			
 			foreach (json_decode($coupledLayers->internalResult)->wms->srv as $server) {
 				foreach ($server->layer as $layer) {
@@ -805,7 +683,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					//Ticket 6655: Changed order of Datasetsearch subservices
 					usort($this->datasetJSON->dataset->srv[$i]->coupledResources->inspireAtomFeeds, fn($a, $b) => $a->type <=> $b->type);
 				} else {
-					$downloadOptionsFromMetadata = json_decode(getDownloadOptions(array($datasetMatrix[$i]['fileidentifier']), $this->protocol . "://" . $this->hostName . "/mapbender/", $this->protocol . "://" . $this->hostName));
+					$downloadOptionsFromMetadata = json_decode((string) getDownloadOptions([$datasetMatrix[$i]['fileidentifier']]));
 					//try to load coupled atom feeds from mod_getDownloadOptions and add them to result list! (if no wms layer nor wfs featuretype is available)
 					foreach ($downloadOptionsFromMetadata->{$datasetMatrix[$i]['fileidentifier']}->option as $dlOption) {
 						if ($dlOption->type == "downloadlink" || $dlOption->type == "distribution" || $dlOption->type == "remotelist") {
@@ -827,7 +705,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	
 		for ($i = 0; $i < count($matrix); $i++) {
 			$layers = $this->datasetJSON->dataset->srv[$i]->coupledResources->layer;
-			$sorted_layers = array();
+			$sorted_layers = [];
 	
 			foreach ($layers as $layer) {
 				$layer_id = $layer->id;
@@ -852,14 +730,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	{
 		//initialize object
 		$this->applicationJSON = new stdClass;
-		$this->applicationJSON->application = (object) array(
-			'md' => (object) array(
-				'nresults' => $n,
-				'p' => $this->searchPages,
-				'rpp' => $this->maxResults
-			),
-			'srv' => array()
-		);
+		$this->applicationJSON->application = (object) ['md' => (object) ['nresults' => $n, 'p' => $this->searchPages, 'rpp' => $this->maxResults], 'srv' => []];
 
 		//read out records
 		$serverCount = 0;
@@ -875,11 +746,11 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			$this->applicationJSON->application->srv[$i]->title = $applicationMatrix[$i]['title'];
 			$this->applicationJSON->application->srv[$i]->uuid = $applicationMatrix[$i]['fileidentifier'];
 			$this->applicationJSON->application->srv[$i]->abstract = $applicationMatrix[$i]['dataset_abstract'];
-			$this->applicationJSON->application->srv[$i]->date = date("Y-m-d", strtotime($applicationMatrix[$i]['dataset_timestamp']));
+			$this->applicationJSON->application->srv[$i]->date = date("Y-m-d", strtotime((string) $applicationMatrix[$i]['dataset_timestamp']));
 			$this->applicationJSON->application->srv[$i]->loadCount = $applicationMatrix[$i]['load_count'];
 			$this->applicationJSON->application->srv[$i]->respOrg = $applicationMatrix[$i]['mb_group_name'];
 			$this->applicationJSON->application->srv[$i]->logoUrl = $applicationMatrix[$i]['mb_group_logo_path'];
-			list($hasConstraints, $symbolLink) = $this->hasConstraints("dataset", $applicationMatrix[$i]['dataset_id']);
+			[$hasConstraints, $symbolLink] = $this->hasConstraints("dataset", $applicationMatrix[$i]['dataset_id']);
 			$this->applicationJSON->application->srv[$i]->hasConstraints = $hasConstraints;
 			$this->applicationJSON->application->srv[$i]->isopen = $applicationMatrix[$i]['isopen'];
 			$this->applicationJSON->application->srv[$i]->symbolLink = $symbolLink;
@@ -889,7 +760,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			//TODO: preview and access url should be generated by class_administration.php
 			$accessUrl = $this->protocol . "://" . $this->hostName . "/mapbender/php/mod_invokeApplicationFromMetadata.php?id=" . $applicationMatrix[$i]['metadata_id'];
 			$admin = new administration();
-			$notNullElements = array('fkey_gui_id', 'fkey_mapviewer_id', 'fkey_wmc_serial_id');
+			$notNullElements = ['fkey_gui_id', 'fkey_mapviewer_id', 'fkey_wmc_serial_id'];
 			foreach ($notNullElements as $notNullElement) {
 				if ($applicationMatrix[$i][$notNullElement] == '' || $applicationMatrix[$i][$notNullElement] == null) {
 					$applicationMatrix[$i][$notNullElement] = false;
@@ -911,9 +782,9 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			}
 			$this->applicationJSON->application->srv[$i]->iso3166 = $spatialSource;
 
-			$this->applicationJSON->application->srv[$i]->bbox = array($applicationMatrix[$i]['bbox']); //TODO: read out bbox from wmc $applicationMatrix[$i][''];
-			$this->applicationJSON->application->srv[$i]->timeBegin = date("Y-m-d", strtotime($applicationMatrix[$i]['timebegin']));
-			$this->applicationJSON->application->srv[$i]->timeEnd = date("Y-m-d", strtotime($applicationMatrix[$i]['timeend']));
+			$this->applicationJSON->application->srv[$i]->bbox = [$applicationMatrix[$i]['bbox']]; //TODO: read out bbox from wmc $applicationMatrix[$i][''];
+			$this->applicationJSON->application->srv[$i]->timeBegin = date("Y-m-d", strtotime((string) $applicationMatrix[$i]['timebegin']));
+			$this->applicationJSON->application->srv[$i]->timeEnd = date("Y-m-d", strtotime((string) $applicationMatrix[$i]['timeend']));
 		}
 	}
 
@@ -921,20 +792,13 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	{
 		//initialize object
 		$this->wmsJSON = new stdClass;
-		$this->wmsJSON->wms = (object) array(
-			'md' => (object) array(
-				'nresults' => $n,
-				'p' => $this->searchPages,
-				'rpp' => $this->maxResults
-			),
-			'srv' => array()
-		);
+		$this->wmsJSON->wms = (object) ['md' => (object) ['nresults' => $n, 'p' => $this->searchPages, 'rpp' => $this->maxResults], 'srv' => []];
 		//read out records
 		$serverCount = 0;
 		$wmsMatrix = db_fetch_all($res);
-		$layerIdArray = array();
+		$layerIdArray = [];
 		//read out array with unique wms_ids in wmsMatrix
-		$wmsIdArray = array();
+		$wmsIdArray = [];
 		//initialize root layer id;
 		$rootLayerId = -1;
 		$j = 0;
@@ -965,8 +829,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 						$wmsRootLayerId = $rootLayerId;
 					}else {
 						$sql = "SELECT layer_id FROM layer WHERE fkey_wms_id = $1 AND layer_pos = 0";
-						$v = array((int) $subLayers[$rootIndex]['wms_id']);
-						$t = array("i");
+						$v = [(int) $subLayers[$rootIndex]['wms_id']];
+						$t = ["i"];
 						$res = db_prep_query($sql, $v, $t);
 						$row = db_fetch_array($res);
 						$wmsRootLayerId = $row['layer_id'];
@@ -994,7 +858,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					$this->wmsJSON->wms->srv[$j]->respOrg = $subLayers[$rootIndex]['mb_group_name'];
 					$this->wmsJSON->wms->srv[$j]->logoUrl = $subLayers[$rootIndex]['mb_group_logo_path'];
 					//check if a disclaimer has to be shown and give the relevant symbol
-					list($hasConstraints, $symbolLink, $termsOfUseId) = $this->hasConstraints("wms", $subLayers[$rootIndex]['wms_id']);
+					[$hasConstraints, $symbolLink, $termsOfUseId] = $this->hasConstraints("wms", $subLayers[$rootIndex]['wms_id']);
 					$this->wmsJSON->wms->srv[$j]->hasConstraints = $hasConstraints;
 					$this->wmsJSON->wms->srv[$j]->isopen = $subLayers[$rootIndex]['isopen'];
 					$this->wmsJSON->wms->srv[$j]->symbolLink = $symbolLink;
@@ -1023,7 +887,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					$this->wmsJSON->wms->srv[$j]->bbox = $subLayers[$rootIndex]['bbox']; //$wmsMatrix[$i][''];
 					//Call recursively the child elements, give and pull $layerIdArray to push the done elements in the array to avoid double results
 					//generate the layer-entry for the so called root layer - maybe this is only a group layer if there is a gap in the layer hierachy
-					$this->wmsJSON->wms->srv[$j]->layer = array();
+					$this->wmsJSON->wms->srv[$j]->layer = [];
 					$this->wmsJSON->wms->srv[$j]->layer[0]->id = (int) $subLayers[$rootIndex]['layer_id'];
 					$this->wmsJSON->wms->srv[$j]->layer[0]->title = $subLayers[$rootIndex]['layer_title'];
 					$this->wmsJSON->wms->srv[$j]->layer[0]->name = $subLayers[$rootIndex]['layer_name'];
@@ -1042,7 +906,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					$downloadOptionsCs = str_replace("{", "", str_replace("}", "", str_replace("}{", ",", $legendInfo['downloadOptions'])));
 					// begin of performance optimusprime by @lvgl-cs
 					if (!isset($functionResults[$downloadOptionsCs])) {
-						$downloadOptions = json_decode(getDownloadOptions(explode(',', $downloadOptionsCs), $this->protocol . "://" . $this->hostName . "/mapbender/"));
+						$downloadOptions = json_decode((string) getDownloadOptions(explode(',', $downloadOptionsCs)));
 	   					$functionResults[$downloadOptionsCs] = $downloadOptions; // Store the result
 					}else{
 						$downloadOptions =$functionResults[$downloadOptionsCs]; // Retrieve the stored result
@@ -1091,7 +955,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	{
 		global $admin;
 		$starttime = $this->microtime_float();
-		list($sql, $v, $t, $n) = $this->generateSearchSQL();
+		[$sql, $v, $t, $n] = $this->generateSearchSQL();
 		//call database search in limits
 		$res = db_prep_query($sql, $v, $t);
 		if ($this->outputFormat == 'json') {
@@ -1148,7 +1012,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function generateWFSMetadata($xmlDoc)
 	{
 		$starttime = $this->microtime_float();
-		list($sql, $v, $t, $n) = $this->generateSearchSQL();
+		[$sql, $v, $t, $n] = $this->generateSearchSQL();
 		//call database search
 		$res = db_prep_query($sql, $v, $t);
 		if ($this->outputFormat == 'json') {
@@ -1203,7 +1067,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function generateWMCMetadata($xmlDoc)
 	{
 		$starttime = $this->microtime_float();
-		list($sql, $v, $t, $n) = $this->generateSearchSQL();
+		[$sql, $v, $t, $n] = $this->generateSearchSQL();
 		//call database search in limits
 		$res = db_prep_query($sql, $v, $t);
 		if ($this->outputFormat == 'json') {
@@ -1256,7 +1120,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function generateDatasetMetadata($xmlDoc)
 	{
 		$starttime = $this->microtime_float();
-		list($sql, $v, $t, $n) = $this->generateSearchSQL();
+		[$sql, $v, $t, $n] = $this->generateSearchSQL();
 		//call database search in limits
 		$res = db_prep_query($sql, $v, $t);
 		if ($this->outputFormat == 'json') {
@@ -1310,7 +1174,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function generateApplicationMetadata($xmlDoc)
 	{
 		$starttime = $this->microtime_float();
-		list($sql, $v, $t, $n) = $this->generateSearchSQL();
+		[$sql, $v, $t, $n] = $this->generateSearchSQL();
 		//call database search in limits
 		$res = db_prep_query($sql, $v, $t);
 		if ($this->outputFormat == 'json') {
@@ -1363,8 +1227,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 
 	private function replaceChars_all($text)
 	{
-		$search = array("ä",  "ö",  "ü",  "Ä",  "Ö",  "Ü",  "ß");
-		$repWith = array("ae", "oe", "ue", "AE", "OE", "UE", "ss");
+		$search = ["ä", "ö", "ü", "Ä", "Ö", "Ü", "ß"];
+		$repWith = ["ae", "oe", "ue", "AE", "OE", "UE", "ss"];
 		$replaced = str_replace($search, $repWith, $text);
 		return $replaced;
 	}
@@ -1379,14 +1243,14 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		//5. ...
 		//parse searchText into different array elements to allow an AND search
 		$searchStringArray = $this->generateSearchStringArray();
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT * from " . $this->searchView . " ";
 		$whereStr = "";
-		$whereCondArray = array();
+		$whereCondArray = [];
 		$isTextSearch = "false";
 		$e = new mb_notice("Number of used searchstrings: " . count($searchStringArray));
-		if ($this->searchText != NULL && trim($this->searchText) != '*') {
+		if ($this->searchText != NULL && trim((string) $this->searchText) != '*') {
 			for ($i = 0; $i < count($searchStringArray); $i++) {
 				$isTextSearch = "true";
 				if ($i > 0) {
@@ -1396,7 +1260,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 				//output for debugging
 				$e = new mb_notice("Part of string" . $i . ": " . $searchStringArray[$i]);
 				$e = new mb_notice("converted: " . $this->replaceChars_all($searchStringArray[$i]));
-				$va = "%" . trim(strtoupper($this->replaceChars_all($searchStringArray[$i]))) . "%";
+				$va = "%" . trim(strtoupper((string) $this->replaceChars_all($searchStringArray[$i]))) . "%";
 				$e = new mb_notice($this->searchResources . " Searchtext in SQL: " . $va);
 				array_push($v, $va);
 				array_push($t, "s");
@@ -1407,17 +1271,17 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		//check for postgis version
 		//sql for get version string
 		//get version number
-		if ((strtolower($this->searchResources) === "wms" or strtolower($this->searchResources) === "wmc" or strtolower($this->searchResources) === "dataset" or strtolower($this->searchResources) === "wfs" or strtolower($this->searchResources) === "application") & $this->searchBbox != NULL) {
+		if ((strtolower((string) $this->searchResources) === "wms" or strtolower((string) $this->searchResources) === "wmc" or strtolower((string) $this->searchResources) === "dataset" or strtolower((string) $this->searchResources) === "wfs" or strtolower((string) $this->searchResources) === "application") & $this->searchBbox != NULL) {
 			//decide which type of search should be done
 			//check for postgis version cause postgis versions < 1.4 have problems when doing disjoint and inside
 			$sqlPostgisVersion = "SELECT postgis_version();";
-			$vPostgisVersion = array();
-			$tPostgisVersion = array();
+			$vPostgisVersion = [];
+			$tPostgisVersion = [];
 			$resPostgisVersion = db_prep_query($sqlPostgisVersion, $vPostgisVersion, $tPostgisVersion);
 			// get version string
 			while ($row = db_fetch_array($resPostgisVersion)) {
 				$postgisVersion = $row['postgis_version'];
-				$postgisVersionArray = explode(" ", $postgisVersion);
+				$postgisVersionArray = explode(" ", (string) $postgisVersion);
 				$postgisVersionSmall = explode(".", $postgisVersionArray[0]);
 				$postgisSubNumber = $postgisVersionSmall[1];
 				$e = new mb_notice("class_metadata.php: postgis sub number = " . $postgisSubNumber);
@@ -1434,8 +1298,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					$spatialFilter = ' intersects(';
 				}
 				//define spatial filter
-				if (count(explode(',', $this->searchBbox)) == 4) {   //if searchBbox has 4 entries
-					$spatialFilterCoords = explode(',', $this->searchBbox); //read out searchBbox
+				if (count(explode(',', (string) $this->searchBbox)) == 4) {   //if searchBbox has 4 entries
+					$spatialFilterCoords = explode(',', (string) $this->searchBbox); //read out searchBbox
 					//definition of the spatial filter
 					$spatialFilter .= 'the_geom,GeomFromText(\'POLYGON((' . $spatialFilterCoords[0]; //minx
 					$spatialFilter .= ' ' . $spatialFilterCoords[1] . ','; //miny
@@ -1453,8 +1317,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			} else {
 				$spatialFilter = ' the_geom && ';
 				//define spatial filter
-				if (count(explode(',', $this->searchBbox)) == 4) {   //if searchBbox has 4 entries
-					$spatialFilterCoords = explode(',', $this->searchBbox); //read out searchBbox
+				if (count(explode(',', (string) $this->searchBbox)) == 4) {   //if searchBbox has 4 entries
+					$spatialFilterCoords = explode(',', (string) $this->searchBbox); //read out searchBbox
 					//definition of the spatial filter
 					$spatialFilter .= 'GeomFromText(\'POLYGON((' . $spatialFilterCoords[0]; //minx
 					$spatialFilter .= ' ' . $spatialFilterCoords[1] . ','; //miny
@@ -1473,12 +1337,12 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		}
 		//search filter for isopen - open data classification of the managed termsofuse
 		//
-		if (strtolower($this->searchResources) !== "wmc" && $this->restrictToOpenData) {
+		if (strtolower((string) $this->searchResources) !== "wmc" && $this->restrictToOpenData) {
 			array_push($whereCondArray, '(isopen = 1)');
 		}
 		//search filter for HVD classification 
 		//
-		if (strtolower($this->searchResources) == "dataset" && $this->restrictToHvd) {
+		if (strtolower((string) $this->searchResources) == "dataset" && $this->restrictToHvd) {
 			//FIX INSPIRE Category ids: [1,2,3]
 			//FIX CUSTOM Category ids: [2,3,4]
 			//{"hvd_inspire_cat": [1,2,3], "hvd_custom_cat": [3,4,5]}
@@ -1502,7 +1366,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		//search filter for md_topic_categories
 		//
 		if ($this->isoCategories != NULL) {
-			$isoArray = explode(',', $this->isoCategories);
+			$isoArray = explode(',', (string) $this->isoCategories);
 			$topicCond = "(";
 			for ($i = 0; $i < count($isoArray); $i++) {
 				if ($i == 0) {
@@ -1518,7 +1382,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		//
 		if ($this->inspireThemes != NULL) {
 
-			$inspireArray = explode(',', $this->inspireThemes);
+			$inspireArray = explode(',', (string) $this->inspireThemes);
 			$inspireCond = "(";
 			for ($i = 0; $i < count($inspireArray); $i++) {
 				if ($i == 0) {
@@ -1534,7 +1398,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		//
 		if ($this->customCategories != NULL) {
 
-			$customArray = explode(',', $this->customCategories);
+			$customArray = explode(',', (string) $this->customCategories);
 			$customCond = "(";
 			for ($i = 0; $i < count($customArray); $i++) {
 				if ($i == 0) {
@@ -1565,7 +1429,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		}
 
 		//filter for data actuality (only for datasets)
-		if (strtolower($this->searchResources) === "dataset" || strtolower($this->searchResources) === "application") {
+		if (strtolower((string) $this->searchResources) === "dataset" || strtolower((string) $this->searchResources) === "application") {
 			if ($this->timeBegin != NULL && $this->timeEnd != NULL) {
 				$time = "((to_timestamp('" . $this->timeBegin . "','YYYY-MM-DD'),to_timestamp('" . $this->timeEnd . "','YYYY-MM-DD')) OVERLAPS (timebegin,timeend))";
 				array_push($whereCondArray, $time);
@@ -1629,7 +1493,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		$n = $this->writeCategories($whereStr, $v, $t);
 		//write counts to filesystem to avoid to many database connections
 		//only write them, if searchId is given - problem: searches with same searchId's maybe get wrong information
-		return array($sql, $v, $t, $n);
+		return [$sql, $v, $t, $n];
 	}
 
 	/** Function to write a json file which includes the categories of the search result for each searchResource - wms/wfs/wmc/georss, new: it should also count the keyword distribution of the searchResource ans save it as a special json file!
@@ -1664,22 +1528,13 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			if ($fileExists == false  or $this->resultTarget == 'debug') { //TODO at the moment the cat file will be overwritten - change this in production system
 				//open category file for results
 				$this->catJSON = new stdClass;
-				$this->catJSON->searchMD = (object) array(
-					'searchId' => $this->searchId,
-					'n' => $n
-				);
+				$this->catJSON->searchMD = (object) ['searchId' => $this->searchId, 'n' => $n];
 				//new: also generate a json object for the keyword distribution
 				$this->keyJSON = new stdClass;
-				$this->keyJSON->tagCloud = (object) array(
-					'searchId' => $this->searchId,
-					'maxFontSize' => $this->maxFontSize,
-					'maxObjects' => $this->maxObjects,
-					'title' => $this->keywordTitle,
-					'tags' => array()
-				);
+				$this->keyJSON->tagCloud = (object) ['searchId' => $this->searchId, 'maxFontSize' => $this->maxFontSize, 'maxObjects' => $this->maxObjects, 'title' => $this->keywordTitle, 'tags' => []];
 				$this->inc = ($this->maxFontSize - $this->minFontSize) / $this->maxObjects; //maybe 10 or 5 or ...
 				//generate the list of category counts
-				$sqlCat = array();
+				$sqlCat = [];
 				//generate the sql for the keyword count
 				$sqlKeyword = "select keyword.keyword, COUNT(*) ";
 				$sqlKeyword .= "FROM (select ";
@@ -1720,7 +1575,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 						//append the resource parameter:
 						$searchUrlKeywords .= '&searchResources=' . $this->searchResources;
 						$e = new mb_notice("class_metadata.php: value " . $paramValue . " for searchText param found");
-						$paramValue = urldecode($paramValue);
+						$paramValue = urldecode((string) $paramValue);
 						if ($paramValue == false || $paramValue == '*') {
 							$this->keyJSON->tagCloud->tags[$j]->url = $searchUrlKeywords . "&searchText=" . $keywordCounts[$j]['keyword'];
 						} else {
@@ -1739,7 +1594,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 
 				//check if categories are defined for the resource
 				if ($this->resourceClasses != NULL) {
-					$this->catJSON->searchMD->category = array();
+					$this->catJSON->searchMD->category = [];
 					for ($i = 0; $i < count($this->resourceClasses); $i++) {
 						//TODO: not to set the classification?
 						$this->catJSON->searchMD->category[$i]->title = $this->resourceClassifications[$i]['title'];
@@ -1790,7 +1645,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 						if ($categoryCounts) {
 							//write results in json object
 							if (count($categoryCounts) > 0) {
-								$this->catJSON->searchMD->category[$i]->subcat = array();
+								$this->catJSON->searchMD->category[$i]->subcat = [];
 								for ($j = 0; $j < count($categoryCounts); $j++) {
 									$this->catJSON->searchMD->category[$i]->subcat[$j]->id = $categoryCounts[$j][$this->resourceClassifications[$i]['tablename'] . "_id"];
 									$this->catJSON->searchMD->category[$i]->subcat[$j]->title = $categoryCounts[$j][$this->resourceClassifications[$i]['tablename'] . "_code_" . $this->languageCode];
@@ -1802,7 +1657,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 									//check if category search was requested and rewrite the search url
 									//get the value of the param as string or false if not set!
 									$paramValue = $this->getValueForParam($this->resourceClassifications[$i]['requestName'], $filteredSearchString);
-									$paramValue = urldecode($paramValue);
+									$paramValue = urldecode((string) $paramValue);
 									if ($paramValue == false) {
 										$filteredSearchString .= "&" . $this->resourceClassifications[$i]['requestName'] . "=" . $categoryCounts[$j][$this->resourceClassifications[$i]['tablename'] . "_id"];
 									} else {
@@ -1817,17 +1672,11 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					//*********************************************************************
 					//create a facet for publishing organizations
 					$i = 3;
-					switch ($this->languageCode) {
-						case "de":
-							$this->catJSON->searchMD->category[$i]->title = "Organisationen";
-							break;
-						case "en":
-							$this->catJSON->searchMD->category[$i]->title = "Organizations";
-							break;
-						default:
-							$this->catJSON->searchMD->category[$i]->title = "Organizations";
-							break;
-					}
+					$this->catJSON->searchMD->category[$i]->title = match ($this->languageCode) {
+         "de" => "Organisationen",
+         "en" => "Organizations",
+         default => "Organizations",
+     };
 					$sqlCat[$i] = "SELECT department AS id, COUNT(department) AS count, mb_group.mb_group_name AS title FROM " . $this->searchView . " INNER JOIN mb_group ON department = mb_group.mb_group_id";
 					if ($this->resourceClassifications[$i]['title'] != $this->resourceClassifications[2]['title']) {
 						if ($whereStr != '') {
@@ -1854,7 +1703,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 					if ($categoryCounts) {
 						//write results in json object
 						if (count($categoryCounts) > 0) {
-							$this->catJSON->searchMD->category[$i]->subcat = array();
+							$this->catJSON->searchMD->category[$i]->subcat = [];
 							for ($j = 0; $j < count($categoryCounts); $j++) {
 								$this->catJSON->searchMD->category[$i]->subcat[$j]->id = $categoryCounts[$j]["id"];
 								$this->catJSON->searchMD->category[$i]->subcat[$j]->title = $categoryCounts[$j]["title"];
@@ -1867,7 +1716,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 								//check if category search was requested and rewrite the search url
 								//get the value of the param as string or false if not set!
 								$paramValue = $this->getValueForParam($this->resourceClassifications[$i]['requestName'], $filteredSearchString);
-								$paramValue = urldecode($paramValue);
+								$paramValue = urldecode((string) $paramValue);
 								if ($paramValue == false) {
 									$filteredSearchString .= "&" . $this->resourceClassifications[$i]['requestName'] . "=" . $categoryCounts[$j]["id"];
 								} else {
@@ -1917,8 +1766,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			$return_permission = "true";
 		} else {
 			$sql = "SELECT wfs.wfs_id, mb_user.mb_user_email as email FROM wfs, mb_user where wfs.wfs_owner=mb_user.mb_user_id " . "and wfs.wfs_id=$1";
-			$v = array($wfs_id);
-			$t = array('i');
+			$v = [$wfs_id];
+			$t = ['i'];
 			$res = db_prep_query($sql, $v, $t);
 			// get email
 			$mail = "";
@@ -1933,8 +1782,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function getUrlsFromWMSId($wmsId)
 	{
 		$sql = "SELECT wms_getmap, wms_getcapabilities, wms_owsproxy FROM wms WHERE wms_id = $1";
-		$v = array($wmsId);
-		$t = array('i');
+		$v = [$wmsId];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
 			$getMap = $row['wms_getmap'];
@@ -1959,8 +1808,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	private function getInfofromLayerId($layerId)
 	{
 		$sql = "SELECT layer_wms.*, layer_style.legendurl, layer_style.legendurlformat FROM (SELECT layer_id, f_get_download_options_for_layer(layer_id) as layer_metadata, layer_minscale, layer_maxscale, wms_getlegendurl, wms_owsproxy, wms_getcapabilities FROM layer INNER JOIN wms ON layer.fkey_wms_id = wms.wms_id WHERE layer.layer_id = $1) as layer_wms LEFT OUTER JOIN layer_style ON layer_style.fkey_layer_id = layer_wms.layer_id";
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
 			$getLegendUrl = $row['wms_getlegendurl'];
@@ -1998,8 +1847,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	{
 		$admin = new administration();
 		$sql = "SELECT wfs_id, wfs_version, wfs_getcapabilities, wfs_describefeaturetype, featuretype_name, wfs_owsproxy FROM wfs_featuretype INNER JOIN wfs ON wfs_featuretype.fkey_wfs_id = wfs.wfs_id WHERE wfs_featuretype.featuretype_id = $1";
-		$v = array($featuretypeId);
-		$t = array('i');
+		$v = [$featuretypeId];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
 			$getCapabilitiesUrl = $row['wfs_getcapabilities'];
@@ -2034,8 +1883,8 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		} else {
 			$sql = "SELECT mb_user.mb_user_email as email FROM wms, mb_user WHERE wms.wms_owner=mb_user.mb_user_id";
 			$sql .= " AND wms.wms_id=$1";
-			$v = array($wmsId);
-			$t = array('i');
+			$v = [$wmsId];
+			$t = ['i'];
 			$res = db_prep_query($sql, $v, $t);
 			$mail = "";
 			while ($row = db_fetch_array($res)) {
@@ -2050,9 +1899,9 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 
 	private function generateSearchStringArray()
 	{
-		$asstr = array();
+		$asstr = [];
 		if ($this->searchText != "false") {
-			$asstr = explode(",", $this->searchText);
+			$asstr = explode(",", (string) $this->searchText);
 			for ($i = 0; $i < count($asstr); $i++) {
 				$asstr[$i] = ltrim($asstr[$i]);
 				$asstr[$i] = rtrim($asstr[$i]);
@@ -2136,7 +1985,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		$countsublayer = 0;
 		//if child exists create a new layer array for these 
 		if (count($childLayers) != 0) {
-			$servObject->layer = array();
+			$servObject->layer = [];
 		}
 		foreach ($childLayers as $child) {
 			$servObject->layer[$countsublayer]->id = $child['layer_id'];
@@ -2153,7 +2002,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			$servObject->layer[$countsublayer]->minScale = $legendInfo['minScale'];
 			$servObject->layer[$countsublayer]->maxScale = $legendInfo['maxScale'];
 			$downloadOptionsCs = str_replace("{", "", str_replace("}", "", str_replace("}{", ",", $legendInfo['downloadOptions'])));
-			$downloadOptions = json_decode(getDownloadOptions(explode(',', $downloadOptionsCs), $this->protocol . "://" . $this->hostName . "/mapbender/", $this->protocol . "://" . $this->hostName));
+			$downloadOptions = json_decode((string) getDownloadOptions(explode(',', $downloadOptionsCs)));
 			$servObject->layer[$countsublayer]->downloadOptions = $downloadOptions;
 			$servObject->layer[$countsublayer]->mdLink = $this->protocol . "://" . $this->hostName . "/mapbender/php/mod_showMetadata.php?languageCode=" . $this->languageCode . "&resource=layer&layout=tabs&id=" . $child['layer_id'];
 			if ($child['layer_name'] == '') {
@@ -2212,14 +2061,14 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			$sql .= " (md_termsofuse.fkey_termsofuse_id=termsofuse.termsofuse_id) where mb_metadata.metadata_id = $1";
 		}
 
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		array_push($t, "i");
 		array_push($v, $id);
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		//TODO: use MAPBENDER_PATH!
-		if ((isset($row[$type . '_proxylog']) & $row[$type . '_proxylog'] != 0) or strtoupper($row['accessconstraints']) != "NONE" or strtoupper($row['fees']) != "NONE" or isset($row['termsofuse_id'])) {
+		if ((isset($row[$type . '_proxylog']) & $row[$type . '_proxylog'] != 0) or strtoupper((string) $row['accessconstraints']) != "NONE" or strtoupper((string) $row['fees']) != "NONE" or isset($row['termsofuse_id'])) {
 			//service has some constraints defined!
 			//give symbol and true
 			//termsofuse symbol or exclamation mark
@@ -2238,7 +2087,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 		} else {
 			$termsOfUseId = false;
 		}
-		return array($hasConstraints, $symbolLink, $termsOfUseId);
+		return [$hasConstraints, $symbolLink, $termsOfUseId];
 	}
 
 	//function to delete one of the comma separated values from a HTTP-GET request
@@ -2275,7 +2124,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 
 	private function getValueForParam($paramName, $queryString)
 	{
-		parse_str($queryString, $allQueries);
+		parse_str((string) $queryString, $allQueries);
 		if (isset($allQueries[$paramName]) & $allQueries[$paramName] != '') {
 			return $allQueries[$paramName];
 		} else {
@@ -2288,7 +2137,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 	{
 		//test if string was part of query before, if so, don't extent the query
 		//TODO: the strings come from json and so they are urlencoded! maybe we have to decode them to find the commata
-		$queryListComma = urldecode($queryList);
+		$queryListComma = urldecode((string) $queryList);
 		$queryListC = "," . $queryListComma . ",";
 		$pattern = ',' . $string . ',';
 		if (!preg_match($pattern, $queryListC)) {
@@ -2347,7 +2196,7 @@ $layer_id_sorted wird befüllt mit der obigen getMetadata Abfrage
 			$str2exchange = "";
 		}
 		$queryStringNew = preg_replace('/\b' . $paramName . '\=[^&]+&?/', $str2exchange, $queryString);
-		$queryStringNew = ltrim($queryStringNew, '&');
+		$queryStringNew = ltrim((string) $queryStringNew, '&');
 		$queryStringNew = rtrim($queryStringNew, '&');
 		return $queryStringNew;
 	}

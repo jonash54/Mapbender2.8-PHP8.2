@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
-require_once(dirname(__FILE__)."/../classes/class_kml_polygon.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_linearring.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_line.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_point.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_multigeometry.php");
+require_once(__DIR__."/../classes/class_kml_polygon.php");
+require_once(__DIR__."/../classes/class_kml_linearring.php");
+require_once(__DIR__."/../classes/class_kml_line.php");
+require_once(__DIR__."/../classes/class_kml_point.php");
+require_once(__DIR__."/../classes/class_kml_multigeometry.php");
 
 /**
  * An abstract class representing a geometry, which is any of the following:
@@ -48,13 +48,13 @@ abstract class KMLGeometry {
 		}
 		
 		//TODO: not sure if this type determination works
-		$type = get_class($obj) ? get_class($obj) : gettype($obj);
+		$type = $obj::class ?: gettype($obj);
 		$e = new mb_warning("class_kml_geometry.php: isGeometry: not a geometry, but " . $type);
 		return false;
 	}
 	
 	public function getGeometryType () {
-		return get_class($this);
+		return static::class;
 	} 
 }
 ?>

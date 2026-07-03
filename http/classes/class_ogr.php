@@ -23,19 +23,19 @@
  *
  ******************************************************************************/
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * A class for providing gdal/ogr functions to mapbender. The functions may be invoked by cli (exec) or directly used 
  * if PHP_OGR is available. To install PHP_OGR see: https://github.com/dvzgeo/php_ogr
  */
 class Ogr {
-    var $useModule; # boolean
-    var $moduleAvailable; # boolean
-    var $ramdiskAvailable; # boolean
-    var $ramdiskPath; # string
-    var $useRamdisk; # boolean
-    var $logRuntime; # boolean
+    public $useModule; # boolean
+    public $moduleAvailable; # boolean
+    public $ramdiskAvailable; # boolean
+    public $ramdiskPath; # string
+    public $useRamdisk; # boolean
+    public $logRuntime; # boolean
     
     /**
      * @constructor
@@ -56,7 +56,7 @@ class Ogr {
      * 
      */
     function microtime_float() {
-        list ( $usec, $sec ) = explode ( " ", microtime () );
+        [$usec, $sec] = explode ( " ", microtime () );
         return (( float ) $usec + ( float ) $sec);
     }
     
@@ -64,7 +64,7 @@ class Ogr {
         $result = shell_exec('ogrinfo '.$geometryFilename);
         //get successful or not
         $e = new mb_exception("classes/class_ogr.php: reult of ogrinfo: " . $result);
-        if (strpos($result, 'successful') !== false) {
+        if (str_contains($result, 'successful')) {
             //using driver `GeoJSON' successful
             preg_match_all('#using driver `(.*?)\' successful#', $result, $match);
             $e = new mb_exception("classes/class_ogr.php: match: " . json_encode($match));
@@ -124,7 +124,7 @@ class Ogr {
         $filenameGml = $tmpDir."/".$filenameUniquePart.".gml";
         $filenameGfs = $tmpDir."/".$filenameUniquePart.".gfs";
         if($h = fopen($filenameGml,"w")){
-            if(!fwrite($h, $gmlFeatures)){
+            if(!fwrite($h, (string) $gmlFeatures)){
                 $e = new mb_exception("classes/class_ogr.php: could not write gml file to tmp folder");
                 return false;
             } else {
@@ -175,17 +175,15 @@ class Ogr {
         if ($extentTempDir) {
             $tmpDir = str_replace("../", "../../http/", $tmpDir);
         }
-        $filenameUniquePart = "ogr_count_features_" .md5($format). "_".time()."_".uniqid(); //
+        $filenameUniquePart = "ogr_count_features_" .md5((string) $format). "_".time()."_".uniqid(); //
         
-        $mapWfsFormat = array(          
+        $mapWfsFormat = [
             "application/json; subtype=geojson" => "GeoJSON",
             "json" => "GeoJSON",
             "application/json; subtype=geojson" => "GeoJSON",
-
             "application/vnd.google-earth.kml+xml" => "KML",
             "application/vnd.google-earth.kml xml" => "KML",
             "KML" => "KML",
-            
             "text/xml; subtype=gml/3.1.1" => "GML",
             "text/xml; subtype=gml/2.1.2" => "GML",
             "text/xml; subtype=gml/3.1.1" => "GML",
@@ -200,19 +198,16 @@ class Ogr {
             "GML" => "GML",
             # fix for qgis sending empty format string
             "" => "GML",
-            
             "csv" => "CSV",
             "text/csv" => "CSV",
-            
             "application/zip" => "ESRI Shapefile",
             "SHAPEZIP" => "ESRI Shapefile",
             "SHAPE-ZIP" => "ESRI Shapefile",
-            
             "text/javascript" => "UNSUPPORTED",
             "excel" => "UNSUPPORTED",
             "application/json" => "UNSUPPORTED",
-            "excel2007" => "UNSUPPORTED"
-        ); 
+            "excel2007" => "UNSUPPORTED",
+        ]; 
         
         if (array_key_exists($format, $mapWfsFormat)) {
             $ogrDriver = $mapWfsFormat[$format];
@@ -246,7 +241,7 @@ class Ogr {
         }
         
         if($h = fopen($filenameFeatures,"w")){
-            if(!fwrite($h, $features)){
+            if(!fwrite($h, (string) $features)){
                 $e = new mb_exception("classes/class_ogr.php: could not write gml file to tmp folder!");
                 return false;
             } else {
@@ -258,8 +253,8 @@ class Ogr {
             $e = new mb_exception("classes/class_ogr.php: could open file to write!");
         }
         //delete namespace from featuretype_name, cause ogr don't use namespaces for "Layer name"
-        if (strpos($layername, ':') != false) {
-            $layername = explode(':', $layername)[1];
+        if (str_contains((string) $layername, ':')) {
+            $layername = explode(':', (string) $layername)[1];
         }
         if ($ogrDriver == "ESRI Shapefile") {
             //$zip = new ZipArchive;

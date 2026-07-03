@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 echo "var mod_highlightPOI_target = '".$e_target[0]."';";
 
@@ -71,9 +71,9 @@ var myPOI;
 
 function mod_highlightPOI_init(){
 		var myPOI = "<?php if (CHARSET == 'UTF-8'){
-				echo addslashes(preg_replace("/\n/", "<br>", Mapbender::session()->get("mb_myPOI")));
+				echo addslashes(preg_replace("/\n/", "<br>", (string) Mapbender::session()->get("mb_myPOI")));
 			}else{
-				echo addslashes(preg_replace("/\n/", "<br>", utf8_decode(Mapbender::session()->get("mb_myPOI"))));
+				echo addslashes((string) preg_replace("/\n/", "<br>", mb_convert_encoding(Mapbender::session()->get("mb_myPOI"), 'ISO-8859-1')));
 			} 
 			?>";
 

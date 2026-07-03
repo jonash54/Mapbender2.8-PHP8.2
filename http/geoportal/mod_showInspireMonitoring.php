@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 $registratingDepartments = null;
 $sessionLang = Mapbender::session()->get("mb_lang");
 $withCounts = true;
@@ -11,7 +11,7 @@ if (defined("MAPBENDER_PATH") && MAPBENDER_PATH != '') {
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; 
 	$languageCode = $langCode;
 }
@@ -19,7 +19,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 	//validate to csv integer list
 	$testMatch = $_REQUEST["registratingDepartments"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		echo 'Parameter <b>registratingDepartments</b> is not valid.<br/>'; 
 		die(); 		
  	}

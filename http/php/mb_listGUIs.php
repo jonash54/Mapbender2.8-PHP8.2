@@ -26,8 +26,8 @@ function mb_listGUIs($arrayGUIs){
 		return;
 	}
 	
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 
 	$sql  = "SELECT DISTINCT gui_id,gui_name,gui_description, ggc.*,gc.category_name,gc.category_description ";
 	$sql .= "FROM gui g ";
@@ -75,7 +75,7 @@ function mb_listGUIs($arrayGUIs){
 			}
 			$category = $row["category_name"];
 			
-			if(strlen($row["category_name"]) > 0) {
+			if(strlen((string) $row["category_name"]) > 0) {
 				echo '<li><a href="#guiListTab-'.$totalCategories.'">' . $row["category_name"] . '</a></li>';
 			}
 			else {
@@ -95,7 +95,8 @@ function mb_listGUIs($arrayGUIs){
 			$totalCategories++;
 		}
 		
-		if(count($row["category_name"]) === 0 && !$dummyCategorySet && $divHtml == "")  {
+		// PHP 8 fatals on count(string); category_name is a scalar.
+		if(empty($row["category_name"]) && !$dummyCategorySet && $divHtml == "")  {
 			echo '<li><a href="#guiListTab-0">'._mb('Others').'</a></li>';
 		
 			$divHtml .= '<div id="guiListTab-0">';

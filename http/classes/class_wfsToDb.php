@@ -17,23 +17,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_administration.php");
-require_once(dirname(__FILE__)."/class_wfs.php");
-require_once dirname(__FILE__) . "/class_Uuid.php";
-require_once dirname(__FILE__) . "/class_iso19139.php";
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_administration.php");
+require_once(__DIR__."/class_wfs.php");
+require_once __DIR__ . "/class_Uuid.php";
+require_once __DIR__ . "/class_iso19139.php";
 //require_once dirname(__FILE__) . "//class_Uuid.php";
 
 class WfsToDb {
 	//check if metadata should be overwritten completly by caps or not. Default to overwrite all (keywords, categories, ...)
-	var $overwrite = true;
-	var $urlsToExclude = array();
+	public $overwrite = true;
+	public $urlsToExclude = [];
 
 	function __construct() {
 		$this->urlsToExclude = $urlsToExclude;
-		if (is_file(dirname(__FILE__) . "/../../conf/excludeHarvestMetadataUrls.conf")) {
-			require_once(dirname(__FILE__) . "/../../conf/excludeHarvestMetadataUrls.conf");
+		if (is_file(__DIR__ . "/../../conf/excludeHarvestMetadataUrls.conf")) {
+			require_once(__DIR__ . "/../../conf/excludeHarvestMetadataUrls.conf");
 			$this->urlsToExclude = $urlsToExclude;
 		}
 	}
@@ -86,42 +86,9 @@ class WfsToDb {
 		if ($owner !== false) {
 			$wfsOwner = $owner;
 		}
-		$v = array(
-			$aWfs->getVersion(), 
-			$aWfs->name, 
-			$aWfs->title, 
-			$aWfs->summary, 
-			$aWfs->getCapabilities, 
-			$aWfs->getCapabilitiesDoc,
-			$aWfs->uploadUrl, 
-			$aWfs->describeFeatureType, 
-			$aWfs->getFeature,
-			$aWfs->transaction, 
-			$aWfs->fees, 
-			$aWfs->accessconstraints, 
-			$aWfs->individualName,
-			$aWfs->positionName,
-			$aWfs->providerName,
-			$aWfs->city,
-			$aWfs->deliveryPoint,
-			$aWfs->administrativeArea,
-			$aWfs->postalCode,
-			$aWfs->voice,
-			$aWfs->facsimile,
-			$aWfs->electronicMailAddress,
-			$aWfs->country, 
-			$wfsOwner, 
-			strtotime("now"),
-			strtotime("now"),
-			$uuid,
-			$aWfs->auth['username'],
-			$aWfs->auth['password'],
-			$aWfs->auth['auth_type'],
-			$wfs_owsproxy,
-		    $aWfs->alternate_title
-		);
+		$v = [$aWfs->getVersion(), $aWfs->name, $aWfs->title, $aWfs->summary, $aWfs->getCapabilities, $aWfs->getCapabilitiesDoc, $aWfs->uploadUrl, $aWfs->describeFeatureType, $aWfs->getFeature, $aWfs->transaction, $aWfs->fees, $aWfs->accessconstraints, $aWfs->individualName, $aWfs->positionName, $aWfs->providerName, $aWfs->city, $aWfs->deliveryPoint, $aWfs->administrativeArea, $aWfs->postalCode, $aWfs->voice, $aWfs->facsimile, $aWfs->electronicMailAddress, $aWfs->country, $wfsOwner, strtotime("now"), strtotime("now"), $uuid, $aWfs->auth['username'], $aWfs->auth['password'], $aWfs->auth['auth_type'], $wfs_owsproxy, $aWfs->alternate_title];
 			
-		$t = array('s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 'i', 'i','i','s','s','s','s','s','s');
+		$t = ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 'i', 'i', 'i', 's', 's', 's', 's', 's', 's'];
 	
 		$res = db_prep_query($sql, $v, $t);
 	
@@ -184,8 +151,8 @@ class WfsToDb {
 		if (!$updateMetadataOnly) {
 			//read network_access from database
 			$sql = "SELECT wfs_network_access, wfs_max_features, inspire_annual_requests, wfs_alternate_title from wfs WHERE wfs_id = $1 ";
-			$v = array($aWfs->id);
-			$t = array('i');
+			$v = [$aWfs->id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			$row = db_fetch_assoc($res);
 			$aWfs->wfs_network_access = $row["wfs_network_access"];
@@ -218,27 +185,8 @@ class WfsToDb {
 			$sql .= "wfs_transaction = $8, wfs_timestamp = $9, wfs_network_access = $10, fkey_mb_group_id = $11, ";
 			$sql .=  "wfs_max_features = $12, inspire_annual_requests = $13, wfs_username = $14, wfs_password = $15, wfs_auth_type = $16, wfs_alternate_title = $18 ";
 			$sql .= "WHERE wfs_id = $17";
-			$v = array(
-				$aWfs->getVersion(),
-				$aWfs->name,
-				$aWfs->getCapabilities,
-				$aWfs->getCapabilitiesDoc,
-				$aWfs->uploadUrl,
-				$aWfs->describeFeatureType,
-				$aWfs->getFeature,
-				$aWfs->transaction,
-				strtotime("now"),
-				$aWfs->wfs_network_access,
-				$aWfs->fkey_mb_group_id,
-				$aWfs->wfs_max_features,
-				$aWfs->inspire_annual_requests,
-				$aWfs->auth['username'],
-				$aWfs->auth['password'],
-				$aWfs->auth['auth_type'],
-				$aWfs->id,
-			    $aWfs->alternate_title
-			);
-			$t = array('s','s','s','s','s','s','s','s','s','i','i','i','i','s','s','s','i','s','s');
+			$v = [$aWfs->getVersion(), $aWfs->name, $aWfs->getCapabilities, $aWfs->getCapabilitiesDoc, $aWfs->uploadUrl, $aWfs->describeFeatureType, $aWfs->getFeature, $aWfs->transaction, strtotime("now"), $aWfs->wfs_network_access, $aWfs->fkey_mb_group_id, $aWfs->wfs_max_features, $aWfs->inspire_annual_requests, $aWfs->auth['username'], $aWfs->auth['password'], $aWfs->auth['auth_type'], $aWfs->id, $aWfs->alternate_title];
+			$t = ['s', 's', 's', 's', 's', 's', 's', 's', 's', 'i', 'i', 'i', 'i', 's', 's', 's', 'i', 's', 's'];
 			$e = new mb_notice("class_wfsToDb.php: UPDATING WFS " . $aWfs->id);
 			$res = db_prep_query($sql, $v, $t);
 			if (!$res) {
@@ -252,18 +200,9 @@ class WfsToDb {
 			$sql = "UPDATE wfs SET wfs_timestamp = $1, wfs_network_access = $2, fkey_mb_group_id = $3, ";
 			$sql .=  "wfs_max_features = $4, inspire_annual_requests = $5, wfs_license_source_note = $7, wfs_alternate_title = $8 ";
 			$sql .= "WHERE wfs_id = $6";
-			$v = array(
-				strtotime("now"),
-				$aWfs->wfs_network_access,
-				$aWfs->fkey_mb_group_id,
-				$aWfs->wfs_max_features,
-				$aWfs->inspire_annual_requests,
-				$aWfs->id,
-				$aWfs->wfs_license_source_note,
-			    $aWfs->alternate_title
-			);
+			$v = [strtotime("now"), $aWfs->wfs_network_access, $aWfs->fkey_mb_group_id, $aWfs->wfs_max_features, $aWfs->inspire_annual_requests, $aWfs->id, $aWfs->wfs_license_source_note, $aWfs->alternate_title];
 			
-			$t = array('s','i','i','i','i','i','s','s');
+			$t = ['s', 'i', 'i', 'i', 'i', 'i', 's', 's'];
 			$e = new mb_notice("class_wfsToDb.php: UPDATING WFS - metadata editor elements only - " . $aWfs->id);
 			$res = db_prep_query($sql, $v, $t);
 			if (!$res) {
@@ -296,29 +235,8 @@ class WfsToDb {
 			$sql .= "wfs_license_source_note = $20, ";
 			$sql .= "wfs_alternate_title = $21 ";
 			$sql .= " WHERE wfs_id = $19";
-			$v = array($aWfs->title,
-					$aWfs->summary,
-					$aWfs->fees,
-					$aWfs->accessconstraints,
-					$aWfs->individualName,
-					$aWfs->positionName,
-					$aWfs->providerName,
-					$aWfs->city,
-					$aWfs->deliveryPoint,
-					$aWfs->administrativeArea,
-					$aWfs->postalCode,
-					$aWfs->voice,
-					$aWfs->facsimile,
-					$aWfs->electronicMailAddress,
-					$aWfs->country,
-					$aWfs->wfs_network_access,
-					$aWfs->wfs_max_features,
-					$aWfs->fkey_mb_group_id,
-					$aWfs->id,
-					$aWfs->wfs_license_source_note,
-			        $aWfs->alternate_title
-				);
-			$t = array('s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','i','i','i','i','s','s');
+			$v = [$aWfs->title, $aWfs->summary, $aWfs->fees, $aWfs->accessconstraints, $aWfs->individualName, $aWfs->positionName, $aWfs->providerName, $aWfs->city, $aWfs->deliveryPoint, $aWfs->administrativeArea, $aWfs->postalCode, $aWfs->voice, $aWfs->facsimile, $aWfs->electronicMailAddress, $aWfs->country, $aWfs->wfs_network_access, $aWfs->wfs_max_features, $aWfs->fkey_mb_group_id, $aWfs->id, $aWfs->wfs_license_source_note, $aWfs->alternate_title];
+			$t = ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 'i', 'i', 'i', 'i', 's', 's'];
 			$res = db_prep_query($sql,$v,$t);
 			if(!$res){
 				db_rollback();
@@ -331,13 +249,13 @@ class WfsToDb {
         		$sql = "DELETE FROM ows_relation_metadata WHERE fkey_featuretype_id IN " ;
         		$sql .= "(SELECT featuretype_id FROM wfs_featuretype WHERE fkey_wfs_id = $1)";
         		$sql .= " AND ows_relation_metadata.relation_type = 'capabilities'";
-        		$v = array($aWfs->id);
-        		$t = array("i");
+        		$v = [$aWfs->id];
+        		$t = ["i"];
         		$res = db_prep_query($sql,$v,$t);     
         		// delete and refill WFS operations
         		$sql = "DELETE FROM wfs_operation WHERE fkey_wfs_id = $1 ";
-        		$v = array($aWfs->id);
-        		$t = array('i');
+        		$v = [$aWfs->id];
+        		$t = ['i'];
         		$res = db_prep_query($sql,$v,$t);
         		if(!$res){
         			db_rollback();
@@ -352,8 +270,8 @@ class WfsToDb {
         }	
 		// delete and refill WFS outputFormats
 		$sql = "DELETE FROM wfs_output_formats WHERE fkey_wfs_id = $1 ";
-		$v = array($aWfs->id);
-		$t = array('i');
+		$v = [$aWfs->id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if(!$res){
 			db_rollback();
@@ -369,8 +287,8 @@ class WfsToDb {
 		if ($updateMetadataOnly) {
 			# delete and refill wfs_termsofuse
 			$sql = "DELETE FROM wfs_termsofuse WHERE fkey_wfs_id = $1 ";
-			$v = array($aWfs->id);
-			$t = array('i');
+			$v = [$aWfs->id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			if(!$res){
 				db_rollback();
@@ -379,9 +297,9 @@ class WfsToDb {
 		}
 	
 		# update TABLE wfs_featuretype
-		$oldFeatureTypeNameArray = array();
-		$v = array($aWfs->id);
-		$t = array('i');
+		$oldFeatureTypeNameArray = [];
+		$v = [$aWfs->id];
+		$t = ['i'];
 		$c = 2;
 		$sql = "SELECT featuretype_id, featuretype_name, featuretype_title, featuretype_abstract, inspire_download, featuretype_schema, featuretype_schema_problem FROM wfs_featuretype WHERE fkey_wfs_id = $1 AND NOT featuretype_name IN(";
 		$e = new mb_notice("class_wfsToDb.php: WFS_UPDATE: count featuretypeArray: ".count($aWfs->featureTypeArray));	
@@ -396,16 +314,10 @@ class WfsToDb {
 		$sql .= ")";
 		$res = db_prep_query($sql,$v,$t);
 		while ($row = db_fetch_array($res)) {
-			$oldFeatureTypeNameArray[]= array(
-				"id" => $row["featuretype_id"],
-				"name" => $row["featuretype_name"],
-				"title" => $row["featuretype_title"],
-				"abstract" => $row["featuretype_abstract"]
-				//"inspire_download" => $row["inspire_download"]
-			);
+			$oldFeatureTypeNameArray[]= ["id" => $row["featuretype_id"], "name" => $row["featuretype_name"], "title" => $row["featuretype_title"], "abstract" => $row["featuretype_abstract"]];
 		}
 	
-		$featureTypeNameArray = array();
+		$featureTypeNameArray = [];
 	
 		for ($i = 0; $i < count($aWfs->featureTypeArray); $i++) {
 			$currentFeatureType = $aWfs->featureTypeArray[$i];
@@ -413,7 +325,7 @@ class WfsToDb {
 			if (WfsToDb::featureTypeExists($currentFeatureType)) {
 				// update existing WFS feature types
 				$e = new mb_notice("class_wfsToDb.php: class_wfsToDb.php: FT exists");
-				if (!WfsToDb::updateFeatureType($currentFeatureType,$updateMetadataOnly,$aWfs->overwrite)) {
+				if (!WfsToDb::updateFeatureType($currentFeatureType,$aWfs->overwrite, $updateMetadataOnly)) {
 					db_rollback();
 					return false;
 				}
@@ -429,8 +341,8 @@ class WfsToDb {
 		}
 	
 		// delete obsolete WFS feature types
-		$v = array($aWfs->id);
-		$t = array("i");
+		$v = [$aWfs->id];
+		$t = ["i"];
 		$sql = "DELETE FROM wfs_featuretype WHERE fkey_wfs_id = $1";
 			$sql_in = "";
 			for ($i = 0; $i < count($featureTypeNameArray); $i++) {
@@ -456,7 +368,7 @@ class WfsToDb {
 		//if WFS has storedQueries, check them for insert and update
 		if(count($aWfs->storedQueriesArray) > 0) {
 			if (!$updateMetadataOnly) {
-				$storedQueryIdArray = array();
+				$storedQueryIdArray = [];
 				for ($i = 0; $i < count($aWfs->storedQueriesArray); $i++) {
 					$currentStoredQuery = $aWfs->storedQueriesArray[$i];
 					array_push($storedQueryIdArray, $currentStoredQuery);
@@ -480,8 +392,8 @@ class WfsToDb {
 					}
 				}	
 				// delete obsolete WFS stored queries
-				$v = array($aWfs->id);
-				$t = array("i");
+				$v = [$aWfs->id];
+				$t = ["i"];
 				$sql = "DELETE FROM wfs_conf WHERE fkey_wfs_id = $1";
 				$sql_in = "";
 				for ($i = 0; $i < count($storedQueryIdArray); $i++) {
@@ -523,8 +435,8 @@ class WfsToDb {
 
 		// if ID is numeric, check if it exists in the database
 		$sql = "SELECT * FROM wfs WHERE wfs_id = $1;";
-		$v = array($aWfs->id);
-		$t = array("i");
+		$v = [$aWfs->id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);	
 		if ($row = db_fetch_array($res)) {
 			return true;
@@ -544,8 +456,8 @@ class WfsToDb {
 		//WfsToDb::deleteFeatureTypeMetadataUrls($aWfs->id); //Not needed any more, cause the relations are deleted thru class_iso19139.php
 		//then delete wfs itself
 		$sql = "DELETE FROM wfs WHERE wfs_id = $1";
-		$v = array($aWfs->id);
-		$t = array('i');
+		$v = [$aWfs->id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if ($res) {
 			$aWfs = null;
@@ -566,8 +478,8 @@ class WfsToDb {
 		}
 		$sql ="INSERT INTO wfs_termsofuse (fkey_wfs_id, fkey_termsofuse_id) ";
 		$sql .= " VALUES($1,$2)";
-		$v = array($aWfs->id,$aWfs->wfs_termsofuse);
-		$t = array('i','i');
+		$v = [$aWfs->id, $aWfs->wfs_termsofuse];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if(!$res){
 			$e = new mb_exception("Error while inserting WFS termsofuse into the database.");
@@ -588,14 +500,9 @@ class WfsToDb {
 	    $sql_check = "SELECT * FROM wfs_featuretype_namespace WHERE fkey_wfs_id=$1 AND " .
 	   	    "fkey_featuretype_id = $2 AND namespace=$3 AND namespace_location=$4 ";
 	    
-	    $v = array(
-	        $aWfsId,
-	        $aWfsFeatureTypeId,
-	        $aWfsFeatureTypeNamespace->name,
-	        $aWfsFeatureTypeNamespace->value
-	    );
+	    $v = [$aWfsId, $aWfsFeatureTypeId, $aWfsFeatureTypeNamespace->name, $aWfsFeatureTypeNamespace->value];
 	    $e = new mb_exception("classes/class_wfsToDb.php: look for namespaces in db: " . json_encode($v) . " - sql: " . $sql_check );
-	    $t = array("i", "i", "s", "s");
+	    $t = ["i", "i", "s", "s"];
 	    $res_check = db_prep_query($sql_check, $v, $t);
 	    
 	    if ($res_check) {
@@ -614,13 +521,8 @@ class WfsToDb {
 				"fkey_featuretype_id, namespace, namespace_location) " . 
 				"VALUES ($1, $2, $3, $4);"; 
 
-		$v = array(
-			$aWfsId, 
-			$aWfsFeatureTypeId, 
-			$aWfsFeatureTypeNamespace->name, 
-			$aWfsFeatureTypeNamespace->value
-		);
-		$t = array("i", "i", "s", "s");
+		$v = [$aWfsId, $aWfsFeatureTypeId, $aWfsFeatureTypeNamespace->name, $aWfsFeatureTypeNamespace->value];
+		$t = ["i", "i", "s", "s"];
 		$e = new mb_notice("class_wfsToDb.php: INSERTING Featuretype Namespace for WFS-ID $aWfsId, FT: $aWfsFeatureTypeId, NS: $aWfsFeatureTypeNamespace->name");
 		$res = db_prep_query($sql, $v, $t);
 
@@ -642,11 +544,8 @@ class WfsToDb {
 	private static function insertFeatureTypeCrs ($aWfsFeatureTypeId, $aWfsFeatureTypeCrsString) {
 		$sql = "INSERT INTO wfs_featuretype_epsg (fkey_featuretype_id, epsg) VALUES ($1, $2)";
 		
-		$v = array(
-			$aWfsFeatureTypeId, 
-			$aWfsFeatureTypeCrsString
-		);
-		$t = array("i", "s");
+		$v = [$aWfsFeatureTypeId, $aWfsFeatureTypeCrsString];
+		$t = ["i", "s"];
 		
 		$e = new mb_notice("class_wfsToDb.php: INSERTING Featuretype Crs (FT: $aWfsFeatureTypeId, Crs: $aWfsFeatureTypeCrsString");
 		$res = db_prep_query($sql, $v, $t);
@@ -669,11 +568,8 @@ class WfsToDb {
 	private static function insertFeatureTypeOutputFormat ($aWfsFeatureTypeId, $aWfsFeatureTypeOutputFormatString) {
 		$sql = "INSERT INTO wfs_featuretype_output_formats (fkey_featuretype_id, output_format) VALUES ($1, $2)";
 		
-		$v = array(
-			$aWfsFeatureTypeId, 
-			$aWfsFeatureTypeOutputFormatString
-		);
-		$t = array("i", "s");
+		$v = [$aWfsFeatureTypeId, $aWfsFeatureTypeOutputFormatString];
+		$t = ["i", "s"];
 		
 		$e = new mb_notice("class_wfsToDb.php: INSERTING Featuretype outputFormat (FT: $aWfsFeatureTypeId, outputFormat: $aWfsFeatureTypeOutputFormatString");
 		$res = db_prep_query($sql, $v, $t);
@@ -714,16 +610,16 @@ class WfsToDb {
 		$mbMetadata->origin = "capabilities";
 		$mbMetadata->owner = $mdOwner;
 		//following is not a good idea, but the call to $this->... makes problems?
-		if (is_file(dirname(__FILE__) . "/../../conf/excludeHarvestMetadataUrls.json")) {
+		if (is_file(__DIR__ . "/../../conf/excludeHarvestMetadataUrls.json")) {
 			$configObject = json_decode(file_get_contents("../../conf/excludeHarvestMetadataUrls.json"));
 			//$e = new mb_exception("classes/class_WfsToDb.php: urlstoexclude from conf: ".json_encode($configObject->urls));
 			$urlsToExclude = $configObject->urls;
 		} else {
-			$urlsToExclude = array();
+			$urlsToExclude = [];
 		}
 		$harvestMetadataUrl = true;
 		foreach($urlsToExclude as $urlToExclude) {
-			if (strpos($mbMetadata->href, $urlToExclude) !== false) {
+			if (str_contains($mbMetadata->href, $urlToExclude)) {
 				$e = new mb_exception("MetadataURL harvesting is excluded by conf!");
 				$harvestMetadataUrl = false;
 				break;
@@ -752,12 +648,8 @@ class WfsToDb {
 		$sql = "INSERT INTO wfs_element (fkey_featuretype_id, element_name, " . 
 				"element_type) VALUES ($1, $2, $3)";
 		
-		$v = array(
-			$aWfsFeatureTypeId, 
-			$aWfsFeatureTypeElement->name, 
-			$aWfsFeatureTypeElement->type
-		);
-		$t = array("i", "s", "s");
+		$v = [$aWfsFeatureTypeId, $aWfsFeatureTypeElement->name, $aWfsFeatureTypeElement->type];
+		$t = ["i", "s", "s"];
 		
 		$e = new mb_notice("class_wfsToDb.php: INSERTING Featuretype Element (FT: $aWfsFeatureTypeId, NS: $aWfsFeatureTypeElement->name");
 		$res = db_prep_query($sql, $v, $t);
@@ -776,8 +668,8 @@ class WfsToDb {
 		//
 		//
 		$sql = "SELECT wfs_conf_id FROM wfs_conf WHERE fkey_featuretype_id = $1";
-		$v = array($aWfsFeatureTypeId);
-		$t = array("i");
+		$v = [$aWfsFeatureTypeId];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			// no configuration exists for this featuretype, 
@@ -794,8 +686,8 @@ class WfsToDb {
 				"wfs_conf_element AS a, wfs_element AS b " . 
 				"WHERE a.f_id = b.element_id AND " .
 				"b.element_id = $1 AND a.fkey_wfs_conf_id = $2";
-			$v = array($aWfsFeatureTypeElement->id, $wfsConfId);
-			$t = array("i", "i");
+			$v = [$aWfsFeatureTypeElement->id, $wfsConfId];
+			$t = ["i", "i"];
 			$resConfElement = db_prep_query($sqlConfElement, $v, $t);
 			$rowConfElement = db_fetch_array($resConfElement);
 			$count = $rowConfElement["cnt"];
@@ -813,8 +705,8 @@ class WfsToDb {
 
 				$sqlInsertConfElement .= "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)";
 
-				$v = array($wfsConfId, $aWfsFeatureTypeElement->id,0,0,0,0,'',0,0,0,'',0,0,'',0,'',0,0);
-				$t = array("i", "i","i", "i","i", "i","s","i","i","i","s","i","i","s","i","s","i","i");
+				$v = [$wfsConfId, $aWfsFeatureTypeElement->id, 0, 0, 0, 0, '', 0, 0, 0, '', 0, 0, '', 0, '', 0, 0];
+				$t = ["i", "i", "i", "i", "i", "i", "s", "i", "i", "i", "s", "i", "i", "s", "i", "s", "i", "i"];
 
 				$resInsertConfElement = db_prep_query($sqlInsertConfElement, $v, $t);
 				if (!$res) {
@@ -843,12 +735,8 @@ class WfsToDb {
 		$sql = "UPDATE wfs_element SET element_type = $1 " . 
 				"WHERE element_id = $2 AND fkey_featuretype_id = $3";
 
-		$v = array(
-			$aWfsFeatureTypeElement->type, 
-			$aWfsFeatureTypeElement->id, 
-			$aWfsFeatureTypeId
-		);
-		$t = array("s", "i", "i");
+		$v = [$aWfsFeatureTypeElement->type, $aWfsFeatureTypeElement->id, $aWfsFeatureTypeId];
+		$t = ["s", "i", "i"];
 
 		#$e = new mb_notice("class_wfsToDb.php: UPDATING FT EL (FT: $aWfsFeatureTypeId, NS: $aWfsFeatureTypeElement->name");
 		$res = db_prep_query($sql, $v, $t);
@@ -872,13 +760,8 @@ class WfsToDb {
 				"op_http_get, op_http_post) " .
 				"VALUES($1, $2, $3, $4)";
 	
-		$v = array(
-				$aWfsId,
-				$aWfsOperation->name,
-				$aWfsOperation->httpGet,
-				$aWfsOperation->httpPost
-		);
-		$t = array('i','s','s','s');
+		$v = [$aWfsId, $aWfsOperation->name, $aWfsOperation->httpGet, $aWfsOperation->httpPost];
+		$t = ['i', 's', 's', 's'];
 	
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
@@ -899,11 +782,8 @@ class WfsToDb {
 		$sql = "INSERT INTO wfs_output_formats (fkey_wfs_id, output_format) " .
 				"VALUES($1, $2)";
 	
-		$v = array(
-				$aWfsId,
-				$aWfsOutputFormat
-		);
-		$t = array('i','s');
+		$v = [$aWfsId, $aWfsOutputFormat];
+		$t = ['i', 's'];
 	
 		$res = db_prep_query($sql,$v,$t);
 		if (!$res) {
@@ -926,10 +806,10 @@ class WfsToDb {
 		//there may be more than one featuretype in the result. It is depending on the schema which is used. E.g. INSPIRE schemas often give back more than one featuretype. ps:ProtectedSites also may include gn:GeographicalName. Both are included in the returned result of a ListStoredQuery request.
 		//the QueryExpressionText attribute returnFeatureTypes is extracted
 		//check if blank is given in string
-		if (strpos($wfsFtName, ' ') === false) {
-			$wfsFtNameArray = array($wfsFtName);
+		if (!str_contains((string) $wfsFtName, ' ')) {
+			$wfsFtNameArray = [$wfsFtName];
 		} else {
-			$wfsFtNameArray = explode(' ', $wfsFtName);
+			$wfsFtNameArray = explode(' ', (string) $wfsFtName);
 		}
 		//$typeReturnFT = gettype($wfsFtNameArray);
 		//$e = new mb_exception($typeReturnFT);
@@ -944,8 +824,8 @@ class WfsToDb {
 			if($aWfsStoredQuery->description['Id'] == 'urn:ogc:def:query:OGC-WFS::GetFeatureById') {
 				//insert this default stored query for every existing featuretype
 				$sql = "SELECT featuretype_id, featuretype_name FROM wfs_featuretype WHERE fkey_wfs_id = $1;";
-				$v = array($aWfsId);
-				$t = array("i");
+				$v = [$aWfsId];
+				$t = ["i"];
 				$res = db_prep_query($sql, $v, $t);
 				if (!$res) {
 					$e = new mb_exception("class_wfsToDb.php: Error getting related featuretype_id from DB.");
@@ -969,8 +849,8 @@ class WfsToDb {
 		else {
 			//get Featuretype IDs for exposed featuretypes from capabilities using the returnFeaturetype names
 			$wfsFtNameArray;
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT featuretype_id FROM wfs_featuretype WHERE fkey_wfs_id = $1 AND featuretype_name IN (";
 			$v[] = $aWfsId;
 			$t[] = "i";
@@ -1011,8 +891,8 @@ class WfsToDb {
 		// delete all query params of this WFS stored query
 		$sql = "DELETE FROM wfs_stored_query_params WHERE ";
 		$sql .= "fkey_wfs_conf_id = $1;";
-		$v = array($aWfsConfId);
-		$t = array("i");
+		$v = [$aWfsConfId];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("Error while deleting WFS stored query params from the database.");
@@ -1033,12 +913,8 @@ class WfsToDb {
 						query_param_type
 					) VALUES (
 					$1, $2, $3, $4);";
-				$v = array(
-					$aWfsConfId, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']
-				);
-				$t = array(
-					"i", "s", "s", "s"
-				);
+				$v = [$aWfsConfId, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']];
+				$t = ["i", "s", "s", "s"];
 				$res = db_prep_query($sql, $v, $t);
 				if (!$res) {
 					$e = new mb_exception("class_wfsToDb.php: StoredQuery Params Insert failed.");
@@ -1061,12 +937,8 @@ class WfsToDb {
 							query_param_type
 					) VALUES (
 						$1, $2, $3, $4);";
-				$v = array(
-					$aWfsConfId, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']
-				);
-				$t = array(
-					"i", "s", "s", "s"
-				);
+				$v = [$aWfsConfId, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']];
+				$t = ["i", "s", "s", "s"];
 				$res = db_prep_query($sql, $v, $t);
 				if (!$res) {
 					$e = new mb_exception("class_wfsToDb.php: StoredQuery Params Insert failed.");
@@ -1126,15 +998,8 @@ class WfsToDb {
 					g_button_id
 				) VALUES (
 					$1, $2, $3, $4, 'OK', $5, 0, $6, $7, 'a', 'b');";
-		$v = array(
-				$title, $aWfsId, $aFtId,
-				$aWfsStoredQuery->description['Id']." ".$aFtName, $title,
-				$aWfsStoredQuery->description['Id'],
-				$style
-		);
-		$t = array(
-				"s", "i", "i", "s", "s", "s", "s"
-		);
+		$v = [$title, $aWfsId, $aFtId, $aWfsStoredQuery->description['Id']." ".$aFtName, $title, $aWfsStoredQuery->description['Id'], $style];
+		$t = ["s", "i", "i", "s", "s", "s", "s"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("class_wfsToDb.php: StoredQuery Insert as WFS Conf failed.");
@@ -1172,12 +1037,8 @@ class WfsToDb {
 						query_param_type
 					) VALUES (
 					$1, $2, $3, $4);";
-				$v = array(
-					$id, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']
-				);
-				$t = array(
-					"i", "s", "s", "s"
-				);
+				$v = [$id, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']];
+				$t = ["i", "s", "s", "s"];
 				$res = db_prep_query($sql, $v, $t);
 				if (!$res) {
 					$e = new mb_exception("class_wfsToDb.php: StoredQuery Params Insert failed.");
@@ -1200,12 +1061,8 @@ class WfsToDb {
 							query_param_type
 					) VALUES (
 						$1, $2, $3, $4);";
-				$v = array(
-					$id, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']
-				);
-				$t = array(
-					"i", "s", "s", "s"
-				);
+				$v = [$id, $aWfsStoredQuery->description['Id'], $param['name'], $param['type']];
+				$t = ["i", "s", "s", "s"];
 				$res = db_prep_query($sql, $v, $t);
 				if (!$res) {
 					$e = new mb_exception("class_wfsToDb.php: StoredQuery Params Insert failed.");
@@ -1217,31 +1074,17 @@ class WfsToDb {
 			
 		//build wfs conf element object
 		$sql = "SELECT * FROM wfs_element WHERE fkey_featuretype_id = $1 ORDER BY element_id";
-		$v = array($aFtId);
-		$t = array("i");
+		$v = [$aFtId];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$cnt = 1;
-		$featuretypeElementArray = array();
+		$featuretypeElementArray = [];
 		while ($row = db_fetch_array($res)){
 			$e = new mb_notice("class_wfsToDb.php: Inserting this feature type element (" .
 										$aFtId . ") into WFS conf ($id)");
 			
 			//try to find the geom attr for insert
-			$geomCheckArray = array("MultiPolygonPropertyType",
-									"GeometryPropertyType",
-									"MultiSurfacePropertyType",
-									"PolygonPropertyType",
-									"GeometryPropertyType",
-									"SurfacePropertyType",
-									"MultiLineStringPropertyType",
-									"GeometryPropertyType",
-									"MultiCurvePropertyType",
-									"LineStringPropertyType",
-									"GeometryPropertyType",
-									"CurvePropertyType",
-									"PointPropertyType",
-									"MultiPointPropertyType"
-			);
+			$geomCheckArray = ["MultiPolygonPropertyType", "GeometryPropertyType", "MultiSurfacePropertyType", "PolygonPropertyType", "GeometryPropertyType", "SurfacePropertyType", "MultiLineStringPropertyType", "GeometryPropertyType", "MultiCurvePropertyType", "LineStringPropertyType", "GeometryPropertyType", "CurvePropertyType", "PointPropertyType", "MultiPointPropertyType"];
 			if(in_array($row["element_type"], $geomCheckArray)) {
 				$geomAttr = 1;
 			}
@@ -1258,8 +1101,8 @@ class WfsToDb {
 			$sqlInsertConfElement .= "f_detailpos, f_min_input, f_geom) VALUES";
 			$sqlInsertConfElement .= "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)";
 			
-			$v = array($id,$row["element_id"],0,$cnt,"c",0,$row["element_name"].": ","d",1,$cnt,"",0,0,"",0,"","0","0",$geomAttr);
-			$t = array("i", "i","i", "s","s", "i","s","s","i","s","s","i","i","s","i","s","s","s","i");
+			$v = [$id, $row["element_id"], 0, $cnt, "c", 0, $row["element_name"].": ", "d", 1, $cnt, "", 0, 0, "", 0, "", "0", "0", $geomAttr];
+			$t = ["i", "i", "i", "s", "s", "i", "s", "s", "i", "s", "s", "i", "i", "s", "i", "s", "s", "s", "i"];
 			
 			$resInsertConfElement = db_prep_query($sqlInsertConfElement, $v, $t);
 			if (!$res) {
@@ -1289,20 +1132,22 @@ class WfsToDb {
 				"featuretype_title, featuretype_abstract, featuretype_searchable, featuretype_srs, featuretype_latlon_bbox, uuid, inspire_download, featuretype_schema, featuretype_schema_problem) " . 
 				"VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)";
 
-		$v = array(
-			$aWfsFeatureType->wfs->id,
-			$aWfsFeatureType->name,
-			$aWfsFeatureType->title,
-			$aWfsFeatureType->summary,
-			1, //default to allow search for a inserted featuretype (searchable)
-			$aWfsFeatureType->srs,
-			$aWfsFeatureType->latLonBboxArray['minx'].','.$aWfsFeatureType->latLonBboxArray['miny'].','.$aWfsFeatureType->latLonBboxArray['maxx'].','.$aWfsFeatureType->latLonBboxArray['maxy'],
-			$uuid,
-			0, //default not generate a INSPIRE Download Feed
-			$aWfsFeatureType->schema,
-			$aWfsFeatureType->schema_problem
-		);
-		$t = array('i','s','s','s','i','s','s','s','i','s','b');
+		$v = [
+      $aWfsFeatureType->wfs->id,
+      $aWfsFeatureType->name,
+      $aWfsFeatureType->title,
+      $aWfsFeatureType->summary,
+      1,
+      //default to allow search for a inserted featuretype (searchable)
+      $aWfsFeatureType->srs,
+      $aWfsFeatureType->latLonBboxArray['minx'].','.$aWfsFeatureType->latLonBboxArray['miny'].','.$aWfsFeatureType->latLonBboxArray['maxx'].','.$aWfsFeatureType->latLonBboxArray['maxy'],
+      $uuid,
+      0,
+      //default not generate a INSPIRE Download Feed
+      $aWfsFeatureType->schema,
+      $aWfsFeatureType->schema_problem,
+  ];
+		$t = ['i', 's', 's', 's', 'i', 's', 's', 's', 'i', 's', 'b'];
 
 		#$e = new mb_notice("class_wfsToDb.php: INSERTING Featuretype (FT: $aWfsFeatureType->name)");
 		$res = db_prep_query($sql,$v,$t);
@@ -1363,12 +1208,12 @@ class WfsToDb {
 	 * @return Boolean
 	 * @param $aWfsFeatureType WfsFeatureType
 	 */
-	private static function updateFeatureType ($aWfsFeatureType, $updateMetadataOnly=false, $overwrite) {
+	private static function updateFeatureType ($aWfsFeatureType, $overwrite, $updateMetadataOnly=false) {
 		$aWfsFeatureType->id = WfsToDb::getFeatureTypeId($aWfsFeatureType);
 		
 		$sql = "SELECT featuretype_id, featuretype_searchable, inspire_download FROM wfs_featuretype WHERE fkey_wfs_id = $1 AND featuretype_name = $2";
-		$v = array($aWfsFeatureType->wfs->id,$aWfsFeatureType->name);
-		$t = array('i','s');
+		$v = [$aWfsFeatureType->wfs->id, $aWfsFeatureType->name];
+		$t = ['i', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			$ft_id = $row['featuretype_id'];
@@ -1403,16 +1248,8 @@ class WfsToDb {
 			$aWfsFeatureType->searchable = intval('0');
 		}
 		
-		$v = array(
-			$aWfsFeatureType->searchable,
-			$aWfsFeatureType->srs,
-			$aWfsFeatureType->latLonBboxArray['minx'].','.$aWfsFeatureType->latLonBboxArray['miny'].','.$aWfsFeatureType->latLonBboxArray['maxx'].','.$aWfsFeatureType->latLonBboxArray['maxy'],
-			$aWfsFeatureType->inspire_download,
-			$aWfsFeatureType->id,
-			$aWfsFeatureType->schema,
-			$aWfsFeatureType->schema_problem
-		);
-		$t = array('s','s','s','i','i','s','b');
+		$v = [$aWfsFeatureType->searchable, $aWfsFeatureType->srs, $aWfsFeatureType->latLonBboxArray['minx'].','.$aWfsFeatureType->latLonBboxArray['miny'].','.$aWfsFeatureType->latLonBboxArray['maxx'].','.$aWfsFeatureType->latLonBboxArray['maxy'], $aWfsFeatureType->inspire_download, $aWfsFeatureType->id, $aWfsFeatureType->schema, $aWfsFeatureType->schema_problem];
+		$t = ['s', 's', 's', 'i', 'i', 's', 'b'];
 
 		$e = new mb_notice("class_wfsToDb.php: UPDATING Featuretype (FT: $aWfsFeatureType->id)");
 		$e = new mb_notice("class_wfsToDb.php: UPDATING Featuretype (FT searchable: $aWfsFeatureType->searchable)");
@@ -1427,8 +1264,8 @@ class WfsToDb {
 			$sql .= "featuretype_abstract = $2 ";
 			$sql .= "WHERE featuretype_id = $3";
 				
-			$v = array($aWfsFeatureType->title,$aWfsFeatureType->summary, $aWfsFeatureType->id);
-			$t = array('s','s','i');
+			$v = [$aWfsFeatureType->title, $aWfsFeatureType->summary, $aWfsFeatureType->id];
+			$t = ['s', 's', 'i'];
 			$res = db_prep_query($sql,$v,$t);
 		}
 		
@@ -1438,7 +1275,7 @@ class WfsToDb {
 		}
 		
 		// update existing WFS feature type elements
-		$featureTypeElementNameArray = array();
+		$featureTypeElementNameArray = [];
 		for ($i = 0; $i < count($aWfsFeatureType->elementArray); $i++) {
 			$currentElement = $aWfsFeatureType->elementArray[$i];
 			array_push($featureTypeElementNameArray, $currentElement);
@@ -1455,8 +1292,8 @@ class WfsToDb {
 		}		
 		
 		// delete obsolete WFS featuretype elements
-		$v = array($aWfsFeatureType->id);
-		$t = array("i");
+		$v = [$aWfsFeatureType->id];
+		$t = ["i"];
 		$sql = "DELETE FROM wfs_element WHERE fkey_featuretype_id = $1";
 
 		$sql_in = "";
@@ -1480,11 +1317,8 @@ class WfsToDb {
 		// delete all namespaces of this WFS feature type
 		$sql = "DELETE FROM wfs_featuretype_namespace WHERE ";
 		$sql .= "fkey_wfs_id = $1 AND fkey_featuretype_id = $2";
-		$v = array(
-			$aWfsFeatureType->wfs->id, 
-			$aWfsFeatureType->id
-		);
-		$t = array("i", "i");
+		$v = [$aWfsFeatureType->wfs->id, $aWfsFeatureType->id];
+		$t = ["i", "i"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("Error while deleting WFS feature type namespaces from the database.");
@@ -1502,11 +1336,11 @@ class WfsToDb {
 		
 		// update categories for feature type
 		if($overwrite){
-			$types = array("md_topic", "inspire", "custom");
+			$types = ["md_topic", "inspire", "custom"];
 			foreach ($types as $cat) {
 				$sql = "DELETE FROM wfs_featuretype_{$cat}_category WHERE fkey_featuretype_id = $1 AND fkey_metadata_id ISNULL";
-				$v = array($aWfsFeatureType->id);
-				$t = array('i');
+				$v = [$aWfsFeatureType->id];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
 				if(!$res){
 						$e = new mb_exception("Error while deleting old categories for WFS feature type in the database.");
@@ -1520,8 +1354,8 @@ class WfsToDb {
 					for ($j = 0; $j < count($k); $j++) {
 						if ($k[$j] != "") { 
 							$sql = "INSERT INTO wfs_featuretype_{$cat}_category (fkey_featuretype_id, fkey_{$cat}_category_id) VALUES ($1, $2)";
-							$v = array($aWfsFeatureType->id, $k[$j]);
-							$t = array('i', 'i');
+							$v = [$aWfsFeatureType->id, $k[$j]];
+							$t = ['i', 'i'];
 							$res = db_prep_query($sql,$v,$t);
 							if(!$res){
 								$e = new mb_exception("Error while inserting WFS feature type categories into the database.");
@@ -1537,8 +1371,8 @@ class WfsToDb {
 			//update CRS
 			//delete supported CRS
 			$sql = "DELETE FROM wfs_featuretype_epsg WHERE fkey_featuretype_id = $1";
-			$v = array($aWfsFeatureType->id);
-			$t = array('i');
+			$v = [$aWfsFeatureType->id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			//insert new supported CRS
 			for ($i = 0; $i < count($aWfsFeatureType->crsArray); $i++) {
@@ -1568,8 +1402,8 @@ SQL;
 			}
 			//delete and refill outputFormats
 			$sql = "DELETE FROM wfs_featuretype_output_formats WHERE fkey_featuretype_id = $1";
-			$v = array($aWfsFeatureType->id);
-			$t = array('i');
+			$v = [$aWfsFeatureType->id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 			//insert current outputFormats
 			for ($i = 0; $i < count($aWfsFeatureType->featuretypeOutputFormatArray); $i++) {
@@ -1582,8 +1416,8 @@ SQL;
 		if ($overwrite) {
 			// update keywords
 			$sql = "DELETE FROM wfs_featuretype_keyword WHERE fkey_featuretype_id = $1";
-			$v = array($aWfsFeatureType->id);
-			$t = array('i');
+			$v = [$aWfsFeatureType->id];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
 		
 			$k = $aWfsFeatureType->featuretype_keyword;
@@ -1593,8 +1427,8 @@ SQL;
 			
 				while ($keyword_id == "") {
 					$sql = "SELECT keyword_id FROM keyword WHERE UPPER(keyword) = UPPER($1)";
-					$v = array($k[$j]);
-					$t = array('s');
+					$v = [$k[$j]];
+					$t = ['s'];
 					$res = db_prep_query($sql,$v,$t);
 					$row = db_fetch_array($res);
 					//print_r($row);
@@ -1605,8 +1439,8 @@ SQL;
 					else {
 						$sql_insertKeyword = "INSERT INTO keyword (keyword)";
 						$sql_insertKeyword .= "VALUES ($1)";
-						$v1 = array($k[$j]);
-						$t1 = array('s');
+						$v1 = [$k[$j]];
+						$t1 = ['s'];
 						$e = new mb_notice("class_wfsToDb.php: Inserting keyword ".$k[$j]." into table keyword in DB.");
 						$res_insertKeyword = db_prep_query($sql_insertKeyword,$v1,$t1);
 						if(!$res_insertKeyword){
@@ -1618,8 +1452,8 @@ SQL;
 
 				// check if featuretype/keyword combination already exists
 				$sql_fiKeywordExists = "SELECT * FROM wfs_featuretype_keyword WHERE fkey_featuretype_id = $1 AND fkey_keyword_id = $2";
-				$v = array($aWfsFeatureType->id, $keyword_id);
-				$t = array('i', 'i');
+				$v = [$aWfsFeatureType->id, $keyword_id];
+				$t = ['i', 'i'];
 				$res_fiKeywordExists = db_prep_query($sql_fiKeywordExists, $v, $t);
 				$row = db_fetch_array($res_fiKeywordExists);
 				//print_r($row);
@@ -1627,8 +1461,8 @@ SQL;
 					$sql1 = "INSERT INTO wfs_featuretype_keyword (fkey_keyword_id,fkey_featuretype_id)";
 					$sql1 .= "VALUES ($1,$2)";
 					$e = new mb_notice("class_wfsToDb.php: Inserting keyword id ".$keyword_id." for featuretype id ".$aWfsFeatureType->id." into DB.");
-					$v1 = array($keyword_id,$aWfsFeatureType->id);
-					$t1 = array('i','i');
+					$v1 = [$keyword_id, $aWfsFeatureType->id];
+					$t1 = ['i', 'i'];
 					$res1 = db_prep_query($sql1,$v1,$t1);
 					if(!$res1){
 						$e = new mb_exception("Error while inserting wfs_featuretype_keywords into the database.");
@@ -1649,8 +1483,8 @@ SQL;
 	 */
 	private static function deleteFeatureType ($aWfsFeatureType) {
 		$sql = "DELETE FROM wfs_featuretype WHERE featuretype_id = $1 AND fkey_wfs_id = $2";
-		$v = array($aWfsFeatureType->id, $aWfsFeatureType->wfs->id);
-		$t = array('i', 'i');
+		$v = [$aWfsFeatureType->id, $aWfsFeatureType->wfs->id];
+		$t = ['i', 'i'];
 
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
@@ -1674,8 +1508,8 @@ SQL;
 DELETE FROM mb_metadata WHERE metadata_id IN (SELECT metadata_id FROM mb_metadata INNER JOIN (SELECT * FROM ows_relation_metadata WHERE (internal IS NULL OR internal != 1) AND fkey_featuretype_id IN (SELECT fkey_featuretype_id FROM wfs_featuretype WHERE fkey_wfs_id = $1)) AS relation ON mb_metadata.metadata_id = relation.fkey_metadata_id WHERE mb_metadata.origin = 'capabilities')
 
 SQL;
-		$v = array($wfsId);
-		$t = array('i');
+		$v = [$wfsId];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("Error while deleting coupled WFS MetadataURLs from database.");
@@ -1696,11 +1530,8 @@ SQL;
 	private static function getFeatureTypeId ($aWfsFeatureType) {
 		$sql = "SELECT featuretype_id FROM wfs_featuretype WHERE " . 
 			"fkey_wfs_id = $1 AND featuretype_name = $2";
-		$v = array(
-			$aWfsFeatureType->wfs->id,
-			$aWfsFeatureType->name
-		);
-		$t = array("i", "s");
+		$v = [$aWfsFeatureType->wfs->id, $aWfsFeatureType->name];
+		$t = ["i", "s"];
 		#$e = new mb_notice("class_wfsToDb.php: " .$sql . " " . print_r($v, true));
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
@@ -1731,11 +1562,8 @@ SQL;
 	private static function storedQueryExists ($aWfsId, $aWfsStoredQueryId) {
 		$sql = "SELECT * FROM wfs_conf WHERE " .
 				"fkey_wfs_id = $1 AND stored_query_id = $2";
-		$v = array(
-				$aWfsId,
-				$aWfsStoredQueryId
-		);
-		$t = array("i", "s");
+		$v = [$aWfsId, $aWfsStoredQueryId];
+		$t = ["i", "s"];
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
 			return $row['wfs_conf_id'];
@@ -1753,11 +1581,8 @@ SQL;
 	private static function getFeatureTypeElementId ($aWfsFeatureType, $name) {
 		$sql = "SELECT element_id FROM wfs_element WHERE " . 
 			"fkey_featuretype_id = $1 AND element_name = $2";
-		$v = array(
-			$aWfsFeatureType->id,
-			$name,
-		);
-		$t = array("i", "s");
+		$v = [$aWfsFeatureType->id, $name];
+		$t = ["i", "s"];
 		$res = db_prep_query($sql, $v, $t);
 		if ($row = db_fetch_array($res)) {
 			return $row["element_id"];

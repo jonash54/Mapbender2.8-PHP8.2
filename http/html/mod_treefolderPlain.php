@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_js.php';
 ?>
 function openwindow (Adresse, width, height) {
@@ -126,16 +126,16 @@ var treeState = "";
 <?php
 //load structure
 $sql = "SELECT * FROM gui_treegde WHERE fkey_gui_id = $1 AND NOT lft = 1 ORDER BY lft;";
-$v = array(Mapbender::session()->get("mb_user_gui"));
-$t = array("s");
+$v = [Mapbender::session()->get("mb_user_gui")];
+$t = ["s"];
 $res = db_prep_query($sql, $v, $t);
 
 //init tree converting arrays
-$nr = array(); 			//array for nested sets numbers
-$str = array();			//array for js array elements
-$categories = array();	//array for wms folders
-$path = array();		//stack for actual path elements
-$rights = array();		//stack for rights of open elements
+$nr = []; 			//array for nested sets numbers
+$str = [];			//array for js array elements
+$categories = [];	//array for wms folders
+$path = [];		//stack for actual path elements
+$rights = [];		//stack for rights of open elements
 
 //build javascript data array for jsTree
 while($row = db_fetch_array($res)){
@@ -157,7 +157,7 @@ while($row = db_fetch_array($res)){
 	array_push($rights, $row['rgt']);
 	array_push($path, "folder_".$row['id']);
 	if($row['wms_id']!=""){
-		foreach(explode(",",$row['wms_id']) as $wms){
+		foreach(explode(",",(string) $row['wms_id']) as $wms){
 			array_push($categories, "'wms_".$wms."':\"root_id|".implode("|", $path)."\"");
 		}
 	}
@@ -169,7 +169,7 @@ if(count($str)>0){
 
 	//output javascript vars
 	$arrNodesStr = "[['root_id', ['Layer','javascript:_foo()'],[".implode("",$str)."]]];";
-	$arrNodesStr = str_replace(array("[]", ",]"),array("","]"),$arrNodesStr);
+	$arrNodesStr = str_replace(["[]", ",]"],["", "]"],$arrNodesStr);
 	echo "var arrNodesStr = \"".$arrNodesStr."\";\n";
 	echo "var categories = {".implode(",", $categories)."};\n";
 }

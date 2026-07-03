@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/mb_validateInput.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_gui.php"); 
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/mb_validateInput.php");
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../classes/class_gui.php"); 
 
 echo "file: ".$_REQUEST["xml_file"];
 echo "<br>-------------------------------<br>";
@@ -28,7 +28,7 @@ $guiList = mb_validateInput($_REQUEST["guiList"]);
 $url = mb_validateInput($_REQUEST["xml_file"]);
 $myWfsFactory = new UniversalWfsFactory();
 if ($_REQUEST["auth_type"] == 'basic' || $_REQUEST["auth_type"] == 'digest') {
-	$auth = array();
+	$auth = [];
     	$auth['username'] = $_REQUEST["username"];
     	$auth['password'] = $_REQUEST["password"];
     	$auth['auth_type'] = $_REQUEST["auth_type"];
@@ -70,7 +70,7 @@ if (isset($auth)) {
 $e = new mb_exception($myWfs->auth['username']);
 $myWfs->insertOrUpdate();
 // link WFS to GUIs in $guiList
-$guiArray = explode(",", $guiList);
+$guiArray = explode(",", (string) $guiList);
 foreach ($guiArray as $appName) {
 	$currentApp = new gui($appName);	
 	$currentApp->addWfs($myWfs);

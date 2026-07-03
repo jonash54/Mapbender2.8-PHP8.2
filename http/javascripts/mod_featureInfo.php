@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_js.php';
 //defaults for element vars
 ?>
@@ -70,9 +70,9 @@ var mod_featureInfo_frameName = "";
 var mod_featureInfo_target = "<?php echo $e_target[0]; ?>";
 var mod_featureInfo_mapObj = null;
 
-var mod_featureInfo_img_on = new Image(); mod_featureInfo_img_on.src =  "<?php  echo preg_replace("/_off/","_on",$e_src);  ?>";
+var mod_featureInfo_img_on = new Image(); mod_featureInfo_img_on.src =  "<?php  echo preg_replace("/_off/","_on",(string) $e_src);  ?>";
 var mod_featureInfo_img_off = new Image(); mod_featureInfo_img_off.src ="<?php  echo $e_src;  ?>";
-var mod_featureInfo_img_over = new Image(); mod_featureInfo_img_over.src = "<?php  echo preg_replace("/_off/","_over",$e_src);  ?>";
+var mod_featureInfo_img_over = new Image(); mod_featureInfo_img_over.src = "<?php  echo preg_replace("/_off/","_over",(string) $e_src);  ?>";
 
 if (featureInfoDrawClick) {
 	var standingHighlightFeatureInfo = null;
@@ -136,7 +136,7 @@ function changeURLValueOrder(url, param){
 
 function mod_featureInfo_click(){   
 	var el = mod_featureInfo_mapObj.getDomElement();
-	
+
 	if (el) {
 		$(el).bind("click", mod_featureInfo_event)
 			.css("cursor", "help");
@@ -258,7 +258,7 @@ function makeListLine(url, title, legendurls, onclick) {
         $("<br/>") 
             .appendTo($legend);
     });
-        
+
     return $row;
 }
 
@@ -276,16 +276,16 @@ function makeOwnDataListLine(ownData) {
 function featureInfoListDialog(urls, ownDataInfos, printInfo) {
     var $featureInfoList = $("<table>")
             .attr("border", 1);
-    
+
     if (reverseInfo) {
         urls.reverse();
         ownDataInfos.reverse();
-        
+
         ownDataInfos.forEach(function (ownDataInfo) {
             $featureInfoList.append(makeOwnDataListLine(ownDataInfo));
         });
     }
-    
+
     for(var i=0; i < urls.length; i++){
         var $line;
         if (featureInfoCollectLayers) { 
@@ -303,7 +303,7 @@ function featureInfoListDialog(urls, ownDataInfos, printInfo) {
             $featureInfoList.append($line);
         }
     }
-    
+
     if (!reverseInfo) {
         ownDataInfos.forEach(function (ownDataInfo) {
             $featureInfoList.append(makeOwnDataListLine(ownDataInfo));
@@ -424,7 +424,7 @@ function mod_featureInfo_event(e){
                         featureInfoWindow(featureInfos[i]);
                     }
 				}
-                
+
                 for(var i=0; i < ownDataInfos.length; i++){
 					if(featureInfoLayerPopup === 'true'){
                         ownDataDialog(ownDataInfos[i], dialogPosition, (featureInfos.length + i) * 25, printInfo);

@@ -18,12 +18,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 function mb_validateInput($text){
-	$match = array(
-		0 => "/drop/i",
-		1 => "/--/"
-	);
+	$match = [0 => "/drop/i", 1 => "/--/"];
 	for($i=0; $i<count($match);$i++){
-		if( preg_match($match[$i], $text) == true){
+		if( preg_match($match[$i], (string) $text) == true){
 			return null;
 			exit;
 		}

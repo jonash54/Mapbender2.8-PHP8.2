@@ -1,4 +1,3 @@
-
 <?php
 # $Id: mod_monitorCapabilities_read_single.php 76 2006-08-15 12:25:34Z heuser $
 # http://www.mapbender.org/index.php/Monitor_Capabilities
@@ -17,8 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
 /*  
  * @security_patch irv done
  */ 
@@ -55,7 +54,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
         $testMatch = $_REQUEST["id"];
         //give max 99 entries - more will be to slow
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 echo 'Parameter <b>id</b> is not valid (integer).<br/>';
                 die();
         }
@@ -71,8 +70,8 @@ switch ($serviceType) {
 		$sql .= "WHERE fkey_wfs_id = $1 AND NOT status = '-2' ORDER BY upload_id DESC";
 		break;
 }
-$v = array($id);
-$t = array('i');
+$v = [$id];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 $cnt=0;
 while ($row = db_fetch_array($res)) {
@@ -102,7 +101,7 @@ switch ($serviceType) {
 $str .= "<table cellpadding=10 cellspacing=0 border=0>";
 $str .= "<tr bgcolor='#dddddd'><th align='left'>date</th><th align='left' colspan = 2>"._mb("Status")."</th><th align='center'>"._mb("Response time")."</th><th align='center'>"._mb("Diff")."</th></tr>";//Status Antwortzeit
 
-for ($k=0; $k<count($upload_id); $k++) {
+for ($k=0; $k<count($upload_id ?? []); $k++) {
 	$img = "stop.png";
 	if ($status[$k]==0) $img = "wait.png";
 	elseif ($status[$k]==1) $img = "go.png";
@@ -127,9 +126,9 @@ for ($k=0; $k<count($upload_id); $k++) {
 	    //$str .= "\n\t\t\t<td align='center'><a href='../php/mod_showCapDiff.php?id=" . $id . "&upload_id=" . $upload_id[$k] . "&serviceType=" . $serviceType ."' target=_blank>Show diff</a></td>";
 	    //$str .= "\n\t\t\t<td align='center'><a href='../php/mod_monitorCapabilities_read_single_diff.php?wmsid=" . $id . "&upload_id=" . $upload_id[$k] . "' target=_blank>Show diff</a></td>";    
 	    $str .= "\n\t\t\t<td align='center'></td>";
-	    
+
 	}
-	
+
 #	$str .= "\n\t\t\t<td><a href='output_".$wms_id[$k]."_".$max.".txt' target=_blank>log</a></td>";
 }
 $str .= "\n\t</table>\n\t";

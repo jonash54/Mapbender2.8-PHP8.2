@@ -21,7 +21,7 @@ ob_start();
 //
 // constants
 //
-require_once(dirname(__FILE__)."/../core/system.php");
+require_once(__DIR__."/../core/system.php");
 //
 // initiates the session-handling
 //
@@ -35,7 +35,7 @@ if (defined("SESSION_NAME") && is_string(SESSION_NAME)) {
 //
 // Basic Mapbender classes, for session handling etc.
 //
-require_once dirname(__FILE__)."/../lib/class_Mapbender.php";
+require_once __DIR__."/../lib/class_Mapbender.php";
 
 //
 // define LC_MESSAGES if unknown (for Windows platforms)
@@ -45,13 +45,13 @@ if (!defined("LC_MESSAGES")) define("LC_MESSAGES", LC_CTYPE);
 //
 // I18n wrapper function, gettext
 //
-require_once dirname(__FILE__) . "/../core/i18n.php";
-require_once dirname(__FILE__) . "/../http/classes/class_locale.php";
+require_once __DIR__ . "/../core/i18n.php";
+require_once __DIR__ . "/../http/classes/class_locale.php";
 $localeObj = new Mb_locale(Mapbender::session()->get("mb_lang"));
 //
 // globally used includes (due to PHP Version changes)
 //
-require_once dirname(__FILE__) . "/../http/php/wrappers/includes.php";
+require_once __DIR__ . "/../http/php/wrappers/includes.php";
 //
 // sets a public user session if defined in mapbender.conf
 //
@@ -87,7 +87,7 @@ if (defined("PUBLIC_USER_AUTO_CREATE_SESSION") && PUBLIC_USER_AUTO_CREATE_SESSIO
 		        Mapbender::session()->set("layer_preview", 0);
 		        Mapbender::session()->set("mb_user_spatial_suggest", 'nein');
 	        }
-	        require_once(dirname(__FILE__)."/../http/php/mb_getGUIs.php");
+	        require_once(__DIR__."/../http/php/mb_getGUIs.php");
 	        $arrayGUIs = mb_getGUIs($isAuthenticated["mb_user_id"]);
 	        Mapbender::session()->set("mb_user_guis", $arrayGUIs);
         }
@@ -103,8 +103,8 @@ function getUserData ($userId){
 	$con = db_connect(DBSERVER,OWNER,PW);
 	db_select_db(DB,$con);
 	$sql = "SELECT * FROM mb_user WHERE mb_user_id = $1";
-	$v = array($userId);
-	$t = array('i');
+	$v = [$userId];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	if($row = db_fetch_array($res)){
 		return $row;	

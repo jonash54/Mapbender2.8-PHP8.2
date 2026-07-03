@@ -17,35 +17,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class kml {
 
-		var $kml_id;
-		var $lookAt_range = 5000;
-		var $lookAt_heading = 0;
-		var $lookAt_tilt = 0;
-		var $description;
-		var $title;
-		var $icon;
-		var $x;
-		var $y;
-		var $kml;
+		public $kml_id;
+		public $lookAt_range = 5000;
+		public $lookAt_heading = 0;
+		public $lookAt_tilt = 0;
+		public $kml;
 					
-	function __construct($title, $description, $x, $y, $icon) {
+	function __construct(public $title, public $description, public $x, public $y, public $icon) {
   		$this->kml_id = md5(microtime());
-  		$this->x = $x;
-  		$this->y = $y;
-  		$this->icon = $icon;
-  		$this->title = $title;
-  		$this->description = $description;
 	} 
         
         /**
         * Old constructor to keep PHP downward compatibility
         */
         function kml($title, $description, $x, $y, $icon) {
-  		self::__construct($title, $description, $x, $y, $icon);
+  		self::__construct();
 	} 
 
 
@@ -72,61 +62,61 @@ class kml {
 		xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 		xml_parser_set_option($parser,XML_OPTION_SKIP_WHITE,1);
 		xml_parser_set_option($parser,XML_OPTION_TARGET_ENCODING,CHARSET);
-		xml_parse_into_struct($parser,$data,$values,$tags);
+		xml_parse_into_struct($parser,(string) $data,$values,$tags);
 		xml_parser_free($parser);
 		
 		$cnt_format = 0;
-		$parent = array();
-		$myParent = array();
+		$parent = [];
+		$myParent = [];
 		$cnt_layer = -1;
-		$layer_style = array();
+		$layer_style = [];
 		$cnt_styles = -1;
 		
 		foreach ($values as $element) {
-			if(mb_strtoupper($element['tag']) == "KML" && $element['type'] == "open"){
+			if(mb_strtoupper((string) $element['tag']) == "KML" && $element['type'] == "open"){
 				$section = "kml";
 			}
-			if ($section == "kml" && mb_strtoupper($element['tag']) == "PLACEMARK" && $element['type'] == "open") {
+			if ($section == "kml" && mb_strtoupper((string) $element['tag']) == "PLACEMARK" && $element['type'] == "open") {
 				$section = "placemark";
 			}
-			if ($section == "placemark" && mb_strtoupper($element['tag']) == "DESCRIPTION" && $element['type'] == "complete") {
+			if ($section == "placemark" && mb_strtoupper((string) $element['tag']) == "DESCRIPTION" && $element['type'] == "complete") {
 				$this->description = $element['value'];
 			}
-			if ($section == "placemark" && mb_strtoupper($element['tag']) == "NAME" && $element['type'] == "complete") {
+			if ($section == "placemark" && mb_strtoupper((string) $element['tag']) == "NAME" && $element['type'] == "complete") {
 				$this->title = $element['value'];
 			}
-			if ($section == "placemark" && mb_strtoupper($element['tag']) == "LOOKAT" && $element['type'] == "open") {
+			if ($section == "placemark" && mb_strtoupper((string) $element['tag']) == "LOOKAT" && $element['type'] == "open") {
 				$section = "lookat";
 			}
 			if ($section == "lookat") {
 				
-				if (mb_strtoupper($element['tag']) == "RANGE" && $element['type'] == "complete") {
+				if (mb_strtoupper((string) $element['tag']) == "RANGE" && $element['type'] == "complete") {
 					$this->lookAt_range = $element['value']; 
 				}
-				if (mb_strtoupper($element['tag']) == "HEADING" && $element['type'] == "complete") {
+				if (mb_strtoupper((string) $element['tag']) == "HEADING" && $element['type'] == "complete") {
 					$this->lookAt_heading = $element['value']; 
 				}
-				if (mb_strtoupper($element['tag']) == "TILT" && $element['type'] == "complete") {
+				if (mb_strtoupper((string) $element['tag']) == "TILT" && $element['type'] == "complete") {
 					$this->lookAt_tilt = $element['value']; 
 				}
 			}
-			if (mb_strtoupper($element['tag']) == "STYLE" && $element['type'] == "open") {
+			if (mb_strtoupper((string) $element['tag']) == "STYLE" && $element['type'] == "open") {
 				$section = "style";
 			}
-			if ($section == "style" && mb_strtoupper($element['tag']) == "ICONSTYLE" && $element['type'] == "open") {
+			if ($section == "style" && mb_strtoupper((string) $element['tag']) == "ICONSTYLE" && $element['type'] == "open") {
 				$section = "iconstyle";
 			}
-			if ($section == "iconstyle" && mb_strtoupper($element['tag']) == "ICON" && $element['type'] == "open") {
+			if ($section == "iconstyle" && mb_strtoupper((string) $element['tag']) == "ICON" && $element['type'] == "open") {
 				$section = "icon";
 			}
-			if ($section == "icon" && mb_strtoupper($element['tag']) == "HREF" && $element['type'] == "complete") {
+			if ($section == "icon" && mb_strtoupper((string) $element['tag']) == "HREF" && $element['type'] == "complete") {
 				$this->icon = $element['value'];
 			}
-			if (mb_strtoupper($element['tag']) == "POINT" && $element['type'] == "open") {
+			if (mb_strtoupper((string) $element['tag']) == "POINT" && $element['type'] == "open") {
 				$section = "point";
 			}
-			if ($section == "point" && mb_strtoupper($element['tag']) == "COORDINATES" && $element['type'] == "complete") {
-				$array = explode(",", $element['value']);
+			if ($section == "point" && mb_strtoupper((string) $element['tag']) == "COORDINATES" && $element['type'] == "complete") {
+				$array = explode(",", (string) $element['value']);
 				$this->x = $array[0];
 				$this->y = $array[1];
 			}
@@ -138,8 +128,8 @@ class kml {
 		$this->kml_id = $kml_id;
 
 		$sql = "SELECT kml FROM mb_meetingpoint WHERE mb_meetingpoint_id = $1";
-		$v = array($kml_id);
-		$t = array('s');
+		$v = [$kml_id];
+		$t = ['s'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		return $this->createObjFromKML($row['kml']);

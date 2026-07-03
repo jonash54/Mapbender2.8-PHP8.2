@@ -23,13 +23,13 @@ $angle = intval($_GET["angle"]);
 
 $text_x = 4;
 $text_y = 0;
-$rect_w = 7 * mb_strlen($text) + $text_x;
+$rect_w = 7 * mb_strlen((string) $text) + $text_x;
 $rect_h = 14 + $text_y;
 
 $im = imagecreate($rect_w, $rect_h);
 $white = imagecolorallocate($im, 255, 255, 255);
 $black = imagecolorallocate($im, 0, 0, 0);
-imagestring($im, 2, $text_x, $text_y, $text, $black);
+imagestring($im, 2, $text_x, $text_y, (string) $text, $black);
 $im = imagerotate($im, $angle, 0);
 
 Header("Content-type:image/png");

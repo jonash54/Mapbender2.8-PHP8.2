@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-include(dirname(__FILE__)."/../php/mb_validateSession.php");
-include(dirname(__FILE__)."/../classes/class_administration.php");
+include(__DIR__."/../php/mb_validateSession.php");
+include(__DIR__."/../classes/class_administration.php");
 
 ?>
 <html>
@@ -29,8 +29,8 @@ include(dirname(__FILE__)."/../classes/class_administration.php");
 $n = new administration();
 $myguis = $n->getGuisByPermission(Mapbender::session()->get("mb_user_id"),true);
 $mywms = $n->getWmsByOwnGuis($myguis);
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $sql = "SELECT * FROM wms WHERE wms_id IN(";
 for($i=0; $i<count($mywms); $i++){
 	if($i>0){$sql .= ",";}

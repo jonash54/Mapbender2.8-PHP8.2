@@ -19,11 +19,17 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $INDEX_WITHOUTPASS = true;
-require_once("../../../portal/fileadmin/function/cookie.php");
+// External Typo3 portal cookie helper — optional integration. The original
+// require_once would fatal when Mapbender is deployed standalone; PHP 8
+// makes that an uncatchable error, so we feature-detect the file.
+$portalCookie = __DIR__ . "/../../../portal/fileadmin/function/cookie.php";
+if (file_exists($portalCookie)) {
+    require_once($portalCookie);
+}
 require_once("../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_gui.php");
-require_once(dirname(__FILE__)."/../classes/class_cache.php");
-require_once dirname(__FILE__) . "/../classes/class_connector.php";
+require_once(__DIR__."/../classes/class_gui.php");
+require_once(__DIR__."/../classes/class_cache.php");
+require_once __DIR__ . "/../classes/class_connector.php";
 
 //new for geoportal.rlp - some guis has special functions - for normal mapbender installation this doesnt matter
 if (Mapbender::session()->get("mb_user_gui") !== false) {
@@ -69,8 +75,8 @@ mapbender/licence/
 <title><?php echo  $gui_id;?> - presented by Mapbender</title>
 <?php
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = 'body' AND fkey_gui_id = $1 and var_name='favicon' ORDER BY var_name";
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){
@@ -94,8 +100,8 @@ ORDER BY var_name
 
 SQL;
 
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){
@@ -118,8 +124,8 @@ ORDER BY var_name
 
 SQL;
 
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){
@@ -138,8 +144,8 @@ SQL;
 	$currentApplication = new gui($gui_id);
 	echo $currentApplication->toHtml();
 
-	$mapPhpParameters = htmlentities($urlParameters, ENT_QUOTES, CHARSET);
-	$mapPhpParameters .= "&amp;".htmlentities($_SERVER["QUERY_STRING"]);
+	$mapPhpParameters = htmlentities((string) $urlParameters, ENT_QUOTES, CHARSET);
+	$mapPhpParameters .= "&amp;".htmlentities((string) $_SERVER["QUERY_STRING"]);
 
 	echo "<script type='text/javascript' src='../javascripts/map.php?".$mapPhpParameters."'></script>";
 ?>

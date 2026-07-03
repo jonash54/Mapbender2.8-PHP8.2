@@ -4,7 +4,7 @@
  * Czech Version
  */
 
-$PHPMAILER_LANG = array();
+$PHPMAILER_LANG = [];
 
 $PHPMAILER_LANG["provide_address"] = 'Musíte zadat alespoò jednu ' .
                                      'emailovou adresu pøíjemce.';

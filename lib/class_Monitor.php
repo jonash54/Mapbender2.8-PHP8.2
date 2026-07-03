@@ -19,11 +19,11 @@
 
 //require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
 
-require_once(dirname(__FILE__)."/../http/classes/class_connector.php");
-require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
-require_once(dirname(__FILE__)."/../http/extensions/DifferenceEngine.php");
-require_once(dirname(__FILE__) . "/../http/classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../http/classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../http/classes/class_connector.php");
+require_once(__DIR__."/../http/classes/class_mb_exception.php");
+require_once(__DIR__."/../http/extensions/DifferenceEngine.php");
+require_once(__DIR__ . "/../http/classes/class_administration.php");
+require_once(__DIR__ . "/../http/classes/class_universal_wfs_factory.php");
 
 class Monitor {
 	/**
@@ -33,33 +33,29 @@ class Monitor {
 	 * -2 = monitoring in progress
 	 * 
 	 */
-	var $result = -1;
+	public $result = -1;
 	/**
 	 * 1  = the get map request DEFINITELY returns a valid map image
 	 * 0  = the WMS doesn't support XML error format. Who knows if the image is really a map?
 	 * -1 = the get map request doesn't return an image
 	 */
-	var $returnsImage;
-	var $comment = "";
-	var $updated = "0";
-	var $supportsXMLException = false;
-	var $timestamp;
-	var $timestamp_cap_begin;
-	var $timestamp_cap_end;
-	var $capabilitiesURL;
-	var $mapURL;
-	var $remoteXML;
-	var $localXML;
-	var $capabilitiesDiff;
-	var $tmpDir = null;        
-	var $serviceType; //WMS|WFS
-	var $serviceId;
-	var $feature_content;
+	public $returnsImage;
+	public $comment = "";
+	public $updated = "0";
+	public $supportsXMLException = false;
+	public $timestamp;
+	public $timestamp_cap_begin;
+	public $timestamp_cap_end;
+	public $capabilitiesURL;
+	public $mapURL;
+	public $remoteXML;
+	public $localXML;
+	public $capabilitiesDiff; //WMS|WFS
+	public $serviceId;
+	public $feature_content;
 	
-	function __construct($reportFile, $autoUpdate, $tmpDir, $serviceType="WMS") {
-		$this->tmpDir = $tmpDir;
-		$this->serviceType = $serviceType;
-		$this->reportFile = $tmpDir.$reportFile;
+	function __construct($reportFile, $autoUpdate, public $tmpDir, public $serviceType="WMS") {
+		$this->reportFile = $this->tmpDir.$reportFile;
 		//$this->reportFile = $reportFile;
 		switch ($this->serviceType) {
 			case "WMS":
@@ -73,7 +69,7 @@ class Monitor {
 		$this->autoUpdate = $autoUpdate;
 		$e=new mb_notice("Monitor Report File: ".$this->reportFile);
 		$e=new mb_notice("Service ID: ".$this->serviceId);
-		$this->capabilitiesURL = urldecode($this->getTagOutOfXML($this->reportFile,'getcapurl',$this->serviceType));//read out from xml
+		$this->capabilitiesURL = urldecode((string) $this->getTagOutOfXML($this->reportFile,'getcapurl',$this->serviceType));//read out from xml
 		$e=new mb_notice("GetCapURL: ".$this->capabilitiesURL);
 		set_time_limit(TIME_LIMIT);
 		$this->timestamp = microtime(TRUE);
@@ -106,7 +102,7 @@ class Monitor {
 			$this->remoteXML = $admin->char_encode($this->remoteXML);
 			$this->timestamp_cap_end=microtime(TRUE);
 			//read local copy out of xml
-			$this->localXML = urldecode($this->getTagOutOfXML($this->reportFile,'getcapdoclocal',$this->serviceType));
+			$this->localXML = urldecode((string) $this->getTagOutOfXML($this->reportFile,'getcapdoclocal',$this->serviceType));
 			// service unreachable
 			if (!$this->remoteXML) {
 				$this->result = -1;
@@ -141,8 +137,8 @@ class Monitor {
 					//check i a capabilities document was send, if not give an error
 					$searchStringWms  = 'WMT_MS_Capabilities';
 					$searchStringWfs  = 'WFS_Capabilities';
-					$posWms = strpos($this->remoteXML, $searchStringWms);
-					$posWfs = strpos($this->remoteXML, $searchStringWfs);
+					$posWms = strpos((string) $this->remoteXML, $searchStringWms);
+					$posWfs = strpos((string) $this->remoteXML, $searchStringWfs);
 					if ($posWms === false && $posWfs === false) {
     						$this->result = -1;
 						$this->comment = "Invalid getCapabilities request/document or service exception.";
@@ -151,7 +147,7 @@ class Monitor {
 						$this->result = 0;
 						$this->comment = "Service is not up to date.";
 						$localXMLArray = explode("\n", $this->localXML);
-						$remoteXMLArray = explode("\n", $this->remoteXML);
+						$remoteXMLArray = explode("\n", (string) $this->remoteXML);
 						$this->capabilitiesDiff = $this->outputDiffHtml($localXMLArray,$remoteXMLArray);
 					}
 				}
@@ -164,7 +160,7 @@ class Monitor {
 			if ($this->result != -1) {
 				switch ($this->serviceType) {
 					case "WMS":
-						$this->mapURL = urldecode($this->getTagOutOfXML($this->reportFile,'getmapurl',$this->serviceType));
+						$this->mapURL = urldecode((string) $this->getTagOutOfXML($this->reportFile,'getmapurl',$this->serviceType));
 						break;
 					case "WFS":
 						$wfsFactory = new UniversalWfsFactory();
@@ -180,7 +176,7 @@ class Monitor {
 							//count features - part from http_auth/index.php - TODO - maybe included in wfs class
 							libxml_use_internal_errors(true);
 							try {
-								$featureCollectionXml = simplexml_load_string($feature);
+								$featureCollectionXml = simplexml_load_string((string) $feature);
 								if ($featureCollectionXml === false) {
 									foreach(libxml_get_errors() as $error) {
         									//$err = new mb_exception("/lib/class_Monitor.php:".$error->message);
@@ -290,7 +286,7 @@ class Monitor {
 				 */
 				#if ($this->result == 0) {
 					//$mywms = new wms();
-		
+
 					/* 
 					 * if the capabilities document is valid,
 					 * update it OR mark it as "not up to date"
@@ -300,7 +296,7 @@ class Monitor {
 							#$mywms->updateObjInDB($this->wmsId);
 							#$this->updated = "1";
 							#$this->comment = "WMS has been updated.";
-							
+
 						#}
 						#else {
 						#	$this->comment = "WMS is not up to date.";
@@ -349,14 +345,14 @@ class Monitor {
 		switch ($this->serviceType) {
 			case "WMS":
 				$sql = "UPDATE mb_monitor SET updated = $1, status = $2, image = $3, status_comment = $4, upload_url = $5, timestamp_end = $6, map_url = $7 , timestamp_begin = $10 WHERE upload_id = $8 AND fkey_wms_id=$9";
-				$v = array($this->updated, $this->result, $this->returnsImage, $this->comment, $this->capabilitiesURL, $this->timestamp_cap_end, $this->mapURL, $this->uploadId, $this->serviceId, $this->timestamp_cap_begin);
-				$t = array('s', 'i', 'i', 's', 's', 's', 's', 's', 'i','s');
+				$v = [$this->updated, $this->result, $this->returnsImage, $this->comment, $this->capabilitiesURL, $this->timestamp_cap_end, $this->mapURL, $this->uploadId, $this->serviceId, $this->timestamp_cap_begin];
+				$t = ['s', 'i', 'i', 's', 's', 's', 's', 's', 'i', 's'];
 				$res = db_prep_query($sql,$v,$t);	
 				break;	
 			case "WFS":
 				$sql = "UPDATE mb_monitor SET updated = $1, status = $2, feature_content = $3, status_comment = $4, upload_url = $5, timestamp_end = $6, feature_urls = $7 , timestamp_begin = $10 WHERE upload_id = $8 AND fkey_wfs_id=$9";
-				$v = array($this->updated, $this->result, "feature_content - json", $this->comment, $this->capabilitiesURL, $this->timestamp_cap_end, "feature_urls - json", $this->uploadId, $this->serviceId, $this->timestamp_cap_begin);
-				$t = array('s', 'i', 's', 's', 's', 's', 's', 's', 'i','s');
+				$v = [$this->updated, $this->result, "feature_content - json", $this->comment, $this->capabilitiesURL, $this->timestamp_cap_end, "feature_urls - json", $this->uploadId, $this->serviceId, $this->timestamp_cap_begin];
+				$t = ['s', 'i', 's', 's', 's', 's', 's', 's', 'i', 's'];
 				$res = db_prep_query($sql,$v,$t);
 				break;
 		}	
@@ -394,7 +390,7 @@ class Monitor {
 				$xml->wms->image=$this->returnsImage;
 				$xml->wms->status=$this->result;
 				$xml->wms->getcapduration = intval(($this->timestamp_cap_end-$this->timestamp_cap_begin)*1000);
-				$xml->wms->getcapdocremote = rawurlencode($this->remoteXML);
+				$xml->wms->getcapdocremote = rawurlencode((string) $this->remoteXML);
 				$xml->wms->getcapdiff = rawurlencode($difftext);
 				$xml->wms->comment=$this->comment;
 				$xml->wms->getcapbegin=$this->timestamp_cap_begin;
@@ -404,7 +400,7 @@ class Monitor {
 				//$xml->wfs->image=$this->returnsImage;
 				$xml->wfs->status=$this->result;
 				$xml->wfs->getcapduration = intval(($this->timestamp_cap_end-$this->timestamp_cap_begin)*1000);
-				$xml->wfs->getcapdocremote = rawurlencode($this->remoteXML);
+				$xml->wfs->getcapdocremote = rawurlencode((string) $this->remoteXML);
 				$xml->wfs->getcapdiff = rawurlencode($difftext);
 				$xml->wfs->comment=$this->comment;
 				$xml->wfs->getcapbegin=$this->timestamp_cap_begin;
@@ -435,7 +431,7 @@ class Monitor {
 		//write images to tmp folder
 		$imageName=$this->tmpDir."/"."monitor_getmap_image_".md5(uniqid()).".png";
 		$fileMapImg = fopen($imageName, 'w+');
-		$bytesWritten = fwrite($fileMapImg, $image);
+		$bytesWritten = fwrite($fileMapImg, (string) $image);
 		fclose($fileMapImg);
 		//$e = new mb_notice("class_monitor: isImage: path: ".$imageName);
 		//$e = new mb_notice("class_monitor: isImage: Content-Type is " . mime_content_type($image));
@@ -467,7 +463,7 @@ class Monitor {
  	 */
        private function getTagOutOfXML($reportFile,$tagName,$serviceType) {
 		$xml=simplexml_load_file($reportFile);
-		$result=(string)$xml->{strtolower($serviceType)}->$tagName;
+		$result=(string)$xml->{strtolower((string) $serviceType)}->$tagName;
 		return $result;
 	}
 	/*

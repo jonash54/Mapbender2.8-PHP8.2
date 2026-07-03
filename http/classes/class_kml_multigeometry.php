@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
-require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
+require_once(__DIR__."/../classes/class_kml_geometry.php");
 
 /**
  * Represents a multi geometry, consisting of an array of geometries 
@@ -28,7 +28,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
  * 
  * @package KML
  */
-class KMLMultiGeometry extends KMLGeometry {
+class KMLMultiGeometry extends KMLGeometry implements \Stringable {
 	
 	/**
 	 * Creates an empty multi geometry. Geometries may be added via {@link KMLMultiGeometry::append()}.
@@ -39,7 +39,7 @@ class KMLMultiGeometry extends KMLGeometry {
 	/**
 	 * @return string a string representation of the object, currently geoJSON.
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toGeoJSON();
 	}
 	
@@ -78,6 +78,6 @@ class KMLMultiGeometry extends KMLGeometry {
 		return false;
 	}
 
-	private $geometryArray = array();
+	private $geometryArray = [];
 }
 ?>

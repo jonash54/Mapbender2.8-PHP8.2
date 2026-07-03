@@ -5,19 +5,19 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__)."/../core/globalSettings.php";
+require_once __DIR__."/../core/globalSettings.php";
 
 /**
  * Normalizes the input data specified at http://www.mapbender.org/GET-Parameter
  */
 class GetApi {
-	private $layers = array();
-	private $featuretypes = array();
-	private $geoRSSFeeds = array();
-	private $kml = array();
-	private $geojson = array();
-	private $wmc = array();
-	private $zoom = array();
+	private $layers = [];
+	private $featuretypes = [];
+	private $geoRSSFeeds = [];
+	private $kml = [];
+	private $geojson = [];
+	private $wmc = [];
+	private $zoom = [];
 	private $geojsonzoom;
 	private $geojsonzoomscale;	
     private $datasetid; //new parameter to find a layer with a corresponding identifier element - solves the INSPIRE data service coupling after retrieving the ows from a dataset search via CSW interface! Only relevant, if a WMS is given 
@@ -161,7 +161,7 @@ class GetApi {
 	 */
 	public function validate_integer($testMatch) {
 	    $pattern = '/^[0-9]*$/';
-	    if (!preg_match($pattern, $testMatch)){
+	    if (!preg_match($pattern, (string) $testMatch)){
 	       return false;
 	    } else {
 	        return true;
@@ -179,8 +179,8 @@ class GetApi {
 	// for possible inputs see http://www.mapbender.org/GET-Parameter#WMC
 	private function normalizeWmcInput ($input) {
 		// assume WMC=12,13,14
-		$inputArray = explode(",", $input);
-		$input = array();
+		$inputArray = explode(",", (string) $input);
+		$input = [];
 		$i = 0;
 		foreach ($inputArray as $id) {
 			if (is_numeric($id)) {
@@ -218,13 +218,13 @@ class GetApi {
 			}
 			// LAYER[id]=12&LAYER[application]=something
 			if ($isSingleLayer) {
-				$input[0] = array();
+				$input[0] = [];
 				foreach ($keys as $key) {
 					if (!is_numeric($key)) {
 					    //check values for keys - begin with querylayer
 					    switch ($key) {
 					        case "querylayer":
-					            if (!in_array($input[$key], array('0','1'))) {
+					            if (!in_array($input[$key], ['0', '1'])) {
 					                //throw away input!
 					                $e = new mb_exception("lib/class_GetApi.php: key: " . $key . " has a not allowed value: " . $input[$key]);
 					            } else {
@@ -232,7 +232,7 @@ class GetApi {
 					            }
 					            break;
 					        case "zoom":
-					            if (!in_array($input[$key], array('0','1'))) {
+					            if (!in_array($input[$key], ['0', '1'])) {
 					                //throw away input!
 					                $e = new mb_exception("lib/class_GetApi.php: key: " . $key . " has a not allowed value: " . $input[$key]);
 					            } else {
@@ -240,7 +240,7 @@ class GetApi {
 					            }
 					            break;
 					        case "visible":
-					            if (!in_array($input[$key], array('0','1'))) {
+					            if (!in_array($input[$key], ['0', '1'])) {
 					                //throw away input!
 					                $e = new mb_exception("lib/class_GetApi.php: key: " . $key . " has a not allowed value: " . $input[$key]);
 					            } else {
@@ -272,7 +272,7 @@ class GetApi {
 					// assume LAYER[]=12&LAYER[]=13
 					if (is_numeric($input[$i])) {
 						$id = $input[$i];
-						$input[$i] = array("id" => $id);
+						$input[$i] = ["id" => $id];
 					}
 					// else assume LAYER[0][id]=12&LAYER[0][application]=something
 				}
@@ -280,8 +280,8 @@ class GetApi {
 		}
 		else {
 			// assume LAYER=12,13,14
-			$inputArray = explode(",", $input);
-			$input = array();
+			$inputArray = explode(",", (string) $input);
+			$input = [];
 			$i = 0;
 			foreach ($inputArray as $id) {
 				if (is_numeric($id)) {
@@ -314,7 +314,7 @@ class GetApi {
 			}
 			// FEATURETYPE[id]=12&FEATURETYPE[active]=something
 			if ($isSingleFeaturetype) {
-				$input[0] = array();
+				$input[0] = [];
 				foreach ($keys as $key) {
 					if (!is_numeric($key)) {
 						$input[0][$key] = $input[$key];
@@ -327,15 +327,15 @@ class GetApi {
 					// assume FEATURETYPE[]=12&FEATURETYPE[]=13
 					if (is_numeric($input[$i])) {
 						$id = $input[$i];
-						$input[$i] = array("id" => $id);
+						$input[$i] = ["id" => $id];
 					}
 				}
 			}
 		}
 		else {
 			// assume FEATURETYPE=12,13,14
-			$inputArray = explode(",", $input);
-			$input = array();
+			$inputArray = explode(",", (string) $input);
+			$input = [];
 			$i = 0;
 			foreach ($inputArray as $id) {
 				if (is_numeric($id)) {
@@ -357,8 +357,8 @@ class GetApi {
 	}
 
 	private function normalizeZoomInput($input){
-		$inputArray = explode(",", $input);
-		$input = array();
+		$inputArray = explode(",", (string) $input);
+		$input = [];
 		switch (count($inputArray)) {
 			case 3:
 				if (is_numeric($inputArray[0]) && is_numeric($inputArray[1]) && is_numeric($inputArray[2])) {
@@ -370,7 +370,7 @@ class GetApi {
 			case 4:
 			    $e = new mb_notice(json_encode($inputArray));
 				//check if last element begins with epsg: - then it will be the case, that zoom to coordinate with scale and special epsg is requested
-				if (strpos(strtolower($inputArray[3]), "epsg") === 0  && is_numeric($inputArray[0]) && is_numeric($inputArray[1]) && is_numeric($inputArray[2]) ) {
+				if (str_starts_with(strtolower($inputArray[3]), "epsg")  && is_numeric($inputArray[0]) && is_numeric($inputArray[1]) && is_numeric($inputArray[2]) ) {
 					//extract epsg code ...
 					//create point object with scale ...
 					return $inputArray;
@@ -424,15 +424,15 @@ class GetApi {
 	}
 
 	private function normalizeGeoRSSInput($input){
-		return is_array($input) ? $input : array($input);
+		return is_array($input) ? $input : [$input];
 	}
 
 	private function normalizeKmlInput($input){
-		return is_array($input) ? $input : array($input);
+		return is_array($input) ? $input : [$input];
 	}
 
 	private function normalizeGeojsonInput($input){
-		return is_array($input) ? $input : array($input);
+		return is_array($input) ? $input : [$input];
 	}
 
 	private function normalizeGeojsonZoomInput($input){
@@ -450,7 +450,7 @@ class GetApi {
 		$offset = false;
 		$testMatch = $input;
 		$pattern = '/^[\d]*$/';		
- 		if (preg_match($pattern,$testMatch)){ 	
+ 		if (preg_match($pattern,(string) $testMatch)){ 	
 			$offset = $testMatch;
  		}
 		return $offset;
@@ -460,7 +460,7 @@ class GetApi {
 		$datasetId = false;
 		$testMatch = $input;
 		$pattern = '/^(?!\s*$).+/';		
- 		if (preg_match($pattern,$testMatch)){ 	
+ 		if (preg_match($pattern,(string) $testMatch)){ 	
 			$e = new mb_exception("lib/classGetApi.php: Get parameter DATASETID has whitespaces - will be set to false!");
  		} else {
                         $datasetId = $testMatch;
@@ -472,7 +472,7 @@ class GetApi {
 	    $noneDefaultWmc = false;
 	    $testMatch = $input;
 	    $pattern = '/^[0-9]*$/';
-	    if (!preg_match($pattern, $testMatch)){
+	    if (!preg_match($pattern, (string) $testMatch)){
 	        $e = new mb_exception("lib/classGetApi.php: Get parameter NONEDEFAULTWMC has forbidden values - will be set to false!");
 	    } else {
 	        $noneDefaultWmc = $testMatch;

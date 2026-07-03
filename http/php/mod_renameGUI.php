@@ -18,7 +18,7 @@ m<?php
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="rename_copy_Gui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -159,8 +159,8 @@ function validate_copy(){
 <body>
 <?php
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_gui.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_gui.php");
 
 ###rename
 if($rename || $copy){
@@ -185,8 +185,8 @@ $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 echo "<form name='form1' action='" . $self ."' method='post'>";
 if(count($ownguis)>0){
 	$sql = "SELECT * FROM gui WHERE gui_id IN (";
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	for($i=0; $i<count($ownguis); $i++){
 		if($i>0){ $sql .= ",";}
 		$sql .= "$".($i+1);

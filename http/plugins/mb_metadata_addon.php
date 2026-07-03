@@ -1,6 +1,6 @@
 <?php
-	require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-	require_once(dirname(__FILE__) . "/../../conf/mimetype.conf");
+	require_once __DIR__ . "/../../core/globalSettings.php";
+	require_once(__DIR__ . "/../../conf/mimetype.conf");
 
 	function displayCategories ($sql) {
 		if (Mapbender::session()->get("mb_lang") === "de") {
@@ -10,7 +10,7 @@
 		$res = db_query($sql);
 		while ($row = db_fetch_assoc($res)) {
 			$str .= "<option value='" . $row["id"] . "'>" . 
-				htmlentities($row["name"], ENT_QUOTES, CHARSET) . 
+				htmlentities((string) $row["name"], ENT_QUOTES, CHARSET) . 
 				"</option>";
 		}
 		return $str;
@@ -23,7 +23,7 @@
 	    $res = db_query($sql);
 	    while ($row = db_fetch_assoc($res)) {
 	        $str .= "<option value='" . $row["id"] . "'>" .
-	   	        htmlentities($row["name"], ENT_QUOTES, CHARSET) .
+	   	        htmlentities((string) $row["name"], ENT_QUOTES, CHARSET) .
 	   	        "</option>";
 	    }
 	    return $str;
@@ -57,13 +57,13 @@ $(function() {
 			<label for="export2csw"><?php echo _mb("Harvest link target and export to CSW");?></label>
       			<input name="export2csw" id="export2csw" type="checkbox" checked="checked"/>
 		</p>
-		
+
 	</fieldset>
 	<!--fieldset for internal link form-->
 	<fieldset id="internal_link" name="internal_link" type="hidden" style="display: none">
 		<legend><?php echo _mb("Internal Link");?></legend>
 		<select name="internal_relation" id="internal_relation" /></select>
-		
+
 	</fieldset>
 	<!--fieldset for upload metadata form-->
 	<fieldset id="metadata_upload" name="metadata_upload" type="hidden" style="display: none">
@@ -113,7 +113,7 @@ $(function() {
 			<?php 	$str ="";
 				foreach ($formats as $format) {
 					$str .= "<option value='" . $format . "'>"._mb($format)."</option>";
-					
+
 				}
 				echo $str;
 			?>
@@ -130,13 +130,13 @@ $(function() {
 			<legend><?php echo _mb("Coordinate Reference System");?><img class="help-dialog" title="<?php echo _mb("Help");?>" help="{text:'<?php echo _mb("Description of the coordinate reference system(s) used in the data set.");?>'}" src="../img/questionmark.png" alt="" /></legend>
 <?php
 	if (defined('SRS_ARRAY')) {
-			$srs_array = explode(",", SRS_ARRAY);
+			$srs_array = explode(",", (string) SRS_ARRAY);
 			echo '<select class="required ref_system_selectbox" name="ref_system" id="ref_system">';
 			foreach ($srs_array as $epsg) {
 				echo "<option value='" . "EPSG:" .$epsg . "'>" . _mb("EPSG:".$epsg) . "</option>";
 			}
 			echo "</select>";
-		
+
 	} else {
 		echo '<input name="ref_system" id="ref_system"/>';
 	}
@@ -186,7 +186,7 @@ $(function() {
 			</select>
 			<img id="resetCustomCatsMd" title="<?php echo _mb("Reset selection");?>" src="../img/cross.png" style="cursor:pointer;"/>
 			<!-- <img id="startCustomTreeSelector" title="<?php //echo _mb("Select from hierachical structure");?>" src="../img/expanded_folder.png" style="cursor:pointer;" onclick='openCustomTreeSelector()';/>-->
-			
+
 		</p>
 	</fieldset>
 	</div>
@@ -240,7 +240,7 @@ $(function() {
 		<legend><?php echo _mb("Topological Consistency");?><img class="help-dialog" title="<?php echo _mb("Help");?>" help="{text:'<?php echo _mb("Correctness of the explicitly encoded topological characteristics of the data set as described by the scope. This element is mandatory only if the data set includes types from the Generic Network Model and does not assure centreline topology (connectivity of centrelines) for the network.");?>'}" src="../img/questionmark.png" alt="" /></legend>
 		<input name="inspire_top_consistence" id="inspire_top_consistence" type="checkbox"/>
 		</fieldset>
-	
+
 	</div>
 	<div id="tabs-5">
 		<fieldset>
@@ -308,7 +308,7 @@ $(function() {
 
 <?php
             //read inspire_LimitationsOnPublicAccess.json as key value pair 
-			if (file_exists(dirname(__FILE__)."/../../conf/inspire_LimitationsOnPublicAccess.json")) {
+			if (file_exists(__DIR__."/../../conf/inspire_LimitationsOnPublicAccess.json")) {
 				$languageCode = Mapbender::session()->get("mb_lang");
 				$languageCode = "de"; //test
 				$configObject = json_decode(file_get_contents("../../conf/inspire_LimitationsOnPublicAccess.json"));
@@ -317,7 +317,7 @@ $(function() {
 			    echo '        <select class="accessconstraints_md_inspire_selectbox" name="md_accessconstraints_inspire" id="md_accessconstraints_inspire" onChange="var chosenoption=this.options[this.selectedIndex];$(\'#mb_md_showMetadataAddon\').mapbender().selectPredefinedAccessConstraints(chosenoption.value);">';
 				echo '            <option value="0">...</option>';
 				foreach ($configObject->codelist as $accessconstraintsCodelist) {
-					echo "            <option value='" . $accessconstraintsCodelist->code . "'>" . htmlentities($accessconstraintsCodelist->title->{$languageCode}, ENT_QUOTES, CHARSET) . "</option>";
+					echo "            <option value='" . $accessconstraintsCodelist->code . "'>" . htmlentities((string) $accessconstraintsCodelist->title->{$languageCode}, ENT_QUOTES, CHARSET) . "</option>";
 				}
 				echo '        </select>';
 				$helptext = "";
@@ -326,16 +326,16 @@ $(function() {
 				}
 				//echo '        <img class="help-dialog" title="'._mb("Help").'" help="{text:\''._mb("Selection of predefined INSPIRE access constraints.").'\'}" src="../img/questionmark.png" alt="" />';
 				echo '        <img class="help-dialog" title="'._mb("Help").'" help="{text:\''.$helptext.'\'}" src="../img/questionmark.png" alt="" />';
-				
+
 				echo '        </p>';				
 			}
 ?>
 	</p>
-	
+
 <?php
 		$sql = "SELECT termsofuse_id, name FROM termsofuse";
 		$res = db_query($sql);
-		$termsofuse = array();
+		$termsofuse = [];
 		while ($row = db_fetch_assoc($res)) {
 			$termsofuse[$row["termsofuse_id"]] = $row["name"];
 		}
@@ -346,7 +346,7 @@ $(function() {
 				<option value='0'>...</option>
 <?php
 			foreach ($termsofuse as $key => $value) {
-				echo "<option value='" . $key . "'>" . htmlentities($value, ENT_QUOTES, CHARSET) . "</option>";
+				echo "<option value='" . $key . "'>" . htmlentities((string) $value, ENT_QUOTES, CHARSET) . "</option>";
 			}
 ?>
 			</select>
@@ -376,7 +376,7 @@ $(function() {
 	</div>
 	<div id="tabs-10">
 		<fieldset>
-			
+
 			<!--<table id='previewuploadtable' name='previewuploadtable'><tr><td><img id="upload_preview_image" name= "upload_preview_image" onclick='initUploadImageForm();' src='../img/button_blue_red/up.png' title='Upload'  /></td><td><?php echo _mb("Upload a preview image for the dataset. Does only make sense for raster files.");?><img class="help-dialog" title="<?php echo _mb("Help");?>" help="{text:'<?php echo _mb("Help for upload preview image");?>'}" src="../img/questionmark.png" alt="" /><img class="delete_preview_image" id="delete_existing_preview_image" onclick="" name="delete_existing_preview_image" src='../img/cross.png' type="hidden" style="display: none" title="<?php echo _mb("Delete actual preview image");?>"/></td></tr></table>-->
 				<input name="preview_image" id="preview_image" type="text"/><img class="help-dialog" title="<?php echo _mb("Help");?>" help="{text:'<?php echo _mb("Here you can give a url to an image that should be shown");?>'}" src="../img/questionmark.png" alt="" />
 		</fieldset>

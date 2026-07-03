@@ -4,10 +4,10 @@
  * @class
  */
  
- require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
- require_once(dirname(__FILE__)."/../http/classes/class_mb_warning.php");
- require_once(dirname(__FILE__)."/../http/classes/class_mb_notice.php");
- require_once(dirname(__FILE__)."/class_Singleton.php");
+ require_once(__DIR__."/../http/classes/class_mb_exception.php");
+ require_once(__DIR__."/../http/classes/class_mb_warning.php");
+ require_once(__DIR__."/../http/classes/class_mb_notice.php");
+ require_once(__DIR__."/class_Singleton.php");
 
  class Mapbender_session extends Singleton{
  	
@@ -21,9 +21,11 @@
  		new mb_notice("session.mapbender_session.instantiated ... ");
  	}
 
- 	public static function singleton()
+ 	// $classname kept for LSP-compat with Singleton::singleton($classname);
+ 	// it is ignored — children always self-register via self::class.
+ 	public static function singleton($classname = null)
     {
-        return parent::singleton(__CLASS__);
+        return parent::singleton(self::class);
     }
  	
  	/**
@@ -233,7 +235,7 @@
 	 */
 	 public function kill(){
 	 	if (isset($_COOKIE[session_name()])) {
-    			setcookie(session_name(), '', time()-42000, '/');
+    			setcookie(session_name(), '', ['expires' => time()-42000, 'path' => '/']);
 		}
 		if(session_id()){
 			session_destroy();

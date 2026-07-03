@@ -11,7 +11,7 @@
  * Convert the image to the right format and save it in the @preview_dir
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 $user_id = Mapbender::session()->get("mb_user_id");
 $source_id = $_POST['source_id'];
@@ -20,10 +20,10 @@ $width;
 $height;
 $new_name;
 //get the http referer and the service (wms,wmc)
-$referer = explode('=',$_SERVER["HTTP_REFERER"]);
+$referer = explode('=',(string) $_SERVER["HTTP_REFERER"]);
 $service = end($referer);
 // get the file informations
-$info = pathinfo($_FILES['image']['name']);
+$info = pathinfo((string) $_FILES['image']['name']);
 // get the extension of the file
 $ext = $info['extension'];
 // set the new fileName
@@ -37,7 +37,7 @@ else {
     $new_name = $source_id."_layer_map_preview.jpg";//.$ext;
 }
 
-$new_image = dirname(__FILE__)."/../geoportal/preview/".$new_name;
+$new_image = __DIR__."/../geoportal/preview/".$new_name;
 
 if ($_POST["upload_action"] === "upload") {
     // get the ímage

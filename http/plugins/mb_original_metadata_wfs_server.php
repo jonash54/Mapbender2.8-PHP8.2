@@ -1,11 +1,11 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wfs.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wfs.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -20,24 +20,24 @@ function getWfsMetadataFromXml($capabilitiesDoc) {
 	$xmlDoc->loadXML($capabilitiesDoc);
 	
 	//define default resultObj
-	$resultObj = array(
-		"original_title" => "",
-		"original_summary" => "",
-		"original_accessconstraints" => "",
-		"original_fees" => "",
-//		"original_wfs_keywords" => "",
-		"original_positionName" => "",
-		"original_electronicMailAddress" => "",
-		"original_facsimile" => "",
-		"original_voice" => "",
-		"original_individualName" => "",
-		"original_providerName" => "",
-		"original_deliveryPoint" => "",
-		"original_city" => "",
-		"original_administrativeArea" => "",
-		"original_postalCde" => "",
-		"original_country" => ""
-	);
+	$resultObj = [
+     "original_title" => "",
+     "original_summary" => "",
+     "original_accessconstraints" => "",
+     "original_fees" => "",
+     //		"original_wfs_keywords" => "",
+     "original_positionName" => "",
+     "original_electronicMailAddress" => "",
+     "original_facsimile" => "",
+     "original_voice" => "",
+     "original_individualName" => "",
+     "original_providerName" => "",
+     "original_deliveryPoint" => "",
+     "original_city" => "",
+     "original_administrativeArea" => "",
+     "original_postalCde" => "",
+     "original_country" => "",
+ ];
 	
 	$service_node = $xmlDoc->getElementsByTagName('Service'); 
 	foreach ($service_node as $node) {
@@ -137,11 +137,7 @@ function getfeaturetypeMetadataFromXml($capabilitiesDoc,$featuretypeName) {
 	$xmlDoc->loadXML($capabilitiesDoc);
 	
 	//define default resultObj
-	$resultObj = array(
-		"original_featuretype_title" => "",
-		"original_featuretype_abstract" => "",
-		"original_featuretype_keyword" => ""
-	);
+	$resultObj = ["original_featuretype_title" => "", "original_featuretype_abstract" => "", "original_featuretype_keyword" => ""];
 	
 	$layer_nodes = $xmlDoc->getElementsByTagName('Featuretype');
 	foreach ($layer_nodes as $node) {
@@ -166,7 +162,7 @@ function getfeaturetypeMetadataFromXml($capabilitiesDoc,$featuretypeName) {
 		//"Service"-childnode KeywordList	
 		if (strtoupper($layerChild->nodeName) == "KEYWORDLIST") {
 			$keywords_list = $layerChild->childNodes;
-			$keywords = array();
+			$keywords = [];
 			foreach ($keywords_list as $keywordlist_child_node) {																		
 				$keyword = $keywordlist_child_node->nodeValue;						
 				array_push($keywords, $keyword);

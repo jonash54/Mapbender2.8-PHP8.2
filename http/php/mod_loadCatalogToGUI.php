@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="loadCSWGUI";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -142,7 +142,7 @@ function load(){
 
 <?php
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner($_SESSION["mb_user_id"],true);
 
@@ -152,8 +152,8 @@ if(isset($catID) && isset($guiID_)){
 	
 	$sql_ins = "INSERT INTO gui_cat (fkey_gui_id,fkey_cat_id) ";
 	$sql_ins .= "VALUES ($1,$2)";
-	$v = array($guiList,$catID);
-	$t = array('s','i');
+	$v = [$guiList, $catID];
+	$t = ['s', 'i'];
 	db_prep_query($sql_ins,$v,$t);
 
 }
@@ -169,7 +169,7 @@ if (count($ownguis)>0){
 	 
 	$sql = "SELECT * FROM gui WHERE gui_id IN (";
 	$v = $ownguis;
-	$t = array();
+	$t = [];
 	for ($i = 1; $i <= count($ownguis); $i++){
 		if ($i > 1) { 
 			$sql .= ",";
@@ -204,8 +204,8 @@ if (count($ownguis)>0){
 		$sql = "SELECT DISTINCT cat_id, cat_title FROM gui_cat ";
 		$sql .= "JOIN gui ON gui_cat.fkey_gui_id = gui.gui_id JOIN cat ON gui_cat.fkey_cat_id=cat.cat_id ";
 		$sql .= "AND gui_cat.fkey_gui_id=gui.gui_id WHERE gui.gui_name = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);	
 		$count=0;
 		echo"<select size='8' name='catList' style='width:200px'>";
@@ -229,7 +229,7 @@ if (count($ownguis)>0){
 	$sql = "SELECT DISTINCT cat.cat_id,cat.cat_title,cat.cat_abstract,cat.cat_owner FROM gui_cat JOIN cat ON ";
 	$sql .= "cat.cat_id = gui_cat.fkey_cat_id WHERE gui_cat.fkey_gui_id IN(";
 	$v = $arrayGUIs;
-	$t = array();
+	$t = [];
 	for ($i = 1; $i <= count($arrayGUIs); $i++){
 		if ($i > 1) {
 			$sql .= ",";
@@ -261,8 +261,8 @@ if (count($ownguis)>0){
 	if(isset($catID)){
 		echo "<div class='text2'>FROM:</div>";
 		$sql = "SELECT * from gui_cat WHERE fkey_cat_id = $1 ORDER BY fkey_gui_id";
-		$v = array($catID);
-		$t = array("s");
+		$v = [$catID];
+		$t = ["s"];
 		$res = db_prep_query($sql, $v, $t);
 		echo "<select class='select2' name='guiID_' size='20' onchange='load()'>";
 		$cnt = 0;

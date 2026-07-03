@@ -1,7 +1,7 @@
 <?php
 //mod_exportMapbenderLayer2CkanObjects.php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__.'/../../conf/ckan.conf');
 $openLicences = OPEN_LICENCES;
 //select open data information from mapbenders database
 $sql = <<<SQL
@@ -13,7 +13,7 @@ $result = db_query($sql);
 //
 
 //initialize result array
-$sqlTable = array();
+$sqlTable = [];
 while ($row = db_fetch_array($result)) {
 	$sqlTable['name'][] = $row['uuid'];
 	$sqlTable['title'][] = $row['title'];
@@ -49,7 +49,7 @@ while ($row = db_fetch_array($result)) {
 		for ($i=0; $i < count($categories); $i++){
 			if (array_key_exists($categories[$i],$topicCkanCategoryMap)) {
 				//check if categories should be exploded
-				$newCategories = explode(",",$topicCkanCategoryMap[$categories[$i]]);
+				$newCategories = explode(",",(string) $topicCkanCategoryMap[$categories[$i]]);
 				foreach ($newCategories as $cat) {
 					//explode categories if 
 					$categories[$numberOfCategories] = $cat;
@@ -64,7 +64,7 @@ while ($row = db_fetch_array($result)) {
 	}
 }
 
-$groupOwnerArray = array();
+$groupOwnerArray = [];
 $groupOwnerArray[0] = $sqlTable['service_group'];
 $groupOwnerArray[1] = $sqlTable['service_owner'];
 
@@ -89,14 +89,14 @@ $sqlTable['group_timestamp'] = $groupOwnerArray[13];
 
 
 //test output
-/*for ($i=0; $i < count($sqlTable['name']); $i++){
+/*for ($i=0; $i < count($sqlTable['name'] ?? []); $i++){
 		echo $sqlTable['name'][$i]." - ".$sqlTable['title'][$i]." - ".$sqlTable['service_id'][$i]." - ".$sqlTable['resource_id'][$i]." - ".$sqlTable['organization'][$i]." - ".$sqlTable['orgaId'][$i]."<br>";
 	}*/
 $transpSqlTable = array_transpose($sqlTable);
 $ckanPackages = new stdClass();
-$ckanPackages->result = array();
+$ckanPackages->result = [];
 //invoke creation of ckan package objects
-for ($i=0; $i < count($sqlTable['name']); $i++){
+for ($i=0; $i < count($sqlTable['name'] ?? []); $i++){
 	$ckanPackages->result[] = buildCkanPackage($transpSqlTable[$i]);
 }
 header('Content-Type: application/json; charset='.CHARSET);
@@ -124,11 +124,7 @@ function buildCkanPackage ($mbArray) {
 	//$e = new mb_exception("mod_exportMapbenderLayer2CkanObjects.php: group timestamp:".$mbArray['group_timestamp']);
 	//$e = new mb_exception("mod_exportMapbenderLayer2CkanObjects.php: service timestamp:".date("Y-m-d H:i:s",strtotime($mbArray['service_timestamp'])));
 	//$e = new mb_exception("mod_exportMapbenderLayer2CkanObjects.php: tou timestamp:".$mbArray['tou_licence_timestamp']);
-	$timestamps = array(
-		date("Y-m-d H:i:s",$mbArray['group_timestamp']),
-		date("Y-m-d H:i:s",strtotime($mbArray['service_timestamp'])),
-		date("Y-m-d H:i:s",$mbArray['tou_licence_timestamp'])
-	);
+	$timestamps = [date("Y-m-d H:i:s",$mbArray['group_timestamp']), date("Y-m-d H:i:s",strtotime((string) $mbArray['service_timestamp'])), date("Y-m-d H:i:s",$mbArray['tou_licence_timestamp'])];
 	$maxDate = max($timestamps);
 	//
 	$package->timestamp = $maxDate;
@@ -139,7 +135,7 @@ function buildCkanPackage ($mbArray) {
 	$package->url = 'http://www.geoportal.rlp.de';//""; //mb_group.mb_group_name
 	$package->download_url = $mapbenderUrl."/php/wms.php?layer_id=".$mbArray['resource_id']."&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";//$mbArray['mb_user_id'];//"http://www.geoportal.rlp.de/portal/karten.html?LAYER[zoom]=1&LAYER[id]=36699"; //
 	$package->version = "";//$mbArray['mb_user_id'];//""; //		
-	$package->groups = array();
+	$package->groups = [];
 	//for v1/v2 - only $package->groups[0] = "gdi-rp"; //constant
 	//$package->groups[0] = CKAN_GROUP_NAME;
 	//for v3:
@@ -156,8 +152,8 @@ function buildCkanPackage ($mbArray) {
 		}
 	}
 	if ($mbArray['resource_keywords'] && $mbArray['resource_keywords'] != '') {
-		$package->tags = array();
-		$keywordArray = explode(',',$mbArray['resource_keywords']);
+		$package->tags = [];
+		$keywordArray = explode(',',(string) $mbArray['resource_keywords']);
 		for ($i=0; $i < count($keywordArray); $i++){
 			$package->tags[$i]->name = $keywordArray[$i];
 		}
@@ -170,10 +166,10 @@ function buildCkanPackage ($mbArray) {
 	$package->other_terms_of_use = "Keine Angaben";//$mbArray['mb_user_id'];// "test tou"; //null or ""
 	
 	//TODO: problem date format
-	$package->temporal_coverage_to = substr($mbArray['temporal_coverage_to'],0,10);// "2012-01-01"; // last update ? wms.wms_timestamp - OK
+	$package->temporal_coverage_to = substr((string) $mbArray['temporal_coverage_to'],0,10);// "2012-01-01"; // last update ? wms.wms_timestamp - OK
 
 	if ($mbArray['temporal_coverage_from']) {
-		$package->temporal_coverage_from = substr($mbArray['temporal_coverage_from'],0,10);// "2011-01-01"; // last update ? wms.wms_timestamp_create - OK
+		$package->temporal_coverage_from = substr((string) $mbArray['temporal_coverage_from'],0,10);// "2011-01-01"; // last update ? wms.wms_timestamp_create - OK
 	} else {
 		$package->temporal_coverage_from = "2000-01-01";
 	}	
@@ -187,7 +183,7 @@ function buildCkanPackage ($mbArray) {
 	} else {
 		$package->isopen = false;
 	}
-	$package->resources = array();
+	$package->resources = [];
 
 	$package->resources[0]->description = "Anzeige im GeoPortal.rlp";//$mbArray['mb_user_id'];// "Link zur WMS-Darstellung im GeoPortal.rlp, die Darstellung erfolgt ab einem Maßstab 1:500.000"; //fix: "".id.id?
 	$package->resources[0]->format = "Kartenviewer"; //constant
@@ -254,10 +250,10 @@ function buildCkanPackage ($mbArray) {
 //other functions
 function getOrganizationInfoForServices($groupOwnerArray) {
 	//split array into two lists which are requested in two separate sqls
-	$listGroupIds = array();
-	$listOwnerIds = array();
+	$listGroupIds = [];
+	$listOwnerIds = [];
 	//echo "<br>count groupOwnerArray: ".count($groupOwnerArray[0]);
-	for ($i=0; $i < count($groupOwnerArray[0]); $i++){
+	for ($i=0; $i < count($groupOwnerArray[0] ?? []); $i++){
 		$key = $i;
 		if (!isset($groupOwnerArray[0][$i]) || is_null($groupOwnerArray[0][$i]) || $groupOwnerArray[0][$i] == 0){
 			$listOwnerIds[$key] = $groupOwnerArray[1][$i];
@@ -266,8 +262,8 @@ function getOrganizationInfoForServices($groupOwnerArray) {
 		}
 	}
 	//for ownerList
-	$metadataContactArray = array();
-	$metadataContact = array();
+	$metadataContactArray = [];
+	$metadataContact = [];
 	$listGroupIdsKeys =  array_keys($listGroupIds);
 	$listOwnerIdsKeys =  array_keys($listOwnerIds);
 	$listOwnerIdsString = implode(",",$listOwnerIds);
@@ -310,7 +306,7 @@ function getOrganizationInfoForServices($groupOwnerArray) {
 			$groupOwnerArray[10][$listOwnerIdsKeys[$i]] = $metadataContactOwnerArray[$index]['metadatapointofcontactorglogo']; //logo - 10	
 			$groupOwnerArray[11][$listOwnerIdsKeys[$i]] = $metadataContactOwnerArray[$index]['orga_id'];
 			$groupOwnerArray[12][$listOwnerIdsKeys[$i]] = $metadataContactOwnerArray[$index]['mb_group_homepage'];
-			
+
 			$groupOwnerArray[13][$listOwnerIdsKeys[$i]] = $metadataContactOwnerArray[$index]['metadatapointofcontactorgtime'];
 			//$groupOwnerArray[14][$listOwnerIdsKeys[$i]] = $metadataContactOwnerArray[$index]['mb_user_time'];
 		}
@@ -363,7 +359,7 @@ function getOrganizationInfoForServices($groupOwnerArray) {
 
 function array_transpose($array, $selectKey = false) {
     if (!is_array($array)) return false;
-    $return = array();
+    $return = [];
     foreach($array as $key => $value) {
         if (!is_array($value)) return $array;
         if ($selectKey) {

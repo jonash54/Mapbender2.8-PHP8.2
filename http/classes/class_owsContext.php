@@ -17,36 +17,36 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_Uuid.php");
-require_once(dirname(__FILE__)."/class_wmc.php");
-require_once(dirname(__FILE__)."/class_kml_ows.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_Uuid.php");
+require_once(__DIR__."/class_wmc.php");
+require_once(__DIR__."/class_kml_ows.php");
 /**
  * An OWS Context (OWS Context) class, based on the OGC OWS Context Conceptual Model
  * Version 1.0 - https://portal.opengeospatial.org/files/?artifact_id=55182
  */
 
 class OwsContext {
-	var $specReference; //mandatory
-	var $language; //mandatory
-	var $id; //mandatory
-	var $title; //mandatory
-	var $abstract; //[0..1]
-	var $updateDate; //[0..1]
-	var $author; //[0..*]
-	var $publisher; //[0..1]
-	var $creator; //[0..1] OwsContextResourceCreator
-	var $rights; //[0..1]
-	var $areaOfInterest; //[0..1]
-	var $geojsonBbox; 
-	var $timeIntervalOfInterest; //[0..1]
-	var $keyword; //[0..*]
-	var $extension; //[0..*]
+	public $specReference; //mandatory
+	public $language; //mandatory
+	public $id; //mandatory
+	public $title; //mandatory
+	public $abstract; //[0..1]
+	public $updateDate; //[0..1]
+	public $author; //[0..*]
+	public $publisher; //[0..1]
+	public $creator; //[0..1] OwsContextResourceCreator
+	public $rights; //[0..1]
+	public $areaOfInterest; //[0..1]
+	public $geojsonBbox; 
+	public $timeIntervalOfInterest; //[0..1]
+	public $keyword; //[0..*]
+	public $extension; //[0..*]
 	//relations
-	var $resource; //[0..*] OwsContextResource (ordered)
-	var $contextMetadata; //[0..*] MD_Metadata
+	public $resource; //[0..*] OwsContextResource (ordered)
+	public $contextMetadata; //[0..*] MD_Metadata
 	//internal
-	var $version; //1.0
+	public $version; //1.0
 	
 	public function __construct() {
 		//mandatory
@@ -56,12 +56,12 @@ class OwsContext {
 		$this->title = "dummy title";
 		$this->abstract = "dummy abstract";
 		//arrays
-		$this->author = array();
+		$this->author = [];
 		$this->keyword = "";
-		$this->extension = array();
+		$this->extension = [];
 		//relations
-		$this->resource = array();
-		$this->contextMetadata = array();
+		$this->resource = [];
+		$this->contextMetadata = [];
 		//internal
 		$this->version = "1.0";	
 	}	
@@ -128,20 +128,20 @@ class OwsContext {
 	    $properties->title = $this->title;
 	    $properties->subtitle = $this->abstract;
 	    $properties->updated = $this->updateDate;
-	    $properties->authors = array("name" => $this->author[0]['name'], "email" => $this->author[0]['email']);
+	    $properties->authors = ["name" => $this->author[0]['name'], "email" => $this->author[0]['email']];
 	    $properties->publisher = "";
 	    $properties->rights = $this->rights;
-	    $properties->generator = array("title" => $this->creator->creatorApplication->title, "uri" => $this->creator->creatorApplication->uri, "version" => $this->creator->creatorApplication->version);
-	    $properties->display = array("pixelWidth" => (integer)$this->creator->creatorDisplay->pixelWidth, "pixelHeight" => (integer)$this->creator->creatorDisplay->pixelHeight, "mmPerPixel" => $this->creator->creatorDisplay->mmPerPixel);
+	    $properties->generator = ["title" => $this->creator->creatorApplication->title, "uri" => $this->creator->creatorApplication->uri, "version" => $this->creator->creatorApplication->version];
+	    $properties->display = ["pixelWidth" => (integer)$this->creator->creatorDisplay->pixelWidth, "pixelHeight" => (integer)$this->creator->creatorDisplay->pixelHeight, "mmPerPixel" => $this->creator->creatorDisplay->mmPerPixel];
 		//see http://www.owscontext.org/owc_user_guide/C0_userGuide.html
         $properties->bbox = $this->bbox;
         $properties->contextMetadata = $this->contextMetadata;
-	    $properties->links->profiles = array("http://www.opengis.net/spec/owc-geojson/1.0/req/core");
+	    $properties->links->profiles = ["http://www.opengis.net/spec/owc-geojson/1.0/req/core"];
 	    $properties->extension = $this->extension;
 	    
 	    $owsContextJsonObject->properties = $properties;
 	    
-	    $features = array();
+	    $features = [];
 	    
 	    foreach ($this->resource as $resource) {
 	        $feature = new stdClass();
@@ -150,11 +150,11 @@ class OwsContext {
 	        $properties->title = (string)$resource->title;
 	        $properties->abstract = (string)$resource->abstract;
 	        $properties->updated = "";
-	        $properties->links->previews = array("href" => $resource->preview[0], "type" => "image/jpeg", "length" => 100 , "title" => "Preview for Layer XY");
+	        $properties->links->previews = ["href" => $resource->preview[0], "type" => "image/jpeg", "length" => 100, "title" => "Preview for Layer XY"];
 	        if (count($resource->resourceMetadata) >= 1) {
 	            $properties->resourceMetadata = $resource->resourceMetadata;
 	        }
-	        $properties->offerings = array();
+	        $properties->offerings = [];
 	        
 	        //kml
 	        
@@ -164,17 +164,17 @@ class OwsContext {
 	            $jsonOffering = new stdClass();
 	            $jsonOffering->code = $offering->code;
 	            foreach ($offering->operation as $operation) {
-                    $operationsArray = array("code" => $operation->code, "method" => $operation->method, "type" => $operation->type, "href" => (string)$operation->href);
+                    $operationsArray = ["code" => $operation->code, "method" => $operation->method, "type" => $operation->type, "href" => (string)$operation->href];
 					if (isset($operation->extension)) {
 						$operationsArray["extension"] = $operation->extension;
 					}
 	                $jsonOffering->operations[] = $operationsArray;
 	            }
 	            foreach ($offering->content as $offeringContent) {
-	                $jsonOffering->content[] = array("type" => $offeringContent->type, "content" => $offeringContent->content);
+	                $jsonOffering->content[] = ["type" => $offeringContent->type, "content" => $offeringContent->content];
 	            }
 				foreach ($offering->styleSet as $style) {
-					$jsonOffering->styles[] = array("name" => $style->name, "title" => $style->title, "legendURL" => $style->legendURL, "default" => $style->default);
+					$jsonOffering->styles[] = ["name" => $style->name, "title" => $style->title, "legendURL" => $style->legendURL, "default" => $style->default];
 				}
 				foreach ($offering->extension as $extension) {
 					$jsonOffering->extension[] = $extension;
@@ -489,14 +489,14 @@ class OwsContext {
 		    $localDataOrder= $localDataOrder[0];
 		    //use first entry
 		    //before, check if data is encoded 
-		    if (strpos($localData, 'base64_') === 0) {
+		    if (str_starts_with($localData, 'base64_')) {
 		        $localData = base64_decode(str_replace('base64_', '', $localData));
 		    }
 		    //$e = new mb_exception("classes/class_owsContext.php: localdata from geojson: " . $localData);
 		    $localData = json_decode($localData);
 		    $localDataOrder = json_decode($localDataOrder);
 		    $mergedKml = new Kml();
-		    $kmlArray = array();
+		    $kmlArray = [];
 		    foreach ($localDataOrder as $collectionTitle) {
 		        $kmlObj = new Kml();		       
 		        $kmlObj->parseGeoJSON(json_encode($localData->${'collectionTitle'}->data));		        
@@ -535,8 +535,8 @@ class OwsContext {
 		//$e = new mb_exception("layer_ids: ".json_encode($layerIdArray, false));
 		if (count($layerIdArray) > 0) {
 		    $c = 1;
-		    $v = array();
-		    $t = array();
+		    $v = [];
+		    $t = [];
     		// Select relevant information from mapbender database if some layer_ids are given
     		$sql = "select * from (select layer_info.*, ows_relation_metadata.fkey_metadata_id ";
     		$sql .= "from (select layer.fkey_wms_id as wms_id, layer_id, last_status, availability from ";
@@ -558,13 +558,13 @@ class OwsContext {
     		 * array have to be processed once further and the metadata connections are glued together
     		 */
     		$cnt = 0;
-    		$layerInfoArray = array();
+    		$layerInfoArray = [];
     		while($row = db_fetch_array($res)){ 
     		    //$e = new mb_exception(json_encode(array_column($layerInfoArray, 'layerId'))); 
     		    if (in_array($row['layer_id'], array_column($layerInfoArray, 'layerId'))) {
     		        array_push($layerInfoArray[array_search($row['layer_id'], array_column($layerInfoArray, 'layerId'))]['metadata'], $row['uuid']);
     		    } else {
-    		        $layerInfoArray[] = array("layerId" => $row['layer_id'], "wmsId" => $row['wms_id'], "serviceStatus" => $row['last_status'], "serviceAvailability" => $row['availability'], "metadata" => array($row['uuid']));
+    		        $layerInfoArray[] = ["layerId" => $row['layer_id'], "wmsId" => $row['wms_id'], "serviceStatus" => $row['last_status'], "serviceAvailability" => $row['availability'], "metadata" => [$row['uuid']]];
     		        $cnt++;
     		    }
     		}    
@@ -573,7 +573,7 @@ class OwsContext {
 		//get relevant urls from database 
 		$e = new mb_notice("classes/class_owsContext.php: number of all layers found in WMC: ".count($layerList));
 		$path = "/";
-		$pathArray = array();
+		$pathArray = [];
 		//initialize serviceId - most top layers
         $serviceId = 0;
 		/*
@@ -628,7 +628,7 @@ class OwsContext {
 			//$e = new mb_exception("layer name: " . $layer->Name);
 			//Add operation only, if a named layer is given - unnamed layer have got a layer name which begin with 'unnamed_layer:...' in mapbender
 			// $e = new mb_exception("strgpos...: " . strpos((string)$layer->Name, 'unnamed_layer:'));
-			if (strpos((string)$layer->Name, 'unnamed_layer:') !== 0 && $layer->Name !== "") {
+			if (!str_starts_with((string)$layer->Name, 'unnamed_layer:') && $layer->Name !== "") {
 			    //$e = new mb_exception("layer name: " . $layer->Name == "");
     			$owsContextResourceOfferingOperation = new OwsContextResourceOfferingOperation();
     			$owsContextResourceOfferingOperation->code = "GetMap";
@@ -637,7 +637,7 @@ class OwsContext {
     			$owsContextResourceOfferingOperation->href = $getmap . "REQUEST=" . $owsContextResourceOfferingOperation->code . "&VERSION=" . $version . "&SERVICE=WMS&LAYERS=" . $layer->Name . "&format=" . $owsContextResourceOfferingOperation->type . "&HEIGHT=" . $creatorDisplay->pixelHeight . "&WIDTH=" . $creatorDisplay->pixelWidth . "&SRS=EPSG:4326" . "&BBOX=" . implode(',', $this->bbox) ."&STYLES=" ;
     			//check if operation is activated
     			if ($layer->attributes()->hidden == "0") {
-    				$owsContextResourceOfferingOperation->extension = array("active" => true);
+    				$owsContextResourceOfferingOperation->extension = ["active" => true];
     			}
     			$owsContextResourceOffering->addOperation($owsContextResourceOfferingOperation);
     			if ($layer->attributes()->queryable == "1") {
@@ -652,7 +652,7 @@ class OwsContext {
     				$owsContextResourceOfferingOperation->href = $getmap . "REQUEST=" . $owsContextResourceOfferingOperation->code . "&VERSION=" . $version . "&SERVICE=WMS&LAYERS=" . $layer->Name . "&format=" . $owsContextResourceOfferingOperation->type ;
     				//check if operation is activated
     				if ($layer->Extension->children('http://www.mapbender.org/context')->querylayer == "1") {
-    					$owsContextResourceOfferingOperation->extension = array("active" => true);
+    					$owsContextResourceOfferingOperation->extension = ["active" => true];
     				}
     				$owsContextResourceOffering->addOperation($owsContextResourceOfferingOperation);
     			}
@@ -709,7 +709,7 @@ class OwsContext {
 				}
 			}
 			if (isset($layer->DimensionList)) {
-				$owsContextResourceOffering->extension = array();
+				$owsContextResourceOffering->extension = [];
 				$owsContextResourceOffering->extension[] = $owsContextResourceOfferingExtDimensions;
 			}
 			//active
@@ -739,7 +739,7 @@ class OwsContext {
 			if ((string)$layer->Extension->children('http://www.mapbender.org/context')->layer_parent == '') {
  				$serviceId++;
 				//layer_pos will be 0 - initialize array again!
-				$pathArray = array();
+				$pathArray = [];
 				$pathArray[] = (string)$serviceId;
 				$e = new mb_notice("classes/class_owsContext.php: Layer is service layer and will be given an id!");
 			} else {
@@ -753,7 +753,7 @@ class OwsContext {
 					if ($valueToFind == '0') {
 						$valueToFind = (string)$serviceId;
 						//go up to service level
-						$pathArray = array($valueToFind);
+						$pathArray = [$valueToFind];
 					} else {
 						//Make a copy of the pathArray for searching
 						$e = new mb_notice("classes/class_owsContext.php value to find:  ".$valueToFind);
@@ -794,7 +794,7 @@ class OwsContext {
 		            break;
 		        }
 		        // for subfolder
-		        if (strpos($strFolder, $strSearch) === 0) {
+		        if (str_starts_with($strFolder, $strSearch)) {
 		            $str = preg_replace($search, $replace, $resource->folder);
 		            $resource->folder = $str;
 		            break;
@@ -806,7 +806,7 @@ class OwsContext {
 		//usort($this->resource, function ($a, $b) { return strcmp($a->folder, $b->folder); });
 		//usort($this->resource, function ($a, $b) { $a = explode("/", $a->folder)[0]; $b = explode("/", $b->folder)[0];return strcmp($a, $b); });
 		//usort($this->resource, function ($a, $b) { $a = (integer)explode("/", $a->folder)[0]; $b = (integer)explode("/", $b->folder)[0];($a-$b) ? ($a-$b)/abs($a-$b) : 0; });
-		usort($this->resource, function ($a, $b) { return strnatcmp($a->folder, $b->folder); });
+		usort($this->resource, fn($a, $b) => strnatcmp($a->folder, $b->folder));
 	}	
 }
 
@@ -815,11 +815,11 @@ class OwsContext {
  */
 class OwsContextExtProjections {
     // https://github.com/dlr-eoc/ukis-frontend-libraries/blob/master/projects/services-ogc/README.md
-    var $projections; //[1..n] OwsContextExtProjectionsProjection
+    public $projections; //[1..n] OwsContextExtProjectionsProjection
     
     public function __construct() {
         //mandatory element
-        $this->projections = array();
+        $this->projections = [];
     }
     
     public function addProjection($aProjection) {
@@ -828,10 +828,10 @@ class OwsContextExtProjections {
 }
 
 class OwsContextExtProjection {
-    var $code; //mandatory
-    var $unit; //{'m'|'d'}
-    var $bbox; //array minx, miny, maxx, maxy
-    var $default; //boolean
+    public $code; //mandatory
+    public $unit; //{'m'|'d'}
+    public $bbox; //array minx, miny, maxx, maxy
+    public $default; //boolean
     
     public function __construct() {
         //mandatory
@@ -847,48 +847,48 @@ class OwsContextExtProjection {
 }
 
 class OwsContextResource {
-	var $id; //mandatory CharacterString
-	var $title; //mandatory CharacterString
-	var $abstract; //[0..1] CharacterString
-	var $updateDate; //[0..1] - TM_Date
-	var $author; //[0..*] ? - really * CharacterString
-	var $publisher; //[0..1] CharacterString
-	var $rights; //[0..1] CharacterString
-	var $geospatialExtent; //[0..1] GM_Envelope
-	var $temporalExtent; //[0..1] TM_GeometricPrimitive
-	var $contentDescription; //[0..1] Any
-	var $preview; //[0..*] URI
-	var $contentByRef; //[0..*] URI
-	var $offering; //[0..*] OwsContextResourceOffering
-	var $active; //[0..1] Boolean
-	var $keyword; //[0..*]
-	var $maxScaleDenominator; //[0..1] Double
-	var $minScaleDenominator; //[0..1] Double
-	var $folder; //[0..1]
-	var $extension; //[0..*] Any
+	public $id; //mandatory CharacterString
+	public $title; //mandatory CharacterString
+	public $abstract; //[0..1] CharacterString
+	public $updateDate; //[0..1] - TM_Date
+	public $author; //[0..*] ? - really * CharacterString
+	public $publisher; //[0..1] CharacterString
+	public $rights; //[0..1] CharacterString
+	public $geospatialExtent; //[0..1] GM_Envelope
+	public $temporalExtent; //[0..1] TM_GeometricPrimitive
+	public $contentDescription; //[0..1] Any
+	public $preview; //[0..*] URI
+	public $contentByRef; //[0..*] URI
+	public $offering; //[0..*] OwsContextResourceOffering
+	public $active; //[0..1] Boolean
+	public $keyword; //[0..*]
+	public $maxScaleDenominator; //[0..1] Double
+	public $minScaleDenominator; //[0..1] Double
+	public $folder; //[0..1]
+	public $extension; //[0..*] Any
 	//relations	
-	var $resourceMetadata; //[0..*] MD_Metadata	
+	public $resourceMetadata; //[0..*] MD_Metadata	
 
 	/*
 	* Mapbender Extensions
 	*/
-	var $opacity; // real between 0 and 1
-	var $selectActive; // [0..1] Boolean
-	var $editActive;
-	var $temporalFilter; //see dimension aat 
+	public $opacity; // real between 0 and 1
+	public $selectActive; // [0..1] Boolean
+	public $editActive;
+	public $temporalFilter; //see dimension aat 
 		
 	public function __construct() {
 		//mandatory
 		$this->id = new uuid();
 		$this->id = "dummy title";
 		//arrays
-		$this->author = array();
-		$this->preview = array();
-		$this->contentByRef = array();
-		$this->offering = array();
+		$this->author = [];
+		$this->preview = [];
+		$this->contentByRef = [];
+		$this->offering = [];
 		$this->keyword = "";
-		$this->extension = array();
-		$this->resourceMetadata = array();
+		$this->extension = [];
+		$this->resourceMetadata = [];
 	}	
 	
 	public function addOffering($aOffering) {
@@ -901,51 +901,51 @@ class OwsContextResource {
 }
 
 class OwsContextResourceCreator {
-	var $creatorApplication; //[0..1] OwsContextResourceCreatorApplication
-	var $creatorDisplay; //[0..1] OwsContextResourceCreatorDisplay
-	var $extension; //[0..*] Any	
+	public $creatorApplication; //[0..1] OwsContextResourceCreatorApplication
+	public $creatorDisplay; //[0..1] OwsContextResourceCreatorDisplay
+	public $extension; //[0..*] Any	
 	
 	public function __construct() {
-		$this->extension = array();
+		$this->extension = [];
 	}
 }
 
 class OwsContextResourceCreatorApplication {
-	var $title; //[0..1]
-	var $uri; //[0..1] URI
-	var $version; //[0..1]
+	public $title; //[0..1]
+	public $uri; //[0..1] URI
+	public $version; //[0..1]
 	
 	public function __construct() {
 	}
 }
 
 class OwsContextResourceCreatorDisplay {
-	var $pixelWidth; //[0..1] integer
-	var $pixelHeight; //[0..1] integer
-	var $mmPerPixel; //[0..1] double	
-	var $extension; //[0..*] Any	
+	public $pixelWidth; //[0..1] integer
+	public $pixelHeight; //[0..1] integer
+	public $mmPerPixel; //[0..1] double	
+	public $extension; //[0..*] Any	
 	
 	public function __construct() {
 		//arrays
-		$this->extension = array();
+		$this->extension = [];
 	}
 }
 
 class OwsContextResourceOffering {
-	var $code; //mandatory URI
-	var $operation; //[0..*] OwsContextResourceOfferingOperation
-	var $content; //[0..*] OwsContextResourceOfferingContent
-	var $styleSet; //[0..*] OwsContextResourceOfferingStyleSet
-	var $extension; //[0..*] Any
+	public $code; //mandatory URI
+	public $operation; //[0..*] OwsContextResourceOfferingOperation
+	public $content; //[0..*] OwsContextResourceOfferingContent
+	public $styleSet; //[0..*] OwsContextResourceOfferingStyleSet
+	public $extension; //[0..*] Any
 		
 	public function __construct() {
 		//mandatory
 		$this->code = "dummy code";		
 		//arrays
-		$this->operation = array();
-		$this->content = array();
-		$this->styleSet = array();
-		$this->extension = array();
+		$this->operation = [];
+		$this->content = [];
+		$this->styleSet = [];
+		$this->extension = [];
 	}	
 
 	public function addOperation($aOperation) {
@@ -965,11 +965,11 @@ class OwsContextResourceOffering {
 * Extensions
 */
 class OwsContextResourceOfferingExtDimensions {
-	var $dimension; //[1..n] OwsContextResourceOfferingExtDimensionsDimension
+	public $dimension; //[1..n] OwsContextResourceOfferingExtDimensionsDimension
 
 	public function __construct() {
 		//mandatory element
-		$this->dimension = array();		
+		$this->dimension = [];		
 	}
 
 	public function addDimension($aDimension) {
@@ -978,14 +978,14 @@ class OwsContextResourceOfferingExtDimensions {
 }
 
 class OwsContextResourceOfferingExtDimensionsDimension {
-	var $name; //mandatory
-	var $units; //{'ISO8601'|}
-	var $unitSymbol; //string
-	var $default; //string - "current"
-	var $multipleValues; //string
-	var $nearestValue; //string
-	var $extent; //string - "2021-11-16T07:45:00.000Z/2021-11-30T09:45:00.000Z/PT5M" 
-	var $userValue; //string ""
+	public $name; //mandatory
+	public $units; //{'ISO8601'|}
+	public $unitSymbol; //string
+	public $default; //string - "current"
+	public $multipleValues; //string
+	public $nearestValue; //string
+	public $extent; //string - "2021-11-16T07:45:00.000Z/2021-11-30T09:45:00.000Z/PT5M" 
+	public $userValue; //string ""
 
 	public function __construct() {
 		//mandatory
@@ -1001,13 +1001,13 @@ class OwsContextResourceOfferingExtDimensionsDimension {
 }
 
 class OwsContextResourceOfferingOperation {
-	var $code; //mandatory
-	var $method; //mandatory
-	var $type; //mandatory
-	var $requestURL; //mandatory URI
-	var $request; //[0..1] OwsContextResourceOfferingContent
-	var $result; //[0..1] Any
-	var $extension; //[0..*] Any
+	public $code; //mandatory
+	public $method; //mandatory
+	public $type; //mandatory
+	public $requestURL; //mandatory URI
+	public $request; //[0..1] OwsContextResourceOfferingContent
+	public $result; //[0..1] Any
+	public $extension; //[0..*] Any
 	
 	public function __construct() {
 		//mandatory
@@ -1016,41 +1016,41 @@ class OwsContextResourceOfferingOperation {
 		$this->type = "dummy type";
 		$this->requestURL = "dummy requestURL";
 		//arrays
-		$this->extension = array();
+		$this->extension = [];
 	}
 }
 
 class OwsContextResourceOfferingContent {
-	var $type; //mandatory
-	var $URL; //[0..1] URI
-	var $content; //[0..1] Any
-	var $extension; //[0..*] Any
+	public $type; //mandatory
+	public $URL; //[0..1] URI
+	public $content; //[0..1] Any
+	public $extension; //[0..*] Any
 
 	public function __construct() {
 		//mandatory
 		$this->type = "dummy type";		
 		//arrays
-		$this->content = array();	
-		$this->extension = array();
+		$this->content = [];	
+		$this->extension = [];
 	}
 }
 
 class OwsContextResourceOfferingStyleSet {
-	var $name; //mandatory
-	var $title; //mandatory
-	var $abstract; //[0..1]
-	var $default; //[0..1]
-	var $legendURL; //[0..*] URI
-	var $content; //[0..1] OwsContextResourceOfferingContent
-	var $extension; //[0..*] Any
+	public $name; //mandatory
+	public $title; //mandatory
+	public $abstract; //[0..1]
+	public $default; //[0..1]
+	public $legendURL; //[0..*] URI
+	public $content; //[0..1] OwsContextResourceOfferingContent
+	public $extension; //[0..*] Any
 
 	public function __construct() {
 		//mandatory
 		$this->name = "dummy name";
 		$this->title = "dummy title";
 		//arrays
-		$this->legendURL = array();
-		$this->extension = array();
+		$this->legendURL = [];
+		$this->extension = [];
 	}
 }
 

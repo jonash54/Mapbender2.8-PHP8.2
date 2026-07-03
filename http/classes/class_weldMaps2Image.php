@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_connector.php");
  
  /*
   * Class generats Images (jpegs/pngs/geotiff) 
@@ -29,12 +29,10 @@ require_once(dirname(__FILE__)."/class_connector.php");
   */
  class weldMaps2Image{
  	
-	var $urls = array();
-	var $filename; 	
+	public $filename; 	
  	
- 	function __construct($urls, $array_file){
- 		$this->urls = $urls;
-  		$this->array_file = $array_file;
+ 	function __construct(public $urls, $array_file){
+ 		$this->array_file = $array_file;
  	}
         
         /**
@@ -69,7 +67,7 @@ require_once(dirname(__FILE__)."/class_connector.php");
 		ImageFilledRectangle($image,0,0,$width,$height,$white); 
 	
 		for($i=0; $i<count($this->urls); $i++){
-			$obj = new stripRequest(urldecode($this->urls[$i]));
+			$obj = new stripRequest(urldecode((string) $this->urls[$i]));
 			if($imageTyp=='geotiff'){
 				$this->urls[$i] = $obj->setFormat($wms_format);
 			} else {
@@ -171,7 +169,7 @@ require_once(dirname(__FILE__)."/class_connector.php");
 		 * @security_patch fdl done
 		 * This allows filenames like ../../
 		 */
-		if(strpos($dwFilename,"..") !== false) {
+		if(str_contains((string) $dwFilename,"..")) {
 			die("Illegal filename given.");
 		}
 		
@@ -184,7 +182,7 @@ require_once(dirname(__FILE__)."/class_connector.php");
 		
 		$now_date = date("Ymd_His");
 		
-		switch(substr($dwFilename,-4)) {
+		switch(substr((string) $dwFilename,-4)) {
 			case ".png":
 				$filename = "map_export__".$now_date.".png";
 				header('Content-Type: image/png');

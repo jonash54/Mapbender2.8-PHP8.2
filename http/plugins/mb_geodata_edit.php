@@ -1,6 +1,6 @@
 <?php
-	require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-	require_once dirname(__FILE__) . "/../classes/class_user.php";
+	require_once __DIR__ . "/../../core/globalSettings.php";
+	require_once __DIR__ . "/../classes/class_user.php";
 ?>
 
 <fieldset>
@@ -41,7 +41,7 @@
 <?php
 	$sql = "SELECT termsofuse_id, name FROM termsofuse";
 	$res = db_query($sql);
-	$termsofuse = array();
+	$termsofuse = [];
 	while ($row = db_fetch_assoc($res)) {
 		$termsofuse[$row["termsofuse_id"]] = $row["name"];
 	}
@@ -52,7 +52,7 @@
 			<option>...</option>
 <?php
 	foreach ($termsofuse as $key => $value) {
-		echo "<option value='" . $key . "'>" . htmlentities($value, ENT_QUOTES, CHARSET) . "</option>";
+		echo "<option value='" . $key . "'>" . htmlentities((string) $value, ENT_QUOTES, CHARSET) . "</option>";
 	}
 ?>
 		</select>
@@ -130,10 +130,10 @@
 	$sql = "SELECT fkey_mb_group_id, mb_group_name FROM (SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 AND (mb_user_mb_group_type = 3 OR mb_user_mb_group_type = 2)) AS a LEFT JOIN mb_group ON a.fkey_mb_group_id = mb_group.mb_group_id";
 	$user = new User();
 	$userId = $user->id;
-	$v = array($userId);
-	$t = array('i');
+	$v = [$userId];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
-	$metadataGroup = array();
+	$metadataGroup = [];
 	while ($row = db_fetch_assoc($res)) {
 		$metadataGroup[$row["fkey_mb_group_id"]] = $row["mb_group_name"];
 	}
@@ -144,7 +144,7 @@
 			<option value="0">...</option>
 <?php
 	foreach ($metadataGroup as $key => $value) {
-		echo "<option value='" . $key . "'>" . htmlentities($value, ENT_QUOTES, CHARSET) . "</option>";
+		echo "<option value='" . $key . "'>" . htmlentities((string) $value, ENT_QUOTES, CHARSET) . "</option>";
 	}
 ?>
 		</select>

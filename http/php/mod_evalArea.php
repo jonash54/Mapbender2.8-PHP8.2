@@ -18,15 +18,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 extract($_GET, EXTR_OVERWRITE);extract($_POST, EXTR_OVERWRITE);
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $x = $_REQUEST["x"];
 $y = $_REQUEST["y"];
 $epsg = $_REQUEST["srs"];
 $length = $_REQUEST["length"];
-$posX = explode (",", $x);
-$posY = explode (",", $y);
+$posX = explode (",", (string) $x);
+$posY = explode (",", (string) $y);
 
 echo "{";
 if(SYS_DBTYPE=='pgsql' && count($posX) > 3){
@@ -35,7 +35,7 @@ if(SYS_DBTYPE=='pgsql' && count($posX) > 3){
 	if($i>0){$sql .= ",";}
 	$sql .= $posX[$i] . " " . $posY[$i];
   }
-  $sql .= ")))',".rawurldecode($epsg).")) as myArea";
+  $sql .= ")))',".rawurldecode((string) $epsg).")) as myArea";
   $res = db_query($sql);
   if($row = db_fetch_array($res)){
 	 echo "'area': ".round($row[0]*100)/100 ;

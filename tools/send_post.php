@@ -19,14 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/mapbender.conf");
 echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">';	
 ?>
 <title>Test WFS-T operated by CCGIS</title>
 </head>
 <?php
 if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onlineresource"] != ''){
-	$arURL = parse_url($_REQUEST["onlineresource"]);
+	$arURL = parse_url((string) $_REQUEST["onlineresource"]);
 	$host = $arURL["host"];
 	$port = $arURL["port"]; 
 	if($port == ''){
@@ -35,30 +35,30 @@ if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onliner
 	$path = $arURL["path"];
 	$method = "POST";
 
-	$data = stripslashes($_REQUEST["filter"]);
+	$data = stripslashes((string) $_REQUEST["filter"]);
 
 	$out = sendToHost($host,$port,$method,html_entity_decode($path),$data);
 	echo "-------------------get-------------<br>";
-	echo htmlentities($out);
+	echo htmlentities((string) $out);
 	echo "-------------------end of get-------------<br>";
 }
 function sendToHost($host,$port,$method,$path,$data)
 {
 	echo "-------------------send-------------<br>";
-	echo $host."<br>".$method."<br>".$path."<br>".htmlspecialchars($data)."<br>";
+	echo $host."<br>".$method."<br>".$path."<br>".htmlspecialchars((string) $data)."<br>";
 	echo "-------------------end of send-------------<br>";
 	$buf = '';
     if (empty($method)) {
         $method = 'POST';
     }
-    $method = mb_strtoupper($method);
+    $method = mb_strtoupper((string) $method);
     $fp = fsockopen($host, $port);
     fputs($fp, "$method $path HTTP/1.1\r\n");
     fputs($fp, "Host: $host\r\n");
     fputs($fp,"Content-type: application/x-www-form-urlencoded\r\n");
-    fputs($fp, "Content-length: " . strlen($data) . "\r\n");
+    fputs($fp, "Content-length: " . strlen((string) $data) . "\r\n");
     fputs($fp, "Connection: close\r\n\r\n");
-	fputs($fp, $data);
+	fputs($fp, (string) $data);
     while (!feof($fp)) {
         $buf .= fgets($fp,4096);
     }
@@ -72,7 +72,7 @@ OnlineResource:
 <input name='onlineresource' type='text' size='100' value='<?php echo $_REQUEST["onlineresource"]; ?>'>
 <br>
 Filter:
-<textarea name='filter' cols='100' rows='10'><?php echo stripslashes($_REQUEST["filter"]); ?></textarea>
+<textarea name='filter' cols='100' rows='10'><?php echo stripslashes((string) $_REQUEST["filter"]); ?></textarea>
 <input type='submit' value='ok'>
 </form>
 </body>

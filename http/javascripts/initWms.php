@@ -2,9 +2,9 @@
 //
 // Load WMS
 // 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_wms.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $wmsArray = wms::selectMyWmsByApplication($gui_id);
 

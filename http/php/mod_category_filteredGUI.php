@@ -19,7 +19,7 @@
 
 
 $e_id="category_filteredGUI";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done 
  */ 
@@ -120,14 +120,14 @@ if($insert){
 		for($i=0; $i<count($selected_gui); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from gui_gui_category where fkey_gui_category_id = $1 and fkey_gui_id = $2";
-			$v = array($selected_category,$selected_gui[$i]);
-			$t = array('i','s');
+			$v = [$selected_category, $selected_gui[$i]];
+			$t = ['i', 's'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO gui_gui_category(fkey_gui_category_id, fkey_gui_id) VALUES($1, $2)";
-				$v = array($selected_category,$selected_gui[$i]);
-				$t = array('i','s');
+				$v = [$selected_category, $selected_gui[$i]];
+				$t = ['i', 's'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -137,8 +137,8 @@ if($remove){
 	if(count($remove_gui)>0){
 		for($i=0; $i<count($remove_gui); $i++){
 			$sql_remove = "DELETE FROM gui_gui_category WHERE fkey_gui_id = $1 and fkey_gui_category_id = $2";
-			$v = array($remove_gui[$i],$selected_category);
-			$t = array('s','i');
+			$v = [$remove_gui[$i], $selected_category];
+			$t = ['s', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}

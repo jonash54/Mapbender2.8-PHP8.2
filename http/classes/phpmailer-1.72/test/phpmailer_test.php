@@ -6,7 +6,7 @@
 
 $INCLUDE_DIR = "";
 
-require(dirname(__FILE__) . "/phpunit.php");
+require(__DIR__ . "/phpunit.php");
 require($INCLUDE_DIR . "class.phpmailer.php");
 error_reporting(E_ALL);
 
@@ -20,28 +20,28 @@ class phpmailerTest extends TestCase
      * @private
      * @type object
      */
-    var $Mail = false;
+    public $Mail = false;
 
     /**
      * Holds the SMTP mail host.
      * @public
      * @type string
      */
-    var $Host = "";
+    public $Host = "";
     
     /**
      * Holds the change log.
      * @private
      * @type string array
      */
-    var $ChangeLog = array();
+    public $ChangeLog = [];
     
      /**
      * Holds the note log.
      * @private
      * @type string array
      */
-    var $NoteLog = array();   
+    public $NoteLog = [];   
 
     /**
      * Class constuctor.
@@ -90,7 +90,7 @@ class phpmailerTest extends TestCase
         
         global $global_vars;
         $this->SetAddress($global_vars["mail_to"], "Test User");
-        if(strlen($global_vars["mail_cc"]) > 0)
+        if(strlen((string) $global_vars["mail_cc"]) > 0)
             $this->SetAddress($global_vars["mail_cc"], "Carbon User", "cc");
     }     
 
@@ -100,8 +100,8 @@ class phpmailerTest extends TestCase
     function tearDown() {
         // Clean global variables
         $this->Mail = NULL;
-        $this->ChangeLog = array();
-        $this->NoteLog = array();
+        $this->ChangeLog = [];
+        $this->NoteLog = [];
     }
 
 
@@ -515,8 +515,8 @@ class phpmailerTest extends TestCase
  * Create and run test instance.
  */
  
-if(isset($HTTP_GET_VARS))
-    $global_vars = $HTTP_GET_VARS;
+if(isset($_GET))
+    $global_vars = $_GET;
 else
     $global_vars = $_REQUEST;
 

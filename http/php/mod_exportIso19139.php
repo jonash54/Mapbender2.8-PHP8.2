@@ -5,14 +5,14 @@
 # This program is dual licensed under the GNU General Public License 
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_iso19139.php";
-require_once(dirname(__FILE__) . "/../classes/class_cswClient.php");
-require_once(dirname(__FILE__) . "/../classes/class_csw.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_iso19139.php";
+require_once(__DIR__ . "/../classes/class_cswClient.php");
+require_once(__DIR__ . "/../classes/class_csw.php");
 //show html from a given url
 //default languageCode to de
 $languageCode = "de";
-$url = urldecode($_REQUEST['url']);
+$url = urldecode((string) $_REQUEST['url']);
 $outputFormat = 'html';
 $resolveCoupledResources = false;
 //get language parameter out of mapbender session if it is set else set default language to de_DE
@@ -20,7 +20,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -69,7 +69,7 @@ $cswBasedResource = false;
 //instantiate
 $mbMetadata = new Iso19139();
 //test if getrecordbyid request was used - then the service data may also be in the same catalogue
-if (strpos(strtoupper($url), "GETRECORDBYID") !== false && strpos(strtoupper($url), "SERVICE=CSW") !== false && strpos(strtoupper($url), "VERSION=2.0.2") !== false) {
+if (str_contains(strtoupper($url), "GETRECORDBYID") && str_contains(strtoupper($url), "SERVICE=CSW") && str_contains(strtoupper($url), "VERSION=2.0.2")) {
 	$cswBasedResource = true;
 }
 
@@ -111,7 +111,7 @@ if ($mbMetadata->hierarchyLevel == 'dataset' || $mbMetadata->hierarchyLevel == '
 		//$e = new mb_exception("test1");	
 		//$e = new mb_exception($cswClient->operationSuccessful);
 		//$e = new mb_exception("test2");	
-		$serviceMetadataUrls = array();
+		$serviceMetadataUrls = [];
 		if ($cswClient->operationSuccessful == true) {
 			//$e = new mb_exception("operation successfull");	
 			//$e = new mb_exception(gettype($cswClient->operationResult));
@@ -158,13 +158,13 @@ if ($mbMetadata->hierarchyLevel == 'dataset' || $mbMetadata->hierarchyLevel == '
 				$serviceMetadata->service[$k]->metadataUrl = $urlWithoutRequest."?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&&outputSchema=".urlencode('http://www.isotc211.org/2005/gmd')."&id=".$fileIdentifier;
 				$serviceMetadata->service[$k]->accessUrl = $mdAccessUrl;
 
-				
+
 			}
 		}
 		/*if ($cswClient->operationSuccessful == true) {
 			if ($cswResponseObject !== false) {
 				$e = new mb_exception("php/mod_exportIso19139.php: returned service records: ".$cswClient->operationResult->asXML());
-				
+
 			}
 		}*/
 	}
@@ -179,7 +179,7 @@ switch ($outputFormat) {
 		echo $html;
 	break;
 	case "html2":
-		$html = $mbMetadata->transformToHtml2('tabs',$languageCode);
+		$html = $mbMetadata->transformToHtml2();
 		header("Content-type: text/html; charset=UTF-8");
 		echo $html;
 	break;

@@ -20,7 +20,7 @@
 #
 # configuration file
 #
-require_once dirname(__FILE__)."/../conf/mapbender.conf";
+require_once __DIR__."/../conf/mapbender.conf";
 
 #
 # mapbender version
@@ -49,11 +49,7 @@ define("OPENLAYERS_PATH", "../extensions/OpenLayers-2.9.1/");
 #
 # Module search paths
 #
-$pathArray = array(
-	"../javascripts/",
-	OPENLAYERS_PATH,
-	OPENLAYERS_PATH . "lib/OpenLayers/"
-);
+$pathArray = ["../javascripts/", OPENLAYERS_PATH, OPENLAYERS_PATH . "lib/OpenLayers/"];
 define("MODULE_SEARCH_PATHS", implode(",", $pathArray));
 unset($pathArray);
 
@@ -81,7 +77,7 @@ define("MODULES_NOT_RELYING_ON_GLOBALS",
  *	Function to check a path for security.
  */
 
-define("MB_BASEDIR",realpath(dirname(__FILE__)."/../"));
+define("MB_BASEDIR",realpath(__DIR__."/../"));
 
 if(!defined("PREPAREDSTATEMENTS")){
 	define("PREPAREDSTATEMENTS", true);
@@ -94,10 +90,10 @@ function secure($path,$folder = "",$fileExt = null) {
 	$basedir = realpath(MB_BASEDIR."/".$folder);
 	$path = realpath($path);
 	// $path must be within the basedir (and optionally within the subdirectory within basedir given by the $folder parameter
-	if(substr($path,0,strlen($basedir)) != $basedir){$secure = false;}
+	if(!str_starts_with($path, $basedir)){$secure = false;}
 
 	// PATH END
-	if(!empty($fileExt) AND substr($path,-strlen($fileExt)) != $fileExt){
+	if(!empty($fileExt) AND !str_ends_with($path, (string) $fileExt)){
 		$secure = false;
 	} 
 
@@ -110,7 +106,7 @@ function secure($path,$folder = "",$fileExt = null) {
 /*
  *	@security_patch XSS
  */
-include_once dirname(__FILE__) . "/httpRequestSecurity.php";
+include_once __DIR__ . "/httpRequestSecurity.php";
 
 /*
  *	@security_patch Helper
@@ -155,7 +151,7 @@ function getRealIpAddr() {
 //
 // database wrapper
 //
-require_once dirname(__FILE__) . "/../lib/database-pgsql.php";
+require_once __DIR__ . "/../lib/database-pgsql.php";
 
 //
 // establish database connection
@@ -169,7 +165,7 @@ db_select_db(DB, $con);
 // Add FirePHP for debugging only, supply a global $firephp
 //
 if (defined("LOG_PHP_WITH_FIREPHP") && LOG_PHP_WITH_FIREPHP === "on") {
-	require_once(dirname(__FILE__)."/../http/extensions/FirePHP-0.3/FirePHP.class.php");
+	require_once(__DIR__."/../http/extensions/FirePHP-0.3/FirePHP.class.php");
 
 	$firephp = FirePHP::getInstance(true);
 }
@@ -179,25 +175,8 @@ if (defined("LOG_PHP_WITH_FIREPHP") && LOG_PHP_WITH_FIREPHP === "on") {
 //
 mb_internal_encoding("UTF-8");
 
-//
-// if magic quotes is on, automatically strip slashes
-// (non-recursive due to possible security hazard)
-//
-if (get_magic_quotes_gpc()) {
-	$in = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
-
-	while (list($k, $v) = each($in)) {
-		foreach ($v as $key => $val) {
-			if (!is_array($val)) {
-				$in[$k][$key] = stripslashes($val);
-				continue;
-			}
-			$in[]= &$in[$k][$key];
-		}
-	}
-
-	unset($in);
-}
+// magic_quotes_gpc was removed in PHP 8.0 (already returned false in 5.4+),
+// so the inbound stripslashes pass is a no-op on any supported PHP version.
 
 //
 // until we have decided how to implement a public user,
@@ -210,8 +189,8 @@ if (!defined("LOAD_JQUERY_FROM_GOOGLE")) define("LOAD_JQUERY_FROM_GOOGLE", false
 //
 // class for error handling
 //
-if (!defined("LOG_DIR")) define("LOG_DIR", dirname(__FILE__) . "/../log/");
-require_once dirname(__FILE__)."/../http/classes/class_mb_exception.php";
+if (!defined("LOG_DIR")) define("LOG_DIR", __DIR__ . "/../log/");
+require_once __DIR__."/../http/classes/class_mb_exception.php";
 
 //
 // Do not display PHP errors
@@ -221,7 +200,7 @@ ini_set("display_errors", "0");
 //
 // AJAX wrapper
 //
-require_once dirname(__FILE__)."/../lib/ajax.php";
+require_once __DIR__."/../lib/ajax.php";
 
 // Max. size of WFS Responses in Byte
 // If exceeded, an error message will be returned

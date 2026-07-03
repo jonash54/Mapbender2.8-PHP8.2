@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="editSelf";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -29,7 +29,7 @@ foreach ($postvars as $value) {
    ${$value} = $_POST[$value];
 }
 
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_user.php");
 $editSelf = true;
 $selected_user = Mapbender::session()->get("mb_user_id");
 

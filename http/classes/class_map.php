@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../classes/class_bbox.php");
-require_once(dirname(__FILE__)."/../classes/class_cache.php");
-require_once(dirname(__FILE__)."/../classes/class_crs.php");
+require_once(__DIR__."/../classes/class_bbox.php");
+require_once(__DIR__."/../classes/class_cache.php");
+require_once(__DIR__."/../classes/class_crs.php");
 /**
  * Representing a map object, identical to the JS object in javascripts/map.js
  * @class
@@ -13,9 +13,9 @@ class Map {
 	private $frameName;
 	private $elementName;
 	private $extent;
-	private $zoomFullExtentArray = array();
+	private $zoomFullExtentArray = [];
 	private $isOverview = false;
-	private $wmsArray = array();
+	private $wmsArray = [];
     private $kmls;
     private $kmlOrder;
 
@@ -115,7 +115,7 @@ class Map {
 	 * @return Mapbender_bbox extent information
 	 */
 	public function getExtentInfo () {
-		return array($this->extent->min->x, $this->extent->min->y, $this->extent->max->x, $this->extent->max->y);
+		return [$this->extent->min->x, $this->extent->min->y, $this->extent->max->x, $this->extent->max->y];
 	}
 
 	/**
@@ -179,15 +179,15 @@ class Map {
 		    $point = "POINT(" . (string)$point[0] . " " . (string)$point[1] .")";
 		    $sql = "SELECT st_asewkt(st_transform(ST_PointFromText($1, $2::INT),$3::INT)) AS geom";
 		    $var1 = $point;
-		    $var2 = (string)explode(':', $pointEpsg)[1];
+		    $var2 = (string)explode(':', (string) $pointEpsg)[1];
 		    $var3 = (string)explode(':', $mapSetEpsg)[1];
-		    $v = array($var1, $var2, $var3);
-		    $t = array('s', 's', 's');
+		    $v = [$var1, $var2, $var3];
+		    $t = ['s', 's', 's'];
 		    $res = db_prep_query($sql, $v, $t);
 		    db_fetch_row($res);
 		    $newPoint = db_result($res, 0, 'geom');
 		    //extract new coordinates
-		    preg_match("/\([^\]]*\)/", $newPoint , $matches);
+		    preg_match("/\([^\]]*\)/", (string) $newPoint , $matches);
 		    $e = new mb_notice("classes/class_map.php:  matches[0]: " . $matches[0]);
 		    $point = explode(' ',str_replace(')','',str_replace('(', '', $matches[0])));
 		    $e = new mb_notice("classes/class_map.php: point: " . json_encode($point));
@@ -195,12 +195,12 @@ class Map {
 		$e = new mb_notice("classes/class_map.php:  epsgType: " . $crs->epsgType);
 		$xtenty = $scale / ($mapResolutionDpi * 100) * $this->getWidth(); //x width in m
 		$ytenty = $scale / ($mapResolutionDpi * 100) * $this->getHeight();
-        if (strtolower($crs->epsgType) == 'geographic 2d') {
+        if (strtolower((string) $crs->epsgType) == 'geographic 2d') {
             //lon/lat
             $R = 6371000.0;
             $rho = 180.0 / M_PI;
             $perimeterlon = $xtenty * $rho / $R;
-            $perimeterlat = $ytenty * $rho / ($R * cos((float)(point[1]) / $rho));
+            $perimeterlat = $ytenty * $rho / ($R * cos((float)(\POINT[1]) / $rho));
             //wms 1.3.0 spec 
             //$scale = $distanceInDeegree * ((6378137 * M_PI) / 180) / $this->getHeight() / 0.00028;
             //$e = new mb_exception("classes/class_map.php:  height: " . $this->getHeight());
@@ -242,7 +242,7 @@ class Map {
 
 	public function removeWms ($indices) {
 		if (!is_array($indices)) {
-			$indices = array($indices);
+			$indices = [$indices];
 		}
 		sort($indices, SORT_NUMERIC);
 		$indices = array_reverse($indices);
@@ -350,18 +350,13 @@ class Map {
 		if (!is_a($bbox, "Mapbender_bbox")) {
 			throw new Exception("Input must be a Mapbender bounding box.");
 		}
-		if (preg_replace("/EPSG:/","", $bbox->epsg) !== "4326") {
+		if (preg_replace("/EPSG:/","", (string) $bbox->epsg) !== "4326") {
 			throw new Exception("Input must be a WGS84 bounding box.");
 		}
 		$ext = $this->getExtent();
 		$srs = $ext->epsg;
 
-		$extArray = array(
-			$bbox->min->x,
-			$bbox->min->y,
-			$bbox->max->x,
-			$bbox->max->y
-		);
+		$extArray = [$bbox->min->x, $bbox->min->y, $bbox->max->x, $bbox->max->y];
 		$oldEPSG = "4326";
 		$newEPSG = preg_replace("/EPSG:/","", $srs);
 
@@ -404,7 +399,7 @@ class Map {
 		$bboxArray = $input;
 
 		if (is_a($input, "Mapbender_bbox")) {
-			$bboxArray = array($input);
+			$bboxArray = [$input];
 		}
 
 		// assume bbox array
@@ -433,7 +428,7 @@ class Map {
 					$reprojectedBbox = $this->reprojectExtent($c);
 					$this->calculateExtent($reprojectedBbox);
 				}
-				catch (Exception $e) {
+				catch (Exception) {
 					new mb_exception("Could not merge extent.");
 				}
 				return;
@@ -456,7 +451,7 @@ class Map {
 
 			if ($options["zoom"]) {
 				$currentWms = $wmsArray[0];
-				$bboxArray = array();
+				$bboxArray = [];
 				for ($i = 0; $i < count($currentWms->objLayer[0]->layer_epsg); $i++) {
 					$bboxArray[]= Mapbender_bbox::createFromLayerEpsg(
 						$currentWms->objLayer[0]->layer_epsg[$i]
@@ -502,7 +497,7 @@ class Map {
 						}
 					}
 				}
-				
+
 			}
 
 			// querylayer
@@ -645,7 +640,7 @@ class Map {
 
 				// set layer data
 				$newLayer->layer_uid = $currentLayer->layer_uid;
-				if (strpos($currentLayer->layer_name, "unnamed_layer:") == 0) {
+				if (str_starts_with($currentLayer->layer_name, "unnamed_layer:")) {
 				    $newLayer->layer_name = $currentLayer->layer_name;
 				} else {
 				    $newLayer->layer_name = "";
@@ -665,7 +660,7 @@ class Map {
 //				$newLayer->layer_featuretype_coupling = $currentLayer->layer_featuretype_coupling;
 
 				if ($this->isOverview) {
-					preg_match_all("/LAYERS\=([^&]*)/", $jsMapObject->mapURL[0], $resultMatrix);
+					preg_match_all("/LAYERS\=([^&]*)/", (string) $jsMapObject->mapURL[0], $resultMatrix);
 					$layerList = $resultMatrix[1][0];
 					$layerListArray = explode(",", $layerList);
 					$newLayer->gui_layer_visible = (in_array($currentLayer->layer_name, $layerListArray)) ? 1 : 0;
@@ -682,9 +677,9 @@ class Map {
                 $newLayer->layer_featuretype_coupling = $currentLayer->layer_featuretype_coupling; //TODO - test it!
 
 				// BEWARE THIS IS SUPER UGLY CODE
-				$newLayer->layer_epsg = array();
+				$newLayer->layer_epsg = [];
 				for ($z = 0; $z < count($currentLayer->layer_epsg); $z++) {
-					$newLayer->layer_epsg[$z] = array();
+					$newLayer->layer_epsg[$z] = [];
 					$newLayer->layer_epsg[$z]["epsg"] = $currentLayer->layer_epsg[$z]->epsg;
 					$newLayer->layer_epsg[$z]["minx"] = $currentLayer->layer_epsg[$z]->minx;
 					$newLayer->layer_epsg[$z]["miny"] = $currentLayer->layer_epsg[$z]->miny;
@@ -692,30 +687,30 @@ class Map {
 					$newLayer->layer_epsg[$z]["maxy"] = $currentLayer->layer_epsg[$z]->maxy;
 				}
 				// BEWARE THIS IS SUPER UGLY CODE
-				$newLayer->layer_style = array();
+				$newLayer->layer_style = [];
 				for ($z = 0; $z < count($currentLayer->layer_style); $z++) {
-					$newLayer->layer_style[$z] = array();
-					$newLayer->layer_style[$z]["name"] = $currentLayer->layer_style[$z]->name ? $currentLayer->layer_style[$z]->name : "default";
-					$newLayer->layer_style[$z]["title"] = $currentLayer->layer_style[$z]->title ? $currentLayer->layer_style[$z]->title : "default";
+					$newLayer->layer_style[$z] = [];
+					$newLayer->layer_style[$z]["name"] = $currentLayer->layer_style[$z]->name ?: "default";
+					$newLayer->layer_style[$z]["title"] = $currentLayer->layer_style[$z]->title ?: "default";
 					$newLayer->layer_style[$z]["legendurl"] = $currentLayer->layer_style[$z]->legendurl;
 					$newLayer->layer_style[$z]["legendurlformat"] = $currentLayer->layer_style[$z]->legendurlformat;
 				}
 				// BEWARE THIS IS SUPER UGLY CODE TOO
 				//new 2023 - handling of layer_identifiers
-				$newLayer->layer_identifier = array();
+				$newLayer->layer_identifier = [];
 				for ($z = 0; $z < count($currentLayer->layer_identifier); $z++) {
-				    $newLayer->layer_identifier[$z] = array();
+				    $newLayer->layer_identifier[$z] = [];
 				    if (isset($currentLayer->layer_identifier[$z]->identifier)) {
 				        //$e = new mb_exception('classes/class_map.php: createFromJs: read found layer identifier: ' . json_encode($currentLayer->layer_identifier));
 				        
     				    $newLayer->layer_identifier[$z]["identifier"] = $currentLayer->layer_identifier[$z]->identifier;// ? $currentLayer->layer_identifier[$z]->identifier;
     				    if (isset($currentLayer->layer_identifier[$z]->identifier) && $currentLayer->layer_identifier[$z]->identifier !== '') {
-    				        $newLayer->layer_identifier[$z]["visible"] = $currentLayer->layer_identifier[$z]->visible ? $currentLayer->layer_identifier[$z]->visible : "false";
+    				        $newLayer->layer_identifier[$z]["visible"] = $currentLayer->layer_identifier[$z]->visible ?: "false";
     				    }
     				}
 				}
 				//
-				$newLayer->layer_dimension = array();
+				$newLayer->layer_dimension = [];
 				$indexDimension = count($newLayer->layer_dimension);
 				
 				foreach($currentLayer->layer_dimension as $dimension) {
@@ -757,7 +752,7 @@ class Map {
 	 * @return String[]
 	 */
 	public function toJavaScript ($wmsJson) {
-		$jsCodeArray = array();
+		$jsCodeArray = [];
 
 		// syntax has changed in 2.6! Map is no longer a frame
 		$registerMapString = "var currentWmcMap = Mapbender.modules['" .
@@ -815,8 +810,8 @@ class Map {
 		//cache only, when cache is explicitly demanded by element var!
 		//check if element var for caching gui is set to true!
 		$sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = 'body' AND var_name='cacheGuiHtml'";
-		$v = array($appId);
-		$t = array('s');
+		$v = [$appId];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 
@@ -841,8 +836,8 @@ class Map {
 			// find the mapframe in the application elements...
 			$sql = "SELECT * FROM gui_element WHERE fkey_gui_id = $1 AND " .
 				"e_id = $2 AND e_public = 1 LIMIT 1";
-			$v = array($appId, $frameName);
-			$t = array('s', 's');
+			$v = [$appId, $frameName];
+			$t = ['s', 's'];
 			$res = db_prep_query($sql,$v,$t);
 			$row = db_fetch_array($res);
 
@@ -864,14 +859,14 @@ class Map {
 				// reset the WMS array
 				// BEWARE, SUPER UGLY CODE AHEAD!!
 				// (BUT THERE IS NO OTHER WAY TO DO IT)
-				if (strpos($row["e_js_file"], "mb_overview.js") !== false) {
+				if (str_contains((string) $row["e_js_file"], "mb_overview.js")) {
 //					$e = new mb_exception("guess this is the OV");
 
 					$ov_sql = "SELECT var_value FROM gui_element_vars WHERE " .
 						"var_name = 'overview_wms' AND fkey_e_id = $1 AND " .
 						"fkey_gui_id = $2";
-					$ov_v = array($frameName, $appId);
-					$ov_t = array('s', 's');
+					$ov_v = [$frameName, $appId];
+					$ov_t = ['s', 's'];
 					$ov_res = db_prep_query($ov_sql, $ov_v, $ov_t);
 					$ov_row = db_fetch_array($ov_res);
 					if ($ov_row) {
@@ -882,12 +877,12 @@ class Map {
 					if (!isset($ovIndex)) {
 						$ovIndex = 0;
 					}
-					$wmsArray = array($wmsArray[$ovIndex]);
+					$wmsArray = [$wmsArray[$ovIndex]];
 
 			   	 	$sql = "SELECT * from gui_wms JOIN gui ON gui_wms.fkey_gui_id = gui.gui_id JOIN wms ON ";
                				$sql .= "gui_wms.fkey_wms_id = wms.wms_id AND gui_wms.fkey_gui_id=gui.gui_id WHERE gui.gui_id = $1 ORDER BY gui_wms_position";
-               		 		$v = array ($appId);
-                			$t = array ('s');
+               		 		$v = [$appId];
+                			$t = ['s'];
                 			$res = db_prep_query($sql, $v, $t);
                 			$count_wms = -1;
 
@@ -912,8 +907,8 @@ class Map {
 				//$e = new mb_exception("class_map.php selectbyapplication invoked!");
 				// EXTENT
 				$sql = "SELECT gui_wms_epsg FROM gui_wms WHERE gui_wms_position = 0 AND fkey_gui_id = $1";
-				$v = array($appId);
-				$t = array('s');
+				$v = [$appId];
+				$t = ['s'];
 				$res = db_prep_query($sql, $v, $t);
 				$row = db_fetch_array($res);
 				$epsg = $row["gui_wms_epsg"];

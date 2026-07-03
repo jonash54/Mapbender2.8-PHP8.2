@@ -36,10 +36,10 @@ class VersionSelector {
                 return ["", $phpversion];
             }
 
-            if (strpos($phpversion, "5.") === 0) {
+            if (str_starts_with($phpversion, "5.")) {
                 return ["Version5".$ClassName, "php5path", $phpversion];
             }
-            else if (strpos($phpversion, "7.") === 0) {
+            else if (str_starts_with($phpversion, "7.")) {
                 return ["Version7".$ClassName, "php7path", $phpversion];
             }
 	}
@@ -57,7 +57,7 @@ class VersionSelector {
         // and special characters to be escaped by backslash.
 	public static function GetParams($StaticCall){
 		
-            $exploded = explode("::", $StaticCall);
+            $exploded = explode("::", (string) $StaticCall);
             if (count($exploded) > 1) {
             $classname = $exploded[0];
             $classname = VersionSelector::GetVersioned($classname)[0];
@@ -74,10 +74,10 @@ class VersionSelector {
             $method = explode("(", $method)[0];
             $parameters = str_getcsv($params, ",", "'");
             if (is_null($classname)) {
-                return array($method, $parameters);
+                return [$method, $parameters];
             }
             else {
-                return array(array($classname, $method), $parameters);
+                return [[$classname, $method], $parameters];
             }
 	}
 	
@@ -91,7 +91,7 @@ class VersionSelector {
 	// purposes
 	public function GetParamsForStatic($StaticCall){
 
-            $exploded = explode("::", $StaticCall);
+            $exploded = explode("::", (string) $StaticCall);
             if (count($exploded) > 1) {
                 $classname = $exploded[0];
                 $classname = VersionSelector::GetVersioned($classname)[0];
@@ -108,10 +108,10 @@ class VersionSelector {
             $method = explode("(", $method)[0];
             $parameters = str_getcsv($params, ",", "'");
             if (is_null($classname)) {
-                return array($method, $parameters);
+                return [$method, $parameters];
             }
             else {
-                return array(array($classname, $method), $parameters);
+                return [[$classname, $method], $parameters];
             }
 	}
 }

@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_2.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_gml_factory.php");
+require_once(__DIR__."/../classes/class_gml_2.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 /**
  * Creates GML 2 objects from a GML documents.
@@ -36,15 +36,15 @@ class Gml_2_Factory extends GmlFactory {
 	 * @return Gml_3
 	 * @param $geoJson String
 	 */
-	public function createFromGeoJson ($geoJson) {
+	public function createFromGeoJson ($geoJson, $gml) {
 		$gml2 = new Gml_2();
 		
 		return parent::createFromGeoJson($geoJson, $gml2);
 	}
 
 	function findNameSpace($s){
-		list($ns,$FeaturePropertyName) = explode(":",$s);
-		$nodeName = array('ns' => $ns, 'value' => $FeaturePropertyName);
+		[$ns, $FeaturePropertyName] = explode(":",(string) $s);
+		$nodeName = ['ns' => $ns, 'value' => $FeaturePropertyName];
 		return $nodeName;
 	}
 
@@ -53,7 +53,7 @@ class Gml_2_Factory extends GmlFactory {
 		
 		$currentSibling = $domNode->firstChild;
 		while ($currentSibling) {
-			list($x, $y, $z) = explode(",", $currentSibling->nodeValue);
+			[$x, $y, $z] = explode(",", $currentSibling->nodeValue);
 			$gmlPoint->setPoint($x, $y);
 			$currentSibling = $currentSibling->nextSibling;
 		}
@@ -67,7 +67,7 @@ class Gml_2_Factory extends GmlFactory {
 		while ($currentSibling) {
 			
 			foreach(explode(' ',trim($currentSibling->nodeValue)) as $cords){
-				list($x,$y,$z) = explode(',',$cords);
+				[$x, $y, $z] = explode(',',$cords);
 				$gmlLine->addPoint($x, $y);
 			}
 			$currentSibling = $currentSibling->nextSibling;
@@ -88,9 +88,9 @@ class Gml_2_Factory extends GmlFactory {
 		foreach ($allCoords as $Coords) {
 			$coordsDom = dom_import_simplexml($Coords);
 				
-			foreach(explode(' ',trim($coordsDom->nodeValue)) as $pointCoords){
+			foreach(explode(' ',trim((string) $coordsDom->nodeValue)) as $pointCoords){
 
-				list($x,$y,$z) = explode(',',$pointCoords);
+				[$x, $y, $z] = explode(',',$pointCoords);
 				$gmlPolygon->addPoint($x, $y);
 			}
 			
@@ -105,9 +105,9 @@ class Gml_2_Factory extends GmlFactory {
 				foreach ($coordinates as $coordinate) {
 					$coordsDom = dom_import_simplexml($coordinate);
 						
-					foreach(explode(' ',trim($coordsDom->nodeValue)) as $pointCoords){
+					foreach(explode(' ',trim((string) $coordsDom->nodeValue)) as $pointCoords){
 		
-						list($x,$y,$z) = explode(',',$pointCoords);
+						[$x, $y, $z] = explode(',',$pointCoords);
 						$gmlPolygon->addPointToRing($ringCount, $x, $y);
 					}
 				}
@@ -129,7 +129,7 @@ class Gml_2_Factory extends GmlFactory {
 		$cnt=0;
 		foreach ($allCoords as $Coords) {
 			
-			$gmlMultiLine->lineArray[$cnt] = array();
+			$gmlMultiLine->lineArray[$cnt] = [];
 			
 			$coordsDom = dom_import_simplexml($Coords);
 				
@@ -137,8 +137,8 @@ class Gml_2_Factory extends GmlFactory {
 //			$value = $coordsDom->nodeValue;				
 //			echo "===> name: ".$name. ", Value: ".$value."<br>";
 			
-			foreach(explode(' ',trim($coordsDom->nodeValue)) as $pointCoords){
-				list($x,$y,$z) = explode(',',$pointCoords);
+			foreach(explode(' ',trim((string) $coordsDom->nodeValue)) as $pointCoords){
+				[$x, $y, $z] = explode(',',$pointCoords);
 				$gmlMultiLine->addPoint($x, $y, $cnt);
 				}
 			
@@ -160,18 +160,18 @@ class Gml_2_Factory extends GmlFactory {
 		foreach ($allPolygons as $polygon) {
 			$allCoords = $polygon->xpath("gml:outerBoundaryIs/gml:LinearRing/gml:coordinates");
 				
-			$gmlMultiPolygon->polygonArray[$cnt] = array();
+			$gmlMultiPolygon->polygonArray[$cnt] = [];
 			foreach ($allCoords as $Coords) {
 				
 				$coordsDom = dom_import_simplexml($Coords);
 					
-				foreach (explode(' ',trim($coordsDom->nodeValue)) as $pointCoords) {
-					list($x,$y,$z) = explode(',',$pointCoords);
+				foreach (explode(' ',trim((string) $coordsDom->nodeValue)) as $pointCoords) {
+					[$x, $y, $z] = explode(',',$pointCoords);
 					$gmlMultiPolygon->addPoint($x, $y, $cnt);
 				}
 			}
 			
-			$gmlMultiPolygon->innerRingArray[$cnt] = array();
+			$gmlMultiPolygon->innerRingArray[$cnt] = [];
 			$innerRingNodeArray = $polygon->xpath("gml:innerBoundaryIs");
 			if ($innerRingNodeArray) {
 				$ringCount = 0;
@@ -182,9 +182,9 @@ class Gml_2_Factory extends GmlFactory {
 						foreach ($coordinates as $coordinate) {
 							$coordsDom = dom_import_simplexml($coordinate);
 								
-							foreach(explode(' ',trim($coordsDom->nodeValue)) as $pointCoords){
+							foreach(explode(' ',trim((string) $coordsDom->nodeValue)) as $pointCoords){
 				
-								list($x,$y,$z) = explode(',',$pointCoords);
+								[$x, $y, $z] = explode(',',$pointCoords);
 								$gmlMultiPolygon->addPointToRing($cnt, $ringCount, $x, $y);
 							}
 						}

@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_geometry.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_geometry.php");
 
 class GMLMultiPolygon extends GmlGeometry {
 
-	var $polygonArray = array();
-	var $innerRingArray = array();
+	public $polygonArray = [];
+	public $innerRingArray = [];
 
 	public function __construct() {
 		
@@ -32,19 +32,19 @@ class GMLMultiPolygon extends GmlGeometry {
 
 	public function addPointToRing ($i, $j, $x, $y) {
 		while (count($this->innerRingArray) <= $i) {
-			array_push($this->innerRingArray, array());
+			array_push($this->innerRingArray, []);
 		}
 		while (count($this->innerRingArray[$i]) <= $j) {
-			array_push($this->innerRingArray[$i], array());
+			array_push($this->innerRingArray[$i], []);
 		}
-		array_push($this->innerRingArray[$i][$j], array("x" => $x, "y" => $y));
+		array_push($this->innerRingArray[$i][$j], ["x" => $x, "y" => $y]);
 	}
 	
 	public function addPoint ($x, $y, $i) {
 		while (count($this->polygonArray) <= $i) {
-			array_push($this->polygonArray, array());
+			array_push($this->polygonArray, []);
 		}
-		array_push($this->polygonArray[$i], array("x" => $x, "y" => $y));
+		array_push($this->polygonArray[$i], ["x" => $x, "y" => $y]);
 	}
 
 	public function toGml2 () {
@@ -55,7 +55,7 @@ class GMLMultiPolygon extends GmlGeometry {
 
 			$currentExteriorRing = $this->polygonArray[$i];
 			
-			$ptArray = array();
+			$ptArray = [];
 			for ($j = 0; $j < count($currentExteriorRing); $j++) {
 				$point = $currentExteriorRing[$j];
 				$ptArray[] = $point["x"] . "," . $point["y"];
@@ -69,7 +69,7 @@ class GMLMultiPolygon extends GmlGeometry {
 				for ($j = 0; $j < count($this->innerRingArray[$i]); $j++) {
 					$currentInteriorRing = $this->innerRingArray[$i][$j];
 					$str .= "<gml:innerBoundaryIs><gml:LinearRing><gml:coordinates>";
-					$ptArray = array();
+					$ptArray = [];
 					for ($k = 0; $k < count($currentInteriorRing); $k++) {
 						$point = $currentInteriorRing[$k];
 						$ptArray[] = $point["x"] . "," . $point["y"];
@@ -94,7 +94,7 @@ class GMLMultiPolygon extends GmlGeometry {
 
 			$currentExteriorRing = $this->polygonArray[$i];
 			
-			$ptArray = array();
+			$ptArray = [];
 			for ($j = 0; $j < count($currentExteriorRing); $j++) {
 				$point = $currentExteriorRing[$j];
 				$ptArray[] = "<gml:pos>" . $point["x"] . " " . $point["y"] . "</gml:pos>";
@@ -108,7 +108,7 @@ class GMLMultiPolygon extends GmlGeometry {
 				for ($j = 0; $j < count($this->innerRingArray[$i]); $j++) {
 					$currentInteriorRing = $this->innerRingArray[$i][$j];
 					$str .= "<gml:interior><gml:LinearRing>";
-					$ptArray = array();
+					$ptArray = [];
 					for ($k = 0; $k < count($currentInteriorRing); $k++) {
 						$point = $currentInteriorRing[$k];
 						$ptArray[] = "<gml:pos>" . $point["x"] . " " . $point["y"] . "</gml:pos>";
@@ -186,7 +186,7 @@ class GMLMultiPolygon extends GmlGeometry {
 	}
 	
 		public function getBbox () {
-                $bboxArray = array();
+                $bboxArray = [];
                 $numberPolygonArray = count($this->polygonArray);
                 if ($numberPolygonArray > 0) {
                         for ($cnt =0; $cnt < $numberPolygonArray; $cnt++){

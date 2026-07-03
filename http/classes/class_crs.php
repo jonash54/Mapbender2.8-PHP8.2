@@ -15,10 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../../conf/altered_axis_epsg.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_cache.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../../conf/altered_axis_epsg.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_cache.php");
 
 /**
  * A class to handle information about different CoordinateReferenceSystems. The class tries to call the epsg registry an pulls some
@@ -33,17 +33,17 @@ require_once(dirname(__FILE__)."/class_cache.php");
  */
 
 class Crs {
-	var $identifierType; //'epsg', 'urn', 'url', 'other'
-	var $identifierCode;
-	var $identifier;
-	var $name;
-	var $gmlRepresentation;
-	var $epsgType; // false, 'geographic 2D', 'projected', '...'
-	var $axisOrder; //different types:'east,north' - ('lon,lat') or 'north,east' - ('lat,lon')
+	public $identifierType; //'epsg', 'urn', 'url', 'other'
+	public $identifierCode;
+	public $identifier;
+	public $name;
+	public $gmlRepresentation;
+	public $epsgType; // false, 'geographic 2D', 'projected', '...'
+	public $axisOrder; //different types:'east,north' - ('lon,lat') or 'north,east' - ('lat,lon')
 	//preasume, that the old order is always lon/lat for geo and east/north for projected systems
-	var $resolveSuccess;
-	var $resolveOrigin;
-	var $resolveErrorMessage;
+	public $resolveSuccess;
+	public $resolveOrigin;
+	public $resolveErrorMessage;
 
 	public function __construct ($identifier) {
 		$this->resolveSuccess = false;
@@ -74,8 +74,8 @@ class Crs {
  */
 	//handles ows identifier: wms_1.0.0, wms_1.1.1, wms_1.3.0, wfs_1.0.0, wfs_1.1.0, wfs_2.0.0, wfs_2.0.2
 	public function alterAxisOrder ($targetOws) {
-		$owsWithSpecialOrder = array("wms_1.0.0","wms_1.1.1","wfs_1.0.0","gml_2.0.0","gml_2.1.0","gml_3.1.1","geojson");//lon/lat,east/north 
-		$owsWithOrderAsDefined = array("wms_1.3.0","wfs_1.1.0","wfs_2.0.0","wfs_2.0.2","gml_3.2.0");
+		$owsWithSpecialOrder = ["wms_1.0.0", "wms_1.1.1", "wfs_1.0.0", "gml_2.0.0", "gml_2.1.0", "gml_3.1.1", "geojson"];//lon/lat,east/north 
+		$owsWithOrderAsDefined = ["wms_1.3.0", "wfs_1.1.0", "wfs_2.0.0", "wfs_2.0.2", "gml_3.2.0"];
 		//$owsWithOrderAsDefined = array("wms_1.3.0","wfs_2.0.0","wfs_2.0.2");
 		$order = "east,north"; //dummy postgis/oracle spatial order
 		$e = new mb_notice("classes/class_crs.php: extracted axis order from epsg: " . $this->axisOrder . " target_ows: " . $targetOws);
@@ -94,25 +94,25 @@ class Crs {
 	private function extractIdentifierType ($identifier) {
 		//$e = new mb_exception("http/classes/class_crs.php - extract identifier: *".$identifier."*");
 		//check for type
-		if (substr(strtoupper($identifier), 0, 5) === "EPSG:") {
+		if (str_starts_with(strtoupper((string) $identifier), "EPSG:")) {
 			//$e = new mb_exception("http/classes/class_crs.php - found EPSG: identifier!");
 			$this->identifier = $identifier;
 			$this->identifierType = 'epsg';
-			$this->identifierCode = explode(':',$identifier)[1];
+			$this->identifierCode = explode(':',(string) $identifier)[1];
 			//$e = new mb_exception("http/classes/class_crs.php - found code: *".$this->identifierCode."*");
 			return;
 		} else {
 			//check for urn based version - example: urn:ogc:def:crs:EPSG:
-			if (substr(strtoupper($identifier), 0, 21) === "URN:OGC:DEF:CRS:EPSG:") {
+			if (str_starts_with(strtoupper((string) $identifier), "URN:OGC:DEF:CRS:EPSG:")) {
 				//delete this part from original identifier
-				$identifierNew = str_replace('URN:OGC:DEF:CRS:EPSG:','',strtoupper($identifier));			
+				$identifierNew = str_replace('URN:OGC:DEF:CRS:EPSG:','',strtoupper((string) $identifier));			
 				$this->identifier = $identifier;
 				//$e = new mb_exception("http/classes/class_crs.php - urn identifier new: ".$identifierNew);
 				$this->identifierType = 'urn';
-				if (substr($identifierNew, 0, 1 ) === ":") {
+				if (str_starts_with($identifierNew, ":")) {
 				    $this->identifierCode = ltrim($identifierNew, ':');
 				} else {
-				    if (strpos($identifierNew, ":") !== false) {
+				    if (str_contains($identifierNew, ":")) {
 				    	$this->identifierCode = explode(':',$identifierNew)[1];
 				    } else {
 						$this->identifierCode = $identifierNew;
@@ -123,16 +123,16 @@ class Crs {
 				return;
 			} else {
 				//case urn:x-ogc:def:crs:EPSG:25832?? - geoserver
-                		if (substr(strtoupper($identifier), 0, 23) === "URN:X-OGC:DEF:CRS:EPSG:") {
+                		if (str_starts_with(strtoupper((string) $identifier), "URN:X-OGC:DEF:CRS:EPSG:")) {
 					//delete this part from original identifier
-					$identifierNew = str_replace('URN:X-OGC:DEF:CRS:EPSG:','',strtoupper($identifier));	
+					$identifierNew = str_replace('URN:X-OGC:DEF:CRS:EPSG:','',strtoupper((string) $identifier));	
 					$this->identifier = $identifier;
 					//TODO - use url encoding for resolving registry ;-) maybe change this
 					$this->identifierType = 'url';
 					$this->identifierCode = $identifierNew;	
 					return; 
 				} else {
-					if (substr($identifier, 0, 31) === 'http://www.opengis.net/def/crs/') {
+					if (str_starts_with((string) $identifier, 'http://www.opengis.net/def/crs/')) {
 						$identifierNew = str_replace('http://www.opengis.net/def/crs/','',$identifier);
 						//remaining string: ({OGC|EPSG}/{0}/{code})
 						$this->identifier = $identifier;
@@ -140,7 +140,7 @@ class Crs {
 						$this->identifierCode = explode('/',$identifierNew)[2];
 						return;
 					} else {
-						if (substr($identifier, 0, 40) === 'http://www.opengis.net/gml/srs/epsg.xml#') {
+						if (str_starts_with((string) $identifier, 'http://www.opengis.net/gml/srs/epsg.xml#')) {
 						    $identifierNew = str_replace('http://www.opengis.net/gml/srs/epsg.xml#','',$identifier);
 						    //remaining string: ({code})
 						    $this->identifier = $identifier;
@@ -160,7 +160,7 @@ class Crs {
 	}
 
 	private function resolveCrsInfo () {
-		if (!preg_match("/^\d+$/", $this->identifierCode)) {
+		if (!preg_match("/^\d+$/", (string) $this->identifierCode)) {
                     $e = new mb_exception("classes/class_crs.php: identifierCode is not an integer: ".$this->identifierCode);
                     return false;
 		}
@@ -168,10 +168,10 @@ class Crs {
 		    $e = new mb_notice("http/classes/class_crs.php - invoked from cli!");
 		    // try to read from filesystem cache
 		    $admin = new administration();
-		    $filename = "/tmp" . "/crsCache_" . md5($this->identifier) . ".cache"; 
+		    $filename = "/tmp" . "/crsCache_" . md5((string) $this->identifier) . ".cache"; 
 		    $cachedObject = $admin->getFromStorage($filename, 'file');
 		    if ($cachedObject != false) {
-		        $cachedObject = json_decode($cachedObject);
+		        $cachedObject = json_decode((string) $cachedObject);
 		        $this->gmlRepresentation = $cachedObject->gmlRepresentation;
 		        $this->epsgType = $cachedObject->epsgType;
 		        $this->axisOrder = $cachedObject->axisOrder;
@@ -185,8 +185,8 @@ class Crs {
 		    $e = new mb_notice("http/classes/class_crs.php - invoked from http!");
     		$cache = new Cache();
     		//try to read from cache if already exists
-    		if ($cache->isActive && $cache->cachedVariableExists("mapbender:crs:" . md5($this->identifier))) {
-    		    $cachedObject = json_decode($cache->cachedVariableFetch("mapbender:crs:" . md5($this->identifier)));
+    		if ($cache->isActive && $cache->cachedVariableExists("mapbender:crs:" . md5((string) $this->identifier))) {
+    		    $cachedObject = json_decode((string) $cache->cachedVariableFetch("mapbender:crs:" . md5((string) $this->identifier)));
     			$this->gmlRepresentation = $cachedObject->gmlRepresentation;	
     			$this->epsgType = $cachedObject->epsgType;
     			$this->axisOrder = $cachedObject->axisOrder;
@@ -206,7 +206,7 @@ class Crs {
 				break;
 			case "urn1":
 				$registryBaseUrl = "http://www.epsg-registry.org/export.htm?gml=";
-				$registryUrl = $registryBaseUrl.urlencode($this->identifier);
+				$registryUrl = $registryBaseUrl.urlencode((string) $this->identifier);
 				/*$xpathCrsType = "";
 				$xpathAxis = "";*/
 				break;
@@ -225,7 +225,7 @@ class Crs {
 		$crsConnector = new connector();
 		$crsConnector->set("timeOut", "2");
 		//New Oct 2020
-		$crsConnector->set("externalHeaders", array("Accept: application/xml"));
+		$crsConnector->set("externalHeaders", ["Accept: application/xml"]);
 		$crsConnector->load($registryUrl);
 		if ($crsConnector->timedOut == true) {
 			return false;
@@ -236,7 +236,7 @@ class Crs {
 		//parse relevant information
 		libxml_use_internal_errors(true);
 		try {
-			$crsXml = simplexml_load_string($this->gmlRepresentation);
+			$crsXml = simplexml_load_string((string) $this->gmlRepresentation);
 			if ($crsXml === false) {
 				foreach(libxml_get_errors() as $error) {
         				$err = new mb_exception("class_crs:".$error->message);
@@ -285,14 +285,14 @@ class Crs {
 			//New Oct 2020
 			$urlToCsDefinition = $csIdentifier;
 			$csConnector = new connector($urlToCsDefinition);
-			$crsConnector->set("externalHeaders", array("Accept: application/xml"));
+			$crsConnector->set("externalHeaders", ["Accept: application/xml"]);
 			$csConnector->set("timeOut", "2");
 			if ($csConnector->timedOut == true) {
 				return false;
 			}
 			$csGmlRepresentation = $csConnector->file;
 			try {
-				$csXml = simplexml_load_string($csGmlRepresentation);
+				$csXml = simplexml_load_string((string) $csGmlRepresentation);
 				if ($csXml === false) {
 					foreach(libxml_get_errors() as $error) {
         					$err = new mb_exception("class_crs:".$error->message);
@@ -329,7 +329,7 @@ class Crs {
 		}
 		//store information - maybe to cache, if it does not already exists!
 		if ($this->is_cli()) {
-		    $filename = "/tmp" . "/crsCache_" . md5($this->identifier) . ".cache";
+		    $filename = "/tmp" . "/crsCache_" . md5((string) $this->identifier) . ".cache";
 		    $e = new mb_notice("http/classes/class_crs.php - search for file: " . $filename);
 		    if (!file_exists($filename)) {
     		    $cachedObject = $admin->putToStorage($filename, json_encode($jsonCrsInfo), 'file', 86400);
@@ -338,8 +338,8 @@ class Crs {
 		        $e = new mb_notice("http/classes/class_crs.php - crs file already exists!");
 		    }
 		} else {
-		    if ($cache->isActive && $cache->cachedVariableExists("mapbender:crs:" . md5($this->identifier)) == false) {
-		        $cache->cachedVariableAdd("mapbender:crs:" . md5($this->identifier), json_encode($jsonCrsInfo), 86400);
+		    if ($cache->isActive && $cache->cachedVariableExists("mapbender:crs:" . md5((string) $this->identifier)) == false) {
+		        $cache->cachedVariableAdd("mapbender:crs:" . md5((string) $this->identifier), json_encode($jsonCrsInfo), 86400);
 		        $e = new mb_notice("http/classes/class_crs.php - store crs info to cache!");
 		        return true;
 		    }

@@ -33,7 +33,7 @@ class PointPlacement
 	 * @see AnchorPoint
 	 * @var object
 	 */
-	var $anchorpoint = "";
+	public $anchorpoint = "";
 	
 	/**
 	 * The displacement object from the xml-scheme.
@@ -41,7 +41,7 @@ class PointPlacement
 	 * @see Displacement
 	 * @var object
 	 */
-	var $displacement = "";
+	public $displacement = "";
 	
 	/**
 	 * The rotation attribute from the xml-scheme.
@@ -50,24 +50,24 @@ class PointPlacement
 	 *
 	 * @var int
 	 */
-	var $rotation = "";
+	public $rotation = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * Default constructor that automatically creates an AnchorPoint and a Displacement object.
 	 */
-	function PointPlacement()
+	function __construct()
 	{
 		$this->anchorpoint = new AnchorPoint();
 		$this->displacement = new Displacement();

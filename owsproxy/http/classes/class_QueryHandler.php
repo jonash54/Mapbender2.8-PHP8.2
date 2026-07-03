@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../../../http/classes/class_owsPostQueryParser.php");
+require_once(__DIR__."/../../../http/classes/class_owsPostQueryParser.php");
 
 /**
  * simple class to handle the querystring and the params
@@ -23,24 +23,19 @@ require_once(dirname(__FILE__)."/../../../http/classes/class_owsPostQueryParser.
  
 class QueryHandler{
 	
-	private $reqParams = array();
-	private $reqParamsToLower = array();
+	private $reqParams = [];
+	private $reqParamsToLower = [];
 	private $owsproxyServiceKey = 'wms';
 	private $owsproxyServiceId;
 	private $onlineResource;
     private $hasPost = false;
 	private $serviceResourceName;
-	public $req;
-        public $reqMethod;
 	/**
 	 * Constructor of the QueryHandler
 	 * 
 	 */
-	function __construct($postData, $request, $requestMethod){
-		//${$this->typeNameParameter};
-        $this->req = $request;
-		$this->reqMethod = $requestMethod;
-		$this->setRequestParams(array_keys($request));
+	function __construct($postData, public $req, public $reqMethod){
+		$this->setRequestParams(array_keys($this->req));
 		if ($postData !== false) {
 			//parse post request for service / request / version parameters
 			//$e = new mb_exception("owsproxy/http/classes/class_QueryHandler.php: postData: ".$postData);
@@ -111,11 +106,11 @@ class QueryHandler{
            		//SZ, 30.11.2007, writing REQUEST parameter values into local variable
           	 	//as key will be modified
           		$reqValue = $this->req[$keys[$i]];
-          		if(strpos($keys[$i], "?") === 0){
-                       	    	$keys[$i] = substr($keys[$i],1);
+          		if(str_starts_with((string) $keys[$i], "?")){
+                       	    	$keys[$i] = substr((string) $keys[$i],1);
           	 	}
-          		$this->reqParams[strtolower($keys[$i])] = $reqValue;
-          	 	$this->reqParamsToLower[strtolower($keys[$i])] = $reqValue;
+          		$this->reqParams[strtolower((string) $keys[$i])] = $reqValue;
+          	 	$this->reqParamsToLower[strtolower((string) $keys[$i])] = $reqValue;
           		if($keys[$i] == $this->owsproxyServiceKey){
             	  	 	$this->owsproxyServiceId = $this->req[$keys[$i]];
             	  	 	$notice = new mb_notice("owsId: ".$this->owsproxyServiceId);
@@ -163,7 +158,7 @@ class QueryHandler{
 	 function setParam($param,$value){
 		$mykeys = array_keys($this->reqParams);
 		for($i=0; $i<count($mykeys);$i++){
-			if(strtolower($mykeys[$i]) == strtolower($param)){
+			if(strtolower($mykeys[$i]) == strtolower((string) $param)){
 				$this->reqParams[$mykeys[$i]] = $value;
 				$n = new mb_notice("QueryHandler: setParam: ".serialize($this->reqParams));
 			}
@@ -182,7 +177,7 @@ class QueryHandler{
 				if($cnt > 0){ 
 					$qstring .= "&"; 
 				}
-				$qstring .= $mykeys[$i]."=".rawurlencode(stripslashes($this->reqParams[$mykeys[$i]]));
+				$qstring .= $mykeys[$i]."=".rawurlencode(stripslashes((string) $this->reqParams[$mykeys[$i]]));
 				$cnt++;
 			}
 		}
@@ -195,7 +190,7 @@ class QueryHandler{
 	  * @return string POST representation for the query
 	  */
 	  function getPostQueryString(){
-		$postQueryArray = array();
+		$postQueryArray = [];
 		$mykeys = array_keys($this->reqParams);
 		$cnt = 0;
 		for($i=0; $i<count($mykeys);$i++){
@@ -221,16 +216,16 @@ class QueryHandler{
 	    * gets the conjunction character between url and query string
 	    */
 	    function getConjunctionCharacter($url){
-			if(strpos($url,"?")){ 
-				if(strpos($url,"?") == strlen($url)){ 
+			if(strpos((string) $url,"?")){ 
+				if(strpos((string) $url,"?") == strlen((string) $url)){ 
 				$cchar = "";
-				}else if(strpos($url,"&") == strlen($url)){
+				}else if(strpos((string) $url,"&") == strlen((string) $url)){
 					$cchar = "";
 				}else{
 					$cchar = "&";
 				}
 			}
-			if(strpos($url,"?") === false){
+			if(!str_contains((string) $url,"?")){
 				$cchar = "?";
 			} 
 			return $cchar;  

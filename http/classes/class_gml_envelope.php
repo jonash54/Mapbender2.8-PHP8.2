@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_polygon.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_polygon.php");
 
 /**
  * 		Models a GML Envelope.
@@ -37,8 +37,8 @@ class GMLEnvelope extends GMLPolygon{
 		$corner1 = $domNode->firstChild;
 		$corner2 = $corner1->nextSibling;
 		
-		list($y1,$x1) = explode(' ',$corner1->nodeValue);
-		list($y2,$x2) = explode(' ',$corner2->nodeValue);
+		[$y1, $x1] = explode(' ',$corner1->nodeValue);
+		[$y2, $x2] = explode(' ',$corner2->nodeValue);
 
 		$this->addPoint($x1, $y1);
 		$this->addPoint($x1, $y2);

@@ -1,4 +1,12 @@
 <?php
+
+// __MB_PHP8_GUARD__ — load Mapbender globals defensively. In PHP 7 these
+// files relied on the implicit "undefined constant -> string" behaviour, but
+// PHP 8 fatals there. Guard prevents the fatal when the file is reached
+// directly (e.g. via include from a stand-alone HTTP entry).
+if (!defined('MB_VERSION_NUMBER') || !function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
 	ob_start();
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -13,15 +21,15 @@
 			var loadFromSession = false;
 <?php
 	$e_id = "wmcPublic";
-	require_once(dirname(__FILE__) . "/../php/mb_validatePermission.php");
-	require_once(dirname(__FILE__) . "/../classes/class_json.php");
-	require_once(dirname(__FILE__) . "/../extensions/jquery-1.3.2.min.js");
-	require_once(dirname(__FILE__) . "/../extensions/jqjson.js");
-	require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.core.js");
-	require_once(dirname(__FILE__) . "/../javascripts/core.php");
-	require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.tabs.js");
-	require_once(dirname(__FILE__) . "/../plugins/jq_upload.js");
-	require_once(dirname(__FILE__) . "/../extensions/dataTables-1.5/media/js/jquery.dataTables.min.js");
+	require_once(__DIR__ . "/../php/mb_validatePermission.php");
+	require_once(__DIR__ . "/../classes/class_json.php");
+	require_once(__DIR__ . "/../extensions/jquery-1.3.2.min.js");
+	require_once(__DIR__ . "/../extensions/jqjson.js");
+	require_once(__DIR__ . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.core.js");
+	require_once(__DIR__ . "/../javascripts/core.php");
+	require_once(__DIR__ . "/../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/min.ui.tabs.js");
+	require_once(__DIR__ . "/../plugins/jq_upload.js");
+	require_once(__DIR__ . "/../extensions/dataTables-1.5/media/js/jquery.dataTables.min.js");
 
 echo "var global_mb_log_js = '".LOG_JS."';";
 echo "var global_mb_log_level = '".LOG_LEVEL."';";
@@ -32,10 +40,10 @@ echo "var mb_nr = Mapbender.sessionId;\n";
 echo "Mapbender.sessionName = '".session_name()."';\n";
 echo "var mb_session_name = Mapbender.sessionName;\n";
 	
-	require_once(dirname(__FILE__) . "/../../lib/exception.js");
-	require_once(dirname(__FILE__) . "/../../lib/ajax.js");
-	require_once(dirname(__FILE__) . "/../../lib/basic.js");
-	require_once(dirname(__FILE__) . "/../javascripts/popup.js");
+	require_once(__DIR__ . "/../../lib/exception.js");
+	require_once(__DIR__ . "/../../lib/ajax.js");
+	require_once(__DIR__ . "/../../lib/basic.js");
+	require_once(__DIR__ . "/../javascripts/popup.js");
 	header('Content-type: text/html');
 ?>
 	$(function () {
@@ -56,7 +64,7 @@ echo "var mb_session_name = Mapbender.sessionName;\n";
 				};
 
 <?php
-	require_once(dirname(__FILE__) . "/../javascripts/mod_loadwmc.js");
+	require_once(__DIR__ . "/../javascripts/mod_loadwmc.js");
 	
 ?>
 			});

@@ -7,26 +7,19 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
-include(dirname(__FILE__) . "/../geoportal/class_gml3.php");
-include(dirname(__FILE__) . "/../../conf/gazetteerFlst.conf");
-include_once dirname(__FILE__) . "/geoJSONadditions.php";
+require_once(__DIR__ . "/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_json.php");
+include(__DIR__ . "/../geoportal/class_gml3.php");
+include(__DIR__ . "/../../conf/gazetteerFlst.conf");
+include_once __DIR__ . "/geoJSONadditions.php";
 
 //db connection
 $con = db_connect($DBSERVER, $OWNER, $PW) or die("Error while connecting database $dbname");
 db_select_db(DB, $con);
 
 $command = $_REQUEST['command'];
-$checkCommand = array(
-    "getGmkNr",
-    "getGmkName",
-    "getFluren",
-    "getFlz",
-    "getFln",
-    "getGeomForFlst"
-);
+$checkCommand = ["getGmkNr", "getGmkName", "getFluren", "getFlz", "getFln", "getGeomForFlst"];
 if (!in_array($command, $checkCommand)) {
     echo "Ungültiger Befehl";
     die();
@@ -44,20 +37,20 @@ function getGeoJson($featureType, $filter, $srs = null)
     } else {
         $wfsUrl = $wfsUrl . "&NAMESPACE=" . $nameSpace . "&username=" . $authUserName . "&password=" . $authUserPassword . "&typeName=" . $featureType . "&srsName=" . $srs . "&filter=";
     }
-    $req = urldecode($wfsUrl) . urlencode($admin->char_decode(stripslashes($filter)));
+    $req = urldecode($wfsUrl) . urlencode((string) $admin->char_decode(stripslashes((string) $filter)));
     $mygml = new gml3();
     $mygml->parseFile($req);
 
     header("Content-type:application/x-json; charset=utf-8");
     $geoJson = $mygml->toGeoJSON();
-    $jsonObj = json_decode($geoJson);
+    $jsonObj = json_decode((string) $geoJson);
     return $jsonObj;
 }
 
 if ($command == "getGmkNr") {
     $searchString = $_REQUEST['term'];
     $pattern = "/[a-z0-9]/i";
-    if (!preg_match($pattern, $searchString)) {
+    if (!preg_match($pattern, (string) $searchString)) {
         echo "Ungültiger Suchbegriff";
         die();
     }
@@ -70,15 +63,10 @@ if ($command == "getGmkNr") {
 
 
     $resultObj = getGeoJson($searchFeaturetype, $filter);
-    $resultArray = array();
+    $resultArray = [];
 
     foreach ($resultObj->features as $feature) {
-        $resultArray[] = array(
-            "id" => $feature->properties->ID,
-            "label" => $feature->properties->ID,
-            "value"   => $feature->properties->ID,
-            "gmkName" => $feature->properties->NAME
-        );
+        $resultArray[] = ["id" => $feature->properties->ID, "label" => $feature->properties->ID, "value"   => $feature->properties->ID, "gmkName" => $feature->properties->NAME];
     }
 
     header("Content-type:application/json; charset=utf-8");
@@ -86,22 +74,17 @@ if ($command == "getGmkNr") {
 }
 
 if ($command == "getGmkName") {
-    $searchString = utf8_encode($_REQUEST['term']);
+    $searchString = mb_convert_encoding($_REQUEST['term'], 'UTF-8', 'ISO-8859-1');
     $searchFeaturetype = $featuretypeGmkNr;
     $filter = '<Filter xmlns="http://www.opengis.net/ogc" xmlns:app="http://www.deegree.org/app"><PropertyIsLike wildCard="*" singleChar="?" escape="#" matchCase="false">
             				<PropertyName>' . $gmkNameAttr . '</PropertyName>
                 			<Literal>*' . $searchString . '*</Literal>
         					</PropertyIsLike></Filter>';
     $resultObj = getGeoJson($searchFeaturetype, $filter);
-    $resultArray = array();
+    $resultArray = [];
 
     foreach ($resultObj->features as $feature) {
-        $resultArray[] = array(
-            "id" => $feature->properties->NAME,
-            "label" => $feature->properties->NAME,
-            "value"   => $feature->properties->NAME,
-            "gmkNr" => $feature->properties->ID
-        );
+        $resultArray[] = ["id" => $feature->properties->NAME, "label" => $feature->properties->NAME, "value"   => $feature->properties->NAME, "gmkNr" => $feature->properties->ID];
     }
 
     header("Content-type:application/json; charset=utf-8");
@@ -111,7 +94,7 @@ if ($command == "getGmkName") {
 if ($command == "getFluren") {
     $gmkNr = $_REQUEST['gmkNr'];
     $pattern = "/[0-9]/i";
-    if (!preg_match($pattern, $gmkNr)) {
+    if (!preg_match($pattern, (string) $gmkNr)) {
         echo "Ungültige Gemarkungsnr";
         die();
     }
@@ -123,7 +106,7 @@ if ($command == "getFluren") {
         					</PropertyIsEqualTo></Filter>';
 
     $resultObj = getGeoJson($searchFeaturetype, $filter);
-    $resultArray = array();
+    $resultArray = [];
     foreach ($resultObj->features as $feature) {
         $resultArray[] = $feature->properties->NAME;
     }
@@ -137,11 +120,11 @@ if ($command == "getFlz") {
     $gmkNr = $_REQUEST['gmkNr'];
     $flurNr = $_REQUEST['flurNr'];
     $pattern = "/[0-9]/i";
-    if (!preg_match($pattern, $gmkNr)) {
+    if (!preg_match($pattern, (string) $gmkNr)) {
         echo "Ungültige Gemarkungsnr";
         die();
     }
-    if (!preg_match($pattern, $flurNr)) {
+    if (!preg_match($pattern, (string) $flurNr)) {
         echo "Ungültige Flurnr";
         die();
     }
@@ -159,7 +142,7 @@ if ($command == "getFlz") {
         </And></Filter>';
 
     $resultObj = getGeoJson($searchFeaturetype, $filter);
-    $resultArray = array();
+    $resultArray = [];
     foreach ($resultObj->features as $feature) {
         $resultArray[] = $feature->properties->ID;
     }
@@ -175,15 +158,15 @@ if ($command == "getFln") {
     $flurNr = $_REQUEST['flurNr'];
     $flz = $_REQUEST['flz'];
     $pattern = "/[0-9]/i";
-    if (!preg_match($pattern, $gmkNr)) {
+    if (!preg_match($pattern, (string) $gmkNr)) {
         echo "Ungültige Gemarkungsnr";
         die();
     }
-    if (!preg_match($pattern, $flurNr)) {
+    if (!preg_match($pattern, (string) $flurNr)) {
         echo "Ungültige Flurnr";
         die();
     }
-    if (!preg_match($pattern, $flz)) {
+    if (!preg_match($pattern, (string) $flz)) {
         echo "Ungültiger Flz";
         die();
     }
@@ -205,9 +188,9 @@ if ($command == "getFln") {
         </And></Filter>';
 
     $resultObj = getGeoJson($searchFeaturetype, $filter);
-    $resultArray = array();
+    $resultArray = [];
     foreach ($resultObj->features as $feature) {
-        $resultArray[] = array("id" => $feature->properties->ID);
+        $resultArray[] = ["id" => $feature->properties->ID];
     }
 
     header("Content-type:application/json; charset=utf-8");
@@ -222,15 +205,15 @@ if ($command == "getGeomForFlst") {
     $fln = $_REQUEST['fln'];
     $srs = $_REQUEST['srs'];
     $pattern = "/[0-9]/i";
-    if (!preg_match($pattern, $gmkNr)) {
+    if (!preg_match($pattern, (string) $gmkNr)) {
         echo "Ungültige Gemarkungsnr";
         die();
     }
-    if (!preg_match($pattern, $flurNr)) {
+    if (!preg_match($pattern, (string) $flurNr)) {
         echo "Ungültige Flurnr";
         die();
     }
-    if (!preg_match($pattern, $flz)) {
+    if (!preg_match($pattern, (string) $flz)) {
         echo "Ungültiger Flz";
         die();
     }

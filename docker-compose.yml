@@ -1,0 +1,153 @@
+# Mapbender 2.8 PHP-8.2 migration dev environment.
+#
+# Three primary services:
+#   - postgis         shared database, seeded from resources/db/ on first start
+#   - mapbender-legacy  PHP 7.4 + Apache on Debian 11   (read-only baseline)
+#   - mapbender-php8    PHP 8.2 + Apache on Debian 12   (migration target)
+#
+# Plus support services for testing:
+#   - wms-mock        canned WMS endpoints for deterministic tests
+#   - mig-tools       on-demand container with rector/phpstan/phpcs
+#
+# Usage:
+#   make up           start everything
+#   make seed         re-seed the DB (drops volume first)
+#   make record       record characterization baseline (against legacy)
+#   make test         replay tests against php8
+#
+# The Mapbender source tree is bind-mounted into both web containers so
+# edits land in both immediately. The DB is shared so a 1:1 behavior diff
+# between PHP versions is observable.
+
+services:
+
+  postgis:
+    build:
+      context: .
+      dockerfile: docker/postgis/Dockerfile
+    image: mapbender-postgis:dev
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+      # Mapbender's bundled SQL seed files (read-only).
+      - ./resources/db:/mapbender-sql:ro
+      # Optional: test fixtures (deterministic users etc.) -- created in Phase 4
+      - ./tests/characterization/fixtures:/test-fixtures:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - mapnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # OPTIONAL — only useful for behaviour-parity work against the pre-PHP-8
+  # snapshot during the migration itself. Colleagues integrating the fork
+  # do NOT need this service.
+  #
+  # The legacy container serves the pre-Rector code from a sibling git
+  # worktree. Default expects ../mapbender-legacy/ next to this repo;
+  # override with LEGACY_PATH=/abs/path docker compose up if you put the
+  # worktree elsewhere. Create the worktree with:
+  #   git worktree add ../mapbender-legacy <upstream-tip-commit>
+  mapbender-legacy:
+    build:
+      context: .
+      dockerfile: docker/legacy/Dockerfile
+    image: mapbender-legacy:dev
+    environment:
+      DBSERVER: postgis
+      DBPORT: "5432"
+      DBNAME: mapbender
+      DBOWNER: mapbenderdbuser
+      DBPASSWORD: mapbenderdbpassword
+    volumes:
+      - "${LEGACY_PATH:-../mapbender-legacy}:/var/www/html/mapbender"
+    ports:
+      - "127.0.0.1:${MB_LEGACY_PORT:-8090}:80"
+    networks:
+      - mapnet
+    depends_on:
+      postgis:
+        condition: service_healthy
+    profiles: ["legacy"]   # opt-in only — `docker compose --profile legacy up`
+
+  mapbender-php8:
+    build:
+      context: .
+      dockerfile: docker/php8/Dockerfile
+      target: dev
+    image: mapbender-php8:dev
+    environment:
+      DBSERVER: postgis
+      DBPORT: "5432"
+      DBNAME: mapbender
+      DBOWNER: mapbenderdbuser
+      DBPASSWORD: mapbenderdbpassword
+    volumes:
+      - ./:/var/www/html/mapbender
+    ports:
+      - "127.0.0.1:${MB_PHP8_PORT:-8091}:80"
+    networks:
+      - mapnet
+    depends_on:
+      postgis:
+        condition: service_healthy
+
+  wms-mock:
+    build:
+      context: .
+      dockerfile: docker/wms-mock/Dockerfile
+    image: mapbender-wms-mock:dev
+    networks:
+      mapnet:
+        aliases:
+          - wms-mock
+          # In tests, point external WMS URLs at this host. We use
+          # extra_hosts on the consuming services if needed.
+    ports:
+      - "127.0.0.1:${MB_WMSMOCK_PORT:-8092}:80"
+
+  # On-demand: Playwright runner. Run with
+  #   docker compose --profile tests run --rm playwright
+  # The container has node + chromium pre-installed. The repo is bind-mounted
+  # at /work, so the tests/characterization/ folder is reachable as ./.
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.60.0-jammy
+    working_dir: /work/tests/characterization
+    volumes:
+      - ./:/work
+    networks:
+      - mapnet
+    # default: install deps + run all specs against php8
+    command: >
+      bash -lc "npm ci --prefer-offline --no-audit --silent || npm install --silent
+      && BASE_URL=http://mapbender-php8 npx playwright test --reporter=list"
+    profiles: ["tests"]
+
+  # On-demand: rector/phpstan/phpcs runner.
+  # `docker compose run --rm mig-tools rector ...`
+  mig-tools:
+    build:
+      context: .
+      dockerfile: docker/php8/Dockerfile
+      target: tools
+    image: mapbender-mig-tools:dev
+    volumes:
+      - ./:/var/www/html/mapbender
+    working_dir: /var/www/html/mapbender
+    networks:
+      - mapnet
+    profiles: ["tools"]   # only starts on explicit `--profile tools`
+
+volumes:
+  postgis-data:
+
+networks:
+  mapnet:
+    driver: bridge

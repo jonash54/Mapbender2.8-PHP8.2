@@ -5,11 +5,11 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_ows_factory.php";
-require_once dirname(__FILE__) . "/../classes/class_wmc.php";
-require_once dirname(__FILE__) . "/../classes/class_connector.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_ows_factory.php";
+require_once __DIR__ . "/../classes/class_wmc.php";
+require_once __DIR__ . "/../classes/class_connector.php";
+require_once __DIR__ . "/../classes/class_administration.php";
 
 /**
  * Creates WMC 1.1.0 objects.
@@ -27,9 +27,9 @@ class WmcFactory extends OwsFactory {
 	public function createFromXml ($xml, $auth=false) {
 		try {
 			$wmc = new wmc();
-			$wmc->createFromXml($xml, $auth);
+			$wmc->createFromXml($xml);
 		}
-		catch (Exception $e) {
+		catch (Exception) {
 			throw new Exception("Could not create WMC from XML.");
 		}
 		return $wmc;
@@ -43,7 +43,7 @@ class WmcFactory extends OwsFactory {
 				throw new Exception("Could not create WMC from DB.");
 			}
 		}
-		catch (Exception $e) {
+		catch (Exception) {
 			throw new Exception("Could not create WMC from DB.");
 		}
 		return $wmc;

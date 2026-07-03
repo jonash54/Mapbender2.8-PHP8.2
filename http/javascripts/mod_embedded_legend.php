@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -34,8 +34,8 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 include_once '../include/dyn_css.php';
 
 $sql = "SELECT DISTINCT e_target, e_width, e_height FROM gui_element WHERE e_id = 'legend_embedded' AND fkey_gui_id = $1";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 $cnt = 0;
 while($row = db_fetch_array($res)){
@@ -47,8 +47,8 @@ if($cnt > 1){
 }
 #target position, with and height...
 $sql = "SELECT e_left,e_top,e_width,e_height FROM gui_element WHERE e_id = '".$e_target."' AND fkey_gui_id = $1";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 echo "<script type='text/javascript'>";
 echo "var mod_legend_target = '".$e_target."';";

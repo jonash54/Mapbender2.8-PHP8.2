@@ -1,9 +1,9 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_stripRequest.php");
-require_once(dirname(__FILE__)."/../classes/class_weldMaps2JPEG.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_stripRequest.php");
+require_once(__DIR__."/../classes/class_weldMaps2JPEG.php");
 
 $ajaxResponse  = new AjaxResponse($_REQUEST);
 
@@ -26,8 +26,8 @@ switch ($ajaxResponse->getMethod()) {
 	case "saveWmcPreview":
 		//check if all urls have been send - sometimes only false is send - then delete this entry!
 		//loop
-		$mapUrlsNew = array();
-		$problemUrls = array();
+		$mapUrlsNew = [];
+		$problemUrls = [];
 		for($i=0; $i<count($mapUrls); $i++){
 			if ($mapUrls[$i] != 'false') {
 				$mapUrlsNew[] = $mapUrls[$i];
@@ -35,7 +35,7 @@ switch ($ajaxResponse->getMethod()) {
 				$problemUrls[] = $i;
 			}
 		}
-		$listOfProblemUrls = implode($problemUrls,",");
+		$listOfProblemUrls = implode(",", $problemUrls);
 		$mapUrls = $mapUrlsNew;			
 		$img = new weldMaps2JPEG(implode("___",$mapUrls), PREVIEW_DIR."/".$wmcId."_wmc_preview.jpg");
 		if(!$img) {

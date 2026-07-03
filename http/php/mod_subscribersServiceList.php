@@ -1,4 +1,3 @@
-
 <?php
 # $Id: mod_monitorCapabilities_read.php 517 2006-11-21 12:37:01Z christoph $
 # http://www.mapbender.org/index.php/Monitor_Capabilities
@@ -17,9 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_user.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
@@ -79,28 +78,28 @@ $user = new User();
 //echo $user->id."<br>";
 //only logged in user can see their subscribed services
 $sql = "SELECT DISTINCT mb_wms_availability.fkey_wms_id FROM mb_wms_availability,mb_user_abo_ows WHERE mb_wms_availability.fkey_wms_id=mb_user_abo_ows.fkey_wms_id AND mb_user_abo_ows.fkey_mb_user_id=$1";
-$res = db_prep_query($sql, array($user->id), array("i"));
+$res = db_prep_query($sql, [$user->id], ["i"]);
 $cnt = 0;
-$wms = array();
+$wms = [];
 while(db_fetch_row($res)){
 	$wms[$cnt] = db_result($res,$cnt,"fkey_wms_id");
 	
 	$cnt++;
 }
-$status = array();
-$upload_id = array();
+$status = [];
+$upload_id = [];
 for ($i=0; $i<count($wms); $i++) {
 	$wms_id[$wms[$i]] = $wms[$i];
         // get layer id
         $sql = "select layer_id from layer where fkey_wms_id= $1 and layer_pos=0";
-        $v = array($wms[$i]);
-        $t = array('i');
+        $v = [$wms[$i]];
+        $t = ['i'];
         $res = db_prep_query($sql,$v,$t);
         $layer_id[$wms[$i]] = db_result($res,0,0);
 	$sql = "SELECT fkey_upload_id,last_status, status_comment, upload_url,availability ,average_resp_time, map_url, image FROM mb_wms_availability ";
 	$sql .= "WHERE fkey_wms_id = $1";
-	$v = array($wms_id[$wms[$i]]);
-	$t = array('i');
+	$v = [$wms_id[$wms[$i]]];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
         $avg_response_time[$wms[$i]] = round(db_result($res,0,"average_resp_time"),1);
 	$status[$wms[$i]] = intval(db_result($res,0,"last_status"));
@@ -215,24 +214,24 @@ $str .= "\n\t</table>\n\t<br/>\n</form>";
 //********************************************************************************************************************************************************************************
 //only logged in user can see their subscribed services
 $sql = "SELECT DISTINCT mb_wfs_availability.fkey_wfs_id FROM mb_wfs_availability,mb_user_abo_ows WHERE mb_wfs_availability.fkey_wfs_id=mb_user_abo_ows.fkey_wfs_id AND mb_user_abo_ows.fkey_mb_user_id=$1";
-$res = db_prep_query($sql, array($user->id), array("i"));
+$res = db_prep_query($sql, [$user->id], ["i"]);
 $cnt = 0;
-$wfs = array();
+$wfs = [];
 while(db_fetch_row($res)){
 	$wfs[$cnt] = db_result($res,$cnt,"fkey_wfs_id");
 	
 	$cnt++;
 }
-$status = array();
-$upload_id = array();
+$status = [];
+$upload_id = [];
 for ($i=0; $i<count($wfs); $i++) {
 	//$e = new mb_exception("wfs: ".$wfs[$i]);
 	//$str.= "<br>"."wfs: ".$wfs[$i]."<br>";
 	$wfs_id[$wfs[$i]] = $wfs[$i];
 	$sql = "SELECT fkey_upload_id, last_status, status_comment, upload_url, availability, average_resp_time FROM mb_wfs_availability ";
 	$sql .= "WHERE fkey_wfs_id = $1";
-	$v = array($wfs_id[$wfs[$i]]);
-	$t = array('i');
+	$v = [$wfs_id[$wfs[$i]]];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
         $avg_response_time[$wfs[$i]] = round(db_result($res,0,"average_resp_time"),1);
 	$status[$wfs[$i]] = intval(db_result($res,0,"last_status"));

@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_metadata_monitor.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_metadata_monitor.php");
 
 class Layer_load_count {
 
@@ -36,8 +36,8 @@ class Layer_load_count {
 
 		//check if an entry exists for the current layer id
 		$sql = "SELECT COUNT(layer_id) AS i FROM layer WHERE layer_id = $1";
-		$v = array($layer_id);
-		$t = array('i');
+		$v = [$layer_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if (intval($row["i"]) === 0) {
@@ -46,8 +46,8 @@ class Layer_load_count {
 
 		//check if an entry exists for the current layer id
 		$sql = "SELECT load_count FROM layer_load_count WHERE fkey_layer_id = $1";
-		$v = array($layer_id);
-		$t = array('i');
+		$v = [$layer_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 
@@ -55,15 +55,15 @@ class Layer_load_count {
 		if ($row) {
 			$currentCount = $row["load_count"];
 			$sql = "UPDATE layer_load_count SET load_count = $1 WHERE fkey_layer_id = $2";
-			$v = array(intval($currentCount + 1), $layer_id);
-			$t = array('i', 'i');
+			$v = [intval($currentCount + 1), $layer_id];
+			$t = ['i', 'i'];
 			$res = db_prep_query($sql, $v, $t);
 		}
 		//if no, insert a new row with current layer id and load_count = 1
 		else {
 			$sql = "INSERT INTO layer_load_count (fkey_layer_id, load_count) VALUES ($1, 1)";
-			$v = array($layer_id);
-			$t = array('i');
+			$v = [$layer_id];
+			$t = ['i'];
 			$res = db_prep_query($sql, $v, $t);
 		}
 	}
@@ -76,14 +76,14 @@ class Layer_load_count {
 		//check for existing entry in load count table, if not exist - insert zero value
 		$sql = "SELECT fkey_layer_id FROM layer_load_count WHERE fkey_layer_id IN (".$layerIdString.")";
 		$res = db_query($sql);
-		$existingLayerIds = array();
+		$existingLayerIds = [];
 		while($row = db_fetch_array($res)) {
 			array_push($existingLayerIds, $row["fkey_layer_id"]);
 		}
 		//check for existing layers in layer table
 		$sql = "SELECT layer_id FROM layer WHERE layer_id IN (".$layerIdString.")";
 		$res = db_query($sql);
-		$existingLayerIdsInLayer = array();
+		$existingLayerIdsInLayer = [];
 		while($row = db_fetch_array($res)) {
 			array_push($existingLayerIdsInLayer, $row["layer_id"]);
 		}
@@ -91,7 +91,7 @@ class Layer_load_count {
 		$layerIdArray = array_intersect($layerIdArray,$existingLayerIdsInLayer);
 		//filter out those layers which are defined in mapbender.conf not to be counted
 		if (DEFINED("LAYERS_EXCLUDED_FROM_COUNTING")) {
-			$arraysToExclude = explode(',',LAYERS_EXCLUDED_FROM_COUNTING);
+			$arraysToExclude = explode(',',(string) LAYERS_EXCLUDED_FROM_COUNTING);
 			//delete this layers from array
 			$layerIdArray = array_diff($layerIdArray, $arraysToExclude);
 		}
@@ -117,7 +117,7 @@ class Layer_load_count {
 				$sql = "SELECT fkey_metadata_id FROM ows_relation_metadata WHERE fkey_layer_id IN (".implode(',',$layerIdArray).")";
 				$metadataMonitor = new Metadata_load_count();
 				$res = db_query($sql);
-				$coupledMetadata = array();
+				$coupledMetadata = [];
 				while($row = db_fetch_array($res)) {
 					array_push($coupledMetadata, $row["fkey_metadata_id"]);
 				}

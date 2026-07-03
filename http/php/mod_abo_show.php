@@ -18,10 +18,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id = "monitor_abo_show";
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/mapbender.conf");
 #require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_user.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -75,7 +75,7 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 		//do descriptive header
 		echo "<h3>" . 
 			htmlentities(
-				$email_form_text,
+				(string) $email_form_text,
 				ENT_QUOTES,
 				CHARSET
 			) . ":</h3>";
@@ -96,8 +96,8 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 		$body_urllist = "\n\n" . 
 			$email_body_info . 
 			":\n";
-		if (preg_match("/^[0-9]+(,[0-9]+)*$/", $_POST['wmslist'])) {
-			$wms_array = explode(',',$_POST['wmslist']);
+		if (preg_match("/^[0-9]+(,[0-9]+)*$/", (string) $_POST['wmslist'])) {
+			$wms_array = explode(',',(string) $_POST['wmslist']);
 			if (defined("MAPBENDER_PATH") && MAPBENDER_PATH != '') {
 				$metadataUrl = MAPBENDER_PATH."/php/mod_showMetadata.php?resource=layer&id=";
 			} else {
@@ -115,8 +115,8 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 			for ($i=0; $i<count($wms_array); $i++) {
 			// get layer id
 	       		$sql = "select layer_id from layer where fkey_wms_id= $1 and layer_pos = 0";
-	       		$v = array($wms_array[$i]);
-	        	$t = array('i');
+	       		$v = [$wms_array[$i]];
+	        	$t = ['i'];
 	        	$res = db_prep_query($sql,$v,$t);
 			$layerid_body=db_result($res,0,0);
 	        	$body_urllist .= $metadataUrl . $layerid_body . "\n";
@@ -132,12 +132,12 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 			$res=db_query($sql);
 			$cnt = 0;
 			//Initialisieren des Arrays
-			$user_email=array();
+			$user_email=[];
 			//Herauslesen der Ergebnisse
 			//echo "wmslist ist gesetzt!\n<br>";
 			echo "<h3>" . 
 				htmlentities(
-					$wms_list_text,
+					(string) $wms_list_text,
 					ENT_QUOTES,
 					CHARSET
 				) . ":</h3> ".$_POST['wmslist']."\n<br><br>";
@@ -154,8 +154,8 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 					$user_email[$cnt], 
 					$mail_user_recipient,
 					$mail_user_topic . " " . date("F j, Y, G:i:s"), 
-					utf8_decode(strip_tags($_POST['emailtext']) . "\n\n" . $further_inquiry_text . 
-					": " . $mail_wms_owner . "\n" . $body_urllist));
+					mb_convert_encoding(strip_tags((string) $_POST['emailtext']) . "\n\n" . $further_inquiry_text . 
+					": " . $mail_wms_owner . "\n" . $body_urllist, 'ISO-8859-1'));
 				$cnt++;
 			}
 			//controll mail for wms_owner
@@ -165,14 +165,14 @@ if ($checkboxes > 0 || isset($_POST['wmslist'])){
 				$mail_wms_owner, 
 				$mail_admin_recipient,
 				$mail_admin_topic . " " . date("F j, Y, G:i:s"), 
-				utf8_decode(_mb($mail_admin_body, $cnt).
+				mb_convert_encoding(_mb($mail_admin_body, $cnt).
 				"\n\n" . 
-				strip_tags($_POST['emailtext']) . $body_urllist));
+				strip_tags((string) $_POST['emailtext']) . $body_urllist, 'ISO-8859-1'));
 		
 		
 			echo "<br>" . 
 				htmlentities(
-					$email_sent_text,
+					(string) $email_sent_text,
 					ENT_QUOTES,
 					CHARSET
 				) . "<br>";
@@ -188,38 +188,38 @@ else {
 	//
 	$sql = "SELECT DISTINCT mb_monitor.fkey_wms_id FROM mb_monitor, wms " . 
 		"WHERE mb_monitor.fkey_wms_id = wms.wms_id AND wms.wms_owner = $1"; 
-	$res = db_prep_query($sql, array($user->id), array("i"));
+	$res = db_prep_query($sql, [$user->id], ["i"]);
 	
-	$wms = array();
+	$wms = [];
 	while($row = db_fetch_array($res)){
 		$wms[] = $row["fkey_wms_id"];
 	}
 	
-	$status = array();
-	$upload_id = array();
+	$status = [];
+	$upload_id = [];
 	for ($i=0; $i<count($wms); $i++) {
 		$wms_id[$wms[$i]] = $wms[$i];
 		
 	
         // get layer id
         $sql = "select layer_id from layer where fkey_wms_id= $1 and layer_pos=0";
-        $v = array($wms[$i]);
-        $t = array('i');
+        $v = [$wms[$i]];
+        $t = ['i'];
         $res = db_prep_query($sql,$v,$t);
         $layer_id[$wms[$i]] = db_result($res,0,0);
 	
 		#Schleife zur Zaehlung der user die den jeweiligen Dienst abonniert haben
 		$sql = "select count(*) from mb_user_abo_ows where fkey_wms_id=$1";
-	        $v = array($wms[$i]);
-	        $t = array('i');
+	        $v = [$wms[$i]];
+	        $t = ['i'];
 	        $res = db_prep_query($sql,$v,$t);
 	        $abo_count[$wms[$i]] = db_result($res,0,0);
 		
 		$sql = "SELECT fkey_upload_id,last_status, status_comment, " . 
 			"upload_url, availability, average_resp_time " . 
 			"FROM mb_wms_availability WHERE fkey_wms_id = $1";
-		$v = array($wms_id[$wms[$i]]);
-		$t = array('i');
+		$v = [$wms_id[$wms[$i]]];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 	    $avg_response_time[$wms[$i]] = round(db_result($res,0,"average_resp_time"),1);
 		$status[$wms[$i]] = intval(db_result($res,0,"last_status"));

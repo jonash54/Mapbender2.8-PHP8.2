@@ -17,15 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * A class for using a variable cache such as apc or mechached.
  * In the first version only some functions from apc are provided.
  */
 class Cache {
-	var $cacheType;
-	var $isActive; # boolean
+	public $cacheType;
+	public $isActive; # boolean
 
 	/**
 	 * @constructor
@@ -49,17 +49,11 @@ class Cache {
 	}
 
 	final public function cachedVariableFetch($key) {
-		switch ($this->cacheType) {
-			case "apc":
-				return apc_fetch($key);
-			break;
-			case "apcu":
-				return apcu_fetch($key);
-			break;
-			default:
-				return false;
-			break;
-		}
+		return match ($this->cacheType) {
+      "apc" => apc_fetch($key),
+      "apcu" => apcu_fetch($key),
+      default => false,
+  };
 	}
 
 	final public function cachedVariableExists($key) {
@@ -118,31 +112,19 @@ class Cache {
 	}
 
 	final public function cachedVariableAdd($key, $value, $ttl = 0) {
-		switch ($this->cacheType) {
-			case "apc":
-				return apc_add($key, $value, $ttl);
-			break;
-			case "apcu":
-				return apcu_add($key, $value, $ttl);
-			break;
-			default:
-				return false;
-			break;
-		}
+		return match ($this->cacheType) {
+      "apc" => apc_add($key, $value, $ttl),
+      "apcu" => apcu_add($key, $value, $ttl),
+      default => false,
+  };
 	}
 
 	final public function cachedVariableDelete($key) {
-		switch ($this->cacheType) {
-			case "apc":
-				return apc_delete($key);
-			break;
-			case "apcu":
-				return apcu_delete($key);
-			break;
-			default:
-				return false;
-			break;
-		}
+		return match ($this->cacheType) {
+      "apc" => apc_delete($key),
+      "apcu" => apcu_delete($key),
+      default => false,
+  };
 	}
 
 

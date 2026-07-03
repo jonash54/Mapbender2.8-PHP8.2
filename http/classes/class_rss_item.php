@@ -5,10 +5,10 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_rss.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_rss.php");
 
-class RssItem {
+class RssItem implements \Stringable {
 	protected $title;
 	protected $description;
 	protected $url;
@@ -42,7 +42,7 @@ class RssItem {
         $this->description = $description;
 	}
 	
-	public function __toString () {
+	public function __toString (): string {
         return '<item>'."\n" . 
         	$this->getItemString() . '</item>'."\n";  
 #        return '<item rdf:about="' . $this->url . '">'."\n" . 
@@ -51,7 +51,7 @@ class RssItem {
 	
 	protected function getItemString () {
         return '<title>' . $this->title . '</title>' . "\n" . 
-			'<link>' . htmlentities($this->url, ENT_QUOTES, CHARSET) . '</link>' . "\n" . 
+			'<link>' . htmlentities((string) $this->url, ENT_QUOTES, CHARSET) . '</link>' . "\n" . 
 			'<description>' . $this->description . '</description>' . "\n" . '<pubDate>' . $this->pubDate . '</pubDate>' . "\n";
 //			'<feedburner:origLink>' . $this->url . '</feedburner:origLink>' . 
 //			"\n";

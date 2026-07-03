@@ -1,8 +1,8 @@
 <?php
 ob_start();
 $e_id="CustomizeTree";
-require_once(dirname(__FILE__) . "/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../php/mb_validatePermission.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -39,16 +39,16 @@ require_once(dirname(__FILE__) . "/../classes/class_json.php");
 		<script type='text/javascript'>
 <?php
 
-	require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js");
-	require_once(dirname(__FILE__) . "/../extensions/jquery-ui-1.8.1.custom/development-bundle/ui/jquery-ui-1.8.1.custom.js");
+	require_once(__DIR__ . "/../extensions/jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js");
+	require_once(__DIR__ . "/../extensions/jquery-ui-1.8.1.custom/development-bundle/ui/jquery-ui-1.8.1.custom.js");
 	//require_once(dirname(__FILE__) . "/../extensions/jquery-ui-personalized-1.5.2.js");
-	require_once(dirname(__FILE__) . "/../extensions/jquery.contextmenu.r2.js");
-	require_once(dirname(__FILE__) . "/../extensions/jqjson.js");
-	require_once(dirname(__FILE__) . "/../javascripts/popup.js");
-	require_once(dirname(__FILE__) . "/../javascripts/core.php");
-	require_once(dirname(__FILE__) . "/../../lib/customTreeModel.js");
-	require_once(dirname(__FILE__) . "/../../lib/customTreeController.js");
-	require_once(dirname(__FILE__) . "/../../lib/buttonNew.js");
+	require_once(__DIR__ . "/../extensions/jquery.contextmenu.r2.js");
+	require_once(__DIR__ . "/../extensions/jqjson.js");
+	require_once(__DIR__ . "/../javascripts/popup.js");
+	require_once(__DIR__ . "/../javascripts/core.php");
+	require_once(__DIR__ . "/../../lib/customTreeModel.js");
+	require_once(__DIR__ . "/../../lib/customTreeController.js");
+	require_once(__DIR__ . "/../../lib/buttonNew.js");
 	header('Content-type: text/html');
 ?>
 			var myTree = new CustomTree();

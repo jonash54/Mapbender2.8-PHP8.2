@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 //Get list of makiicons for digitizing objects and showing svg layer on map
 
 ?>

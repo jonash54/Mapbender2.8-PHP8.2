@@ -1,0 +1,16 @@
+# Keep build contexts small
+.git
+.github
+.idea
+.vscode
+.remember
+.claude
+node_modules
+tests/characterization/node_modules
+tests/characterization/test-results
+tests/characterization/playwright-report
+migration-tools/reports
+vendor
+*.log
+docker/postgis/data
+docs

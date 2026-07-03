@@ -23,16 +23,16 @@ The uuid of the registrated featuretype is used as fileidentifier of the metadat
 The record will be fulfill the demands of the INSPIRE metadata regulation from 03.12.2008 and the iso19139:2005.
 New 2019-09-30: Also metadata for mapbenders LinkedDataProxy (OGC API Features Interface) is generated.
 */
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../php/mod_validateInspire.php");
-require_once(dirname(__FILE__) . "/../classes/class_iso19139.php");
-require_once(dirname(__FILE__) . "/../classes/class_XmlBuilder.php");
-require_once(dirname(__FILE__)."/../classes/class_owsConstraints.php");
-require_once(dirname(__FILE__)."/../classes/class_qualityReport.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../php/mod_validateInspire.php");
+require_once(__DIR__ . "/../classes/class_iso19139.php");
+require_once(__DIR__ . "/../classes/class_XmlBuilder.php");
+require_once(__DIR__."/../classes/class_owsConstraints.php");
+require_once(__DIR__."/../classes/class_qualityReport.php");
 
-if (file_exists(dirname(__FILE__)."/../../conf/linkedDataProxy.json")) {
+if (file_exists(__DIR__."/../../conf/linkedDataProxy.json")) {
      $configObject = json_decode(file_get_contents("../../conf/linkedDataProxy.json"));
 }
 if (isset($configObject) && isset($configObject->behind_rewrite) && $configObject->behind_rewrite == true) {
@@ -79,7 +79,7 @@ if (isset($_REQUEST['ID']) & $_REQUEST['ID'] != "") {
 	//validate integer
 	$testMatch = $_REQUEST["ID"];
 	$pattern = '/^[\d]*$/';		
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		// echo 'Id: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Id is not valid (integer).<br/>'; 
 		die(); 		
@@ -103,7 +103,7 @@ if ($_REQUEST['OUTPUTFORMAT'] == "iso19139" || $_REQUEST['OUTPUTFORMAT'] == "rdf
 	$iso19139Doc->formatOutput = true;
 	$outputFormat = $_REQUEST['OUTPUTFORMAT'];
     if (!@$iso19139Doc->load(
-            dirname(__FILE__) . "/../geoportal/metadata_templates/srv_wfs_inspire.xml",
+            __DIR__ . "/../geoportal/metadata_templates/srv_wfs_inspire.xml",
             LIBXML_DTDLOAD | LIBXML_DTDATTR | LIBXML_NOENT | LIBXML_XINCLUDE)) {
         echo 'A xml template is not found.<br/>'; 
         die();
@@ -117,17 +117,11 @@ if ($_REQUEST['OUTPUTFORMAT'] == "iso19139" || $_REQUEST['OUTPUTFORMAT'] == "rdf
 
 if (!($_REQUEST['CN'] == "false")) {
 	//overwrite outputFormat for special headers:
-	switch ($_SERVER["HTTP_ACCEPT"]) {
-		case "application/rdf+xml":
-			$outputFormat="rdf";
-		break;
-		case "text/html":
-			$outputFormat="html";
-		break;
-		default:
-			$outputFormat="iso19139";
-		break;
-	}
+	$outputFormat = match ($_SERVER["HTTP_ACCEPT"]) {
+     "application/rdf+xml" => "rdf",
+     "text/html" => "html",
+     default => "iso19139",
+ };
 }
 
 //if validation is requested
@@ -169,7 +163,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
                 . ",wfs.wfs_timestamp_create,wfs.wfs_owner,wfs.administrativearea,wfs.postalcode,wfs.voice"
                 . ",wfs.facsimile,wfs.wfs_owsproxy,wfs.electronicmailaddress,wfs.country,wfs.fkey_mb_group_id"
                 . ",wfs.wfs_version"
-                
+
 //                . ",ft_epsg.minx || ',' || ft_epsg.miny || ',' || ft_epsg.maxx || ',' || ft_epsg.maxy  as bbox"         ########## latlon_bbox
                 . " FROM"
                 . " wfs"
@@ -185,8 +179,8 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
                 . ",wfs.facsimile,wfs.wfs_owsproxy,wfs.electronicmailaddress,wfs.country,wfs.fkey_mb_group_id"
                 . ",wfs.wfs_version FROM wfs WHERE wfs_id = $1";
         }
-	$v = array((integer)$recordId);
-	$t = array('i');
+	$v = [(integer)$recordId];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	$mbMeta = db_fetch_array($res);
 
@@ -204,7 +198,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
     //how to generate fileidentifier 
     switch ($serviceType) {
         case "wfs": 
-            $fileIdentifier = isset($mbMeta['uuid']) ? $mbMeta['uuid']: "no id found";
+            $fileIdentifier = $mbMeta['uuid'] ?? "no id found";
 	    break;
 	case "ogcapifeatures":
 	    $uuidHash = md5($mbMeta['uuid']."ogcapifeatures");
@@ -216,44 +210,44 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
             break;   
     }
     $xmlBuilder->addValue($MD_Metadata, './gmd:fileIdentifier/gco:CharacterString', $fileIdentifier);
-    
+
     $xmlBuilder->addValue($MD_Metadata, './gmd:language/gmd:LanguageCode',
-            isset($mbMeta['metadata_language']) ? $mbMeta['metadata_language'] : 'ger');
+            $mbMeta['metadata_language'] ?? 'ger');
 //    $xmlBuilder->addValue($MD_Metadata, './gmd:language/gmd:LanguageCode/@codeList',
 //            "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#LanguageCode");
     $xmlBuilder->addValue($MD_Metadata, './gmd:language/gmd:LanguageCode/@codeListValue',
             isset($mbMeta['metadata_language']) ? $iso19139->createTextNode($mbMeta['metadata_language']) : 'ger');
 
     $xmlBuilder->addValue($MD_Metadata, './gmd:characterSet/gmd:MD_CharacterSetCode',
-            isset($mbMeta['metadata_language']) ? $mbMeta['metadata_language'] : 'utf8');
+            $mbMeta['metadata_language'] ?? 'utf8');
 //    $xmlBuilder->addValue($MD_Metadata, './gmd:characterSet/gmd:MD_CharacterSetCode/@codeList',
 //            "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_CharacterSetCode");
     $xmlBuilder->addValue($MD_Metadata, './gmd:characterSet/gmd:MD_CharacterSetCode/@codeListValue',
             isset($mbMeta['metadata_language']) ? $iso19139->createTextNode($mbMeta['metadata_language']) : 'utf8');
 
     $xmlBuilder->addValue($MD_Metadata, './gmd:hierarchyLevel/gmd:MD_ScopeCode',
-            isset($mbMeta['hierarchy_level']) ? $mbMeta['hierarchy_level'] : 'service');
+            $mbMeta['hierarchy_level'] ?? 'service');
     $xmlBuilder->addValue($MD_Metadata, './gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue',
-            isset($mbMeta['hierarchy_level']) ? $mbMeta['hierarchy_level'] : 'service');
+            $mbMeta['hierarchy_level'] ?? 'service');
 
     $xmlBuilder->addValue($MD_Metadata, './gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString',
-            isset($departmentMetadata['mb_group_name']) ? $departmentMetadata['mb_group_name'] : 'department not known');
+            $departmentMetadata['mb_group_name'] ?? 'department not known');
 
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString',
-            isset($mbMeta['deliverypoint']) ? $mbMeta['deliverypoint'] : 'delivery point not known');
+            $mbMeta['deliverypoint'] ?? 'delivery point not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString',
-            isset($mbMeta['city']) ? $mbMeta['city'] : 'city not known');
+            $mbMeta['city'] ?? 'city not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString',
-            isset($mbMeta['postalcode']) ? $mbMeta['postalcode'] : 'postalcode not known');
+            $mbMeta['postalcode'] ?? 'postalcode not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country/gco:CharacterString',
-            isset($mbMeta['country']) ? $mbMeta['country'] : 'country not known');
+            $mbMeta['country'] ?? 'country not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:contact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-            isset($mbMeta['electronicmailaddress']) ? $mbMeta['electronicmailaddress'] : 'electronicmailaddress not known');
+            $mbMeta['electronicmailaddress'] ?? 'electronicmailaddress not known');
 
     $xmlBuilder->addValue($MD_Metadata, './gmd:dateStamp/gco:Date',
             isset($mbMeta['wfs_timestamp']) ? date("Y-m-d",$mbMeta['wfs_timestamp']) : "2000-01-01");
@@ -272,7 +266,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString',
             isset($mbMeta['wfs_title']) ? $mbMeta['wfs_title']." - ".$mbMeta['featuretype_title']." - ".$serviceTypeTitle : "title not given");
     }
-    
+
 	//Create date elements B5.2-5.4 - format will be only a date - no dateTime given
 	//Do things for B 5.2 date of publication
 	/*if (isset($mbMeta['wfs_timestamp_create'])) {
@@ -284,7 +278,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
         $xmlBuilder->addValue($MD_Metadata, $chunk . '/gmd:CI_Date/gmd:dateType/gmd:CI_DateTypeCode/@codeList',
             "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode");
 	}*/
-    
+
     //add optional alternateTitle
     if (isset($mbMeta['wfs_alternate_title']) && $mbMeta['wfs_alternate_title'] !=="") {
         $xmlBuilder->addValue($MD_Metadata,
@@ -322,7 +316,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
     if ($serviceType  == "ogcapifeatures_wfs") {
         $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:abstract/gco:CharacterString',
-            isset($mbMeta['wfs_abstract']) ? $mbMeta['wfs_abstract'] : "not yet defined");
+            $mbMeta['wfs_abstract'] ?? "not yet defined");
     } else {
         $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:abstract/gco:CharacterString',
@@ -332,25 +326,25 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:individualName/gco:CharacterString',
             $mbMeta['individualname']);
-    
+
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString',
-            isset($departmentMetadata['mb_group_name']) ? $departmentMetadata['mb_group_name'] : 'department not known');
+            $departmentMetadata['mb_group_name'] ?? 'department not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString',
-            isset($mbMeta['deliverypoint']) ? $mbMeta['deliverypoint'] : 'delivery point not known');
+            $mbMeta['deliverypoint'] ?? 'delivery point not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString',
-            isset($mbMeta['city']) ? $mbMeta['city'] : 'city not known');
-    
+            $mbMeta['city'] ?? 'city not known');
+
     //add optional administrativeArea
 
     if ($serviceType  != "ogcapifeatures_wfs") {
         $sql = "SELECT keyword.keyword FROM keyword, wfs_featuretype_keyword ftk WHERE ftk.fkey_featuretype_id=$1 AND ftk.fkey_keyword_id=keyword.keyword_id";
-        $v = array((integer)$recordId);
-        $t = array('i');
+        $v = [(integer)$recordId];
+        $t = ['i'];
         $res = db_prep_query($sql, $v, $t);
-        $keywordsArray = array();
+        $keywordsArray = [];
         while ($row = db_fetch_array($res)) {
                 if (isset($row['keyword']) && $row['keyword'] != "") {
                     $keywordsArray[] = $row['keyword'];
@@ -358,7 +352,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
         }
     }
     if (defined('ADMINISTRATIVE_AREA') && ADMINISTRATIVE_AREA != '') {
-        $adminAreaObj = json_decode(ADMINISTRATIVE_AREA);
+        $adminAreaObj = json_decode((string) ADMINISTRATIVE_AREA);
         if (in_array($adminAreaObj->keyword, $keywordsArray)) {
             $xmlBuilder->addValue($MD_Metadata,
                 './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:administrativeArea/gco:CharacterString', $adminAreaObj->value);
@@ -368,14 +362,14 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
 
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString',
-            isset($mbMeta['postalcode']) ? $mbMeta['postalcode'] : 'postalcode not known');
+            $mbMeta['postalcode'] ?? 'postalcode not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country/gco:CharacterString',
-            isset($mbMeta['country']) ? $mbMeta['country'] : 'country not known');
+            $mbMeta['country'] ?? 'country not known');
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString',
-            isset($mbMeta['electronicmailaddress']) ? $mbMeta['electronicmailaddress'] : "kontakt@geoportal.rlp.de");
-    
+            $mbMeta['electronicmailaddress'] ?? "kontakt@geoportal.rlp.de");
+
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:pointOfContact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL',
             "http://www.mapbender.org");
@@ -383,8 +377,8 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
 	//generate keyword part - for services the inspire themes are not applicable!!!
 	//read keywords for resource out of the database:
 	$sql = "SELECT keyword.keyword FROM keyword, wfs_featuretype_keyword ftk WHERE ftk.fkey_featuretype_id=$1 AND ftk.fkey_keyword_id=keyword.keyword_id";
-	$v = array((integer)$recordId);
-	$t = array('i');
+	$v = [(integer)$recordId];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
         $pos = 1;
 
@@ -407,8 +401,8 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
 	    $sql = "SELECT wfs_id, termsofuse.isopen from wfs LEFT OUTER JOIN";
 	    $sql .= "  wfs_termsofuse ON  (wfs.wfs_id = wfs_termsofuse.fkey_wfs_id) LEFT OUTER JOIN termsofuse ON";
 	    $sql .= " (wfs_termsofuse.fkey_termsofuse_id=termsofuse.termsofuse_id) where wfs.wfs_id = $1";
-	    $v = array();
-	    $t = array();
+	    $v = [];
+	    $t = [];
 	    array_push($t, "i");
 	    array_push($v, (int)$mbMeta['wfs_id']);
 	    $res = db_prep_query($sql,$v,$t);
@@ -426,8 +420,8 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
         if ($serviceType  != "ogcapifeatures_wfs") {
                 //pull special keywords from custom categories:	
                 $sql = "SELECT custom_category.custom_category_key FROM custom_category, wfs_featuretype_custom_category ftcc WHERE ftcc.fkey_featuretype_id = $1 AND ftcc.fkey_custom_category_id =  custom_category.custom_category_id AND custom_category_hidden = 0";
-                $v = array((integer)$recordId);
-                $t = array('i');
+                $v = [(integer)$recordId];
+                $t = ['i'];
                 $res = db_prep_query($sql,$v,$t);
                 $e = new mb_notice("look for custom categories: ");
                 while ($row = db_fetch_array($res)) {
@@ -455,7 +449,7 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:resourceConstraints[2]/gmd:MD_LegalConstraints/gmd:useLimitation/gco:CharacterString',
             isset($mbMeta['accessconstraints']) ? $mbMeta['accessconstraints'] : "no conditions apply");
-    
+
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:resourceConstraints[2]/gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString',
             isset($mbMeta['accessconstraints']) & strtoupper($mbMeta['accessconstraints']) != 'NONE' ? $mbMeta['accessconstraints'] : "no constraints");*/
@@ -463,29 +457,21 @@ function fillISO19139(XmlBuilder $xmlBuilder, $recordId) {
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/srv:serviceType/gco:LocalName',
             'download');
-    switch ($serviceType) {
-    	case "wfs":
-    		$serviceTypeVersion = $mbMeta['wfs_version'];
-    		break;
-    	case "ogcapifeatures":
-    		$serviceTypeVersion = "ogcapifeatures";
-    		break;
-        case "ogcapifeatures_wfs":
-                $serviceTypeVersion = "ogcapifeatures";
-                break;    
-    	default:
-    		$serviceTypeVersion = "undefined";
-    		break;
-    }
-    
+    $serviceTypeVersion = match ($serviceType) {
+        "wfs" => $mbMeta['wfs_version'],
+        "ogcapifeatures" => "ogcapifeatures",
+        "ogcapifeatures_wfs" => "ogcapifeatures",
+        default => "undefined",
+    };
+
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:identificationInfo/srv:SV_ServiceIdentification/srv:serviceTypeVersion/gco:CharacterString',
             $serviceTypeVersion);
-     
+
     //Geographical Extent
-    $bbox = array("-180.0", "-90.0", "180.0", "90.0");
+    $bbox = ["-180.0", "-90.0", "180.0", "90.0"];
     if ($serviceType  != "ogcapifeatures_wfs" && isset($mbMeta['bbox']) && $mbMeta['bbox'] != '') {
-	$bbox = explode(',',$mbMeta['bbox']);
+	$bbox = explode(',',(string) $mbMeta['bbox']);
     }
     //$e = new mb_exception("php/mod_featuretypeISOMetadata.php: bbox: ". json_encode($bbox));
     //$e = new mb_exception("php/mod_featuretypeISOMetadata.php: bbox: ". $bbox[0]);
@@ -522,7 +508,7 @@ SQL;
                 INNER JOIN (SELECT * from ows_relation_metadata 
                 WHERE fkey_featuretype_id IN (SELECT featuretype_id FROM wfs_featuretype WHERE fkey_wfs_id = $recordId) ) as relation ON 
                 mb_metadata.metadata_id = relation.fkey_metadata_id WHERE mb_metadata.origin IN ('capabilities','external','metador')
-                
+
                 SQL;    
         }
 	$res_metadataurl = db_query($sql);
@@ -537,7 +523,7 @@ SQL;
             './gmd:identificationInfo/srv:SV_ServiceIdentification/srv:couplingType/srv:SV_CouplingType',
             "tight");
 	}
-        
+
    switch ($serviceType) {
         case "wfs":
 	    $url = $mapbenderServiceUrl.$mbMeta['featuretype_id']."&REQUEST=GetCapabilities&SERVICE=WFS&VERSION=".$mbMeta['wfs_version'];
@@ -593,7 +579,7 @@ SQL;
                 $pos++;
                 $xmlBuilder->addValue($MD_Metadata,
                         	'./gmd:identificationInfo/srv:SV_ServiceIdentification/srv:operatesOn['.$pos.']/@xlink:href',
-                        	"http://" . $_SERVER['HTTP_HOST'] . "/mapbender/php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $row_metadata['uuid'].'#spatial_dataset_'.md5($row_metadata['uuid']));
+                        	"http://" . $_SERVER['HTTP_HOST'] . "/mapbender/php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $row_metadata['uuid'].'#spatial_dataset_'.md5((string) $row_metadata['uuid']));
                 $xmlBuilder->addValue($MD_Metadata,
                         	'./gmd:identificationInfo/srv:SV_ServiceIdentification/srv:operatesOn['.$pos.']/@uuidref',
                        		$uniqueResourceIdentifierCodespace.$row_metadata['uuid']);
@@ -618,7 +604,7 @@ SQL;
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/gmd:version/@gco:nilReason',
             'inapplicable');
-    
+
     //Check if anonymous user has rights to access this featuretype - if not ? which resource should be advertised? TODO
     //initialize url to give back as point of access
     $url = '';
@@ -686,7 +672,7 @@ SQL;
     $xmlBuilder->addValue($MD_Metadata,
             './gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:report/gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:pass/gco:Boolean',
             'true');
-    
+
     return $xmlBuilder->getDoc()->saveXML();
 
     //TODO exchange specifications from inspire_legislation.json afterwards like it is done in mod_layerISOMetadata.php
@@ -694,7 +680,7 @@ SQL;
 }
 
 //function to give away the xml data
-function pushISO19139(XmlBuilder $xmlBuilder, $recordId, $outputFormat) {
+function pushISO19139(XmlBuilder $xmlBuilder, $recordId, $outputFormat): never {
 	$xml = fillISO19139($xmlBuilder, $recordId);
 	//exchange information
 	//exchange constraints
@@ -736,8 +722,8 @@ function proxyFile($iso19139str,$outputFormat) {
 function exchangeConstraintsAndConformity($metadataXml, $recordId) {
 	//get wfs_id from database
 	$sql = "SELECT fkey_wfs_id FROM wfs_featuretype WHERE featuretype_id = $1 LIMIT 1";
-	$v = array((integer)$recordId);
-	$t = array('i');
+	$v = [(integer)$recordId];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	if ($res !== false) { 
 		$row = db_fetch_array($res);
@@ -829,8 +815,8 @@ function exchangeConstraintsAndConformity($metadataXml, $recordId) {
 function getEpsgByLayerId ($layer_id) { // from merge_layer.php
 	$epsg_list = "";
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array($layer_id);
-	$t = array('i');
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	while($row = db_fetch_array($res)){
 		$epsg_list .= $row['epsg'] . " ";
@@ -839,10 +825,10 @@ function getEpsgByLayerId ($layer_id) { // from merge_layer.php
 }
 function getEpsgArrayByLayerId ($layer_id) { // from merge_layer.php
 	//$epsg_list = "";
-	$epsg_array=array();
+	$epsg_array=[];
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array($layer_id);
-	$t = array('i');
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$cnt=0;
 	while($row = db_fetch_array($res)){
@@ -857,7 +843,7 @@ function guid(){
         return com_create_guid();
     }else{
         mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
-        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $charid = strtoupper(md5(uniqid(random_int(0, mt_getrandmax()), true)));
         $hyphen = chr(45);// "-"
         $uuid = chr(123)// "{"
                 .substr($charid, 0, 8).$hyphen

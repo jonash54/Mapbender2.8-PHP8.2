@@ -28,7 +28,6 @@
  */
 class WmcToXml {
 
-	private $wmc = null;
 	private $doc;
 	private $xml = "";
 
@@ -37,8 +36,7 @@ class WmcToXml {
 	 *
 	 * @param $someWmc wmc
 	 */
-	public function __construct ($someWmc) {
-		$this->wmc = $someWmc;
+	public function __construct (private $wmc) {
 		$this->toXml();
 	}
 
@@ -83,7 +81,7 @@ class WmcToXml {
 		$e_layer_list = $this->doc->createElement("LayerList");
 
 		// store overview layers
-		$overviewLayerArray = array();
+		$overviewLayerArray = [];
 		if ($this->wmc->overviewMap !== null) {
 			$currentOverviewWmsArray = $this->wmc->overviewMap->getWmsArray();
 			for ($k = 0; $k < count($currentOverviewWmsArray); $k++) {
@@ -130,7 +128,7 @@ class WmcToXml {
 	}
 
 	private function createGeneralNode () {
-		$extensionData = array();
+		$extensionData = [];
 		if ($this->wmc->overviewMap !== null) {
 			$ovExtent = $this->wmc->overviewMap->getExtent();
 			$extensionData["ov_minx"] = $ovExtent->min->x;
@@ -406,7 +404,7 @@ class WmcToXml {
 	}
 
 	private function createSrsNode ($currentMap, $currentWms) {
-		$wms_epsg = array();
+		$wms_epsg = [];
 		$wms_epsg[0] = $currentMap->getEpsg();
 
 		if ($currentWms->gui_wms_epsg != $currentMap->getEpsg()) {
@@ -470,7 +468,7 @@ class WmcToXml {
 	}
 
 	private function createLayerExtensionNode ($currentMap, $currentWms, $currentLayer, $currentOverviewLayer) {
-		$layerExtensionData = array();
+		$layerExtensionData = [];
 		$layerExtensionData["wms_name"] = $currentWms->objLayer[0]->layer_name;
 		$layerExtensionData["minscale"] = $currentLayer->layer_minscale;
 		$layerExtensionData["maxscale"] = $currentLayer->layer_maxscale;
@@ -501,13 +499,7 @@ class WmcToXml {
 				}
 			}
 			if (!$found) {
-				$layerExtensionData["layer_epsg"][]= array(
-					"epsg" => $currentWms->gui_epsg[$i],
-					"minx" => $currentWms->gui_minx[$i],
-					"miny" => $currentWms->gui_miny[$i],
-					"maxx" => $currentWms->gui_maxx[$i],
-					"maxy" => $currentWms->gui_maxy[$i]
-				);
+				$layerExtensionData["layer_epsg"][]= ["epsg" => $currentWms->gui_epsg[$i], "minx" => $currentWms->gui_minx[$i], "miny" => $currentWms->gui_miny[$i], "maxx" => $currentWms->gui_maxx[$i], "maxy" => $currentWms->gui_maxy[$i]];
 			}
 		}
 
@@ -516,7 +508,7 @@ class WmcToXml {
 		}
 
 		if ($currentOverviewLayer != null) {
-			$layerExtensionData["overviewData"] = array("overviewHidden" => ($currentOverviewLayer->gui_layer_visible ? 0 : 1));
+			$layerExtensionData["overviewData"] = ["overviewHidden" => ($currentOverviewLayer->gui_layer_visible ? 0 : 1)];
 		}
 		if ($currentLayer->gui_layer_wfs_featuretype) {
 			$layerExtensionData["wfsFeatureType"] = $currentLayer->gui_layer_wfs_featuretype;

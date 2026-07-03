@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="filteredGroup_User";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -140,14 +140,14 @@ if($insert){
 		for($i=0; $i<count($selected_user); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from mb_user_mb_group where fkey_mb_group_id = $1 and fkey_mb_user_id = $2 AND (mb_user_mb_group_type = 1 or mb_user_mb_group_type IS NULL) ";
-			$v = array($selected_group,$selected_user[$i]);
-			$t = array('i','i');
+			$v = [$selected_group, $selected_user[$i]];
+			$t = ['i', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO mb_user_mb_group(fkey_mb_group_id, fkey_mb_user_id) VALUES($1, $2)";
-				$v = array($selected_group,$selected_user[$i]);
-				$t = array('i','i');
+				$v = [$selected_group, $selected_user[$i]];
+				$t = ['i', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -157,8 +157,8 @@ if($remove){
 	if(count($remove_user)>0){
 		for($i=0; $i<count($remove_user); $i++){
 			$sql_remove = "DELETE FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 and fkey_mb_group_id = $2 AND fkey_mb_group_id = $2 AND (mb_user_mb_group_type = 1 or mb_user_mb_group_type IS NULL)";
-			$v = array($remove_user[$i],$selected_group);
-			$t = array('i','i');
+			$v = [$remove_user[$i], $selected_group];
+			$t = ['i', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -168,8 +168,8 @@ if($remove){
 /*get owner groups  *******************************************************************************/
 
 $sql_group = "SELECT * FROM mb_group WHERE mb_group_owner = $1 ORDER BY mb_group_name";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 
 $res_group = db_prep_query($sql_group,$v,$t);
 while($row = db_fetch_array($res_group)){
@@ -195,9 +195,9 @@ if(count($group_id)>0){
 	$sql_mb_user_mb_group .= "WHERE mb_user_mb_group.fkey_mb_group_id = $1  AND (mb_user_mb_group.mb_user_mb_group_type = 1 or mb_user_mb_group.mb_user_mb_group_type IS NULL) ";
 	$sql_mb_user_mb_group .= " ORDER BY mb_user.mb_user_name";
 	
-	if(!$selected_group){$v = array($group_id[0]);}
-	if($selected_group){$v = array($selected_group);}
-	$t = array('i');
+	if(!$selected_group){$v = [$group_id[0]];}
+	if($selected_group){$v = [$selected_group];}
+	$t = ['i'];
 	
 	$res_mb_user_mb_group = db_prep_query($sql_mb_user_mb_group,$v,$t);
 	while($row = db_fetch_array($res_mb_user_mb_group)){

@@ -7,11 +7,11 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_wmc.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_lzw_decompress.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_wmc.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_lzw_decompress.php");
 
 //usefull for debugging purposes
 function logit($text){
@@ -95,7 +95,7 @@ if ($saveInSession === 1) {
     	Mapbender::session()->set("mb_wmc",$filename);
 	$epsgString = $wmc->mainMap->extentToJavascript();
 	// get epsg code from jquery string
-	preg_match('/EPSG:\d{4,5}/',$epsgString, $matches);
+	preg_match('/EPSG:\d{4,5}/',(string) $epsgString, $matches);
 	$epsgString = $matches[0];
 	if (preg_match('/EPSG:\d{4,5}/',$epsgString, $matches)) {
 		$epsgString = $matches[0];
@@ -135,7 +135,7 @@ if ($saveInSession === 1) {
     $wmckwds = $wmc->keyword;
    	if(is_array($wmckwds)) {
          foreach ($wmckwds as &$val) {
-             $val = trim($val);
+             $val = trim((string) $val);
          }
     }
     $wmc->keyword = $wmckwds;

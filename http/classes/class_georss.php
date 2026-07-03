@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_rss.php");
-require_once(dirname(__FILE__)."/../classes/class_georss_item.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_rss.php");
+require_once(__DIR__."/../classes/class_georss_item.php");
 
 /**
  * Creates an RSS Feed.

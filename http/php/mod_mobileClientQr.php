@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../extensions/phpqrcode/phpqrcode.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../extensions/phpqrcode/phpqrcode.php";
 $pathExtension = "";
 $return = "default";
 if (isset($_REQUEST["pathExtension"]) & $_REQUEST["pathExtension"] != "") {

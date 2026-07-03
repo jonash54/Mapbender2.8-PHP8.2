@@ -1,22 +1,22 @@
 <?php
 #http://localhost/mapbender/geoportal/mod_readCSWResultsDetail.php?cat_id=1&uuid=...
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 #$con = db_connect(DBSERVER,OWNER,PW);
 #db_select_db(DB,$con);
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../php/mod_validateInspire.php");
-require_once(dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf");
-require_once(dirname(__FILE__) . "/../classes/class_iso19139.php");
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../php/mod_validateInspire.php");
+require_once(__DIR__ . "/../../tools/wms_extent/extent_service.conf");
+require_once(__DIR__ . "/../classes/class_iso19139.php");
+require_once(__DIR__ . "/../classes/class_Uuid.php");
 //INSPIRE Mapping
-require_once(dirname(__FILE__)."/../../conf/isoMetadata.conf");
+require_once(__DIR__."/../../conf/isoMetadata.conf");
 $languageCode = "de";
 $layout = "tabs";
 //get language parameter out of mapbender session if it is set else set default language to de_DE
 if (isset($_SESSION['mb_lang']) && ($_SESSION['mb_lang']!='')) {
 	$e = new mb_notice("mod_readCSWResultsDetail.php: language found in session: ".$_SESSION['mb_lang']);
 	$language = $_SESSION["mb_lang"];
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -38,7 +38,7 @@ if (isset($_REQUEST["cat_id"]) & $_REQUEST["cat_id"] != "") {
         $testMatch = $_REQUEST["cat_id"];
         //give max 99 entries - more will be to slow
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 echo 'Parameter <b>cat_id</b> is not valid (integer).<br/>';
                 die();
         }
@@ -101,7 +101,7 @@ if(!isset($_REQUEST["uuid"])) {
 }
 
 function getExtentGraphic($layer_4326_box) {
-		$rlp_4326_box = array(6.05,48.9,8.6,50.96);
+		$rlp_4326_box = [6.05, 48.9, 8.6, 50.96];
 		if ($layer_4326_box[0] <= $rlp_4326_box[0] || $layer_4326_box[2] >= $rlp_4326_box[2] || $layer_4326_box[1] <= $rlp_4326_box[1] || $layer_4326_box[3] >= $rlp_4326_box[3]) {
 			if ($layer_4326_box[0] < $rlp_4326_box[0]) {
 				$rlp_4326_box[0] = $layer_4326_box[0]; 
@@ -136,7 +136,7 @@ function getExtentGraphic($layer_4326_box) {
 
 
 function display_text($string) {
-    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     $string = preg_replace("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     $string = preg_replace("\n", "<br>", $string);
     return $string;
@@ -147,7 +147,7 @@ function guid(){
         return com_create_guid();
     }else{
         mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
-        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $charid = strtoupper(md5(uniqid(random_int(0, mt_getrandmax()), true)));
         $hyphen = chr(45);// "-"
         $uuid = chr(123)// "{"
                 .substr($charid, 0, 8).$hyphen
@@ -169,7 +169,7 @@ $res_csw = db_prep_query($sql_csw, $v, $t);
 #initialize count of search interfaces
 $cnt_csw = 0;
 #initialize result array
-$csw_list=array(array());
+$csw_list=[[]];
 #fill result array
 while($row_csw = db_fetch_array($res_csw)){
 	$csw_list[$cnt_csw] ['id'] = $row_csw["csw_id"];
@@ -212,7 +212,7 @@ while($row_csw = db_fetch_array($res_csw)){
 		
 	}
 	$e = new mb_notice("<br>getrecords param type: ".$csw_list[$cnt_csw]['getrecordsurl_param_name']."<br>");
-	$csw_list[$cnt_csw] ['getrecordsurl'] = rtrim($csw_list[$cnt_csw] ['getrecordsurl'], "?");
+	$csw_list[$cnt_csw] ['getrecordsurl'] = rtrim((string) $csw_list[$cnt_csw] ['getrecordsurl'], "?");
 	#echo "count csw: ".$cnt_csw;
 	#echo "<br>getrecordsurl: ".$csw_list[$cnt_csw]['getrecordsurl']."<br>";
 
@@ -220,7 +220,7 @@ while($row_csw = db_fetch_array($res_csw)){
 	$res_grbi = db_prep_query($sql_grbi, $v, $t);
         $row_grbi = db_fetch_array($res_grbi);
 	$csw_list[$cnt_csw] ['getrecordbyidurl'] = $row_grbi['param_value'];
-	$csw_list[$cnt_csw] ['getrecordbyidurl'] = rtrim($csw_list[$cnt_csw] ['getrecordbyidurl'], "?");
+	$csw_list[$cnt_csw] ['getrecordbyidurl'] = rtrim((string) $csw_list[$cnt_csw] ['getrecordbyidurl'], "?");
 	#echo "<br>getrecordbyidurl: ".$csw_list[$cnt_csw]['getrecordbyidurl']."<br>";
 	$csw_list[$cnt_csw] ['h'] = $row_csw["csw_h"];
 	$csw_list[$cnt_csw] ['p'] = $row_csw["csw_p"];
@@ -282,7 +282,7 @@ for($a = 0; $a < count($md_ident); $a++) {
 	for ($i = 0; $i < count($resultOfXpath); $i++) {
 		$md_ident[$a]['value'] = $md_ident[$a]['value'].",".$resultOfXpath[$i];
 	}
-	$md_ident[$a]['value'] = ltrim($md_ident[$a]['value'],',');
+	$md_ident[$a]['value'] = ltrim((string) $md_ident[$a]['value'],',');
 }
 
 //generate output for different parameters mdtype

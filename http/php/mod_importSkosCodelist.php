@@ -1,8 +1,8 @@
 <?php
 //http://localhost/mapbender/php/mod_importSkosCodelist.php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_connector.php";
-require_once dirname(__FILE__) . "/../classes/class_skos.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_connector.php";
+require_once __DIR__ . "/../classes/class_skos.php";
 //import skos codelists in mapbender custom_category table
 //$skosUrl = "http://inspire.ec.europa.eu/registry/res/custompages/PriorityDataset.rdf";
 $skosUrl = "https://inspire.ec.europa.eu/metadata-codelist/SpatialScope/SpatialScope.de.rdf";
@@ -30,7 +30,7 @@ $skosUrl = "http://publications.europa.eu/resource/authority/bna/asd487ae75";
 
 //$skosUrl = "https://inspire.ec.europa.eu/theme/theme.de.rdf";
 $skos = new Skos($skosUrl);
-$skos->languageCodes = array("en", "de");
+$skos->languageCodes = ["en", "de"];
 $skos->importFromSkosRdf();
 $skos->exportSkos();
 $e = new mb_exception("skos exported!");

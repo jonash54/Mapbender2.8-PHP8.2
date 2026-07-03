@@ -1,8 +1,8 @@
 <?php
 //server component to pull statistics from geoportal catalogue
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_Uuid.php");
 $adminLevel = "NUTS_1";
 $registratingDepartments = false;
 $categoryType = "iso";
@@ -32,7 +32,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 	//validate to csv integer list
 	$testMatch = $_REQUEST["registratingDepartments"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'registratingDepartments: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>registratingDepartments</b> is not valid (integer or cs integer list).<br/>';
 		die(); 		
@@ -74,11 +74,11 @@ SQL;
 	select count, mb_group_name, mb_group_logo_path, mb_group_admin_code from ( select count(layer_id), fkey_mb_group_id from (select wms_id, fkey_mb_group_id from wms where fkey_mb_group_id <> 0 AND fkey_mb_group_id is not null group by fkey_mb_group_id, wms_id union select wms_id, fkey_mb_group_id from (select wms_owner, wms_id from wms where fkey_mb_group_id = 0 OR fkey_mb_group_id is null group by  wms_owner, wms_id) as owner_wms inner join mb_user_mb_group on owner_wms.wms_owner = mb_user_mb_group.fkey_mb_user_id where mb_user_mb_group_type = 2) as test  inner join layer on test.wms_id = layer.fkey_wms_id group by fkey_mb_group_id ) as layer_count inner join mb_group on mb_group.mb_group_id = layer_count.fkey_mb_group_id
 SQL;*/
 
-	$v = array(str_replace('_',' ',$adminLevel));
-	$t = array('s');	
+	$v = [str_replace('_',' ',$adminLevel)];
+	$t = ['s'];	
 	$res = db_prep_query($sql,$v,$t);	
-	$row = array();
-	$resultObj = array();
+	$row = [];
+	$resultObj = [];
 	if ($res) {
 		$i = 0;
 		$dataCount = 0;
@@ -102,22 +102,16 @@ SQL;*/
 		$e = new mb_exception("Error while request to database!");
 	}
 } else {
-	switch ($categoryType) {
-		case "inspire":
-			$catId = 1;
-		break;
-		case "custom":
-			$catId = 2;
-		break;
-		default:
-			$catId = 0;
-		break;
-	}
+	$catId = match ($categoryType) {
+     "inspire" => 1,
+     "custom" => 2,
+     default => 0,
+ };
 	if ($categoryType !== "opendata") {
 		//call searchInterface for categories
 		$connector = new connector(MAPBENDER_PATH."/php/mod_callMetadata.php?searchText=e&outputFormat=json&resultTarget=categories&searchResources=wms&searchId=test&registratingDepartments=".$registratingDepartments);
 		$jsonString = $connector->file;
-		$jsonObject = json_decode($jsonString);
+		$jsonObject = json_decode((string) $jsonString);
 		$i = 0;
 		$dataCount = 0;
 		foreach ($jsonObject->searchMD->category[$catId]->subcat as $cat) {
@@ -133,11 +127,11 @@ SQL;*/
 		//call searchInterface
 		$connector = new connector(MAPBENDER_PATH."/php/mod_callMetadata.php?searchText=e&outputFormat=json&searchResources=wms&searchId=test&registratingDepartments=".$registratingDepartments."&maxResults=1");
 		$jsonString = $connector->file;
-		$jsonObject = json_decode($jsonString);
+		$jsonObject = json_decode((string) $jsonString);
 		$numberOfResults = $jsonObject->wms->md->nresults;
 		$connector = new connector(MAPBENDER_PATH."/php/mod_callMetadata.php?searchText=e&outputFormat=json&searchResources=wms&searchId=test&registratingDepartments=".$registratingDepartments."&maxResults=1&restrictToOpenData=true");
 		$jsonString = $connector->file;
-		$jsonObject = json_decode($jsonString);
+		$jsonObject = json_decode((string) $jsonString);
 		$numberOfOpenResults = $jsonObject->wms->md->nresults;
 		//define values to return
 		$dataCount = $numberOfResults;

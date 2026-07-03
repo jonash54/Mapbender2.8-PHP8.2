@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
 global $hierarchyLevel;
 $ajaxResponse = new AjaxResponse($_POST);
 //get hierarchyLevel filter from ajax call
@@ -10,7 +10,7 @@ $hierarchyLevel = $ajaxResponse->getParameter("hierarchyLevel");
 if ($hierarchyLevel != 'application') {
     $hierarchyLevel = 'metadata';
 }
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -19,7 +19,7 @@ function abort ($message) {
 };
 
 function validateType($variable, $value) {
-	$startString = substr($variable, 0, 1);
+	$startString = substr((string) $variable, 0, 1);
 	switch ($startString) {
 		case "s":
 			if (is_string($value)) {
@@ -52,7 +52,9 @@ function validateType($variable, $value) {
 function parseMetadataRow($row, $withOutFirstColumn = false) {
 	global $hierarchyLevel;
 	//convert NULL to '', NULL values cause datatables to crash
-	$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+	$walk = array_walk($row, function (&$s) {
+     $s = strval($s);
+ });
 	//preview with uuid
 	$row[0] = $row[0];
 	$row[1] = $row[1];
@@ -61,7 +63,7 @@ function parseMetadataRow($row, $withOutFirstColumn = false) {
 	$row[3] = $row[3];
 	$row[4] = $row[4];
 	$coupledResourceRow = 5;
-	$coupledResources = json_decode($row[$coupledResourceRow]);
+	$coupledResources = json_decode((string) $row[$coupledResourceRow]);
 	$row[$coupledResourceRow] = "";
 	//get layer list
 	$numberLayers = 0;
@@ -108,7 +110,7 @@ function parseMetadataRow($row, $withOutFirstColumn = false) {
 		$row[] = "";
 	}
 	if ($withOutFirstColumn == true) {
-		$newRow = array($row[1],$row[2],$row[3],$row[4],$row[5],$row[6],$row[7],$row[8],$row[9],$row[10],$row[11]);
+		$newRow = [$row[1], $row[2], $row[3], $row[4], $row[5], $row[6], $row[7], $row[8], $row[9], $row[10], $row[11]];
 		$row = $newRow;
 	}
 	/*if ($hierachyLevel == 'application') {
@@ -147,8 +149,8 @@ switch ($ajaxResponse->getMethod()) {
 SELECT fkey_mb_user_id, searchable FROM mb_metadata WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
@@ -178,12 +180,12 @@ SQL;
 UPDATE mb_metadata SET searchable = $2  WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id, $export2csw);
-		$t = array('i', 'b');
+		$v = [$id, $export2csw];
+		$t = ['i', 'b'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not toogle export for selected metadata!"));
 			$ajaxResponse->send();
@@ -200,8 +202,8 @@ SQL;
 SELECT fkey_mb_user_id, export2csw FROM mb_metadata WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
@@ -231,12 +233,12 @@ SQL;
 UPDATE mb_metadata SET export2csw = $2  WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id, $export2csw);
-		$t = array('i', 'b');
+		$v = [$id, $export2csw];
+		$t = ['i', 'b'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not toogle export for selected metadata!"));
 			$ajaxResponse->send();
@@ -253,8 +255,8 @@ SQL;
 SELECT fkey_mb_user_id FROM mb_metadata WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
@@ -277,12 +279,12 @@ SQL;
 DELETE FROM mb_metadata WHERE metadata_id = $1;
 
 SQL;
-		$v = array($id);
-		$t = array('i');
+		$v = [$id];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not delete metadata in database!"));
 			$ajaxResponse->send();
@@ -293,42 +295,11 @@ SQL;
 		break;
 	case "getHeader" :
 		//$hierarchyLevel = $ajaxResponse->getParameter("hierarchyLevel");
-		switch ($hierarchyLevel) {
-		    case "application_test":
-		        $header = array(
-				_mb("ID"),
-				_mb("UUID"),
-				_mb("Title"),
-				_mb("Last changed"),
-				_mb("Origin"),
-				_mb("Searchability"),
-				_mb("Catalogue export"),
-				_mb("Delete"),
-				_mb("Edit")
-			);
-		        break;
-		    default:
-			$header = array(
-				_mb("ID"),
-				_mb("UUID"),
-				_mb("Title"),
-				_mb("Last changed"),
-				_mb("Layers"),
-				_mb("Featuretypes"),
-				_mb("Origin"),
-				_mb("Searchability"),
-				_mb("Catalogue export"),
-				_mb("Delete"),
-				_mb("Edit")
-			);
-			break;
-		
-		}
-		$translation = array(
-			"confirmSearchabilityMessage" => _mb('Do you really want to change the searchability?'),
-			"confirmExportMessage" => _mb('Do you really want to change the export handling for this metadata?'),
-			"confirmDeleteMessage" => _mb('Do you really want to delete this entry?')
-		);
+		$header = match ($hierarchyLevel) {
+      "application_test" => [_mb("ID"), _mb("UUID"), _mb("Title"), _mb("Last changed"), _mb("Origin"), _mb("Searchability"), _mb("Catalogue export"), _mb("Delete"), _mb("Edit")],
+      default => [_mb("ID"), _mb("UUID"), _mb("Title"), _mb("Last changed"), _mb("Layers"), _mb("Featuretypes"), _mb("Origin"), _mb("Searchability"), _mb("Catalogue export"), _mb("Delete"), _mb("Edit")],
+  };
+		$translation = ["confirmSearchabilityMessage" => _mb('Do you really want to change the searchability?'), "confirmExportMessage" => _mb('Do you really want to change the export handling for this metadata?'), "confirmDeleteMessage" => _mb('Do you really want to delete this entry?')];
 		$resultObj['header'] = $header;
 		$resultObj['translation'] = $translation;
 		$ajaxResponse->setResult($resultObj);
@@ -339,11 +310,11 @@ SQL;
 		//defaults to server side handling
 		//use datatables serverside api: http://legacy.datatables.net/usage/server-side (version <= 1.9!!!)
 		//parse relevant ajax variables (they also available in params var - cause mapbenders ajax class demand this):
-		$ajaxVariables = array("sEcho","iDisplayLength","iDisplayStart","iColumns","sSearch","sSearch_1","bSortable_1","iSortingCols","iSortCol_1","sSortDir_1","sEcho","hierarchyLevel");
+		$ajaxVariables = ["sEcho", "iDisplayLength", "iDisplayStart", "iColumns", "sSearch", "sSearch_1", "bSortable_1", "iSortingCols", "iSortCol_1", "sSortDir_1", "sEcho", "hierarchyLevel"];
 		foreach($ajaxVariables as $variable) {
 			//validate type
 			//$e = new mb_exception("var:".$variable." - value: ".$ajaxResponse->getParameter($variable));
-			if (validateType($variable, $ajaxResponse->getParameter($variable)) == true) {
+			if (validateType($variable) == true) {
 				${$variable} = $ajaxResponse->getParameter($variable);
 			}
 		}
@@ -355,10 +326,10 @@ SQL;
 		//do the sql with limit and offset
 		$metadataList = implode(",", $metadataIdArray);
 		//initialize parameter arrays
-		$v = array();
-		$t = array();
-		$vCount = array();
-		$tCount = array();
+		$v = [];
+		$t = [];
+		$vCount = [];
+		$tCount = [];
 		$numberOfVariables = 0;
 
 //$e = new mb_exception("loadTableIncremental: " . $hierarchyLevel);
@@ -428,7 +399,7 @@ SQL;
 			$resultObj["aaData"][] = parseMetadataRow($row, $withOutFirstColumn);
 		}
 		if ($highLevelObj["iTotalDisplayRecords"] == 0) {
-			$resultObj["aaData"] = array();
+			$resultObj["aaData"] = [];
 		}
 		$ajaxResponse->setResult($resultObj);
 		$ajaxResponse->setHighLevelAttributes($highLevelObj);

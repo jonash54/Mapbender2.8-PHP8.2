@@ -1,12 +1,12 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_user.php");
 $hostName = $_SERVER['HTTP_HOST'];
 $operation = "get";
 $key = "mb_user_id";
 $value = null;
-$allowedOperations = array("get", "set");
-$allowedKeys = array("mb_user_id", "GML", "dsgvo", "preferred_gui");
+$allowedOperations = ["get", "set"];
+$allowedKeys = ["mb_user_id", "GML", "dsgvo", "preferred_gui"];
 
 $resultObj['result'] = '';
 $resultObj['success'] = false;
@@ -96,7 +96,7 @@ switch ($operation) {
     				echo json_encode($resultObj);
 				die();
  			}*/
-			$value = urldecode($testMatch);
+			$value = urldecode((string) $testMatch);
 			$testMatch = NULL;
 		} else {
     			$resultObj['message'] = 'Parameter value for key '.$key.' not given!';
@@ -133,7 +133,7 @@ switch ($operation) {
 	    case "dsgvo":
 		if (isset($_REQUEST["value"]) & $_REQUEST["value"] != "") {
 			$testMatch = $_REQUEST["value"];
-			$value = urldecode($testMatch);
+			$value = urldecode((string) $testMatch);
  			switch($value) {
 				case "true":
 					Mapbender::session()->set($key, "yes");
@@ -166,7 +166,7 @@ switch ($operation) {
 			case "preferred_gui":
 				if (isset($_REQUEST["value"]) & $_REQUEST["value"] != "") {
 					$testMatch = $_REQUEST["value"];
-					$value = urldecode($testMatch);
+					$value = urldecode((string) $testMatch);
 					Mapbender::session()->set($key, $value);
 							$resultObj['success'] = true;
 							$resultObj['message'] = 'Set preferred_gui to'.$value.'!';

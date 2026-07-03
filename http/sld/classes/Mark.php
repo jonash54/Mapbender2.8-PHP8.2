@@ -29,7 +29,7 @@ class Mark
 	 * The wellknownname element from the xml-scheme.
 	 * @var string
 	 */
-	var $wellknownname = "";
+	public $wellknownname = "";
 	
 	/**
 	 * The Fill object from the xml-scheme.
@@ -37,7 +37,7 @@ class Mark
 	 * @see Fill
 	 * @var object
 	 */
-	var $fill = "";
+	public $fill = "";
 	
 	/**
 	 * The Stroke object from the xml-scheme.
@@ -45,19 +45,19 @@ class Mark
 	 * @see Stroke
 	 * @var object
 	 */
-	var $stroke = "";
+	public $stroke = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -94,7 +94,7 @@ class Mark
 		$temp .= $offset."   Mark<br>\n";
 		$temp .= $offset."   <input type=\"hidden\" name=\"".$id."\" value=\"mark\">\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."   <a class='edit' href=\"sld_function_handler.php?function=deleteexternalgraphicormark&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";
 		

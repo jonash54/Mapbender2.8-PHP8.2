@@ -1,11 +1,19 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+
+// __MB_PHP8_GUARD__ — load Mapbender globals defensively. In PHP 7 these
+// files relied on the implicit "undefined constant -> string" behaviour, but
+// PHP 8 fatals there. Guard prevents the fatal when the file is reached
+// directly (e.g. via include from a stand-alone HTTP entry).
+if (!defined('MB_VERSION_NUMBER') || !function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
+require_once(__DIR__."/../../core/globalSettings.php");
 //apache2 mod_rewrite -  RewriteRule ^/icons/maki/([^/]+)/([^/]+)/([^[/]+).png$ http://127.0.0.1/mb_trunk/php/mod_getSymbolFromRepository.php?marker-color=$1&marker-size=$2&marker-symbol=$3 [P,L,QSA,NE]
 //http://127.0.0.1/icons/maki/7e7e7e/large/airfield.png
 //read variables from path - INFO: marker-color without # as first element!!!!!!
 //read from filesystem and recode from svg to png
 //path
-$symbolPath = dirname(__FILE__)."/../extensions/makiicons/mapbox-maki-463a9ff/icons/";
+$symbolPath = __DIR__."/../extensions/makiicons/mapbox-maki-463a9ff/icons/";
 //get name from parameter
 
 //read list of possible filenames
@@ -55,7 +63,7 @@ if (isset($_REQUEST["marker-color"]) & $_REQUEST["marker-color"] != "") {
 
 $key = array_search($marker, $svgFiles);
 
-if (gettype($key) == integer) {
+if (gettype($key) == "integer") {
 	$svgGraphicFilename = $symbolPath.$svgFiles[$key]."-15.svg";
 } else {
 	$svgGraphicFilename = $symbolPath."marker-15.svg";
@@ -70,7 +78,16 @@ $svgGraphic = str_replace('<path ', '<path style="fill:'.$markerColor.'" ', $svg
 $im = new Imagick();
 $im->setBackgroundColor(new ImagickPixel('transparent'));
 
-$im->readImageBlob($svgGraphic);
+// PHP 8 + Imagick on Debian 12: readImageBlob can't auto-detect the SVG
+// blob without a hint. Pass it through a temp file with .svg suffix so the
+// librsvg delegate is invoked by extension.
+$svgTmp = tempnam(sys_get_temp_dir(), 'mb-svg-') . '.svg';
+file_put_contents($svgTmp, $svgGraphic);
+try {
+    $im->readImage($svgTmp);
+} finally {
+    @unlink($svgTmp);
+}
 
 switch ($markerSize){
 	case "medium":
@@ -89,7 +106,7 @@ header('Content-type: image/png;filename="'.$svgFiles[$key].'-15.svg"');
 echo $im;
 
 function cutEndPart(&$item) {
-    $name = explode('-', $item);
+    $name = explode('-', (string) $item);
     $item = $name[0];
 }
 ?>

@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="exportGUI";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done
  */
@@ -63,8 +63,8 @@ function validate(){
 
 <?php
 
-require_once dirname(__FILE__)."/../classes/class_administration.php";
-require_once dirname(__FILE__)."/../classes/class_gui.php";
+require_once __DIR__."/../classes/class_administration.php";
+require_once __DIR__."/../classes/class_gui.php";
 
 $admin = new administration();
 $permguis = $admin->getGuisByPermission(Mapbender::session()->get("mb_user_id"),true);
@@ -81,14 +81,14 @@ if($guiList){
 	}
 	
 	echo "<textarea rows=40 cols=80>";
-	echo htmlentities($insert, ENT_QUOTES, CHARSET); 
+	echo htmlentities((string) $insert, ENT_QUOTES, CHARSET); 
 	echo "</textarea>";
 }
 
 ###
 if(!$guiList){
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT * FROM gui WHERE gui_id IN (";
 	for($i=0; $i<count($permguis); $i++){
 		if($i>0){ $sql .= ",";}

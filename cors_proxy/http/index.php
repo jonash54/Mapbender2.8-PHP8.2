@@ -18,12 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //http://localhost/cors_proxy/1046?VERSION=1.1.1&REQUEST=GetMap&SERVICE=WMS&LAYERS=BPlan.07141058.1.0,BPlan.07141058.1.1,BPlan.07141058.2.0,BPlan.07141058.2.1,BPlan.07141058.3.0,BPlan.07141058.3.1,BPlan.07141058.3.2,BPlan.07141058.4.0,BPlan.07141058.5.0,BPLAN.07141058.0&STYLES=,,,,,,,,,&SRS=EPSG:25832&BBOX=412771.875,5576280,413428.125,5576700&WIDTH=625&HEIGHT=400&FORMAT=image/png&BGCOLOR=0xffffff&TRANSPARENT=TRUE&EXCEPTIONS=application/vnd.ogc.se_xml&vendorspecific_oek=1
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../../http/classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../../http/classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../../owsproxy/http/classes/class_QueryHandler.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__ . "/../../http/classes/class_administration.php");
+require_once(__DIR__ . "/../../http/classes/class_connector.php");
+require_once(__DIR__ . "/../../owsproxy/http/classes/class_QueryHandler.php");
 $startTime = microtime(true);
-$imageformats = array("image/png","image/gif","image/jpeg", "image/jpg");
+$imageformats = ["image/png", "image/gif", "image/jpeg", "image/jpg"];
 $width = 400;
 $height = 400;
 $tmpSession = false;
@@ -36,7 +36,7 @@ $reqParams = $query->getRequestParams();
 if (isset($_REQUEST["wmsid"]) & $_REQUEST["wmsid"] != "") {
         $testMatch = $_REQUEST["wmsid"];
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
 		throwExceptionXml('','Parameter for wmsid is not valid (integer)');
         }
         $wmsId = $testMatch;
@@ -69,7 +69,7 @@ if ($originFromHeader == false) {
 //check server against whitelist for cors header
 if (defined("CORS_WHITELIST") && CORS_WHITELIST != "") {
 	//check if server is in cors whitelist
-	$CORS_WHITELIST_array = explode(" ",CORS_WHITELIST);
+	$CORS_WHITELIST_array = explode(" ",(string) CORS_WHITELIST);
 	if (!in_array($originFromHeader,$CORS_WHITELIST_array)) {
 		throwExceptionXml('','Server not found in whitelist of cors_proxy, please check your configuration!');
 	} else {
@@ -88,7 +88,7 @@ if ($auth['auth_type']==''){
 }
 $e = new mb_exception("userId: ".$userId);
 //check header - see invoking server
-switch (strtolower($reqParams['request'])) {
+switch (strtolower((string) $reqParams['request'])) {
 	case 'getmap':
 		$arrayOnlineresources = checkWmsPermission($wmsId, $userId);
 		$query->setOnlineResource($arrayOnlineresources['wms_getmap']);
@@ -97,7 +97,7 @@ switch (strtolower($reqParams['request'])) {
 			throwE("Permission denied");
 			die();
 		}
-		$query->setParam("layers",urldecode($layers));//the decoding of layernames dont make problems - but not really good names will be requested also ;-)
+		$query->setParam("layers",urldecode((string) $layers));//the decoding of layernames dont make problems - but not really good names will be requested also ;-)
 		$request = $query->getRequest();
 		$startRequestTime = microtime(true);
 		if(isset($auth)){
@@ -116,7 +116,7 @@ switch (strtolower($reqParams['request'])) {
 			throwE("Permission denied");
 			die();
 		}
-		$query->setParam("layers",urldecode($layers));
+		$query->setParam("layers",urldecode((string) $layers));
 		$request = $query->getRequest();
 		if(isset($auth)){
 			getImage($url,$auth);
@@ -142,8 +142,8 @@ $e = new mb_exception("cors_proxy/http/index.php: Time of execution: ".(string)(
 //getImage
 function checkLayerPermission($wms_id,$l,$userId){
 	global $n;
-	$myl = explode(",",$l);
-	$r = array();
+	$myl = explode(",",(string) $l);
+	$r = [];
 	foreach($myl as $mysl){
 		if($n->getLayerPermission($wms_id, $mysl, $userId) === true){
 			array_push($r, $mysl);
@@ -163,10 +163,10 @@ function checkWmsPermission($wmsid,$userId){
 	$myguis = $n->getGuisByPermission($userId,true);
 	$mywms = $n->getWmsByOwnGuis($myguis);
 	$sql = "SELECT * FROM wms WHERE wms_id = $1";
-	$v = array($wmsid);
-	$t = array("i");
+	$v = [$wmsid];
+	$t = ["i"];
 	$res = db_prep_query($sql, $v, $t);
-	$service = array();
+	$service = [];
 	if($row = db_fetch_array($res)){
 		$service["wms_id"] = $row["wms_id"];
 		$service["wms_getcapabilities"] = $row["wms_getcapabilities"];	
@@ -175,11 +175,11 @@ function checkWmsPermission($wmsid,$userId){
 		$service["wms_getcapabilities_doc"] = $row["wms_getcapabilities_doc"];
 	}
 	if(!$row || count($mywms) == 0){
-		throwE(array("No wms data for this user available."));
+		throwE(["No wms data for this user available."]);
 		die();	
 	}
 	if(!in_array($service["wms_id"], $mywms)){
-		throwE(array("Permission denied."," -> ".$service["wms_id"], implode(",", $mywms)));
+		throwE(["Permission denied.", " -> ".$service["wms_id"], implode(",", $mywms)]);
 		die();
 	}
 	return $service;
@@ -234,7 +234,7 @@ function throwImage($e){
 	if (count($e) > 1){
 		for($i=0; $i<count($e); $i++){
 			$imageString = $e[$i];
-			ImageString ($image, 3, 5, $i*20, $imageString, $text_color);
+			ImageString ($image, 3, 5, $i*20, (string) $imageString, $text_color);
 		}
 	} else {
 		if (is_array($e)) {
@@ -245,7 +245,7 @@ function throwImage($e){
 		if ($imageString == "") {
 			$imageString = "An unknown error occured!";
 		}
-		ImageString ($image, 3, 5, $i*20, $imageString, $text_color);
+		ImageString ($image, 3, 5, $i*20, (string) $imageString, $text_color);
 	}
 	responseImage($image);
 }

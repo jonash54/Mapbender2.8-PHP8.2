@@ -19,8 +19,8 @@
 
 # File to load a catalog into the system
 
-require_once(dirname(__FILE__) . "/mb_validatePermission.php");
-require_once(dirname(__FILE__) . "/../classes/class_csw.php"); 
+require_once(__DIR__ . "/mb_validatePermission.php");
+require_once(__DIR__ . "/../classes/class_csw.php"); 
 
 //get list of GUIs
 $gui_list = $_REQUEST["guiList"];

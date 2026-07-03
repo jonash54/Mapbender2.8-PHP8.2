@@ -19,15 +19,15 @@
  * 				along with this program; if not, write to the Free Software
  * 				Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_kml_geometry.php");
 
 /**
  * Represents a point, consisting of a single point geometry.
  * 
  * @package KML 
  */
-class KMLPoint extends KMLGeometry {
+class KMLPoint extends KMLGeometry implements \Stringable {
 	
 	/**
 	 * @param	string	the content of the geometry tag of a KML. Note: KML 2.2 uses a 
@@ -37,13 +37,13 @@ class KMLPoint extends KMLGeometry {
 	public function __construct ($geometryString, $epsg) {
 		//TODO: parameter validation and exception handling
 		// KML 2.2
-		if (preg_match("/,/", $geometryString)) {
-			$aPoint = explode(",", $geometryString);
+		if (preg_match("/,/", (string) $geometryString)) {
+			$aPoint = explode(",", (string) $geometryString);
 			// ignore altitude
 			$pt = new Mapbender_point($aPoint[0], $aPoint[1], $aPoint[2], $epsg);
 		}
 		else {
-			$aPoint = explode(" ", $geometryString);
+			$aPoint = explode(" ", (string) $geometryString);
 			// ignore altitude
 			$pt = new Mapbender_point($aPoint[0], $aPoint[1], $aPoint[2], $epsg);
 		}
@@ -53,13 +53,13 @@ class KMLPoint extends KMLGeometry {
 		if (isset($epsg) && $epsg != 4326) {
 			$pt->transform(4326);
 		}
-		$this->point = array("x" => $pt->x, "y" => $pt->y, "z" => $pt->z);
+		$this->point = ["x" => $pt->x, "y" => $pt->y, "z" => $pt->z];
 	}
 
 	/**
 	 * @return	string	a string representation of the object, currently geoJSON.
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toGeoJSON();
 	}
 
@@ -90,7 +90,7 @@ class KMLPoint extends KMLGeometry {
 	public function transform($targetEpsg){
 	    $pt = new Mapbender_point($this->point["x"], $this->point["y"], $this->point["z"], 4326);
 	    $pt->transform($targetEpsg);
-	    $this->point = array("x" => $pt->x, "y" => $pt->y, "z" => $pt->z);
+	    $this->point = ["x" => $pt->x, "y" => $pt->y, "z" => $pt->z];
 	}
 	
 		

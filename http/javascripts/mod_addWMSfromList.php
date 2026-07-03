@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -64,7 +64,7 @@ function mod_addWMSfromDB(gui_id, wms_id) {
 <body onload='window.focus()'>
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 
 $fieldHeight = 20;
 
@@ -81,8 +81,8 @@ $logged_gui_id=Mapbender::session()->get("mb_user_gui");
 /*get infos from gui_element ********************************************************************************************/
 
 $sql_target = "SELECT e_requires, e_target FROM gui_element WHERE e_id = 'addWMS' AND fkey_gui_id = $1";
-$v = array($logged_gui_id);
-$t = array('s');
+$v = [$logged_gui_id];
+$t = ['s'];
 $res_target = db_prep_query($sql_target, $v, $t);
 $cnt_target = 0;
 while($row = db_fetch_array($res_target)){ 
@@ -96,7 +96,7 @@ if($cnt_target > 1){
 echo "<script type='text/javascript'>";
 echo "var gui_id = '".$logged_gui_id."';";
 echo "var mod_addWMS_data = '".$e_require."';";
-$target = explode(",", $e_target);
+$target = explode(",", (string) $e_target);
 echo "var mod_addWMS_target1 = '".trim($target[0])."';";
 echo "var mod_addWMS_target2 = '".trim($target[1])."';";
 echo "</script>";
@@ -109,7 +109,7 @@ $arrayGuis=mb_getGUIs($logged_user_id);
 
 $sql_gui = "SELECT * FROM gui WHERE gui_id IN (";
 $v = $arrayGuis;
-$t = array();
+$t = [];
 for ($i = 1; $i <= count($arrayGuis); $i++){
 	if ($i > 1) { 
 		$sql_gui .= ",";
@@ -130,7 +130,7 @@ while($row = db_fetch_array($res_gui)){
 /*get allocated wms from allocated gui  ********************************************************************************************/								 
 $sql_gui_wms = "SELECT DISTINCT fkey_wms_id FROM gui_wms WHERE fkey_gui_id IN (";
 $v = $arrayGuis;
-$t = array();
+$t = [];
 for ($i = 1; $i <= count($arrayGuis); $i++){
 	if ($i > 1) { 
 		$sql_gui_wms .= ",";
@@ -151,7 +151,7 @@ while($row = db_fetch_array($res_gui_wms)){
 /*get allocated wms-Abstract and wms-Capabilities from allocated gui  ********************************************************************************************/								 
 $sql_wms = "SELECT DISTINCT wms_id, wms_title, wms_abstract, wms_getcapabilities,wms_version FROM wms WHERE wms_id IN (";
 $v = $fkey_wms_id;
-$t = array();
+$t = [];
 for ($i = 1; $i <= count($fkey_wms_id); $i++){
 	if ($i > 1) { 
 		$sql_wms .= ",";

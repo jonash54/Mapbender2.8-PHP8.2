@@ -5,8 +5,8 @@
  * @author    Raphael.Syed <raphael.syed@WhereGroup.com> http://WhereGroup.com
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_user.php");
 // require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
 /**
  * unpublish the the given wmc

@@ -1,3 +1,8 @@
+<?php
+if (!function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
+?>
 /**
  * Package: measure_widget
  *
@@ -73,29 +78,29 @@ var MeasureApi = function (o) {
 		title = o.title,
 		defaultHtml = "<div title='" + title + "'>" +
 			"<div class='mb-measure-text'><?php 
-				echo nl2br(htmlentities(_mb("Click in the map to start measuring."), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Click in the map to start measuring."), ENT_QUOTES, "UTF-8"));
 			?></div></div>",
 		informationHtml =
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Last point: "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Last point: "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-clicked-point' /></div>" +
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Current point: "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Current point: "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-current-point' /></div>" +
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Distance (to last point): "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Distance (to last point): "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-distance-last' />  <span class='mb-measure-distance-last-unit' /></div>" +
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Distance (total): "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Distance (total): "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-distance-total' /> <span class='mb-measure-distance-total-unit' /></div>" +
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Perimeter: "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Perimeter: "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-perimeter' /> <span class='mb-measure-perimeter-unit' /></div>" +
 			"<div><?php
-				echo nl2br(htmlentities(_mb("Area: "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Area: "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-area' /> <span class='mb-measure-area-unit' /></div>" +
                         "<div><?php
-				echo nl2br(htmlentities(_mb("Angle: "), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Angle: "), ENT_QUOTES, "UTF-8"));
 			?><span class='mb-measure-angle' /> <span class='mb-measure-angle-unit' /></div>";
 
 	var hideMeasureData = function () {

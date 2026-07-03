@@ -12,7 +12,7 @@
 #
 # This file is part of Mapbender.
 
-include_once dirname(__FILE__)."/../core/system.php";
+include_once __DIR__."/../core/system.php";
 
 
 ?>

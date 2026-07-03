@@ -17,15 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_feature.php");
-require_once(dirname(__FILE__)."/../classes/class_bbox.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_feature.php");
+require_once(__DIR__."/../classes/class_bbox.php");
 
 
 class FeatureCollection {
-	var $type = "FeatureCollection";
-	var $featureArray = array();
+	public $type = "FeatureCollection";
+	public $featureArray = [];
 	
 	public function __construct() {
 		
@@ -64,7 +64,7 @@ class FeatureCollection {
 		if (!is_array($this->featureArray) || count($this->featureArray) === 0) {
 			return null;
 		}
-		$bBoxArray = array();
+		$bBoxArray = [];
 		for ($i = 0; $i < count($this->featureArray);$i++) {
 			$currentBbox = $this->featureArray[$i]->getBbox();
 			if(!is_null($currentBbox)) {

@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="EditWMSMetadata";
-require_once(dirname(__FILE__)."/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 include_once '../include/dyn_css.php';
 
@@ -60,14 +60,14 @@ function pick_the_date(obj) {
 
 function guessTimestamp($timestr) {
 	
-     if (mb_strpos($timestr, '.')) {
-        list($day, $month, $year) = explode(".", $timestr);
+     if (mb_strpos((string) $timestr, '.')) {
+        [$day, $month, $year] = explode(".", (string) $timestr);
      }
-     elseif (mb_strpos($timestr, '/')) {
-        list($month, $day, $year) = explode("/", $timestr);
+     elseif (mb_strpos((string) $timestr, '/')) {
+        [$month, $day, $year] = explode("/", (string) $timestr);
      }
-     elseif (mb_strpos($timestr, '-')) {
-        list($year, $month, $day) = explode("-", $timestr);
+     elseif (mb_strpos((string) $timestr, '-')) {
+        [$year, $month, $day] = explode("-", (string) $timestr);
      }
      else {
      	$year = 0;
@@ -91,7 +91,7 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
 	$update_wms_sql .= "contactfacsimiletelephone = $14, ";
 	$update_wms_sql .= "contactelectronicmailaddress = $15 ";
 
-	$v = array();
+	$v = [];
 	array_push($v, $_REQUEST['wms_title_box']);
 	array_push($v, $_REQUEST['wms_abstract_box']);
 	array_push($v, $_REQUEST['fees_box']);
@@ -107,7 +107,7 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
 	array_push($v, $_REQUEST['contactvoicetelephone_box']);
 	array_push($v, $_REQUEST['contactfacsimiletelephone_box']);
 	array_push($v, $_REQUEST['contactelectronicmailaddress_box']);
-	$t = array("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s");
+	$t = ["s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s"];
 
 	if (isset($_REQUEST['wms_timestamp_box']) && $_REQUEST['wms_timestamp_box'] <> "") {
         $update_wms_sql .= ", wms_timestamp = $16 ";
@@ -124,20 +124,20 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
 
     $res_update_wms_sql = db_prep_query($update_wms_sql, $v, $t);
 
-    while(list($key,$val) = each($_REQUEST)) {
+    foreach ($_REQUEST as $key => $val) {
         if(preg_match("/___/", $key)) {
             $myKey = explode("___", $key);
             $layer_id = preg_replace("/L_/","",$myKey[0]);
             if($myKey[1]=="layer_abstract") {
 				$layer_sql = "UPDATE layer SET layer_abstract = $1 ";
 				$layer_sql .= "WHERE layer_id = $2 AND fkey_wms_id = $3";  
-                $v = array($val, $layer_id, $_REQUEST['wms_id']);
-                $t = array("s", "i", "s");
+                $v = [$val, $layer_id, $_REQUEST['wms_id']];
+                $t = ["s", "i", "s"];
                 $res_keyword_sql = db_prep_query($layer_sql, $v, $t);
             }
             if($myKey[1]=="layer_keywords") {
                 #Get all keywords depending on the given layer after user modification
-                $keywords  = explode(",",$val);
+                $keywords  = explode(",",(string) $val);
                 #delete all blanks from the keywords list
                 for ($j = 0; $j < count($keywords); $j++) {
                     $word = $keywords[$j];
@@ -152,8 +152,8 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
                                "AND layer.fkey_wms_id = $1 " .
                                "AND layer.layer_id = $2";
                 
-                $v = array($_REQUEST['wms_id'], $layer_id); 
-                $t = array("s", "i");
+                $v = [$_REQUEST['wms_id'], $layer_id]; 
+                $t = ["s", "i"];
                 $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
                 while($keyword_row = db_fetch_array($res_keyword_sql))
                 {
@@ -170,22 +170,22 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
                         $keyword_sql = "DELETE FROM layer_keyword " .
                                        "WHERE fkey_layer_id = $1 " .
                                        "AND fkey_keyword_id = $2";
-                        $v = array($layer_id, $keyword_id);
-                        $t = array("i", "i");
+                        $v = [$layer_id, $keyword_id];
+                        $t = ["i", "i"];
                         db_prep_query($keyword_sql, $v, $t);
                         #Checking, if the keyword is in use by any layer
                         $layer_sql = "SELECT * FROM layer_keyword " .
                                        "WHERE fkey_keyword_id = $1";
-                        $v = array($keyword_id);
-                        $t = array("i");
+                        $v = [$keyword_id];
+                        $t = ["i"];
                         $res_layer_sql = db_prep_query($layer_sql, $v, $t);
                         if(!($row = db_fetch_array($res_layer_sql)))
                         {
                             #If keyword will not longer be in use, delete it from keyword table
                             $keyword_sql = "DELETE FROM keyword " .
                                            "WHERE keyword_id = $1";
-                            $v = array($keyword_id);
-                            $t = array("i");
+                            $v = [$keyword_id];
+                            $t = ["i"];
                             db_prep_query($keyword_sql, $v, $t);
                         }
                     }
@@ -215,8 +215,8 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
                         #Check, if the keyword is exsiting in the database
                         $keyword_sql = "SELECT keyword_id FROM keyword " .
                                        "WHERE UPPER(keyword) = UPPER($1)";
-                        $v = array($keyword);
-                        $t = array("s");
+                        $v = [$keyword];
+                        $t = ["s"];
                         $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
                         $keyword_row = db_fetch_array($res_keyword_sql);
                         #Keyword exists in the database
@@ -229,13 +229,13 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
                         else
                         {
                             $keyword_sql = "INSERT INTO keyword (keyword) VALUES ($1)";
-                            $v = array($keyword);
-                            $t = array("s");
+                            $v = [$keyword];
+                            $t = ["s"];
                             $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
                             
                             $keyword_sql = "SELECT keyword_id FROM keyword WHERE keyword = $1";
-                            $v = array($keyword);
-                            $t = array("s");
+                            $v = [$keyword];
+                            $t = ["s"];
                             $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
                             $keyword_row = db_fetch_array($res_keyword_sql);
                             if($keyword_row != null)
@@ -247,8 +247,8 @@ if (isset($_REQUEST['update_content']) && $_REQUEST['update_content'] == true) {
                         #Inserting the reference between layer and keyword in the layer_keyword table
                         $keyword_sql = "INSERT INTO layer_keyword (fkey_layer_id, fkey_keyword_id) " .
                                        "VALUES ($1, $2)";
-                        $v = array($layer_id, $keyword_id);
-                        $t = array("s", "s");
+                        $v = [$layer_id, $keyword_id];
+                        $t = ["s", "s"];
                         $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
                     }
                 }
@@ -266,8 +266,8 @@ if(isset($_REQUEST['delete_preview']) && $_REQUEST['delete_preview']=='1'
 	&& isset($_REQUEST['layer_id']))
 {
     $preview_sql = "DELETE FROM layer_preview WHERE fkey_layer_id = $1";
-    $v = array($_REQUEST['layer_id']);
-    $t = array("s");
+    $v = [$_REQUEST['layer_id']];
+    $t = ["s"];
     $res_preview_sql = db_prep_query($preview_sql, $v, $t);
     die("Preview has been deleted!</body></html>");
 }
@@ -292,8 +292,8 @@ if (isset($_REQUEST['show_wms_list']) && $_REQUEST['show_wms_list'] == true)
 
     #Querying information from wms data table 
     $wms_sql = "SELECT wms_id, wms_title FROM wms WHERE wms_owner = $1 ORDER BY wms_title";
-    $v = array(Mapbender::session()->get("mb_user_id"));
-    $t = array("i");
+    $v = [Mapbender::session()->get("mb_user_id")];
+    $t = ["i"];
     $res_wms_sql = db_prep_query($wms_sql, $v, $t);
     #wms-selection
 
@@ -338,8 +338,8 @@ function editWMSByWMSID($param_wms_id)
 if(isset($wms_id) == true && $wms_id <>0)
 { 
 	$selected_wms_sql = "SELECT * FROM wms WHERE wms_id = $1";
-	$v = array($wms_id);
-	$t = array("s");
+	$v = [$wms_id];
+	$t = ["s"];
     $res_selected_wms_sql = db_prep_query($selected_wms_sql, $v, $t);
     $selected_row = db_fetch_array($res_selected_wms_sql);
 
@@ -351,7 +351,7 @@ if(isset($wms_id) == true && $wms_id <>0)
     <input type='text' name='wms_title_box' value='<?php echo $selected_row["wms_title"];?>' /><td/>
 
     <td>WMS- Abstract:<td><td/>
-    <input type='text' name='wms_abstract_box' value='<?php echo htmlentities($selected_row["wms_abstract"],ENT_QUOTES,"UTF-8");?>' /><td/>
+    <input type='text' name='wms_abstract_box' value='<?php echo htmlentities((string) $selected_row["wms_abstract"],ENT_QUOTES,"UTF-8");?>' /><td/>
 
     <td >Fees:<td><td/>
     <input type='text' name='fees_box' value='<?php echo $selected_row["fees"]?>'/><td/>
@@ -420,8 +420,8 @@ if(isset($wms_id) == true && $wms_id <>0)
    
     $layer_sql = "SELECT * FROM layer WHERE layer.fkey_wms_id = $1" .
                  " ORDER BY layer_pos";
-    $v = array($wms_id);
-    $t = array("s");
+    $v = [$wms_id];
+    $t = ["s"];
     $res_layer_sql = db_prep_query($layer_sql, $v, $t);
     
     while($layer_row = db_fetch_array($res_layer_sql))
@@ -433,7 +433,7 @@ if(isset($wms_id) == true && $wms_id <>0)
         <td><input type='text' size='15' name='L_<?php echo $layer_row['layer_id']?>___layer_title' 
             value='<?php echo $layer_row['layer_title']?>' readonly></td>
         <td><input type='text' size='42' name='L_<?php echo $layer_row['layer_id']?>___layer_abstract'
-            value='<?php echo htmlentities($layer_row['layer_abstract'],ENT_QUOTES,"UTF-8")?>'>
+            value='<?php echo htmlentities((string) $layer_row['layer_abstract'],ENT_QUOTES,"UTF-8")?>'>
 
     <?php
         $keyword_sql = "SELECT keyword FROM keyword, layer_keyword, layer " .
@@ -441,8 +441,8 @@ if(isset($wms_id) == true && $wms_id <>0)
                        "AND layer_keyword.fkey_layer_id = layer.layer_id " .
                        "AND layer.fkey_wms_id = $1 " .
                        "AND layer.layer_id = $2";
-        $v = array($wms_id, $layer_row['layer_id']);
-        $t = array("s", "i");
+        $v = [$wms_id, $layer_row['layer_id']];
+        $t = ["s", "i"];
         $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
         $keywordList = "";
         $seperator = "";
@@ -480,7 +480,7 @@ if(isset($wms_id) == true && $wms_id <>0)
 <?php }*/?>
         </td>
         </tr>
-    <?php
+<?php
     }
 
     ?>

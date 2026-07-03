@@ -30,9 +30,9 @@
 
 
 
-include_once(dirname(__FILE__)."/classes/StyledLayerDescriptor.php");
-require_once(dirname(__FILE__)."/sld_config.php");
-include_once(dirname(__FILE__)."/sld_filter_parse.php");
+include_once(__DIR__."/classes/StyledLayerDescriptor.php");
+require_once(__DIR__."/sld_config.php");
+include_once(__DIR__."/sld_filter_parse.php");
 
 //get the neccessary variables from the request or from the session
 //if from request set up the session variables
@@ -79,7 +79,7 @@ if (isset($_REQUEST["function"]))
 		{
 			$operation = $_REQUEST["operation"];
 			
-			switch(strtoupper($operation))
+			switch(strtoupper((string) $operation))
 			{
 				case "OR":
 					$_SESSION["sld_filter_objects"][$_REQUEST["id"]]->operations[] = new BinaryLogicOp("Or");
@@ -252,11 +252,11 @@ else
 	if ($filterObj != "")
 	{
 		echo "<pre>\n";
-		echo htmlspecialchars($filterObj->generateXml());
+		echo htmlspecialchars((string) $filterObj->generateXml());
 		print_r ($_SESSION["sld_filter_objects"]);
 		echo "</pre>\n";
 		echo "<textarea  id=\"filter_textarea\" style=\"visibility:hidden;\">\n";
-		echo htmlspecialchars($filterObj->generateXml());
+		echo htmlspecialchars((string) $filterObj->generateXml());
 		echo "</textarea>\n";
 	}
 	else

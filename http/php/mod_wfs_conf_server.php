@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_configuration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_wfs_configuration.php");
+require_once(__DIR__."/../classes/class_wfs_conf.php");
 
 $ajaxResponse = new AjaxResponse($_REQUEST);
 $command = $ajaxResponse->getMethod();
@@ -36,9 +36,9 @@ switch ($command) {
 			$ajaxResponse->send();
 			break;
 		}
-		$wfsConfIdString = trim($wfsConfIdString,',');
+		$wfsConfIdString = trim((string) $wfsConfIdString,',');
 		$wfsConfIds = explode(',',$wfsConfIdString);
-		$result = array();
+		$result = [];
 		foreach($wfsConfIds as $wfsId){
 			$currentWfsConf = WfsConfiguration::createFromDb($wfsId);
 			if ($currentWfsConf !== null) {
@@ -53,9 +53,9 @@ switch ($command) {
 	    $currentUser = new User(Mapbender::session()->get("mb_user_id"));
 	    $wfsConfIds = $currentUser->getWfsConfByWfsOwner();
 	    if ($wfsConfIds === null) {
-	        $wfsConfIds = array();
+	        $wfsConfIds = [];
 	    }
-	    $result = array();
+	    $result = [];
 	    if (in_array((string)$wfsConfId, $wfsConfIds)) {
 	        $currentWfsConf = WfsConfiguration::createFromDb($wfsConfId);
 	        $result[]= $currentWfsConf;
@@ -67,9 +67,9 @@ switch ($command) {
 		$currentUser = new User(Mapbender::session()->get("mb_user_id"));
 		$wfsConfIds = $currentUser->getWfsConfByWfsOwner();
 		if ($wfsConfIds === null) {
-			$wfsConfIds = array();
+			$wfsConfIds = [];
 		}
-		$result = array();
+		$result = [];
 		foreach ($wfsConfIds as $id) {
 			$currentWfsConf = WfsConfiguration::createFromDb($id);
 			if ($currentWfsConf !== null) {
@@ -84,9 +84,9 @@ switch ($command) {
 	    $currentUser = new User(Mapbender::session()->get("mb_user_id"));
 	    $wfsConfIds = $currentUser->getWfsConfByWfsOwner();
 	    if ($wfsConfIds === null) {
-	        $wfsConfIds = array();
+	        $wfsConfIds = [];
 	    }
-	    $result = array();
+	    $result = [];
 	    foreach ($wfsConfIds as $id) {
 	        $currentWfsConf = WfsConfiguration::createFromDb($id);
 	        $entry = new stdClass();
@@ -102,39 +102,21 @@ switch ($command) {
 	case "getWfs" : 
 		$aWFS = new wfs_conf();
 		$aWFS->getallwfs(Mapbender::session()->get("mb_user_id"));
-		$result = array();
+		$result = [];
 		for ($i = 0; $i < count($aWFS->wfs_id); $i++) {
 			// featuretypes
-			$featuretypeArray = array();
+			$featuretypeArray = [];
 			$aWFS->getfeatures($aWFS->wfs_id[$i]);
 			for ($j = 0; $j < count($aWFS->features->featuretype_id); $j++) {
 				// featuretype elements
-				$ftElementArray = array();
+				$ftElementArray = [];
        			$aWFS->getelements($aWFS->features->featuretype_id[$j]);
 				for ($k = 0; $k < count($aWFS->elements->element_id); $k++) {
-					$ftElementArray[]= array(
-						"id" => $aWFS->elements->element_id[$k],
-						"name" => $aWFS->elements->element_name[$k],
-						"type" => $aWFS->elements->element_type[$k]
-					);
+					$ftElementArray[]= ["id" => $aWFS->elements->element_id[$k], "name" => $aWFS->elements->element_name[$k], "type" => $aWFS->elements->element_type[$k]];
 				}
-                $featuretypeArray[]= array(
-					"id" => $aWFS->features->featuretype_id[$j],
-                	"name" => $aWFS->features->featuretype_name[$j],
-					"srs" => $aWFS->features->featuretype_srs[$j],
-					"elementArray" => $ftElementArray
-				);
+                $featuretypeArray[]= ["id" => $aWFS->features->featuretype_id[$j], "name" => $aWFS->features->featuretype_name[$j], "srs" => $aWFS->features->featuretype_srs[$j], "elementArray" => $ftElementArray];
 			}
-			$result[]= array(
-				"id" => $aWFS->wfs_id[$i],
-				"name" => $aWFS->wfs_name[$i],
-				"title" => $aWFS->wfs_title[$i],
-				"abstr" => $aWFS->wfs_abstract[$i],
-				"getCapabilities" => $aWFS->wfs_getcapabilities[$i],
-				"describeFeaturetype" => $aWFS->wfs_describefeaturetype[$i],
-				"getFeature" => $aWFS->wfs_getfeature[$i],
-				"featuretypeArray" => $featuretypeArray
-			);
+			$result[]= ["id" => $aWFS->wfs_id[$i], "name" => $aWFS->wfs_name[$i], "title" => $aWFS->wfs_title[$i], "abstr" => $aWFS->wfs_abstract[$i], "getCapabilities" => $aWFS->wfs_getcapabilities[$i], "describeFeaturetype" => $aWFS->wfs_describefeaturetype[$i], "getFeature" => $aWFS->wfs_getfeature[$i], "featuretypeArray" => $featuretypeArray];
 		}
 		$ajaxResponse->setResult($result);
 		$ajaxResponse->send();

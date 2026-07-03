@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../classes/class_wms.php");
-require_once(dirname(__FILE__) . "/../classes/class_wfs_conf.php");
-require_once(dirname(__FILE__) . "/../classes/class_layer_monitor.php");
-require_once(dirname(__FILE__) . "/../classes/class_point.php");
-require_once(dirname(__FILE__) . "/../classes/class_bbox.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
-require_once(dirname(__FILE__) . "/../classes/class_map.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmcToXml.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
+require_once(__DIR__ . "/../classes/class_wms.php");
+require_once(__DIR__ . "/../classes/class_wfs_conf.php");
+require_once(__DIR__ . "/../classes/class_layer_monitor.php");
+require_once(__DIR__ . "/../classes/class_point.php");
+require_once(__DIR__ . "/../classes/class_bbox.php");
+require_once(__DIR__ . "/../classes/class_json.php");
+require_once(__DIR__ . "/../classes/class_map.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_wmcToXml.php");
+require_once(__DIR__ . "/../classes/class_user.php");
+require_once(__DIR__ . "/../classes/class_Uuid.php");
 
 /**
  * Implementation of a Web Map Context Document, WMC 1.1.0
@@ -61,77 +61,77 @@ require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
  * 		$myWmc->toJavaScript();
  *
  */
-class wmc {
+class wmc implements \Stringable {
 /**
  * Representing the main map in a map application
  * @var Map
  */
-	var $mainMap;
+	public $mainMap;
 
 	/**
 	 * Representing an (optional) overview map in a map application
 	 * @var Map
 	 */
-	var $overviewMap;
+	public $overviewMap;
 
 	/**
 	 * @var Array
 	 */
-	var $generalExtensionArray = array();
+	public $generalExtensionArray = [];
 
 	/**
 	 * The XML representation of this WMC.
 	 * @var String
 	 */
-	var $xml;
+	public $xml;
 
 	// constants
-	var $saveWmcAsFile = false;
-	var $extensionNamespace = "mapbender";
-	var $extensionNamespaceUrl = "http://www.mapbender.org/context";
+	public $saveWmcAsFile = false;
+	public $extensionNamespace = "mapbender";
+	public $extensionNamespaceUrl = "http://www.mapbender.org/context";
 
 	// set in constructor
-	var $wmc_id;
-	var $userId;
-	var $timestamp;
-	var $public;
-    var $local_data_public = 0;
-    var $has_local_data = 0;
-    var $local_data_size = '0';
-	var $uuid; 
+	public $wmc_id;
+	public $userId;
+	public $timestamp;
+	public $public;
+    public $local_data_public = 0;
+    public $has_local_data = 0;
+    public $local_data_size = '0';
+	public $uuid; 
 
 	// set during parsing
-	var $wmc_version;
-	var $wmc_name;
-	var $wmc_title;
-	var $wmc_abstract;
-	var $wmc_srs;
-	var $wmc_extent;
-	var $wmc_keyword = array();
-	var $wmc_contactposition;
-	var $wmc_contactvoicetelephone;
-	var $wmc_contactemail;
-	var $wmc_contactfacsimiletelephone;
-	var $wmc_contactperson;
-	var $wmc_contactorganization;
-	var $wmc_contactaddresstype;
-	var $wmc_contactaddress;
-	var $wmc_contactcity;
-	var $wmc_contactstateorprovince;
-	var $wmc_contactpostcode;
-	var $wmc_contactcountry;
-	var $wmc_logourl;
-	var $wmc_logourl_format;
-	var $wmc_logourl_type;
-	var $wmc_logourl_width;
-	var $wmc_logourl_height;
-	var $wmc_descriptionurl;
-	var $wmc_descriptionurl_format;
-	var $wmc_descriptionurl_type;
+	public $wmc_version;
+	public $wmc_name;
+	public $wmc_title;
+	public $wmc_abstract;
+	public $wmc_srs;
+	public $wmc_extent;
+	public $wmc_keyword = [];
+	public $wmc_contactposition;
+	public $wmc_contactvoicetelephone;
+	public $wmc_contactemail;
+	public $wmc_contactfacsimiletelephone;
+	public $wmc_contactperson;
+	public $wmc_contactorganization;
+	public $wmc_contactaddresstype;
+	public $wmc_contactaddress;
+	public $wmc_contactcity;
+	public $wmc_contactstateorprovince;
+	public $wmc_contactpostcode;
+	public $wmc_contactcountry;
+	public $wmc_logourl;
+	public $wmc_logourl_format;
+	public $wmc_logourl_type;
+	public $wmc_logourl_width;
+	public $wmc_logourl_height;
+	public $wmc_descriptionurl;
+	public $wmc_descriptionurl_format;
+	public $wmc_descriptionurl_type;
 
-	var $inspireCats;
-	var $isoTopicCats;
-	var $customCats;
+	public $inspireCats;
+	public $isoTopicCats;
+	public $customCats;
 
 	public function __construct () {
 		$this->userId = Mapbender::session()->get("mb_user_id");
@@ -166,8 +166,8 @@ class wmc {
 		$this->createObjFromWMC_xml($doc);
 		$sql = "SELECT * from (SELECT wmc_timestamp, wmc_title, wmc_public, srs, minx, miny, maxx, maxy, wmc_has_local_data, wmc_local_data_size, wmc_local_data_public, uuid, fkey_user_id " .
 			"FROM mb_user_wmc WHERE wmc_serial_id = $1 AND (fkey_user_id = $2 OR wmc_public = 1)) as wmc_data INNER JOIN mb_user ON wmc_data.fkey_user_id = mb_user.mb_user_id";
-		$v = array($wmcId, Mapbender::session()->get("mb_user_id"));
-		$t = array("i", "i");
+		$v = [$wmcId, Mapbender::session()->get("mb_user_id")];
+		$t = ["i", "i"];
 
 		$res = db_prep_query($sql,$v,$t);
 		if(db_error()) { return false; }
@@ -205,8 +205,8 @@ class wmc {
 	    $this->createObjFromWMC_xml($doc);
 	    $sql = "SELECT * from (SELECT wmc_timestamp, wmc_title, wmc_public, srs, minx, miny, maxx, maxy, wmc_has_local_data, wmc_local_data_size, wmc_local_data_public, uuid, fkey_user_id " .
 	   	    "FROM mb_user_wmc WHERE wmc_serial_id = $1) as wmc_data INNER JOIN mb_user ON wmc_data.fkey_user_id = mb_user.mb_user_id";
-	    $v = array($wmcId);
-	    $t = array("i");
+	    $v = [$wmcId];
+	    $t = ["i"];
 	    
 	    $res = db_prep_query($sql,$v,$t);
 	    if(db_error()) { return false; }
@@ -244,7 +244,7 @@ class wmc {
 		try{
 			$ev = new ElementVar($appId,"mapframe1","wfsConfIdString");
 			$this->generalExtensionArray['WFSCONFIDSTRING'] = $ev->value;
-		}catch(Exception $E){
+		}catch(Exception){
 			// ... exceptions are a terrible way to do this, but I am not going to rewrite the ElementVar class
 			$this->generalExtensionArray['WFSCONFIDSTRING'] = "";
 		}
@@ -321,7 +321,7 @@ class wmc {
 		$sql .= "WHERE wmc_public = 1 GROUP BY wmc_serial_id";
 		$res_wmc = db_query($sql);
 
-		$wmcArray = array();
+		$wmcArray = [];
 		while($row = db_fetch_array($res_wmc)) {
 			array_push($wmcArray, $row["wmc_serial_id"]);
 		}
@@ -329,7 +329,7 @@ class wmc {
 	}
 
 	public function getAccessibleWmcs ($user) {
-		$wmcArray = array();
+		$wmcArray = [];
 
 		// get WMC ids
 		$wmcOwnerArray = $user->getWmcByOwner();
@@ -340,7 +340,7 @@ class wmc {
 	}
 
 	public function selectByUser ($user, $showPublic=0) {
-		$wmcArray = array();
+		$wmcArray = [];
 
 		// get WMC ids
 		$wmcOwnerArray = $user->getWmcByOwner();
@@ -348,12 +348,12 @@ class wmc {
 			$publicWmcIdArray = self::getPublicWmcIds();
 			$wmcIdArray = array_keys( array_flip(array_merge($wmcOwnerArray, $publicWmcIdArray)));
 		} else {
-			$publicWmcIdArray = array();
+			$publicWmcIdArray = [];
 			$wmcIdArray=$wmcOwnerArray;
 		}
 		// get WMC data
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$wmcIdList = "";
 
 		for ($i = 0; $i < count($wmcIdArray); $i++) {
@@ -372,7 +372,7 @@ class wmc {
 
 			$res = db_prep_query($sql, $v, $t);
 			while($row = db_fetch_assoc($res)) {
-				$currentResult = array();
+				$currentResult = [];
 				$currentResult["id"] = $row["wmc_serial_id"];
 				$currentResult["abstract"] = $row["abstract"];
 				$currentResult["title"] = administration::convertIncomingString($row["wmc_title"]);
@@ -396,15 +396,15 @@ class wmc {
 	private function getKeywordsById ($id, $user) {
 		$wmcArray = $this->getAccessibleWmcs($user);
 		if (!in_array($id, $wmcArray)) {
-			return array();
+			return [];
 		}
 
-		$keywordArray = array();
+		$keywordArray = [];
 
 		$sql = "SELECT DISTINCT k.keyword FROM keyword AS k, wmc_keyword AS w " .
 			"WHERE w.fkey_keyword_id = k.keyword_id AND w.fkey_wmc_serial_id = $1";
-		$v = array($id);
-		$t = array("s");
+		$v = [$id];
+		$t = ["s"];
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
 			$keywordArray[]= $row["keyword"];
@@ -416,17 +416,17 @@ class wmc {
 	private function getCategoriesById ($id, $user) {
 		$wmcArray = $this->getAccessibleWmcs($user);
 		if (!in_array($id, $wmcArray)) {
-			return array();
+			return [];
 		}
 
-		$categoryArray = array();
+		$categoryArray = [];
 
 		$sql = "SELECT DISTINCT t.md_topic_category_id FROM " .
 			"md_topic_category AS t, wmc_md_topic_category AS w " .
 			"WHERE w.fkey_md_topic_category_id = t.md_topic_category_id " .
 			"AND w.fkey_wmc_serial_id = $1";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		while ($row = db_fetch_array($res)) {
 			$categoryArray[]= $row["md_topic_category_id"];
@@ -440,17 +440,13 @@ class wmc {
 	}
 	public function getAllWms () {
 		$wmsArray = $this->mainMap->getWmsArray();
-		$resultObj = array();
-		$usedIds = array();
+		$resultObj = [];
+		$usedIds = [];
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			if (in_array($wmsArray[$i]->wms_id, $usedIds)) {
 				continue;
 			}
-			$resultObj[]= array(
-				"title" => $wmsArray[$i]->wms_title,
-				"id" => is_null($wmsArray[$i]->wms_id) ? null : intval($wmsArray[$i]->wms_id),
-				"index" => $i
-			);
+			$resultObj[]= ["title" => $wmsArray[$i]->wms_title, "id" => is_null($wmsArray[$i]->wms_id) ? null : intval($wmsArray[$i]->wms_id), "index" => $i];
 			$usedIds[]= $wmsArray[$i]->wms_id;
 		}
 		return $resultObj;
@@ -458,17 +454,13 @@ class wmc {
 
 	public function getWmsWithoutId () {
 		$wmsArray = $this->getAllWms();
-		$resultObj = array();
+		$resultObj = [];
 
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			if (is_numeric($wmsArray[$i]["id"]) && $wmsArray[$i]["id"] !== 0) {
 				continue;
 			}
-			$resultObj[]= array(
-				"title" => $wmsArray[$i]["title"],
-				"id" => $wmsArray[$i]["id"],
-				"index" => $i
-			);
+			$resultObj[]= ["title" => $wmsArray[$i]["title"], "id" => $wmsArray[$i]["id"], "index" => $i];
 		}
 		return $resultObj;
 	}
@@ -477,7 +469,7 @@ class wmc {
 		return array_values(array_udiff(
 			$this->getAllWms(),
 			$this->getWmsWithoutId(),
-			array("wmc", "compareWms")
+			["wmc", "compareWms"]
 		));
 	}
 
@@ -487,15 +479,15 @@ class wmc {
 		return array_values(array_udiff(
 			$withId,
 			$inv,
-			array("wmc", "compareWms")
+			["wmc", "compareWms"]
 		));
 	}
 
 	public function getInvalidWms () {
-		$resultObj = array();
+		$resultObj = [];
 		$wmsArray = $this->getWmsWithId();
 		//changes to allow only unique entries for registrated wms ids
-		$wmsIdArray = array();
+		$wmsIdArray = [];
 		foreach ($wmsArray as $wms) {
 			$wmsIdArray[] = $wms['id'];
 		}
@@ -503,18 +495,14 @@ class wmc {
 		if (count($wmsArray) > 0) {
 			$sql = "SELECT COUNT(wms_id), wms_id FROM wms WHERE wms_id IN (".implode(',', $wmsIdArray).") GROUP BY wms_id";
 			$res = db_query($sql);
-			$notExistingLookupArray = array();
+			$notExistingLookupArray = [];
 			while($row = db_fetch_assoc($res)) {
 				$notExistingLookupArray[$row['wms_id']] = intval($row['count']);
 			}
 		}
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			if ($notExistingLookupArray[$wmsArray[$i]["id"]] === 0) {
-				$resultObj[]= array(
-					"title" => $wmsArray[$i]["title"],
-					"id" => intval($wmsArray[$i]["id"]),
-					"index" => $wmsArray[$i]["index"]
-				);
+				$resultObj[]= ["title" => $wmsArray[$i]["title"], "id" => intval($wmsArray[$i]["id"]), "index" => $wmsArray[$i]["index"]];
 			}
 		}
 		return $resultObj;
@@ -522,17 +510,13 @@ class wmc {
 
 	public function getWmsWithPermission ($user) {
 		$wmsArray = $this->getValidWms();
-		$resultObj = array();
+		$resultObj = [];
 
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			$currentWmsId = intval($wmsArray[$i]["id"]);
 
 			if ($user->isWmsAccessible($currentWmsId)) {
-				$resultObj[]= array(
-					"title" => $wmsArray[$i]["title"],
-					"id" => intval($currentWmsId),
-					"index" => $wmsArray[$i]["index"]
-				);
+				$resultObj[]= ["title" => $wmsArray[$i]["title"], "id" => intval($currentWmsId), "index" => $wmsArray[$i]["index"]];
 			}
 		}
 		return $resultObj;
@@ -542,7 +526,7 @@ class wmc {
 		return array_values(array_udiff(
 		$this->getValidWms(),
 		$this->getWmsWithPermission($user),
-		array("wmc", "compareWms")
+		["wmc", "compareWms"]
 		));
 	}
 
@@ -550,27 +534,23 @@ class wmc {
 		return array_values(array_udiff(
 		$this->getWmsWithPermission($user),
 		$this->getUnavailableWms(),
-		array("wmc", "compareWms")
+		["wmc", "compareWms"]
 		));
 	}
 
 	public function getUnavailableWms ($user) {
 		$wmsArray = $this->getWmsWithPermission($user);
-		$resultObj = array();
+		$resultObj = [];
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			$currentWmsId = $wmsArray[$i]["id"];
 			$sql = "SELECT last_status FROM mb_wms_availability WHERE fkey_wms_id = $1";
-			$v = array($currentWmsId);
-			$t = array("i");
+			$v = [$currentWmsId];
+			$t = ["i"];
 			$res = db_prep_query($sql, $v, $t);
 			$statusRow = db_fetch_row($res);
 			$status = intval($statusRow[0]);
 			if (isset($status) && $status == -1) {
-				$resultObj[]= array(
-					"title" => $wmsArray[$i]["title"],
-					"id" => $currentWmsId,
-					"index" => $wmsArray[$i]["index"]
-				);
+				$resultObj[]= ["title" => $wmsArray[$i]["title"], "id" => $currentWmsId, "index" => $wmsArray[$i]["index"]];
 			}
 		}
 		return $resultObj;
@@ -581,9 +561,9 @@ class wmc {
 	 */
 	public function getAllUnavailableWms () {
 	    $validWmsArray = $this->getValidWms();
-	    $resultObj = array();
+	    $resultObj = [];
 	    //$e = new mb_exception("classes/class_wmc.php: " . json_encode($validWmsArray));
-	    $validWmsIdArray = array();
+	    $validWmsIdArray = [];
 	    foreach ($validWmsArray as $wms) {
 	        $validWmsIdArray[] = $wms['id'];
 	    }
@@ -594,12 +574,7 @@ class wmc {
 	    }
 	    $res = db_query($sql);
         while($row = db_fetch_assoc($res)) {
-            $resultObj[]= array(
-                "title" => $row["wms_title"],
-                "id" => $row["wms_id"],
-                "availability" => row["availability"],
-                "index" => 0
-            );  
+            $resultObj[]= ["title" => $row["wms_title"], "id" => $row["wms_id"], "availability" => \ROW["availability"], "index" => 0];  
         }
     return $resultObj;
     }
@@ -653,9 +628,9 @@ class wmc {
 		//$layerLegendUrlList = $WMCDoc->xpath($query_mbLayerLegend);
 		$e = new mb_notice(count($layerIdList));
 		//Select current layer and wms information with one SQL select query!
-		$v = array();
-		$t = array();
-		$layerIds = array();
+		$v = [];
+		$t = [];
+		$layerIds = [];
 		$sql = "SELECT layer_id, layer_title, f_get_layer_featuretype_coupling(array[ layer_id ], TRUE) as featuretypecoupling, f_get_download_options_for_layer(layer_id) AS downloadoptions, layer_name, fkey_wms_id, wms_timestamp, wms_getmap, wms_getlegendurl, wms_owsproxy, wms_title FROM layer, wms WHERE layer.fkey_wms_id = wms.wms_id and layer_id in (";
 		$i = 0;
 		//generate csv list of layer_ids
@@ -681,18 +656,18 @@ class wmc {
 		$sql .= ")";
 		$resStyle = db_prep_query($sql,$v,$t);
 		//get result as array
-		$style = array();
-		$styleNameArray = array();
-		$dbStyleArray = array();
+		$style = [];
+		$styleNameArray = [];
+		$dbStyleArray = [];
 		$numberOfStyles = 0;
 		while($row = db_fetch_array($resStyle)) {
-		    
+
 		    $dbStyleArray[$row["fkey_layer_id"]][$numberOfStyles]->name = $row["name"];
 		    $dbStyleArray[$row["fkey_layer_id"]][$numberOfStyles]->title = $row["title"];
 		    $dbStyleArray[$row["fkey_layer_id"]][$numberOfStyles]->legendurl = $row["legendurl"];
 		    $dbStyleArray[$row["fkey_layer_id"]][$numberOfStyles]->legendurlformat = $row["legendurlformat"];
 		    $numberOfStyles++;
-		    
+
 			$style[$row["fkey_layer_id"]][$row["name"]] [$row["legendurlformat"]] = $row["legendurl"];
 			$styleNameArray[] = $row["name"];
 			//$e = new mb_notice($row["fkey_layer_id"] . " : " . $row["name"]. " - legendurl: ".$row["legendurl"]." - format: ".$row["legendurlformat"]);
@@ -703,10 +678,10 @@ class wmc {
 		$sql .= ") AND (name = 'time' AND units = 'ISO8601')";
 		//$sql .= ") AND (name = 'time' or name = 'elevation')";
 		//following attributes should be exchanged for time:
-		$attributeNames = array('unitSymbol', 'default', 'multipleValues', 'nearestValue', 'current', 'extent');
+		$attributeNames = ['unitSymbol', 'default', 'multipleValues', 'nearestValue', 'current', 'extent'];
 		$resAttributes = db_prep_query($sql,$v,$t);
 		//get result as array
-		$dimension = array();
+		$dimension = [];
 		while($row = db_fetch_array($resAttributes)) {
 			foreach ($attributeNames as $attributeName) {
 				$dimension[$row["fkey_layer_id"]][$row["name"]] [$attributeName] = $row[strtolower($attributeName)];
@@ -717,7 +692,7 @@ class wmc {
 		while($row = db_fetch_array($res)){
 			$wmsId = $row["fkey_wms_id"];
 			$layerId = $row["layer_id"];
-			$layerTitle = addslashes($row["layer_title"]);
+			$layerTitle = addslashes((string) $row["layer_title"]);
 			$e = new mb_notice("class_wmc.php - updateUrlsInDb - following layer will be processed: ".$layerId);
 			$layerName = $row["layer_name"];
 			//xpath to pull a special wmc layer object from simple xml object
@@ -1005,7 +980,7 @@ class wmc {
 	    $layerIndex = 0;
 	    $newParentId = 0;
 	    //storage for new layer tree
-	    $tmpLayerListDocDom = DOMDocument::loadXML('<LayerList></LayerList>');
+	    $tmpLayerListDocDom = (new DOMDocument())->loadXML('<LayerList></LayerList>');
 	    //$e = new mb_exception('php/mod_qualify_mb_user_wmc.php: ' . $tmpLayerListDocDom->saveXML());
 	    //start creation of tree
 	    $this->recursiveBuildTreeDom($WMCDocDom, $wmsId, '', $layerIndex, $newParentId, $tmpLayerListDocDom);
@@ -1101,7 +1076,7 @@ class wmc {
 		$query_mbLayerId = "/wmc:ViewContext/wmc:LayerList/wmc:Layer/wmc:Extension/mapbender:layer_id";
 		libxml_use_internal_errors(true);
 		try {
-			$WMCDoc = simplexml_load_string($wmcXml);
+			$WMCDoc = simplexml_load_string((string) $wmcXml);
 			if ($WMCDoc === false) {
 				foreach(libxml_get_errors() as $error) {
         				$err = new mb_exception("class_wmc:".$error->message);
@@ -1130,7 +1105,7 @@ class wmc {
 		if (gettype($allowedLayerArray) == "array" && count($allowedLayerArray) > 0) {
 			
 		} else {
-			$allowedLayerArray = array();
+			$allowedLayerArray = [];
 			$allowedLayerArray[] = 0;
 		}
 		//iterate over all layers with id and remove layer with an id that is not in $allowedLayerArray!
@@ -1154,7 +1129,7 @@ class wmc {
 	 * @return mixed[] an assoc array with attributes "success" (boolean) and "message" (String).
 	 */
 	public function insert ($overwrite) {
-		$result = array();
+		$result = [];
 
 		if ($this->userId && $this->xml && $this->wmc_title) {
 			try {
@@ -1172,7 +1147,7 @@ class wmc {
 
 			//put keywords into Document
 			try {
-				$WMCDoc = DOMDocument::loadXML($this->toXml());
+				$WMCDoc = (new DOMDocument())->loadXML($this->toXml());
 			}
 			catch (Exception $E) {
 				new mb_exception("WMC XML is broken.");
@@ -1214,8 +1189,8 @@ class wmc {
 			if($overwrite) {
 
 				$findsql = "SELECT fkey_user_id,wmc_title,wmc_timestamp, wmc_serial_id FROM mb_user_wmc WHERE fkey_user_id = $1 AND wmc_serial_id = $2 ORDER BY wmc_timestamp DESC LIMIT 1;";
-				$v = array($this->userId, $this->wmc_id);
-				$t = array("i","i");
+				$v = [$this->userId, $this->wmc_id];
+				$t = ["i", "i"];
 
 				$res = db_prep_query($findsql,$v,$t);
 				if (db_error()) {
@@ -1230,31 +1205,29 @@ class wmc {
 					$sql = "UPDATE mb_user_wmc SET wmc = $1, wmc_timestamp = $2, abstract = $3, srs = $4, minx = $5, miny = $6,".
 						" maxx = $7, maxy = $8, wmc_title = $9, wmc_has_local_data = $13, ".
                         "wmc_local_data_public = $14, wmc_local_data_size = $15 WHERE fkey_user_id = $10 AND wmc_serial_id=$11 AND wmc_timestamp = $12;";
-					$v = array($this->xml, time(), $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx, $this->wmc_extent->miny,
-                    $this->wmc_extent->maxx, $this->wmc_extent->maxy ,administration::convertOutgoingString($this->wmc_title), $this->userId, $this->wmc_id,$row[2],
-                    $this->has_local_data, $this->local_data_public, $this->local_data_size);
-					$t = array("s", "s","s","s","i","i","i","i", "s", "i", "i","s", "i", "i", "s");
+					$v = [$this->xml, time(), $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx, $this->wmc_extent->miny, $this->wmc_extent->maxx, $this->wmc_extent->maxy, administration::convertOutgoingString($this->wmc_title), $this->userId, $this->wmc_id, $row[2], $this->has_local_data, $this->local_data_public, $this->local_data_size];
+					$t = ["s", "s", "s", "s", "i", "i", "i", "i", "s", "i", "i", "s", "i", "i", "s"];
 					$res = db_prep_query($sql, $v, $t);
 					// need the database Id
 					$wmc_DB_ID = $row[3];
 					$delsqlCustomTopic = "DELETE FROM wmc_custom_category WHERE fkey_wmc_serial_id = $1;";
-					$delvCustomTopic = array($wmc_DB_ID);
-					$deltCustomTopic = array("s");
+					$delvCustomTopic = [$wmc_DB_ID];
+					$deltCustomTopic = ["s"];
 					db_prep_query($delsqlCustomTopic, $delvCustomTopic,$deltCustomTopic);
 
 					$delsqlInspireTopic = "DELETE FROM wmc_inspire_category WHERE fkey_wmc_serial_id = $1;";
-					$delvInspireTopic= array($wmc_DB_ID);
-					$deltInspireTopic = array("s");
+					$delvInspireTopic= [$wmc_DB_ID];
+					$deltInspireTopic = ["s"];
 					db_prep_query($delsqlInspireTopic, $delvInspireTopic,$deltInspireTopic);
 
 					$delsql = "DELETE FROM wmc_md_topic_category WHERE fkey_wmc_serial_id = $1;";
-					$delv = array($wmc_DB_ID);
-					$delt = array("s");
+					$delv = [$wmc_DB_ID];
+					$delt = ["s"];
 					db_prep_query($delsql, $delv,$delt);
 
 					$delkwsql = "DELETE FROM wmc_keyword WHERE fkey_wmc_serial_id = $1;";
-					$delkwv = array($wmc_DB_ID);
-					$delkwt = array("s");
+					$delkwv = [$wmc_DB_ID];
+					$delkwt = ["s"];
 					db_prep_query($delkwsql, $delkwv,$delkwt);
 				}
 				else {
@@ -1267,10 +1240,8 @@ class wmc {
 						"wmc_id, fkey_user_id, wmc, wmc_title, wmc_public, wmc_timestamp, wmc_timestamp_create, " .
 						"abstract, srs, minx, miny, maxx, maxy, wmc_serial_id, wmc_has_local_data, wmc_local_data_public, wmc_local_data_size, uuid".
 						") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);";
-					$v = array(time(), $this->userId, $this->xml, administration::convertOutgoingString($this->wmc_title), $this->isPublic()?1:0,time(),time(),
-                    $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx,  $this->wmc_extent->miny, $this->wmc_extent->maxx, $this->wmc_extent->maxy, $wmc_DB_ID_new,
-                    $this->has_local_data, $this->local_data_public, $this->local_data_size, $this->uuid);
-					$t = array("s", "i", "s", "s", "i", "s","s", "s","s","i","i","i", "i", "i", "i", "i", "s", "s");
+					$v = [time(), $this->userId, $this->xml, administration::convertOutgoingString($this->wmc_title), $this->isPublic()?1:0, time(), time(), $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx, $this->wmc_extent->miny, $this->wmc_extent->maxx, $this->wmc_extent->maxy, $wmc_DB_ID_new, $this->has_local_data, $this->local_data_public, $this->local_data_size, $this->uuid];
+					$t = ["s", "i", "s", "s", "i", "s", "s", "s", "s", "i", "i", "i", "i", "i", "i", "i", "s", "s"];
 					$res = db_prep_query($sql, $v, $t);
 
 					//$sql = "SELECT max(wmc_serial_id) AS i FROM mb_user_wmc";
@@ -1291,10 +1262,8 @@ class wmc {
 					"abstract, srs, minx, miny, maxx, maxy, wmc_serial_id, wmc_has_local_data, wmc_local_data_public, wmc_local_data_size, uuid".
 					") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);";
 				//$e = new mb_exception($sql);
-				$v = array(time(), $this->userId, $this->xml, administration::convertOutgoingString($this->wmc_title), $this->isPublic()?1:0, time(),time(),
-                $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx,  $this->wmc_extent->miny, $this->wmc_extent->maxx, $this->wmc_extent->maxy, $wmc_DB_ID_new,
-                $this->has_local_data, $this->local_data_public, $this->local_data_size, $this->uuid);
-				$t = array("s", "i", "s", "s", "i", "s","s", "s","s","i","i","i", "i", "i", "i", "i", "s", "s");
+				$v = [time(), $this->userId, $this->xml, administration::convertOutgoingString($this->wmc_title), $this->isPublic()?1:0, time(), time(), $this->wmc_abstract, $this->wmc_srs, $this->wmc_extent->minx, $this->wmc_extent->miny, $this->wmc_extent->maxx, $this->wmc_extent->maxy, $wmc_DB_ID_new, $this->has_local_data, $this->local_data_public, $this->local_data_size, $this->uuid];
+				$t = ["s", "i", "s", "s", "i", "s", "s", "s", "s", "i", "i", "i", "i", "i", "i", "i", "s", "s"];
 				$res = db_prep_query($sql, $v, $t);
 
 
@@ -1318,8 +1287,8 @@ class wmc {
 				// if a keyword does not yet exist, create it
 					$keywordExistsSql = "SELECT keyword FROM keyword WHERE keyword = $1";
 					$keywordCreateSql = "INSERT INTO keyword (keyword) VALUES($1);";
-					$v = array($keyword);
-					$t = array("s");
+					$v = [$keyword];
+					$t = ["s"];
 					$res = db_prep_query($keywordExistsSql,$v,$t);
 					if(db_num_rows($res) == 0) {
 						$res = db_prep_query($keywordCreateSql,$v,$t);
@@ -1334,42 +1303,42 @@ INSERT INTO wmc_keyword (fkey_keyword_id,fkey_wmc_serial_id)
 		SELECT fkey_keyword_id FROM wmc_keyword WHERE fkey_wmc_serial_id = $3
 	)
 SQL;
-					$v = array($wmc_DB_ID_new, $keyword,$wmc_DB_ID_new);
-					$t = array("s","s","s");
+					$v = [$wmc_DB_ID_new, $keyword, $wmc_DB_ID_new];
+					$t = ["s", "s", "s"];
 					$res = db_prep_query($keywordsql, $v, $t);
 					if($a = db_error()) {
 					}
 				}
 
 				// update iso topic categories
-				$this->isoTopicCats = $this->isoTopicCats? $this->isoTopicCats: array();
+				$this->isoTopicCats = $this->isoTopicCats ?: [];
 				foreach($this->isoTopicCats as $catId) {
 
 					$catSql = "INSERT INTO wmc_md_topic_category (fkey_wmc_serial_id, fkey_md_topic_category_id) VALUES ($1,$2)";
-					$v = array($wmc_DB_ID_new, $catId);
-					$t = array("s","s");
+					$v = [$wmc_DB_ID_new, $catId];
+					$t = ["s", "s"];
 					$res = db_prep_query($catSql, $v, $t);
 
 				}
 
 				// update inspire categories
-				$this->inspireCats = $this->inspireCats? $this->inspireCats: array();
+				$this->inspireCats = $this->inspireCats ?: [];
 				foreach($this->inspireCats as $catId) {
 
 					$catSql = "INSERT INTO wmc_inspire_category (fkey_wmc_serial_id, fkey_inspire_category_id) VALUES ($1,$2)";
-					$v = array($wmc_DB_ID_new, $catId);
-					$t = array("s","s");
+					$v = [$wmc_DB_ID_new, $catId];
+					$t = ["s", "s"];
 					$res = db_prep_query($catSql, $v, $t);
 
 				}
 
 				// update custom categories
-				$this->customCats = $this->customCats? $this->customCats: array();
+				$this->customCats = $this->customCats ?: [];
 				foreach($this->customCats as $catId) {
 
 					$catSql = "INSERT INTO wmc_custom_category (fkey_wmc_serial_id, fkey_custom_category_id) VALUES ($1,$2)";
-					$v = array($wmc_DB_ID_new, $catId);
-					$t = array("s","s");
+					$v = [$wmc_DB_ID_new, $catId];
+					$t = ["s", "s"];
 					$res = db_prep_query($catSql, $v, $t);
 
 				}
@@ -1395,8 +1364,8 @@ SQL;
     	*/
 	public function update_existing($xml,$id) {
 		$sql = "UPDATE mb_user_wmc SET wmc = $1 WHERE wmc_serial_id = $2";
-		$v = array($xml,$id);
-		$t = array("s","s");
+		$v = [$xml, $id];
+		$t = ["s", "s"];
 		$res = db_prep_query($sql,$v,$t);
 		if(db_error()) { $e = new mb_exception("There was an error saving an updated WMC"); }
 	}
@@ -1416,7 +1385,7 @@ SQL;
 
 		try {
 			$user = new user($userId);
-		} catch (Exception $E) {
+		} catch (Exception) {
 			return $false;
 		}
 
@@ -1426,8 +1395,8 @@ SQL;
 
 		$sql = "DELETE FROM mb_user_wmc ";
 		$sql .= "WHERE fkey_user_id = $1 AND wmc_serial_id = $2";
-		$v = array($userId, $wmcId);
-		$t = array('i', 's');
+		$v = [$userId, $wmcId];
+		$t = ['i', 's'];
 		$res = db_prep_query($sql, $v, $t);
 		if ($res) {
 			return true;
@@ -1443,8 +1412,8 @@ SQL;
 	public static function getDocument ($id) {
 		$sql = "SELECT wmc FROM mb_user_wmc WHERE wmc_serial_id = $1 AND " .
 			"(fkey_user_id = $2 OR wmc_public = 1)";
-		$v = array($id, Mapbender::session()->get("mb_user_id"));
-		$t = array('s', 'i');
+		$v = [$id, Mapbender::session()->get("mb_user_id")];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -1465,8 +1434,8 @@ SQL;
 	 */
 	public static function getDocumentRoot ($id) {
 	    $sql = "SELECT wmc FROM mb_user_wmc WHERE wmc_serial_id = $1";
-	    $v = array($id);
-	    $t = array('s');
+	    $v = [$id];
+	    $t = ['s'];
 	    $res = db_prep_query($sql,$v,$t);
 	    $row = db_fetch_array($res);
 	    if ($row) {
@@ -1488,8 +1457,8 @@ SQL;
 	public static function getDocumentWithPublicData ($id) {
 		$sql = "SELECT wmc FROM mb_user_wmc WHERE wmc_serial_id = $1 AND " .
 			"wmc_local_data_public = 1";
-		$v = array($id);
-		$t = array('s');
+		$v = [$id];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -1506,8 +1475,8 @@ SQL;
 	public static function getDocumentByTitle ($title) {
 		$sql = "SELECT wmc FROM mb_user_wmc WHERE wmc_title = $1 AND " .
 			"(fkey_user_id = $2 OR wmc_public = 1)";
-		$v = array($title, Mapbender::session()->get("mb_user_id"));
-		$t = array('s', 'i');
+		$v = [$title, Mapbender::session()->get("mb_user_id")];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -1528,8 +1497,8 @@ SQL;
 		$wmcId = $this->wmc_id;
 		$public = $public ? 1 :0;
 		$sql = "UPDATE mb_user_wmc SET wmc_public = $1 WHERE wmc_serial_id = $2 AND fkey_user_id = $3;";
-		$v = array($public,$wmcId, $currentUser->id);
-		$t = array("i","s","i");
+		$v = [$public, $wmcId, $currentUser->id];
+		$t = ["i", "s", "i"];
 		$res = db_prep_query($sql,$v,$t);
 		if(db_error()) {
 			return false;
@@ -1548,8 +1517,8 @@ SQL;
 			//if not been set, set it to 1
 			//else increment it
 			$sql = "SELECT load_count FROM wmc_load_count where fkey_wmc_serial_id = $1;";
-			$v = array($wmcId);
-			$t = array("i");
+			$v = [$wmcId];
+			$t = ["i"];
 			$res = db_prep_query($sql,$v,$t);
 			if(db_error()) {
 				return false;
@@ -1560,14 +1529,14 @@ SQL;
 				$count = $row['load_count'];
 				$count++;
 				$sql = "UPDATE wmc_load_count SET load_count = $2 WHERE fkey_wmc_serial_id = $1;";
-				$v = array($wmcId,$count);
-				$t = array("i","i");
+				$v = [$wmcId, $count];
+				$t = ["i", "i"];
 				$res = db_prep_query($sql,$v,$t);
 			} else {
 				$e = new mb_exception("class_wmc: incrementWmcLoadCount dont found entry - new should be set to 1");
 				$sql = "INSERT INTO wmc_load_count (fkey_wmc_serial_id,load_count) VALUES ($1, $2);";
-				$v = array($wmcId,1);
-				$t = array("i","i");
+				$v = [$wmcId, 1];
+				$t = ["i", "i"];
 				$res = db_prep_query($sql,$v,$t);
 			}
 			return true;
@@ -1582,8 +1551,8 @@ SQL;
 		$wmcId = $this->wmc_id;
 		$sql = "SELECT wmc_serial_id FROM mb_user_wmc ";
 		$sql .= "WHERE wmc_serial_id = $1 AND wmc_public = 1;";
-		$v = array($wmcId);
-		$t = array("i");
+		$v = [$wmcId];
+		$t = ["i"];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if (isset($row['wmc_serial_id']) && $row['wmc_serial_id'] != '') {
@@ -1606,8 +1575,8 @@ SQL;
 	}
 
 	private function getLayerWithoutIdArray () {
-		$layerWithoutWmsIdArray = array();
-		$layerWithoutLayerIdArray = array();
+		$layerWithoutWmsIdArray = [];
+		$layerWithoutLayerIdArray = [];
 
 		// check if WMS IDs exist
 		$wmsArray = $this->mainMap->getWmsArray();
@@ -1664,7 +1633,7 @@ SQL;
 	 * Wrapper function, returns XML at the moment
 	 * @return String
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toXml();
 	}
 
@@ -1727,7 +1696,7 @@ SQL;
 		$e = new mb_notice("class_wmc.php: create wms array from main map");
 		$wmsArray = $this->mainMap->getWmsArray();
 
-		$wmcJsArray = array();
+		$wmcJsArray = [];
 		$e = new mb_notice("class_wmc.php: iterate over wms array");
 		$e = new mb_notice("class_wmc.php: count of wms array: ".count($wmsArray));
 
@@ -1744,9 +1713,9 @@ SQL;
 	public function featuretypeConfToJavaScript() {
 		$wfsConfIds = $this->generalExtensionArray['WFSCONFIDSTRING'];
 		//new mb_notice("app AAAA idstr $wfsConfIds");
-		$featuretypeConfs = array();
+		$featuretypeConfs = [];
 		$featuretypeConfArray = is_string($wfsConfIds) ?
-			explode(",", $wfsConfIds) : array();
+			explode(",", $wfsConfIds) : [];
 		for ($i = 0; $i < count($featuretypeConfArray); $i++) {
  			$wfsconf = new WfsConf();
 			$featuretypeConf = $wfsconf->getWfsConfFromDb($featuretypeConfArray[$i]);
@@ -1762,7 +1731,7 @@ SQL;
 
 		// remove WMS from overview map
 		if (!is_null($this->overviewMap)) {
-			$ovIndices = array();
+			$ovIndices = [];
 			$ovWmsArray = $this->overviewMap->getWmsArray();
 			for ($i = 0; $i < count($ovWmsArray); $i++) {
 				for ($j = 0; $j < count($wmsArray); $j++) {
@@ -1785,7 +1754,7 @@ SQL;
 	 * @return String[]
 	 */
 	public function toJavaScript () {
-		$skipWmsArray = array();
+		$skipWmsArray = [];
 		if (func_num_args() === 1) {
 			if (!is_array(func_get_arg(0))) {
 				throw new Exception("Invalid argument, must be array.");
@@ -1795,18 +1764,18 @@ SQL;
 
 		// will contain the JS code to create the maps
 		// representing the state stored in this WMC
-		$wmcJsArray = array();
+		$wmcJsArray = [];
 
 		// set general extension data
 		if (count($this->generalExtensionArray) > 0) {
 		    //TODO - check base64
 			//$json = new Mapbender_JSON();
 			//test decode base 64
-			if (strpos($this->generalExtensionArray['kmls'], 'base64_') === 0) {
+			if (str_starts_with((string) $this->generalExtensionArray['kmls'], 'base64_')) {
 			    $KMLString = base64_decode(str_replace('base64_', '', (string)$this->generalExtensionArray['kmls']));
 			    $this->generalExtensionArray['kmls'] = $KMLString;
 			}
-			if (strpos($this->generalExtensionArray['KMLS'], 'base64_') === 0) {
+			if (str_starts_with((string) $this->generalExtensionArray['KMLS'], 'base64_')) {
 			    $KMLString = base64_decode(str_replace('base64_', '', (string)$this->generalExtensionArray['KMLS']));
 			    $this->generalExtensionArray['KMLS'] = $KMLString;
 			}
@@ -1821,7 +1790,7 @@ SQL;
 		// find the WMS in the main map which is equal to the WMS
 		// in the overview map
 		$overviewWmsIndex = null;
-		$ovWmsArray = array();
+		$ovWmsArray = [];
 		if ($this->overviewMap !== null) {
 			$ovWmsArray = $this->overviewMap->getWmsArray();
 			$overviewWmsIndex = 0;
@@ -1836,7 +1805,7 @@ SQL;
 			}
 		}
 		// for all wms...
-		$layerIdArray = array();
+		$layerIdArray = [];
 		for ($i = 0; $i < count($wmsArray); $i++) {
 			if (in_array($i, $skipWmsArray)) {
 				continue;
@@ -2011,22 +1980,22 @@ SQL;
 		//
 		$this->mainMap = new Map();
 		$this->overviewMap = null;
-		$this->generalExtensionArray = array();
+		$this->generalExtensionArray = [];
 
-		$layerlistArray = array();
-		$layerlistArray["main"] = array();
-		$layerlistArray["overview"] = array();
+		$layerlistArray = [];
+		$layerlistArray["main"] = [];
+		$layerlistArray["overview"] = [];
 		
-		$layerlistArrayNew = array();
-		$layerlistArrayNew["main"] = array();
-		$layerlistArrayNew["overview"] = array();
+		$layerlistArrayNew = [];
+		$layerlistArrayNew["main"] = [];
+		$layerlistArrayNew["overview"] = [];
 		
 		
 		//parse WMC per simpleXML and use xpath instead of old bib
 		//$wmcXml = new SimpleXMLElement($data);
 
 
-		$wmcXml = simplexml_load_string(mb_utf8_encode($data));
+		$wmcXml = simplexml_load_string((string) mb_utf8_encode($data));
 
 		if ($wmcXml) {
 			//$e = new mb_exception("classes/class_wmc.php: parsing wmc successfully");
@@ -2066,7 +2035,7 @@ SQL;
 		    $extensions = $layer->Extension->children('mapbender', true);
 		    //$e = new mb_exception("classes/class_wmc.php: layer extension layer_identifier: " .json_encode($extensions->layer_identifier));
 		    //currentLayerNew
-		    $currentLayerNew = array();
+		    $currentLayerNew = [];
 		    $currentLayerNew['queryable'] = (string)$layer->attributes()->queryable;
 		    if ( (string)$layer->attributes()->hidden == "1") {
 		        $currentLayerNew["visible"] = 0;
@@ -2074,14 +2043,14 @@ SQL;
 		        $currentLayerNew["visible"] = 1;
 		    }
 		    //lists
-		    $currentLayerNew["format"] = array();
-		    $currentLayerNew["style"] = array();
-		    $currentLayerNew["dimension"] = array();
+		    $currentLayerNew["format"] = [];
+		    $currentLayerNew["style"] = [];
+		    $currentLayerNew["dimension"] = [];
 		    //formatlist
 		    $format_array = $layer->FormatList->Format;
 		    $cnt_format_array = 0;
 		    foreach($format_array as $format) {
-		        array_push($currentLayerNew["format"],  array("current" => (string)$format->attributes()->current, "name" => (string)$format));
+		        array_push($currentLayerNew["format"],  ["current" => (string)$format->attributes()->current, "name" => (string)$format]);
 		        if ((string)$format->attributes()->current == '1') {
 		            $currentLayerNew["formatIndex"] =  $cnt_format_array;
 		        }
@@ -2109,7 +2078,7 @@ SQL;
 			$tagLowerCase = administration::sepNameSpace($element['tag']);
 			$type = $element['type'];
 			$attributes = $element['attributes'];
-			$value = mb_utf8_decode(html_entity_decode($element['value']));
+			$value = mb_utf8_decode(html_entity_decode((string) $element['value']));
 
 			if ($tag == "VIEWCONTEXT" && $type == "open") {
 				$this->wmc_id = $attributes["id"];
@@ -2252,27 +2221,27 @@ SQL;
 				 * the kmls / KMLS extension include geojson objects as vector layer. this content maybe base64 encoded 
 				 * to solve that problem - the encoded string can be identified with a leading "base64_"  (armin:2023-04-06) 
 				 */
-				$base64EncodedExtensions = array('KMLS', 'kmls');
+				$base64EncodedExtensions = ['KMLS', 'kmls'];
 				if ($generalExtension) {
 				    //TODO: enable base64 for kmls everywhere the extension is used, class_wmc.php, class_wmcToXml.php, initWmcObj.php, ...
 					if ($value !== "") {
 						if (isset($this->generalExtensionArray[$tag])) {
 							if (!is_array($this->generalExtensionArray[$tag])) {
 								$firstValue = $this->generalExtensionArray[$tag];
-								$this->generalExtensionArray[$tag] = array();
+								$this->generalExtensionArray[$tag] = [];
 								//base 64
-								if (in_array($tag, $base64EncodedExtensions) && strpos($firstValue, 'base64_') === 0) {
+								if (in_array($tag, $base64EncodedExtensions) && str_starts_with((string) $firstValue, 'base64_')) {
 								    $firstValue = base64_decode(str_replace('base64_', '', $firstValue));
 								}
 								array_push($this->generalExtensionArray[$tag], $firstValue);
 							}
-							if (in_array($tag, $base64EncodedExtensions) && strpos($value, 'base64_') === 0) {
+							if (in_array($tag, $base64EncodedExtensions) && str_starts_with((string) $value, 'base64_')) {
 							    $value = base64_decode(str_replace('base64_', '', $value));
 							}
 							//add the value - is this the right way? TODO: check this behauviour
 							array_push($this->generalExtensionArray[$tag], $value);
 						} else {
-						    if (in_array($tag, $base64EncodedExtensions) && strpos($value, 'base64_') === 0) {
+						    if (in_array($tag, $base64EncodedExtensions) && str_starts_with((string) $value, 'base64_')) {
 						        $value = base64_decode(str_replace('base64_', '', $value));
 						    }
 							$this->generalExtensionArray[$tag] = $value;
@@ -2297,7 +2266,7 @@ SQL;
 				// The data will be set in the classes' WMS
 				// object when the layer tag is closed.
 				//
-					$currentLayer = array();
+					$currentLayer = [];
 
 					$currentLayer["queryable"] = $attributes["queryable"];
 					if ($attributes["hidden"] == "1") {
@@ -2306,9 +2275,9 @@ SQL;
 					else {
 						$currentLayer["visible"] = 1;
 					}
-					$currentLayer["format"] = array();
-					$currentLayer["style"] = array();
-					$currentLayer["dimension"] = array();
+					$currentLayer["format"] = [];
+					$currentLayer["style"] = [];
+					$currentLayer["dimension"] = [];
 					//$currentLayer["layer_metadataurl"] = array();
 					//$currentLayer["layer_dataurl"] = array();
 					$layer = true;
@@ -2338,7 +2307,7 @@ SQL;
 							$dimensionIndex = count($currentLayer['dimension']);
 							if ($dimensionIndex <= 0) {
 								$dimensionIndex = 0;
-								$dimensionAttributes = array();
+								$dimensionAttributes = [];
 							}
 							foreach (array_keys($attributes) as $attribute) {
 								$dimensionAttributes[$attribute] = $attributes[$attribute];
@@ -2351,7 +2320,7 @@ SQL;
 					}
 					if ($formatlist) {
 						if ($tag == "FORMAT") {
-							array_push($currentLayer["format"], array("current" => $attributes["current"], "name" => $value));
+							array_push($currentLayer["format"], ["current" => $attributes["current"], "name" => $value]);
 							if ($attributes["current"] == "1") {
 								$currentLayer["formatIndex"] = count($currentLayer["format"]) - 1;
 							}
@@ -2399,10 +2368,10 @@ SQL;
 							}
 							else {
 								if ($tag == "NAME") {
-									$currentLayer["style"][$index]["name"] = $value ? $value : "default";
+									$currentLayer["style"][$index]["name"] = $value ?: "default";
 								}
 								if ($tag == "TITLE") {
-									$currentLayer["style"][$index]["title"] = $value ? $value : "default";
+									$currentLayer["style"][$index]["title"] = $value ?: "default";
 								}
 								if ($legendurl) {
 									if ($tag == "LEGENDURL" && $type == "close") {
@@ -2424,7 +2393,7 @@ SQL;
 						}
 						if ($tag == "STYLE" && $type == "open") {
 							$style = true;
-							array_push($currentLayer["style"], array("current" => $attributes["current"]));
+							array_push($currentLayer["style"], ["current" => $attributes["current"]]);
 							if ($attributes["current"] == "1") {
 								$currentLayer["styleIndex"] = count($currentLayer["style"]) - 1;
 								//$currentLayer["extension"]["gui_layer_style"] = $currentLayer["style"][$index]["name"];
@@ -2459,14 +2428,14 @@ SQL;
 							$currentLayer["abstract"] = $value;
 						}
 						if ($tag == "SRS") {
-							$currentLayer["epsg"] = explode(" ", $value);
+							$currentLayer["epsg"] = explode(" ", (string) $value);
 						}
 						if ($tag == "EXTENSION" && $type == "close") {
 							$extension = false;
 						}
 						if ($extension == true) {
 						    //$e = new mb_exception('classes/class_wmc.php: extension: layer: ' . $currentLayer['title'] . " - " . json_encode($currentLayer["extension"]));
-						    
+
 						//
 /*if ($tag == "LAYER_FEATURETYPE_COUPLING" && $currentLayer["extension"][$tag] !== null) {							//if ($value !== "") {
 	$e = new mb_exception("classes/class_wmc.php: createObjFromWMC_xml: layer extension tag:  ".$tag." - value: ".json_encode($currentLayer["extension"][$tag]));	
@@ -2476,12 +2445,12 @@ SQL;
 						    $e = new mb_exception("classes/class_wmc.php: type " . gettype($currentLayer["extension"][$tag]));*/
 						    if (isset($currentLayer["extension"][$tag]) && $tag === 'LAYER_IDENTIFIER') {
 						        $e = new mb_exception("classes/class_wmc.php: read wmc xml: layer_identifier info json: " . $value);
-						        $currentLayer["extension"][$tag] = json_decode($value);
+						        $currentLayer["extension"][$tag] = json_decode((string) $value);
 						    } else {
     						    if (isset($currentLayer["extension"][$tag])) {
     								if (!is_array($currentLayer["extension"][$tag])) {
     									$firstValue = $currentLayer["extension"][$tag];
-    									$currentLayer["extension"][$tag] = array();
+    									$currentLayer["extension"][$tag] = [];
     									array_push($currentLayer["extension"][$tag], $firstValue);
     								}
     								array_push($currentLayer["extension"][$tag], $value);
@@ -2492,7 +2461,7 @@ SQL;
 						//							}
 						}
 						if ($tag == "EXTENSION" && $type == "open") {
-							$currentLayer["extension"] = array();
+							$currentLayer["extension"] = [];
 							$extension = true;
 						}
 						if ($tag == "METADATAURL" && $type == "open") {
@@ -2714,11 +2683,11 @@ SQL;
 			$this->generalExtensionArray["MAXX"] &&
 			$this->generalExtensionArray["MAXY"]) {
 
-			$mainEpsgArray = array();
-			$mainMinXArray = array();
-			$mainMinYArray = array();
-			$mainMaxXArray = array();
-			$mainMaxYArray = array();
+			$mainEpsgArray = [];
+			$mainMinXArray = [];
+			$mainMinYArray = [];
+			$mainMaxXArray = [];
+			$mainMaxYArray = [];
 			if (!is_array($this->generalExtensionArray["EPSG"])) {
 				$mainEpsgArray[0] = $this->generalExtensionArray["EPSG"];
 				$mainMinXArray[0] = $this->generalExtensionArray["MINX"];

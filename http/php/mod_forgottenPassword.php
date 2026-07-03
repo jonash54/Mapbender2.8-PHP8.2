@@ -21,8 +21,8 @@
 /*  
  * @security_patch irv done
  */ 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
 //security_patch_log(__FILE__,__LINE__);
 //import_request_variables("PG");
 
@@ -31,7 +31,7 @@ foreach ($postvars as $value) {
    ${$value} = $_POST[$value];
 }
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -78,7 +78,7 @@ else {
 	if ($_POST["sendnew"]) {
 		if ($_POST["username"] && $_POST["email"]) {
 			$id = $admin->getUserIdByUserName($_POST["username"]);
-			$mailAddressMatch = (strtolower($admin->getEmailByUserId($id)) == strtolower($_POST["email"])) && ($_POST["email"] != '');
+			$mailAddressMatch = (strtolower($admin->getEmailByUserId($id)) == strtolower((string) $_POST["email"])) && ($_POST["email"] != '');
 			$user_id = $id;
 	
 			if ($user_id && $mailAddressMatch) {
@@ -129,10 +129,10 @@ else {
 	   $upd = false;
 	}
 	else {
-	
-	
+
+
 	/*HTML*****************************************************************************************************/
-	
+
 	echo "<fieldset><legend>Forgot your Passwort ?</legend>";
 	#echo "<fieldset><legend>Passwort vergessen ?</legend>";
 	#echo "<form name='form1' action='" . $_SERVER["SCRIPT_NAME"] . "' method='post'>";

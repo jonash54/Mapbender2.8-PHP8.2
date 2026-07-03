@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";  
-require_once dirname(__FILE__) . "/../classes/class_administration.php"; 
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php"; 
+require_once __DIR__ . "/../../core/globalSettings.php";  
+require_once __DIR__ . "/../classes/class_administration.php"; 
+require_once __DIR__ . "/../classes/class_Uuid.php"; 
 
 //parse id from application (metadata_id)
 if (isset($_REQUEST["dcat_orga_id"]) & $_REQUEST["dcat_orga_id"] != "") {
@@ -23,8 +23,8 @@ if (isset($_REQUEST["dcat_orga_id"]) & $_REQUEST["dcat_orga_id"] != "") {
 
 //select application from mb_metadata by id
 $sql = "SELECT mb_group_id FROM mb_group WHERE mb_group_ckan_uuid = $1";
-$v = array($ckan_orga_id);
-$t = array('s');
+$v = [$ckan_orga_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 if ($res) {
     $row = db_fetch_array($res);

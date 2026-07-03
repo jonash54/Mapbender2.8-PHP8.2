@@ -1,11 +1,11 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
 //classes for csw handling
-require_once(dirname(__FILE__)."/../classes/class_cswClient.php");
-require_once(dirname(__FILE__)."/../classes/class_csw.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_cswClient.php");
+require_once(__DIR__."/../classes/class_csw.php");
+require_once(__DIR__."/../classes/class_administration.php");
 //************************************************************************************
 //parsing parameters
 //************************************************************************************
@@ -59,14 +59,14 @@ foreach ($headers as $header => $value) {
 $searchURL = $_SERVER['QUERY_STRING'];
 //$e = new mb_exception("mod_callMetadata.php: searchURL".$searchURL);
 //decode it !
-$searchURL = urldecode($searchURL);
+$searchURL = urldecode((string) $searchURL);
 //list of possibly hierarchyLevels - iso 19115 MD_ScopeCode
-$MD_ScopeCode = array("attribute","attributeType","collectionHardware","collectionSession","dataset","series","nonGeographicDataset","dimensionGroup","feature","featureType","propertyType","fieldSession","software","service","model","tile");
+$MD_ScopeCode = ["attribute", "attributeType", "collectionHardware", "collectionSession", "dataset", "series", "nonGeographicDataset", "dimensionGroup", "feature", "featureType", "propertyType", "fieldSession", "software", "service", "model", "tile"];
 $MD_ScopeCode[] = "application";
 $MD_ScopeCode[] = "spatialData";
 #
 //control if some request variables are not set and set them explicit to NULL
-$checkForNullRequests = array("registratingDepartments","isoCategories","inspireThemes","customCategories","regTimeBegin","regTimeEnd","timeBegin","timeEnd","searchBbox","searchTypeBbox","searchResources","orderBy","hostName","resourceIds","restrictToOpenData");
+$checkForNullRequests = ["registratingDepartments", "isoCategories", "inspireThemes", "customCategories", "regTimeBegin", "regTimeEnd", "timeBegin", "timeEnd", "searchBbox", "searchTypeBbox", "searchResources", "orderBy", "hostName", "resourceIds", "restrictToOpenData"];
 
 for($i=0; $i < count($checkForNullRequests); $i++){
 	if (!$_REQUEST[$checkForNullRequests[$i]] or $_REQUEST[$checkForNullRequests[$i]] == 'false' or $_REQUEST[$checkForNullRequests[$i]] == 'undefined') {
@@ -78,14 +78,14 @@ for($i=0; $i < count($checkForNullRequests); $i++){
 //Read out request Parameter:
 if (isset($_REQUEST["searchId"]) & $_REQUEST["searchId"] != "") {
 	//generate md5 representation, cause the id is used as a filename later on! - no validation needed
-	$searchId = md5($_REQUEST["searchId"]);
+	$searchId = md5((string) $_REQUEST["searchId"]);
 }
 if (isset($_REQUEST["searchText"]) & $_REQUEST["searchText"] != "") {
 	$test="(SELECT\s[\w\*\)\(\,\s]+\sFROM\s[\w]+)| (UPDATE\s[\w]+\sSET\s[\w\,\'\=]+)| (INSERT\sINTO\s[\d\w]+[\s\w\d\)\(\,]*\sVALUES\s\([\d\w\'\,\)]+)| (DELETE\sFROM\s[\d\w\'\=]+)";
 	//validate to csv integer list
 	$testMatch = $_REQUEST["searchText"];
 	$pattern = '/(\%27)|(\')|(\-\-)|(\")|(\%22)/';
- 	if (preg_match($pattern,$testMatch)){
+ 	if (preg_match($pattern,(string) $testMatch)){
 		//echo 'searchText: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>searchText</b> is not valid.<br/>';
 		die();
@@ -214,7 +214,7 @@ if (isset($_REQUEST["maxResults"]) & $_REQUEST["maxResults"] != "") {
 	$testMatch = $_REQUEST["maxResults"];
 	//give max 99 entries - more will be to slow
 	$pattern = '/^([0-9]{0,1})([0-9]{1})$/';
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'maxResults: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>maxResults</b> is not valid (integer < 99).<br/>';
 		die();
@@ -227,7 +227,7 @@ if (isset($_REQUEST["catalogueId"]) & $_REQUEST["catalogueId"] != "") {
 	$testMatch = $_REQUEST["catalogueId"];
 	//
 	$pattern = '/^([0-9]{0,1})([0-9]{1})$/';
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'maxResults: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>catalogueId</b> is not valid (integer < 99).<br/>';
 		die();
@@ -244,7 +244,7 @@ if (isset($_REQUEST["searchBbox"]) & $_REQUEST["searchBbox"] != "") {
 	$testMatch = $_REQUEST["searchBbox"];
 	//$pattern = '/^[-\d,]*$/';
 	$pattern = '/^[-+]?([0-9]*\.[0-9]+|[0-9]+)*$/';
-	$testMatchArray = explode(',',$testMatch);
+	$testMatchArray = explode(',',(string) $testMatch);
  	if (count($testMatchArray) != 4) {
 		echo 'Parameter <b>searchBbox</b> has a wrong amount of entries.<br/>';
 		die();
@@ -362,13 +362,13 @@ if (isset($_REQUEST["searchResources"]) & $_REQUEST["searchResources"] != "") {
 	//validate to wms,wfs,wmc,georss
 	$testMatch = $_REQUEST["searchResources"];
 	#$pattern = '/^(19|20)[0-9]{2}[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/';
-	$countSR = count(explode(',',$testMatch));
+	$countSR = count(explode(',',(string) $testMatch));
  	if (!($countSR >= 1 && $countSR <= 6)){
 		//echo 'searchResources: <b>'.$testMatch.'</b> count of requested resources out of sync.<br/>';
 		echo 'Parameter <b>searchResources</b> count of requested resource types is more than 5.<br/>';
 		die();
  	} else {
-		$testArray = explode(',',$testMatch);
+		$testArray = explode(',',(string) $testMatch);
 		for($i=0; $i<count($testArray);$i++){
 			if (!in_array($testArray[$i], $MD_ScopeCode)) {
 			//echo 'searchResources: <b>'.$testMatch.'</b>at least one of them does not exists!<br/>';
@@ -387,12 +387,12 @@ if (isset($_REQUEST["searchPages"]) & $_REQUEST["searchPages"] != "") {
 	//validate to csv integer list with dimension of searchResources list
 	$testMatch = $_REQUEST["searchPages"];
 	$pattern = '/^[-\d,]*$/';
- 	if (!preg_match($pattern,$testMatch)){
+ 	if (!preg_match($pattern,(string) $testMatch)){
 		//echo 'searchPages: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>searchPages</b> is not valid (integer or integer csv).<br/>';
 		die();
  	}
-	if (count(explode(',',$testMatch)) != count(explode(',',$searchResources))) {
+	if (count(explode(',',(string) $testMatch)) != count(explode(',',(string) $searchResources))) {
 		//echo 'searchPages: <b>'.$testMatch.'</b> has a wrong amount of entries.<br/>';
 		echo 'Parameter <b>searchPages</b> has a wrong amount of entries.<br/>';
 		die();
@@ -457,8 +457,8 @@ if ($resultTarget == 'file' or $resultTarget == 'webclient') {
 	}
 
 }
-if (!isset($searchPages) OR ($searchPages == "") or count(explode(",",$searchPages)) !== count(explode(",",$searchResources))) {
-	for($i=0;$i<count(explode(",",$searchResources));$i++) {
+if (!isset($searchPages) OR ($searchPages == "") or count(explode(",",(string) $searchPages)) !== count(explode(",",(string) $searchResources))) {
+	for($i=0;$i<count(explode(",",(string) $searchResources));$i++) {
 		$searchPages[$i] = 1;
 	}
 	$searchPages = implode(",",$searchPages);
@@ -472,8 +472,8 @@ if ($resultTarget == 'web' or $resultTarget == 'debug') {
 }
 
 //convert the respources and the pagenumbers into arrays
-$searchResourcesArray = explode(",",$searchResources);
-$searchPages = explode(",",$searchPages);
+$searchResourcesArray = explode(",",(string) $searchResources);
+$searchPages = explode(",",(string) $searchPages);
 
 //$originFromHeader - maybe alternative to referer $_SERVER['HTTP_REFERER']
 if (DEFINED("SEARCH_LOG") && SEARCH_LOG === true) {
@@ -486,15 +486,15 @@ Function to get the right service access url from an array of urls which was fou
 */
 function getServiceUrl($mdServiceType, $mdServiceTypeVersion, $accessUrls) {
 	if (is_array($accessUrls)) {
-		if (in_array(strtoupper($mdServiceType), array('VIEW','OGC:WMS','WMS','PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-			if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','DOWNLOAD','WFS','ATOM'))) {
-				if (in_array(strtoupper($mdServiceType), array('PREDEFINED ATOM','ATOM')) || in_array(strtoupper($mdServiceTypeVersion), array('PREDEFINED ATOM','ATOM'))) {
+		if (in_array(strtoupper((string) $mdServiceType), ['VIEW', 'OGC:WMS', 'WMS', 'PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+			if (in_array(strtoupper((string) $mdServiceType), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM']) || in_array(strtoupper((string) $mdServiceTypeVersion), ['PREDEFINED ATOM', 'DOWNLOAD', 'WFS', 'ATOM'])) {
+				if (in_array(strtoupper((string) $mdServiceType), ['PREDEFINED ATOM', 'ATOM']) || in_array(strtoupper((string) $mdServiceTypeVersion), ['PREDEFINED ATOM', 'ATOM'])) {
 					//return first entry as atom feed access url
 					return $accessUrls[0];
 				} else {
 					//check for WFS
 					foreach ($accessUrls as $url) {
-						$pos = strpos(strtolower($url), 'service=wfs');
+						$pos = strpos(strtolower((string) $url), 'service=wfs');
 						if ($pos !== false) {
 							$accessUrl = $url; 
 							$accessUrlFound = true;
@@ -510,7 +510,7 @@ function getServiceUrl($mdServiceType, $mdServiceTypeVersion, $accessUrls) {
 			} else {
 				//check for WMS
 				foreach ($accessUrls as $url) {
-					$pos = strpos(strtolower($url), 'service=wms');
+					$pos = strpos(strtolower((string) $url), 'service=wms');
 					if ($pos !== false) {
 						$accessUrl = $url; 
 						$accessUrlFound = true;
@@ -588,23 +588,16 @@ switch ($combineTextOption) {
 $existsSpatialFilter = false;
 //$e = new mb_exception("searchBbox: ".$searchBbox);
 //$e = new mb_exception("searchTypeBbox: ".$searchTypeBbox);
-$searchBboxArray = explode(",", $searchBbox);
+$searchBboxArray = explode(",", (string) $searchBbox);
 //TODO: test the right filter! - inspire has other ones and no logical option!
 if ($searchBbox !== NULL) {
     $existsSpatialFilter = true;
-    switch ($searchTypeBbox) {
-	case "intersects":
-		$spatialFilter .= "<ogc:BBOX>";
-	break;
-	case "inside":
-		$spatialFilter .= "<ogc:Within>";
-	break;
-	case "outside":
-		$spatialFilter .= "<ogc:Disjoint>";
-	break;
-	default:
-		$spatialFilter .= "<ogc:BBOX>";
-    }
+    match ($searchTypeBbox) {
+        "intersects" => $spatialFilter .= "<ogc:BBOX>",
+        "inside" => $spatialFilter .= "<ogc:Within>",
+        "outside" => $spatialFilter .= "<ogc:Disjoint>",
+        default => $spatialFilter .= "<ogc:BBOX>",
+    };
     $spatialFilter .= "<ogc:PropertyName>BoundingBox</ogc:PropertyName>";
 
     /*$spatialFilter .= '<gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:4326">';
@@ -618,19 +611,12 @@ if ($searchBbox !== NULL) {
     $spatialFilter .= '<gml:upperCorner>'.$searchBboxArray[2].' '.$searchBboxArray[3].'</gml:upperCorner>';
     $spatialFilter .= '</gml:Envelope>';
 
-    switch ($searchTypeBbox) {
-	case "intersect":
-		$spatialFilter .= "</ogc:BBOX>";
-	break;
-	case "inside":
-		$spatialFilter .= "</ogc:Within>";
-	break;
-	case "outside":
-		$spatialFilter .= "</ogc:Disjoint>";
-	break;
-	default:
-		$spatialFilter .= "</ogc:BBOX>";
-    }
+    match ($searchTypeBbox) {
+        "intersect" => $spatialFilter .= "</ogc:BBOX>",
+        "inside" => $spatialFilter .= "</ogc:Within>",
+        "outside" => $spatialFilter .= "</ogc:Disjoint>",
+        default => $spatialFilter .= "</ogc:BBOX>",
+    };
 }
 //combine filter
 //$e = new mb_exception("spatialFilter: ".$spatialFilter);
@@ -681,7 +667,7 @@ $recordType = $searchResources;
 //$maxRecords = (integer)$cswClient->operationResult;
 //$pages = ceil($maxRecords / $maxResults);
 //$e = new mb_exception("pages: ".$pages);
-$metadataArray = array();
+$metadataArray = [];
 $numberOfMetadataRecords = 0;
 //$cswResponseObject = $cswClient->doRequest($cswClient->cswId, 'getrecords', $fileIdentifier, false, false, false, false, $additionalFilter);
 //parse XML
@@ -696,12 +682,12 @@ $resultObject = new stdClass;
 //define object for dynamic filtering - actually only for searchResources
 
 $queryJSON = new stdClass;
-$queryJSON->searchFilter = (object) array();
+$queryJSON->searchFilter = (object) [];
 $queryJSON->searchFilter->origURL = $searchURL;
 
 
 //define where to become the information from - this is relevant for the information which must be pulled out of the database
-$classificationElements = array();
+$classificationElements = [];
 $classificationElements[0]['name'] = 'searchText';
 $classificationElements[1]['name'] = 'searchBbox';
 $classificationElements[2]['name'] = 'searchResources';
@@ -817,7 +803,7 @@ for($i=0; $i < count($classificationElements); $i++){
 		//check if the filter has subfilters - if not delete the whole filter from query
 		if ($classificationElements[$i]['list'] == false) { //the object has no subsets - like bbox or time filters
 			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = array();
+			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = [];
 			if ($classificationElements[$i]['name'] == 'searchBbox') {
 				$sBboxTitle = $searchTypeBbox." ".${$classificationElements[$i]['name']};
 				$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[0]->title = $sBboxTitle;
@@ -836,9 +822,9 @@ for($i=0; $i < count($classificationElements); $i++){
 			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink = delTotalFromQuery($classificationElements[$i]['name'],$searchURL);
 			//$e = new mb_exception('mod_callMetadata.php: dellink: '.$queryJSON->searchFilter->{$classificationElements[$i]['name']}->delLink);
 
-			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = array();
+			$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item = [];
 
-			$queryArray = explode(',', ${$classificationElements[$i]['name']});
+			$queryArray = explode(',', (string) ${$classificationElements[$i]['name']});
 
 			//loop for the subcategories
 			for($j=0; $j < count($queryArray); $j++){
@@ -851,7 +837,7 @@ for($i=0; $i < count($classificationElements); $i++){
 				}
 
 				//generate links to disable filters on a simple way
-				if (($classificationElements[$i]['name'] === 'searchText' || $classificationElements[$i]['name'] === 'searchResources') & count(explode(',',${$classificationElements[$i]['name']})) === 1) {
+				if (($classificationElements[$i]['name'] === 'searchText' || $classificationElements[$i]['name'] === 'searchResources') & count(explode(',',(string) ${$classificationElements[$i]['name']})) === 1) {
 					//$queryJSON->searchFilter->{$classificationElements[$i]['name']}->item[$j]->delLink = NULL;
 					$newSearchLink = delFromQuery($classificationElements[$i]['name'], $searchURL,$queryArray[$j],$queryArray,${$classificationElements[$i]['name']});
 					$newSearchLink = delTotalFromQuery('searchId',$newSearchLink);
@@ -936,15 +922,15 @@ foreach ($searchResourcesArray as $searchResource) {
 					//http://inspire.ec.europa.eu/file/1705/download?token=iSTwpRWd&usg=AOvVaw18y1aTdkoMCBxpIz7tOOgu
 					//from 2017-03-02 - the MD_Identifier - see C.2.5 Unique resource identifier - it is separated with a slash - the codespace should be everything after the last slash 
 					//now try to check if a single slash is available and if the md_identifier is a url
-					$parsedUrl = parse_url($code[0]);
-					if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && strpos($parsedUrl['path'],'/') !== false) {
-						$explodedUrl = explode('/', $code[0]);
+					$parsedUrl = parse_url((string) $code[0]);
+					if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && str_contains($parsedUrl['path'],'/')) {
+						$explodedUrl = explode('/', (string) $code[0]);
 						$datasetId = $explodedUrl[count($explodedUrl) - 1];
-						$datasetIdCodeSpace = rtrim($code[0], $datasetId);	
+						$datasetIdCodeSpace = rtrim((string) $code[0], $datasetId);	
 					} else {
-						if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && strpos($code[0],'#') !== false) {
+						if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && str_contains((string) $code[0],'#')) {
 							//$e = new mb_exception($code[0]);
-							$explodedUrl = explode('#', $code[0]);
+							$explodedUrl = explode('#', (string) $code[0]);
 							$datasetId = $explodedUrl[1];
 							$datasetIdCodeSpace = $explodedUrl[0];
 						} else {
@@ -993,7 +979,7 @@ foreach ($searchResourcesArray as $searchResource) {
             $maxx = $maxx[0];
             $maxy = $cswClient->operationResult->xpath('/csw:GetRecordsResponse/csw:SearchResults/gmd:MD_Metadata['.$k.']/gmd:identificationInfo/'.$identifikationXPath.'/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/gco:Decimal');
             $maxy = $maxy[0];
-            $resultObject->{$searchResource}->srv[$k-1]->bbox = implode(',', array($minx,$miny,$maxx,$maxy)); 
+            $resultObject->{$searchResource}->srv[$k-1]->bbox = implode(',', [$minx, $miny, $maxx, $maxy]); 
 			//title
 			$title = $cswClient->operationResult->xpath('/csw:GetRecordsResponse/csw:SearchResults/gmd:MD_Metadata['.$k.']/gmd:identificationInfo/'.$identifikationXPath.'/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString');
 			$title = $title[0];
@@ -1018,7 +1004,7 @@ foreach ($searchResourcesArray as $searchResource) {
 			//service access url
 			//first read the inspire kind of implementation of the access to capabilities documents
 			$accessUrl = $cswClient->operationResult->xpath('/csw:GetRecordsResponse/csw:SearchResults/gmd:MD_Metadata['.$k.']/gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL');
-			
+
 			if ($searchResource == 'service') {
 				$accessUrl = getServiceUrl($typeOfService, $typeOfServiceVersion, $accessUrl);
 			}
@@ -1030,13 +1016,13 @@ foreach ($searchResourcesArray as $searchResource) {
 			}
 			$isViewService = false;
 			$isDownloadService = false;
-			$typeOfServiceUpper = strtoupper($typeOfService);
+			$typeOfServiceUpper = strtoupper((string) $typeOfService);
 			//check for view service type
-			if ($typeOfServiceUpper == 'WMS' || $typeOfServiceUpper == 'VIEW'  || strpos($typeOfServiceUpper,'WMS') !== false) {
+			if ($typeOfServiceUpper == 'WMS' || $typeOfServiceUpper == 'VIEW'  || str_contains($typeOfServiceUpper,'WMS')) {
 				$isViewService = true;
 				//echo "view service identified<br>";
 			}
-			if ($typeOfServiceUpper == 'DOWNLOAD' || $typeOfServiceUpper == 'ATOM'  || strpos($typeOfServiceUpper,'PREDEFINED ATOM') !== false) {
+			if ($typeOfServiceUpper == 'DOWNLOAD' || $typeOfServiceUpper == 'ATOM'  || str_contains($typeOfServiceUpper,'PREDEFINED ATOM')) {
 				$isDownloadService = true;
 				//echo "view service identified<br>";
 			}
@@ -1050,11 +1036,11 @@ foreach ($searchResourcesArray as $searchResource) {
 			} else {
 				$scheme = "http";
 			}
-			if ($isDownloadService == true && strtoupper($typeOfServiceVersion) == 'PREDEFINED ATOM' ) {
-				$resultObject->{$searchResource}->srv[$k-1]->downloadFeedClientUrl = $scheme.'://'.$hostName.str_replace("php/".basename($_SERVER['SCRIPT_NAME']), "plugins/mb_downloadFeedClient.php", $_SERVER['PHP_SELF'])."?url=".urlencode($accessUrl);
+			if ($isDownloadService == true && strtoupper((string) $typeOfServiceVersion) == 'PREDEFINED ATOM' ) {
+				$resultObject->{$searchResource}->srv[$k-1]->downloadFeedClientUrl = $scheme.'://'.$hostName.str_replace("php/".basename((string) $_SERVER['SCRIPT_NAME']), "plugins/mb_downloadFeedClient.php", $_SERVER['PHP_SELF'])."?url=".urlencode((string) $accessUrl);
 			}
 			//html view
-			$resultObject->{$searchResource}->srv[$k-1]->htmlLink = $scheme.'://'.$hostName.str_replace(basename($_SERVER['SCRIPT_NAME']), "mod_exportIso19139.php", $_SERVER['PHP_SELF'])."?url=".urlencode($resultObject->{$searchResource}->srv[$k-1]->mdLink)."&resolveCoupledResources=true";
+			$resultObject->{$searchResource}->srv[$k-1]->htmlLink = $scheme.'://'.$hostName.str_replace(basename((string) $_SERVER['SCRIPT_NAME']), "mod_exportIso19139.php", $_SERVER['PHP_SELF'])."?url=".urlencode($resultObject->{$searchResource}->srv[$k-1]->mdLink)."&resolveCoupledResources=true";
 			//service urls if available
 			//type of service
 			//inspire url for service
@@ -1077,7 +1063,7 @@ foreach ($searchResourcesArray as $searchResource) {
 		$resultObject->{$searchResource}->md->p = $searchPages[$i];
 		$resultObject->{$searchResource}->md->rpp = $maxResults;
 		$resultObject->{$searchResource}->md->genTime = $usedSearchCswTime;
-		$resultObject->{$searchResource}->srv = array();
+		$resultObject->{$searchResource}->srv = [];
 	}
         $i++;
 }
@@ -1126,7 +1112,7 @@ function delFromQuery($paramName,$queryString,$string,$queryArray,$queryList) {
 		//echo "string to search: ".$str2search."<br>";
 		$str2exchange = $paramName."=".$objectList;
 		//echo "string to exchange: ".$str2exchange."<br>";
-		$queryStringNew = str_replace($str2search, $str2exchange, urldecode($queryString));
+		$queryStringNew = str_replace($str2search, $str2exchange, urldecode((string) $queryString));
 	}
 	return $queryStringNew;
 }
@@ -1146,13 +1132,13 @@ function delTotalFromQuery($paramName,$queryString) {
 		$str2exchange = "searchResources=".$dummySearchResources."&";
 	} */
 	$queryStringNew = preg_replace('/\b'.$paramName.'\=[^&]*&?/',$str2exchange,$queryString); //TODO find empty get params
-	$queryStringNew = ltrim($queryStringNew,'&');
+	$queryStringNew = ltrim((string) $queryStringNew,'&');
 	$queryStringNew = rtrim($queryStringNew,'&');
 	return $queryStringNew;
 }
 //delete all string entries from array
 function deleteEntry($arrayname, $entry) {
-	$n = $arrayname.length;
+	$n = $arrayname.\LENGTH;
 	for($i=0; $i<($n+1); $i++){
 		if ($arrayname[$i] == $entry) {
 			$arrayname.splice($i, 1);
@@ -1162,31 +1148,25 @@ function deleteEntry($arrayname, $entry) {
 }
 function correctWmsUrl($wms_url) {
 	//check if last sign is ? or & or none of them
-	$lastChar = substr($wms_url,-1);
+	$lastChar = substr((string) $wms_url,-1);
 	//check if getcapabilities is set as a parameter
 	$findme = "getcapabilities";
-	$posGetCap = strpos(strtolower($wms_url), $findme);
+	$posGetCap = strpos(strtolower((string) $wms_url), $findme);
 	if ($posGetCap === false) {
-		$posGetAmp = strpos(strtolower($wms_url), "?");
+		$posGetAmp = strpos(strtolower((string) $wms_url), "?");
 		if ($posGetAmp === false) {
 			$wms_url .= "?REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
 		} else {
-			switch ($lastChar) {
-				case "?":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				case "&":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				default:
-					$wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-			 }
+			match ($lastChar) {
+       "?" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       "&" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       default => $wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+   };
 		}
 	} else {
 		//check if version is defined
 		$findme1 = "version=";
-		$posVersion = strpos(strtolower($wms_url), $findme1);
+		$posVersion = strpos(strtolower((string) $wms_url), $findme1);
 		if ($posVersion === false) {
 			$wms_url .= "&VERSION=1.1.1";
 		} else {
@@ -1204,10 +1184,10 @@ function correctWmsUrl($wms_url) {
 return $wms_url;
 }
 function isValidURL($url) {
-	return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
+	return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', (string) $url);
 }
 function microtime_float() {
-    	list($usec, $sec) = explode(" ", microtime());
+    	[$usec, $sec] = explode(" ", microtime());
     	return ((float)$usec + (float)$sec);
 }
 

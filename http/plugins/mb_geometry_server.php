@@ -1,13 +1,13 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
-require_once dirname(__FILE__) . "/../classes/class_ogr.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../classes/class_administration.php";
+require_once __DIR__ . "/../classes/class_ogr.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -17,7 +17,7 @@ function abort ($message) {
 
 function DOMNodeListObjectValuesToArray($domNodeList) {
 	$iterator = 0;
-	$array = array();
+	$array = [];
 	foreach ($domNodeList as $item) {
     		$array[$iterator] = $item->nodeValue; // this is a DOMNode instance
     		// you might want to have the textContent of them like this
@@ -28,14 +28,14 @@ function DOMNodeListObjectValuesToArray($domNodeList) {
 
 //NOTE: independend
 function extractPolygonArray($domXpath, $path) {
-	$polygonalExtentExterior = array();
+	$polygonalExtentExterior = [];
 	if ($domXpath->query($path.'/gml:Polygon/gml:exterior/gml:LinearRing/gml:posList')) {
 		//read posList
 		$exteriorRingPoints = $domXpath->query($path.'/gml:Polygon/gml:exterior/gml:LinearRing/gml:posList');
 		$exteriorRingPoints = DOMNodeListObjectValuesToArray($exteriorRingPoints);
 		if (count($exteriorRingPoints) > 0) {
 			//poslist is only space separated
-			$exteriorRingPointsArray = explode(' ',$exteriorRingPoints[0]);
+			$exteriorRingPointsArray = explode(' ',(string) $exteriorRingPoints[0]);
 			for ($i = 0; $i <= count($exteriorRingPointsArray)/2-1; $i++) {
 				$polygonalExtentExterior[$i]['x'] = $exteriorRingPointsArray[2*$i];
 				$polygonalExtentExterior[$i]['y'] = $exteriorRingPointsArray[(2*$i)+1];
@@ -63,7 +63,7 @@ function extractPolygonArray($domXpath, $path) {
 function gml2wkt($gml) {
 	//function to create wkt from given gml multipolygon
 	//DOM
-	$polygonalExtentExterior = array();
+	$polygonalExtentExterior = [];
 	$gmlObject = new DOMDocument();
 	libxml_use_internal_errors(true);
 	try {
@@ -89,7 +89,7 @@ function gml2wkt($gml) {
 		if ($MultiSurface->length == 1) { //test for DOM!
 			$crs = $xpath->query('/gml:MultiSurface/@srsName');
 			$crsArray = DOMNodeListObjectValuesToArray($crs);
-			$crsId = end(explode(":",$crsArray[0]));
+			$crsId = end(explode(":",(string) $crsArray[0]));
 			//count surfaceMembers
 			$numberOfSurfaces = count(DOMNodeListObjectValuesToArray($xpath->query('/gml:MultiSurface/gml:surfaceMember')));
 			for ($k = 0; $k < $numberOfSurfaces; $k++) {
@@ -100,7 +100,7 @@ function gml2wkt($gml) {
 		}
 		$crs = $xpath->query('/gml:Polygon/@srsName');
 		$crsArray = DOMNodeListObjectValuesToArray($crs);
-		$crsId = end(explode(":",$crsArray[0]));
+		$crsId = end(explode(":",(string) $crsArray[0]));
 		if (!isset($crsId) || $crsId =="" || $crsId == NULL) {
 			//set default to lonlat wgs84
 			$crsId = "4326";
@@ -127,9 +127,9 @@ switch ($ajaxResponse->getMethod()) {
             $sql = <<<SQL
 UPDATE mb_metadata SET bounding_geom = $2 WHERE metadata_id = $1
 SQL;
-            $v = array($metadataId, $wktPolygon);
+            $v = [$metadataId, $wktPolygon];
             //$e = new mb_exception($metadataId);
-            $t = array('i','POLYGON');
+            $t = ['i', 'POLYGON'];
             $res = db_prep_query($sql,$v,$t);
             if (!$res) {
                 abort(_mb("Problem while storing geometry into database!"));
@@ -169,7 +169,7 @@ SQL;
                     $stat = $za->statIndex( $i );
                     //$e = new mb_exception('plugins/mb_geometry_server.php: file in zip: ' . basename( $stat['name'] ) );
                     $file_parts = pathinfo( basename( $stat['name'] ) );
-                    if (!in_array(strtolower($file_parts['extension']), array('shx', 'shp', 'qix', 'cpg', 'dbf', 'prj', 'qmd'))) {
+                    if (!in_array(strtolower($file_parts['extension']), ['shx', 'shp', 'qix', 'cpg', 'dbf', 'prj', 'qmd'])) {
                         abort('Found unexpected file in zip archive: ' . $file_parts['extension']);
                     }
                     if (strtolower($file_parts['extension']) == 'shp') {
@@ -186,7 +186,7 @@ SQL;
                 break;
         }
         $e = new mb_exception('plugins/mb_geometry_server.php: identified format: ' . $identifiedFormat );
-        if (in_array($identifiedFormat, array('GeoJSON', 'GML', 'ESRI Shapefile'))) {
+        if (in_array($identifiedFormat, ['GeoJSON', 'GML', 'ESRI Shapefile'])) {
             //format supported
             //transform it to geojson in requested crs
             $geometry = $ogr->transform($filenameGeometry, $identifiedFormat, 'GeoJSON', $ajaxResponse->getParameter("targetCrs"));

@@ -23,10 +23,10 @@
 * get/post '___' separated maprequests
 *
 **/
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_weldMaps2PNG.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_weldMaps2PNG.php");
 
 class weldMaps2PNG_rotate extends weldMaps2PNG{
 
@@ -34,7 +34,7 @@ class weldMaps2PNG_rotate extends weldMaps2PNG{
         if(!$urls || $urls == ""){
             $e = new mb_exception("weldMaps2PNG_rotate: no maprequests delivered");
         }
-        $url = explode("___", $urls);
+        $url = explode("___", (string) $urls);
         $obj1 = new stripRequest($url[0]);
         $width = $obj1->get("width");
         $height = $obj1->get("height");
@@ -50,7 +50,7 @@ class weldMaps2PNG_rotate extends weldMaps2PNG{
             $obj->set("height", $neededHeight);
 
             $map_extent = $obj->get("BBOX");
-            $coord = explode(",",$map_extent);
+            $coord = explode(",",(string) $map_extent);
             $coord = $this->enlargeExtent($coord, $width, $height, $neededWidth, $neededHeight);
 
             $obj->set("BBOX", implode(",", $coord));
@@ -59,7 +59,7 @@ class weldMaps2PNG_rotate extends weldMaps2PNG{
 
         //get image
         $urls = implode("___", $url);
-        $this->weldMaps2PNG($urls, $filename, $encode, $opacities);
+        $this->weldMaps2PNG($urls, $filename);
 
 
         //rotate image

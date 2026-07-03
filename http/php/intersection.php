@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__) . "/../../core/globalSettings.php" ;
+require __DIR__ . "/../../core/globalSettings.php" ;
 $request = new AjaxResponse($_REQUEST);
 $method = $request->getMethod();
 
@@ -9,7 +9,7 @@ switch ($method) {
 	case "intersect":
 		$geometries = $request->getParameter("geometries");
 		$clickPoint = $request->getparameter("clickPoint");
-		$resultGeometries = array();
+		$resultGeometries = [];
 
 		$i = 0;
 		foreach($geometries as $geometry){
@@ -24,7 +24,7 @@ switch ($method) {
 		}
 
 		$request->setSuccess(true);
-		$request->setResult(array("geometries" => $resultGeometries));
+		$request->setResult(["geometries" => $resultGeometries]);
 	break;
 
 	default:

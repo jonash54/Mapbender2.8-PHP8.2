@@ -5,13 +5,13 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/class_administration.php";
-require_once dirname(__FILE__) . "/class_ows_factory.php";
-require_once dirname(__FILE__) . "/class_wms_factory.php";
-require_once dirname(__FILE__) . "/class_wms_1_1_1_factory.php";
-require_once dirname(__FILE__) . "/class_wms_1_3_0_factory.php";
-require_once (dirname ( __FILE__ ) . "/class_cache.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/class_administration.php";
+require_once __DIR__ . "/class_ows_factory.php";
+require_once __DIR__ . "/class_wms_factory.php";
+require_once __DIR__ . "/class_wms_1_1_1_factory.php";
+require_once __DIR__ . "/class_wms_1_3_0_factory.php";
+require_once (__DIR__ . "/class_cache.php");
 
 /**
  * 
@@ -71,17 +71,11 @@ class UniversalWmsFactory extends WmsFactory {
 		try {
 			$version = $this->getVersionFromXml($xml);
 
-			switch ($version) {
-				case "1.1.1 or older":
-					$factory = new Wms_1_1_1_Factory();
-					break;
-				case "1.3.0":
-				    $factory = new Wms_1_3_0_Factory();
-				    break;
-				default:
-					throw new Exception("Unknown WMS version " . $version);
-					break;
-			}
+			$factory = match ($version) {
+       "1.1.1 or older" => new Wms_1_1_1_Factory(),
+       "1.3.0" => new Wms_1_3_0_Factory(),
+       default => throw new Exception("Unknown WMS version " . $version),
+   };
 			return $factory->createFromXml($xml, $auth);
 		}
 		catch (Exception $e) {
@@ -92,8 +86,8 @@ class UniversalWmsFactory extends WmsFactory {
 
 	private function getVersionByWmsId ($id) {
 		$sql = "SELECT wms_version FROM wms WHERE wms_id = $1";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -103,23 +97,13 @@ class UniversalWmsFactory extends WmsFactory {
 	}
 	
 	private function getFactory ($version) {
-		switch ($version) {
-			case "1.0.0":
-				return new Wms_1_1_1_Factory();
-				break;
-			case "1.1.0":
-				return new Wms_1_1_1_Factory();
-				break;
-			case "1.1.1":
-				return new Wms_1_1_1_Factory();
-				break;
-			case "1.3.0":
-			    return new Wms_1_3_0_Factory();
-			    break;
-			default:
-				throw new Exception("Unknown WMS version " . $version);
-				break;
-		}
+		return match ($version) {
+      "1.0.0" => new Wms_1_1_1_Factory(),
+      "1.1.0" => new Wms_1_1_1_Factory(),
+      "1.1.1" => new Wms_1_1_1_Factory(),
+      "1.3.0" => new Wms_1_3_0_Factory(),
+      default => throw new Exception("Unknown WMS version " . $version),
+  };
 		return null;
 	}
 	
@@ -128,9 +112,9 @@ class UniversalWmsFactory extends WmsFactory {
 	    //cache reading of wms objects from db to enhance loading of big layertrees 
 	    $cache = new Cache ();
 	    if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
-	        if ($cache->cachedVariableExists ( 'mapbender: wms_obj_cache_' . $id . '_' . md5($appId) ) != false) {
-	            $e = new mb_notice("classes/class_universal_wms_factory.php: Deliver wms obj with id " . $id . " from cache! Generation time: " . gmdate("Y-m-d\TH:i:s\Z", $cache->cachedVariableCreationTime('wms_obj_cache_' . $id . '_' . md5($appId))));
-	            return $cache->cachedVariableFetch ( 'mapbender: wms_obj_cache_' . $id . '_' . md5($appId) );
+	        if ($cache->cachedVariableExists ( 'mapbender: wms_obj_cache_' . $id . '_' . md5((string) $appId) ) != false) {
+	            $e = new mb_notice("classes/class_universal_wms_factory.php: Deliver wms obj with id " . $id . " from cache! Generation time: " . gmdate("Y-m-d\TH:i:s\Z", $cache->cachedVariableCreationTime('wms_obj_cache_' . $id . '_' . md5((string) $appId))));
+	            return $cache->cachedVariableFetch ( 'mapbender: wms_obj_cache_' . $id . '_' . md5((string) $appId) );
 	        }
 	    }
 		try {
@@ -143,7 +127,7 @@ class UniversalWmsFactory extends WmsFactory {
 				    //write to cache
 				    if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
 				        $e = new mb_notice('classes/class_universal_wms_factory.php: createFromDb - write wms obj to cache!');
-				        $cache->cachedVariableAdd ( 'mapbender: wms_obj_cache_' . $id . '_' . md5($appId), $returnObject, CACHE_TIME_WMS_LAYER );
+				        $cache->cachedVariableAdd ( 'mapbender: wms_obj_cache_' . $id . '_' . md5((string) $appId), $returnObject, CACHE_TIME_WMS_LAYER );
 				    }
 				    return $returnObject;
 				}
@@ -162,9 +146,9 @@ class UniversalWmsFactory extends WmsFactory {
 		$e = new mb_notice('classes/class_universal_wms_factory.php: createLayerFromDb - wms_version: ' . $version);
 		$cache = new Cache ();
 		if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
-		    if ($cache->cachedVariableExists ( 'mapbender: layer_obj_cache_' . $id . '_' . md5($appId) ) != false) {
-		        $e = new mb_notice("classes/class_universal_wms_factory.php: Deliver layer obj with id " . $id . " from cache! Generation time: " . gmdate("Y-m-d\TH:i:s\Z", $cache->cachedVariableCreationTime('wms_obj_cache_' . $id . '_' . md5($appId))));
-		        return $cache->cachedVariableFetch ( 'mapbender: layer_obj_cache_' . $id . '_' . md5($appId) );
+		    if ($cache->cachedVariableExists ( 'mapbender: layer_obj_cache_' . $id . '_' . md5((string) $appId) ) != false) {
+		        $e = new mb_notice("classes/class_universal_wms_factory.php: Deliver layer obj with id " . $id . " from cache! Generation time: " . gmdate("Y-m-d\TH:i:s\Z", $cache->cachedVariableCreationTime('wms_obj_cache_' . $id . '_' . md5((string) $appId))));
+		        return $cache->cachedVariableFetch ( 'mapbender: layer_obj_cache_' . $id . '_' . md5((string) $appId) );
 		    }
 		}
 		$e = new mb_notice("classes/class_universal_wms_factory.php: Read layer obj with id " . $id . " from database");
@@ -175,7 +159,7 @@ class UniversalWmsFactory extends WmsFactory {
 			    if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
 			        //write to cache
 			        $e = new mb_notice('classes/class_universal_wms_factory.php: createLayerFromDb - write layer obj to cache!');
-			        $cache->cachedVariableAdd ( 'mapbender: layer_obj_cache_' . $id . '_' . md5($appId), $returnObject, CACHE_TIME_WMS_LAYER );
+			        $cache->cachedVariableAdd ( 'mapbender: layer_obj_cache_' . $id . '_' . md5((string) $appId), $returnObject, CACHE_TIME_WMS_LAYER );
 			    }
 			    return $returnObject;
 			}

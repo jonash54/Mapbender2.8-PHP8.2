@@ -19,12 +19,12 @@
 
 #returns an array of all guis of the user
 function mb_getGUIs($mb_user_id, $onlyOwn = false){
-	$arrayGuis = array();
+	$arrayGuis = [];
 	if ($onlyOwn == false) {
 		if(isset($mb_user_id)){
 			$sql_groups = "SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 ";
-			$v = array($mb_user_id);
-			$t = array('i');
+			$v = [$mb_user_id];
+			$t = ['i'];
 			$res_groups = db_prep_query($sql_groups,$v,$t);
 			$cnt_groups = 0;
 			while(db_fetch_row($res_groups)){
@@ -33,8 +33,8 @@ function mb_getGUIs($mb_user_id, $onlyOwn = false){
 			}
 			$count_g = 0;
 			if($cnt_groups > 0){
-				$v = array();
-				$t = array();
+				$v = [];
+				$t = [];
 				$sql_g = "SELECT DISTINCT gui.gui_id FROM gui JOIN gui_mb_group ";     
 				$sql_g .= " ON gui.gui_id = gui_mb_group.fkey_gui_id WHERE( gui_mb_group.fkey_mb_group_id IN (";  
 				for($i=0; $i<count($mb_user_groups);$i++){
@@ -53,8 +53,8 @@ function mb_getGUIs($mb_user_id, $onlyOwn = false){
 			$sql_guis = "SELECT DISTINCT gui.gui_id FROM gui JOIN gui_mb_user ";  
 			$sql_guis .= "ON gui.gui_id = gui_mb_user.fkey_gui_id WHERE (gui_mb_user.fkey_mb_user_id = $1) ";
 			$sql_guis .= " AND gui.gui_public = 1";
-			$v = array($mb_user_id);
-			$t = array('i');
+			$v = [$mb_user_id];
+			$t = ['i'];
 			$res_guis = db_prep_query($sql_guis,$v,$t);
 			$count_guis = 0;
 			while(db_fetch_row($res_guis)){
@@ -72,8 +72,8 @@ function mb_getGUIs($mb_user_id, $onlyOwn = false){
 			$sql_guis = "SELECT DISTINCT gui.gui_id FROM gui JOIN gui_mb_user ";  
 			$sql_guis .= "ON gui.gui_id = gui_mb_user.fkey_gui_id WHERE (gui_mb_user.fkey_mb_user_id = $1) ";
 			$sql_guis .= " AND gui.gui_public = 1 AND gui_mb_user.mb_user_type = 'owner'";
-			$v = array($mb_user_id);
-			$t = array('i');
+			$v = [$mb_user_id];
+			$t = ['i'];
 			$res_guis = db_prep_query($sql_guis,$v,$t);
 			$count_guis = 0;
 			while(db_fetch_row($res_guis)){

@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc.,  59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-include(dirname(__FILE__)."/../php/mb_validateSession.php");
-include(dirname(__FILE__)."/../classes/class_administration.php");
+include(__DIR__."/../php/mb_validateSession.php");
+include(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownwms = $admin->getWmsByWmsOwner($_SESSION["mb_user_id"]);
 #need admin functions: getWmsLogTag, getWmsPrice, setWmsLogTag, setWmsPrice
@@ -32,7 +32,7 @@ $ownwms = $admin->getWmsByWmsOwner($_SESSION["mb_user_id"]);
              foreach($array as $v) {  
                  $str .= $pre.$v.$pad.$sep;  
              }  
-             $str = substr($str, 0, -strlen($sep));  
+             $str = substr($str, 0, -strlen((string) $sep));  
          }  
      } else {  
          $str .= $pre.$array.$pad;  

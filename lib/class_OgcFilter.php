@@ -5,10 +5,10 @@
 # and Simplified BSD license.
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/class_Filter.php";
-require_once dirname(__FILE__) . "/../http/classes/class_wfs_configuration.php";
-require_once dirname(__FILE__) . "/../http/classes/class_universal_gml_factory.php";
-require_once dirname(__FILE__) . "/../http/classes/class_universal_wfs_factory.php";
+require_once __DIR__ . "/class_Filter.php";
+require_once __DIR__ . "/../http/classes/class_wfs_configuration.php";
+require_once __DIR__ . "/../http/classes/class_universal_gml_factory.php";
+require_once __DIR__ . "/../http/classes/class_universal_wfs_factory.php";
 
 
 /**
@@ -20,28 +20,14 @@ class OgcFilter extends Filter {
 	const SPATIAL_OPERATORS = "Intersects";
 
 	private function mapOperator ($op) {
-		switch ($op) {
-			case "LIKE":
-				return array(
-					"open" => 'ogc:PropertyIsLike wildCard="*" singleChar="#" escapeChar="!"',
-					"close" => 'ogc:PropertyIsLike'
-				);
-				break;
-			case "AND":
-				return array(
-					"open" => 'ogc:And',
-					"close" => 'ogc:And'
-				);
-				break;
-			default:
-				return array(
-					"open" => $op,
-					"close" => $op
-				);
-		}
+		return match ($op) {
+      "LIKE" => ["open" => 'ogc:PropertyIsLike wildCard="*" singleChar="#" escapeChar="!"', "close" => 'ogc:PropertyIsLike'],
+      "AND" => ["open" => 'ogc:And', "close" => 'ogc:And'],
+      default => ["open" => $op, "close" => $op],
+  };
 	}
 	public function __construct () {
-		$allOperators = implode(",", array(self::OPERATORS, self::SPATIAL_OPERATORS));
+		$allOperators = implode(",", [self::OPERATORS, self::SPATIAL_OPERATORS]);
 		if (func_num_args() >= 3) {
 			$this->operator = func_get_arg(0);
 			$this->key = func_get_arg(1);

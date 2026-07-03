@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__)."/../../lib/class_Filter.php";
+require_once __DIR__."/../../lib/class_Filter.php";
 
 interface RPCObject{
 
@@ -16,14 +16,9 @@ interface RPCObject{
 
 class RPCEndpoint {
   
-  var $ObjectConf;
-  var $ajaxResponse;
+  public $method;
 
-  var $method;
-
-  public function __construct ($ObjectConf,$ajaxResponse){
-    $this->ObjectConf = $ObjectConf;
-    $this->ajaxResponse = $ajaxResponse;
+  public function __construct (public $ObjectConf,public $ajaxResponse){
     $this->method = $this->ajaxResponse->getMethod();
   }
 
@@ -221,7 +216,7 @@ class RPCEndpoint {
     {
       $this->ajaxResponse->setSuccess(true);
       $this->ajaxResponse->setMessage(_mb("No such ". $this->ObjectConf['internalName'] .": $name"));
-      $this->ajaxResponse->setResult("data",array("error"=>true ));
+      $this->ajaxResponse->setResult("data",["error"=>true]);
       return;
     }
   try{
@@ -239,9 +234,9 @@ class RPCEndpoint {
   }
 
   public function rpc_list(){
-    $result = array();
-    $instances = array();
-    $instances = $this->RPCObjectGetList('');
+    $result = [];
+    $instances = [];
+    $instances = $this->RPCObjectGetList();
     if(!$instances)
     {
       $this->ajaxResponse->setSuccess(false);
@@ -251,11 +246,10 @@ class RPCEndpoint {
     
     foreach( $instances as $instance)
     {
-      $result[] = array("name" =>  $instance->name, "value" => $instance->name);
+      $result[] = ["name" =>  $instance->name, "value" => $instance->name];
     }
     $this->ajaxResponse->setResult("list",$result);
-    $this->ajaxResponse->setResult("type", array("display" => $this->ObjectConf['DisplayName'], 
-                                           "internal" => $this->ObjectConf['InternalName']));
+    $this->ajaxResponse->setResult("type", ["display" => $this->ObjectConf['DisplayName'], "internal" => $this->ObjectConf['InternalName']]);
 
   }
 

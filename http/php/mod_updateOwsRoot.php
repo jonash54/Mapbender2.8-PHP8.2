@@ -13,20 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
-require_once(dirname(__FILE__) . "/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";
+require_once(__DIR__ . "/../classes/class_universal_wfs_factory.php");
 
 //give back every result as json
 header('Content-Type: application/json; charset=utf-8');
 
 $resultObject->success = false;
 //check if invoked from localhost
-$whitelist = array(
-    '127.0.0.1',
-    '::1'
-);
+$whitelist = ['127.0.0.1', '::1'];
 
 $userId = Mapbender::session()->get("mb_user_id");
 if ($userId == false) {
@@ -60,7 +57,7 @@ $schedulerOverwriteCategories = null;
 header('Content-Type: application/json; charset=utf-8');
 
 //validate parameters
-$schedulerParams = array("schedulerPublish", "schedulerSearchable", "schedulerOverwrite", "schedulerOverwriteCategories");
+$schedulerParams = ["schedulerPublish", "schedulerSearchable", "schedulerOverwrite", "schedulerOverwriteCategories"];
 foreach ($schedulerParams as $schedulerParam) {    
     if (isset($_REQUEST[$schedulerParam]) & $_REQUEST[$schedulerParam] != "") {
         $testMatch = $_REQUEST[$schedulerParam];
@@ -91,12 +88,12 @@ if (isset($_REQUEST["serviceType"]) & $_REQUEST["serviceType"] != "") {
     $serviceType = $testMatch;
     $testMatch = NULL;
 }
-$serviceType= strtoupper($serviceType);
+$serviceType= strtoupper((string) $serviceType);
 
 if (isset($_REQUEST["serviceId"]) & $_REQUEST["serviceId"] != "") {
     $testMatch = $_REQUEST["serviceId"];
     $pattern = '/^[0-9]*$/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         $resultObject->error->message = 'Parameter serviceId is not valid (integer).';
         echo json_encode($resultObject);
         die();
@@ -108,7 +105,7 @@ if (isset($_REQUEST["serviceId"]) & $_REQUEST["serviceId"] != "") {
 if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
     $testMatch = $_REQUEST["userId"];
     $pattern = '/^[0-9]*$/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         $resultObject->error->message = 'Parameter userId is not valid (integer).';
         echo json_encode($resultObject);
         die();
@@ -139,8 +136,8 @@ switch ($serviceType) {
         break;
 }
 
-$v = array($serviceId);
-$t = array('i');
+$v = [$serviceId];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 
 if (db_fetch_array( $res ) == false) {
@@ -163,7 +160,7 @@ while ($row = db_fetch_array( $res )) {
     }
        
     //extract params for scheduler 
-    $schedulerConf = array();
+    $schedulerConf = [];
     foreach ($schedulerParams as $schedulerParam) {
         //add result from db to array
         $schedulerConf[$schedulerParam] = $row[$schedulerParam];
@@ -179,7 +176,7 @@ while ($row = db_fetch_array( $res )) {
     
     //update service
     if ($row['serviceAuthType'] == "basic" || $row['serviceAuthType'] == "digest"){
-        $auth = array();
+        $auth = [];
         $auth['auth_type'] = $row['serviceAuthType'];
         $auth['username'] = $row['serviceAuthUser'];
         $auth['password'] = $row['serviceAuthPassword'];
@@ -219,7 +216,7 @@ while ($row = db_fetch_array( $res )) {
             try {
                 $updateWms->updateObjInDB($row['serviceId']);
             }
-            catch(Exception $e) {
+            catch(Exception) {
                 $resultObject->error->message = 'WMS could not be updated - check needed!';
                 echo json_encode($resultObject);
                 die();

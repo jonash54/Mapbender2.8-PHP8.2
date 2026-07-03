@@ -18,9 +18,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="updateWMSs";
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php"); 
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_wms.php"); 
 
 $selWMS = $_POST["selWMS"];
 $capURL = $_POST["capURL"];
@@ -42,8 +42,8 @@ function getRootLayerId ($wms_id) {
 	$sql = "SELECT layer_id FROM layer, wms " . 
 		"WHERE wms.wms_id = layer.fkey_wms_id AND layer_pos='0' " . 
 		"AND wms.wms_id = $1";
-	$v=array($wms_id);
-	$t=array('i');
+	$v=[$wms_id];
+	$t=['i'];
 	$res=db_prep_query($sql,$v,$t);
 	$row=db_fetch_array($res);
 	return $row ? $row["layer_id"] : null;
@@ -369,15 +369,15 @@ function sel(){
 
 
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 $permguis = $admin->getGuisByPermission(Mapbender::session()->get("mb_user_id"),true);
 $wms_id_own = $admin->getWmsByOwnGuis($ownguis);
 
 if (count($wms_id_own)>0 AND count($ownguis)>0 AND count($permguis)>0){
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$c = 1;
 	$sql = "SELECT wms.wms_id, wms.wms_title, wms.wms_getcapabilities, wms.wms_upload_url, wms.wms_auth_type, "; 
  	$sql .= "wms.wms_username, wms.wms_password, layer.layer_id  FROM wms, layer "; 
@@ -454,15 +454,15 @@ if (count($wms_id_own)>0 AND count($ownguis)>0 AND count($permguis)>0){
 if(isset($myURL) && $myURL != ''){
 
     	$mywms = new wms(); 
- 	
- 	if (in_array($imrHttpAuth, array('basic','digest'))) { 
- 		$auth = array(); 
+
+ 	if (in_array($imrHttpAuth, ['basic', 'digest'])) { 
+ 		$auth = []; 
  		$auth['username'] = $imrAuthName; 
  		$auth['password'] = $imrAuthPassword; 
  		$auth['auth_type'] = $imrHttpAuth; 
  		$result = $mywms->createObjFromXML($myURL, $auth); 
  	} elseif ($imrHttpAuth == 'keep') { 
- 		$auth = array(); 
+ 		$auth = []; 
  		$auth['username'] = $imrOldAuthName; 
  		$auth['password'] = $imrOldAuthPasswword; 
  		$auth['auth_type'] = $imrOldAuthType; 
@@ -475,7 +475,7 @@ if(isset($myURL) && $myURL != ''){
 	    	echo $result['message'];
 	    	die();
 	}
-	
+
 	$mywms->optimizeWMS();
 	echo "<br />";  
 
@@ -506,8 +506,8 @@ if(isset($myURL) && $myURL != ''){
  	} else { 
  		$mywms->updateObjInDB($myWMS); 
  	} 
-	
-	
+
+
 	echo "<div id='updateResult'>";
 	$mywms->displayWMS();
     	echo "</div>";
@@ -528,7 +528,7 @@ if(isset($myURL) && $myURL != ''){
 		$subscribers_ids = $admin->getSubscribersByWms($myWMS);
 		//if some person exists which is interested in changing of wms information ;-)
 		if (($owner_ids && count($owner_ids)>0) || ($subscribers_ids && count($subscribers_ids)>0)) {
-			$notification_mail_addresses = array();
+			$notification_mail_addresses = [];
 			$j=0;
 			for ($i=0; $i<count($owner_ids); $i++) {
 				$adr_tmp = $admin->getEmailByUserId($owner_ids[$i]);
@@ -567,7 +567,7 @@ if(isset($myURL) && $myURL != ''){
 			$error_msg = "";
 $e = new mb_exception("replyto: ". $replyto. " - from: ".$from);
 			for ($i=0; $i<count($notification_mail_addresses); $i++) {
-				if (!$admin->sendEmail($replyto, $from, $notification_mail_addresses[$i], $notification_mail_addresses[$i], _mb("Update of an observed WMS"), utf8_decode($body), $error)) {
+				if (!$admin->sendEmail($replyto, $from, $notification_mail_addresses[$i], $notification_mail_addresses[$i], _mb("Update of an observed WMS"), mb_convert_encoding($body, 'ISO-8859-1'), $error)) {
 					if ($error){
 						$error_msg .= $error . " ";
 					}

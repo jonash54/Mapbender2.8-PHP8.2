@@ -1,3 +1,11 @@
+<?php
+// PHP 8 needs the conf loaded before CHARSET / LOG_* constants are used
+// below. The original file relied on being include()'d from a script
+// that already loaded globalSettings.php.
+if (!defined('MB_VERSION_NUMBER') || !function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
+?>
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2, or (at your option)

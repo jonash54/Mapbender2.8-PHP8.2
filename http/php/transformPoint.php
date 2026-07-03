@@ -16,18 +16,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 header("Content-Type: application/json");
 
 $point_pos = $_POST["point_pos"];
-$targetProj = json_decode($_POST["targetProj"], true);
-$currentProj = json_decode($_POST["currentProj"], true);
+$targetProj = json_decode((string) $_POST["targetProj"], true);
+$currentProj = json_decode((string) $_POST["currentProj"], true);
 
 // Return the multipoints and use it on the client-side
 try {
     $multipoint = "";
-    $points_obj = json_decode($point_pos, true);
+    $points_obj = json_decode((string) $point_pos, true);
     $last_item = end($points_obj);
     foreach ($points_obj as $key => $value) {
         $multipoint .= '(';
@@ -43,8 +43,8 @@ try {
     $targetProjSricCode = intval($targetProj["srsProjNumber"]);
     $currentProjSricCode = intval($currentProj["srsProjNumber"]);
     $sql = "SELECT ST_AsGeoJson(ST_Transform(ST_GeomFromText($1,$2),$3::int)) As target_geom";
-    $v = array($multipoint, intval($targetProjSricCode), intval($currentProjSricCode));
-    $t = array('s', 'i', 'i');
+    $v = [$multipoint, intval($targetProjSricCode), intval($currentProjSricCode)];
+    $t = ['s', 'i', 'i'];
     $res = db_prep_query($sql, $v, $t);
     db_fetch_row($res);
     $geom = db_result($res, 0, 'target_geom');

@@ -251,7 +251,7 @@ class SMTP
             case 'html':
                 //Cleans up output a bit for a better looking, HTML-safe output
                 echo gmdate('Y-m-d H:i:s'), ' ', htmlentities(
-                    preg_replace('/[\r\n]+/', '', $str),
+                    (string) preg_replace('/[\r\n]+/', '', $str),
                     ENT_QUOTES,
                     'UTF-8'
                 ), "<br>\n";
@@ -268,7 +268,7 @@ class SMTP
                     str_replace(
                         "\n",
                         "\n                   \t                  ",
-                        trim($str)
+                        trim((string) $str)
                     )
                 ),
                 "\n";
@@ -360,7 +360,7 @@ class SMTP
         $this->edebug('Connection: opened', self::DEBUG_CONNECTION);
         // SMTP server can take longer to respond, give longer timeout for first read
         // Windows does not have support for this timeout function
-        if (substr(PHP_OS, 0, 3) != 'WIN') {
+        if (!str_starts_with(PHP_OS, 'WIN')) {
             $max = ini_get('max_execution_time');
             // Don't bother if unlimited
             if (0 != $max and $timeout > $max) {
@@ -443,7 +443,7 @@ class SMTP
                 return false;
             }
 
-            $this->edebug('Auth method requested: ' . ($authtype ? $authtype : 'UNKNOWN'), self::DEBUG_LOWLEVEL);
+            $this->edebug('Auth method requested: ' . ($authtype ?: 'UNKNOWN'), self::DEBUG_LOWLEVEL);
             $this->edebug(
                 'Auth methods available on the server: ' . implode(',', $this->server_caps['AUTH']),
                 self::DEBUG_LOWLEVEL
@@ -662,7 +662,7 @@ class SMTP
 
         $field = substr($lines[0], 0, strpos($lines[0], ':'));
         $in_headers = false;
-        if (!empty($field) and strpos($field, ' ') === false) {
+        if (!empty($field) and !str_contains($field, ' ')) {
             $in_headers = true;
         }
 
@@ -768,7 +768,7 @@ class SMTP
     protected function parseHelloFields($type)
     {
         $this->server_caps = [];
-        $lines = explode("\n", $this->helo_rply);
+        $lines = explode("\n", (string) $this->helo_rply);
 
         foreach ($lines as $n => $s) {
             //First 4 chars contain response code followed by - or space
@@ -893,7 +893,7 @@ class SMTP
             return false;
         }
         //Reject line breaks in all commands
-        if (strpos($commandstring, "\n") !== false or strpos($commandstring, "\r") !== false) {
+        if (str_contains($commandstring, "\n") or str_contains($commandstring, "\r")) {
             $this->setError("Command '$command' contained line breaks");
 
             return false;

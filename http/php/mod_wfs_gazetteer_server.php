@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_conf.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_gml_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_configuration.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../classes/class_universal_gml_factory.php");
+require_once(__DIR__."/../classes/class_wfs_configuration.php");
 
 $user = new User(Mapbender::session()->get("mb_user_id"));
 $command = $_REQUEST["command"];
@@ -34,7 +34,7 @@ $command = $_REQUEST["command"];
  * TODO: this function is also in mod_wfs_result!! Maybe merge someday.
  */
 function isValidVarName ($varname) {
-	if (preg_match("/[\$]{1}_[a-z]+\[\"[a-z_]+\"\]/i", $varname) != 0) {
+	if (preg_match("/[\$]{1}_[a-z]+\[\"[a-z_]+\"\]/i", (string) $varname) != 0) {
 		return true;
 	}
 	return false;
@@ -51,8 +51,8 @@ function isValidVarName ($varname) {
 	$sql .= "WHERE wfs_conf_element.fkey_wfs_conf_id = $1 ";
 	$sql .= "ORDER BY wfs_conf_element.f_respos";
 			
-	$v = array($wfs_conf_id);
-	$t = array('i');
+	$v = [$wfs_conf_id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 
@@ -68,7 +68,7 @@ function isValidVarName ($varname) {
 			if ($user) {
 				$pattern = "(<ogc:Filter[^>]*>)(.*)(</ogc:Filter>)";
 				$replacement = "\\1<And>\\2<ogc:PropertyIsEqualTo><ogc:PropertyName>" . $element_name . "</ogc:PropertyName><ogc:Literal>" . $user . "</ogc:Literal></ogc:PropertyIsEqualTo></And>\\3"; 
-				$filter = mb_eregi_replace($pattern, $replacement, $filter);
+				$filter = mb_eregi_replace($pattern, $replacement, (string) $filter);
 			}
 			else {
 				$e = new mb_exception("mod_wfs_gazetteer_server: checkAccessConstraint: invalid value of variable containing user information!");
@@ -88,7 +88,7 @@ if ($command == "getWfsConf") {
 	
 	if ($wfsConfIdString != "") {
 		//array_keys(array_flip()) produces an array with unique entries
-		$wfsConfIdArray = array_keys(array_flip(mb_split(",", $wfsConfIdString)));
+		$wfsConfIdArray = array_keys(array_flip(mb_split(",", (string) $wfsConfIdString)));
 		$availableWfsConfIds = $user->getWfsConfByPermission();
 		
 		$wfsConfIdArray = array_intersect($wfsConfIdArray, $availableWfsConfIds);
@@ -155,7 +155,7 @@ else if ($command == "getSearchResults") {
 	
 	if ($data === null) die('{}');
 	
-	if (defined("WFS_RESPONSE_SIZE_LIMIT") && WFS_RESPONSE_SIZE_LIMIT < strlen($data)) {
+	if (defined("WFS_RESPONSE_SIZE_LIMIT") && WFS_RESPONSE_SIZE_LIMIT < strlen((string) $data)) {
 		die("Too many results, please restrict your search.");
 	}
 //	$geomColumn = WfsConf::getGeomColumnNameByConfId($wfs_conf_id);

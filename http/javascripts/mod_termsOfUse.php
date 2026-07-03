@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 # $Id: mod_copyright.php 6660 2010-07-30 09:34:33Z christoph $
 # http://www.mapbender.org/index.php/mod_copyright.php
 # Copyright (C) 2002 CCGIS
@@ -38,7 +38,7 @@ function mod_copyright(){
 	var myMapObj = Mapbender.modules[mod_copyright_target];
 
 	var str_c = "<div style='z-index:110;font-family:" + mod_copyright_font + ";font-size:" + mod_copyright_fontsize + ";color:" + mod_copyright_color2 + ";position:absolute;bottom:5px;right:5px'><a style='color: blue;text-decoration: underline;' href='../php/mod_getWmcDisclaimer.php?id=current&withHeader=true' target='_blank'><?php echo _mb('Terms of use');?></a></div>";
-	
+
 	var map_el = myMapObj.getDomElement();
 	if(!map_el.ownerDocument.getElementById(myMapObj.elementName+"_copyright")){
 		//create Box Elements

@@ -33,39 +33,39 @@ class StyledLayerDescriptor
 	 * The name attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $name = "";
+	public $name = "";
 	/**
 	 * The title attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $title = "";
+	public $title = "";
 	/**
 	 * The abstract attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $abstract = "";
+	public $abstract = "";
 	/**
 	 * Array containing the layers of the sld.
 	 * @see NamedLayer
 	 * @var array
 	 */
-	var $layers = array();
+	public $layers = [];
 	/**
 	 * The version attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $version = "";
+	public $version = "";
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * Generates the sld-document as an xml-string and returns it.
@@ -206,7 +206,7 @@ class StyledLayerDescriptor
  * @param string $class_name
  */
 function __autoload($class_name) {
-	if (file_exists(dirname(__FILE__). "/{$class_name}.php"))
+	if (file_exists(__DIR__. "/{$class_name}.php"))
     	require_once $class_name . '.php';
 }
 ?>

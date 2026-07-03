@@ -11,11 +11,11 @@ define("MB_RESOLUTION", 28.35);
 
 		//map format
 		$sql = "SELECT * FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'map'";
-		$res = db_prep_query($sql, array($wmsId), array('i'));
+		$res = db_prep_query($sql, [$wmsId], ['i']);
 		$row = db_fetch_array($res);
 		$mapFormat = "";
 		while ($row = db_fetch_array($res)) {
-			$mapFormat = urlencode($row["data_format"]);
+			$mapFormat = urlencode((string) $row["data_format"]);
 			if (preg_match("/png/", $mapFormat) || preg_match("/gif/", $mapFormat) || preg_match("/jp.{1}g/", $mapFormat)) {
 				break;
 			}
@@ -26,10 +26,10 @@ define("MB_RESOLUTION", 28.35);
 	
 		// layers (all layers)
 		$sql = "SELECT layer_name FROM layer WHERE fkey_wms_id = $1 AND layer_parent <> '' AND layer_pos > 0";
-		$res = db_prep_query($sql, array($wmsId), array('i'));
-		$layerArray = array();
+		$res = db_prep_query($sql, [$wmsId], ['i']);
+		$layerArray = [];
 		while ($row = db_fetch_array($res)) {
-			array_push($layerArray, urlencode($row["layer_name"]));
+			array_push($layerArray, urlencode((string) $row["layer_name"]));
 		}
 		$layerList = implode(",", $layerArray);
 	        //Styles
@@ -41,16 +41,16 @@ define("MB_RESOLUTION", 28.35);
 		// bbox (layer_epsg: minx, miny, maxx, maxy)
 		//first read out root layer_id - cause this request is needed more than once!
 		$sql = "SELECT layer_id from layer WHERE fkey_wms_id = $1 AND layer_pos = 0 AND layer_parent = ''";
-		$res = db_prep_query($sql, array($wmsId), array('i'));
+		$res = db_prep_query($sql, [$wmsId], ['i']);
 		$row = db_fetch_array($res);
 		$rootLayerId = $row["layer_id"];
 		//get bbox of the root layer
 		$sql = "SELECT epsg, minx, miny, maxx, maxy ";
 		$sql .= "FROM layer_epsg WHERE fkey_layer_id = $1";
 		//this is done only for root layers!
-		$res = db_prep_query($sql, array($rootLayerId), array('i'));
+		$res = db_prep_query($sql, [$rootLayerId], ['i']);
 		//push all bboxes from mb_db into one array as mb_bbox object
-		$bboxArray = array();
+		$bboxArray = [];
 		while ($row = db_fetch_array($res)) {
 			array_push($bboxArray, new Mapbender_bbox($row["minx"], $row["miny"], $row["maxx"], $row["maxy"], $row["epsg"]));
 		}
@@ -76,13 +76,13 @@ define("MB_RESOLUTION", 28.35);
 		 */
 		// check if this WMS supports exception type XML
 		$sql = "SELECT data_format FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'exception'";
-		$v = array($wmsId);
-		$t = array('i');
+		$v = [$wmsId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		while ($row = db_fetch_array($res)) {
 			$exceptionFormat = $row["data_format"];
 			// set the exception type to xml (if possible)
-			if (preg_match('/xml/', $exceptionFormat)) {
+			if (preg_match('/xml/', (string) $exceptionFormat)) {
 				$supportsXMLException = true;
 				break; 
 			}
@@ -119,7 +119,7 @@ define("MB_RESOLUTION", 28.35);
 			$e = new mb_notice("monitorDefineGetMapBBOX: minmaxwerte? " . $bbox->max." ".$bbox->min);
 			$center = $bbox->min->plus($bbox->max)->times(0.5);
 		#	$e = new mb_notice("class_monitor: getMapRequest: center = " . $center);
-			
+
 			/*
 			 * TODO: this formula should have documentation
 			 */
@@ -191,7 +191,7 @@ define("MB_RESOLUTION", 28.35);
 		/*
 		 * Transparency
 		 */
-		if (preg_match("/png/", $mapFormat) || preg_match("/gif/", $mapFormat)) {
+		if (preg_match("/png/", (string) $mapFormat) || preg_match("/gif/", (string) $mapFormat)) {
 			$mapRequest .= "TRANSPARENT=TRUE&";
 		}
 		 
@@ -210,8 +210,8 @@ define("MB_RESOLUTION", 28.35);
 	 function getScaleForWMS($rootLayerId) {
 		// get the scalehints
 		$sql = "SELECT layer_minscale, layer_maxscale FROM layer WHERE layer_id = $1 AND layer_minscale <> layer_maxscale LIMIT 1";
-		$v = array($rootLayerId);
-		$t = array('i');
+		$v = [$rootLayerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$scaleHintArray = db_fetch_array($res);
 		
@@ -251,15 +251,15 @@ define("MB_RESOLUTION", 28.35);
 	 */
 	function mb_getConjunctionCharacter($onlineresource){
 		// index of character ? in online resource
-		$indexOfChar = mb_strpos($onlineresource,"?");
+		$indexOfChar = mb_strpos((string) $onlineresource,"?");
 	
 		if($indexOfChar) {
 			// no conjunction character needed
-			if($indexOfChar == mb_strlen($onlineresource)-1){ 
+			if($indexOfChar == mb_strlen((string) $onlineresource)-1){ 
 				return "";
 			}
 			// no conjunction character needed
-			else if (mb_substr($onlineresource, mb_strlen($onlineresource)-1) == "&") {
+			else if (mb_substr((string) $onlineresource, mb_strlen((string) $onlineresource)-1) == "&") {
 				return "";
 			}
 			else{

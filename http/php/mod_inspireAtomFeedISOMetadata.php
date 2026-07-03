@@ -20,13 +20,13 @@
 
 // Script to generate a conformant ISO19139 service metadata record for a wms layers dataurl attribut which is registrated in the mapbender database. It works as a webservice
 // The record will be fulfill the demands of the INSPIRE metadata regulation from 03.12.2008 and the iso19139
-require_once (dirname ( __FILE__ ) . "/../../core/globalSettings.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_connector.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_administration.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_Uuid.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_iso19139.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_owsConstraints.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_qualityReport.php");
+require_once (__DIR__ . "/../../core/globalSettings.php");
+require_once (__DIR__ . "/../classes/class_connector.php");
+require_once (__DIR__ . "/../classes/class_administration.php");
+require_once (__DIR__ . "/../classes/class_Uuid.php");
+require_once (__DIR__ . "/../classes/class_iso19139.php");
+require_once (__DIR__ . "/../classes/class_owsConstraints.php");
+require_once (__DIR__ . "/../classes/class_qualityReport.php");
 
 $con = db_connect ( DBSERVER, OWNER, PW );
 db_select_db ( DB, $con );
@@ -71,17 +71,11 @@ if ($_REQUEST ['OUTPUTFORMAT'] == "iso19139" || $_REQUEST ['OUTPUTFORMAT'] == "r
 
 if (! ($_REQUEST ['CN'] == "false")) {
 	// overwrite outputFormat for special headers:
-	switch ($_SERVER ["HTTP_ACCEPT"]) {
-		case "application/rdf+xml" :
-			$outputFormat = "rdf";
-			break;
-		case "text/html" :
-			$outputFormat = "html";
-			break;
-		default :
-			$outputFormat = "iso19139";
-			break;
-	}
+	$outputFormat = match ($_SERVER ["HTTP_ACCEPT"]) {
+     "application/rdf+xml" => "rdf",
+     "text/html" => "html",
+     default => "iso19139",
+ };
 }
 
 // if validation is requested
@@ -116,7 +110,7 @@ if ($generateFrom == "wfs") {
 	if (isset ( $_REQUEST ['WFSID'] ) & $_REQUEST ['WFSID'] != "") {
 		$testMatch = $_REQUEST ["WFSID"];
 		$pattern = '/^[\d]*$/';
-		if (! preg_match ( $pattern, $testMatch )) {
+		if (! preg_match ( $pattern, (string) $testMatch )) {
 			// echo 'WFSID must be an integer: <b>'.$testMatch.'</b> is not valid.<br/>';
 			echo 'Parameter <b>WFSID</b> must be an integer!<br/>';
 			die ();
@@ -135,7 +129,7 @@ function fillISO19139($iso19139, $recordId) {
 	// Pull download options for specific dataset from mapbender database and show them
 	$downloadOptionsConnector = new connector ( "http://localhost" . $_SERVER ['SCRIPT_NAME'] . "/../mod_getDownloadOptions.php?id=" . $recordId );
 	// echo "http://localhost".$_SERVER['SCRIPT_NAME']."/../mod_getDownloadOptions.php?id=".$recordId;
-	$downloadOptions = json_decode ( $downloadOptionsConnector->file );
+	$downloadOptions = json_decode ( (string) $downloadOptionsConnector->file );
 	//$e = new mb_exception("php/mod_inspireAtomFeedISOMetadata.php: download options: " . json_encode($downloadOptions));
 	// var_dump($downloadOptions);
 	// switch for generateFrom
@@ -183,12 +177,8 @@ function fillISO19139($iso19139, $recordId) {
 			$sql = <<<SQL
 			select mb_metadata.title, mb_metadata.alternate_title, mb_metadata.abstract, mb_metadata.ref_system, mb_metadata.datasetid, mb_metadata.datasetid_codespace, mb_metadata.origin from mb_metadata where mb_metadata.uuid = $1;
 SQL;
-			$v = array (
-					$recordId 
-			);
-			$t = array (
-					's' 
-			);
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['mdTitle'] = $mbMetadata ['title'];
@@ -203,12 +193,8 @@ SQL;
 			$sql = <<<SQL
 			select * from (select layer.layer_id, layer.layer_minscale, layer.layer_maxscale, wms.wms_timestamp, wms.wms_owner, wms.fkey_mb_group_id, wms.contactorganization, layer.uuid, wms.contactelectronicmailaddress, wms.wms_timestamp_create, wms.fees, wms.accessconstraints from layer inner join wms on layer.fkey_wms_id = wms.wms_id where layer.layer_id = $1) as wms_layer, layer_epsg where wms_layer.layer_id = layer_epsg.fkey_layer_id and layer_epsg.epsg = 'EPSG:4326';
 SQL;
-			$v = array (
-					( integer ) $mapbenderMetadata ['resourceId'] 
-			);
-			$t = array (
-					'i' 
-			);
+			$v = [( integer ) $mapbenderMetadata ['resourceId']];
+			$t = ['i'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			// use layer.uuid because dataurl is defined at layer_level
@@ -263,12 +249,8 @@ SQL;
 			$sql = <<<SQL
 			SELECT * , box2d(the_geom) as bbox2d from mb_metadata WHERE mb_metadata.uuid = $1;
 SQL;
-			$v = array (
-					$recordId 
-			);
-			$t = array (
-					's' 
-			);
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['mdTitle'] = $mbMetadata ['title'];
@@ -280,8 +262,8 @@ SQL;
 			$mapbenderMetadata ['mdOrigin'] = $mbMetadata ['origin'];
 			$mapbenderMetadata ['serviceUuid'] = $mbMetadata ['uuid'];
 			$mapbenderMetadata ['metadataId'] = $mbMetadata ['metadata_id'];
-			$mapbenderMetadata ['serviceTimestamp'] = strtotime ( $mbMetadata ['wms_timestamp'] );
-			$mapbenderMetadata ['serviceTimestampCreate'] = strtotime ( $mbMetadata ['wms_timestamp_create'] );
+			$mapbenderMetadata ['serviceTimestamp'] = strtotime ( (string) $mbMetadata ['wms_timestamp'] );
+			$mapbenderMetadata ['serviceTimestampCreate'] = strtotime ( (string) $mbMetadata ['wms_timestamp_create'] );
 			// $mapbenderMetadata['serviceTimestamp'] = date("Y-m-d",strtotime($mb_metadata['lastchanged']));
 			
 			// $mapbenderMetadata['serviceTimestampCreate'] = date("Y-m-d",strtotime($mb_metadata['lastchanged']));
@@ -351,12 +333,8 @@ SQL;
 		    $sql = <<<SQL
 			SELECT * , box2d(the_geom) as bbox2d from mb_metadata WHERE mb_metadata.uuid = $1;
 SQL;
-		    $v = array (
-		        $recordId
-		    );
-		    $t = array (
-		        's'
-		    );
+		    $v = [$recordId];
+		    $t = ['s'];
 		    $res = db_prep_query ( $sql, $v, $t );
 		    $mbMetadata = db_fetch_array ( $res );
 		    $mapbenderMetadata ['mdTitle'] = $mbMetadata ['title'];
@@ -374,8 +352,8 @@ SQL;
 		    /*$e = new mb_exception($mbMetadata['lastchanged']);
 		    $e = new mb_exception($mbMetadata['createdate']);
 		    $e = new mb_exception($mbMetadata['changedate']);*/
-		    $mapbenderMetadata['serviceTimestamp'] = date("Y-m-d",strtotime($mbMetadata['lastchanged']));
-		    $mapbenderMetadata['serviceTimestampCreate'] = date("Y-m-d",strtotime($mbMetadata['createdate']));
+		    $mapbenderMetadata['serviceTimestamp'] = date("Y-m-d",strtotime((string) $mbMetadata['lastchanged']));
+		    $mapbenderMetadata['serviceTimestampCreate'] = date("Y-m-d",strtotime((string) $mbMetadata['createdate']));
 		    /*$e = new mb_exception($mapbenderMetadata['serviceTimestamp']);
 		    $e = new mb_exception($mapbenderMetadata['serviceTimestampCreate']);*/
 		    
@@ -449,12 +427,8 @@ SQL;
 			$sql = <<<SQL
 			select mb_metadata.title, mb_metadata.alternate_title, mb_metadata.abstract, mb_metadata.ref_system, mb_metadata.datasetid_codespace , mb_metadata.datasetid, mb_metadata.origin from mb_metadata where mb_metadata.uuid = $1;
 SQL;
-			$v = array (
-					$recordId 
-			);
-			$t = array (
-					's' 
-			);
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['mdTitle'] = $mbMetadata ['title'];
@@ -469,12 +443,8 @@ SQL;
 			$sql = <<<SQL
 			select * from (select layer.layer_id, layer.layer_minscale, layer.layer_maxscale, wms.wms_timestamp, wms.wms_owner, wms.fkey_mb_group_id, wms.contactorganization, layer.uuid, wms.contactelectronicmailaddress, wms.wms_timestamp_create, wms.fees, wms.accessconstraints  from layer inner join wms on layer.fkey_wms_id = wms.wms_id where layer.layer_id = $1) as wms_layer, layer_epsg where wms_layer.layer_id = layer_epsg.fkey_layer_id and layer_epsg.epsg = 'EPSG:4326';
 SQL;
-			$v = array (
-					( integer ) $mapbenderMetadata ['resourceId'] 
-			);
-			$t = array (
-					'i' 
-			);
+			$v = [( integer ) $mapbenderMetadata ['resourceId']];
+			$t = ['i'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['serviceUuid'] = $mbMetadata ['uuid'];
@@ -521,7 +491,7 @@ SQL;
 						$mapbenderMetadata ['mdFileIdentifier'] = $recordId;
 						$mapbenderMetadata ['serviceId'] = $option->serviceId;
 						// generate array of featuretypes
-						$ft = array ();
+						$ft = [];
 						foreach ( $option->featureType as $featuretype ) {
 							$ft [] = $featuretype;
 						}
@@ -539,12 +509,8 @@ SQL;
 			$sql = <<<SQL
 			select mb_metadata.title, mb_metadata.alternate_title, mb_metadata.abstract, mb_metadata.ref_system, mb_metadata.datasetid, mb_metadata.datasetid_codespace, mb_metadata.origin from mb_metadata where mb_metadata.uuid = $1;
 SQL;
-			$v = array (
-					$recordId 
-			);
-			$t = array (
-					's' 
-			);
+			$v = [$recordId];
+			$t = ['s'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['mdTitle'] = $mbMetadata ['title'];
@@ -563,12 +529,8 @@ SQL;
 			$sql = <<<SQL
 			select wfs_id, uuid, wfs_timestamp, providername, fkey_mb_group_id, wfs_owner, electronicmailaddress, wfs_timestamp_create, fees, accessconstraints from wfs where wfs_id = $1;
 SQL;
-			$v = array (
-					( integer ) $mapbenderMetadata ['serviceId'] 
-			);
-			$t = array (
-					'i' 
-			);
+			$v = [( integer ) $mapbenderMetadata ['serviceId']];
+			$t = ['i'];
 			$res = db_prep_query ( $sql, $v, $t );
 			$mbMetadata = db_fetch_array ( $res );
 			$mapbenderMetadata ['serviceUuid'] = $mbMetadata ['uuid'];
@@ -584,17 +546,13 @@ SQL;
 			$sql = <<<SQL
 			select featuretype_latlon_bbox from wfs_featuretype where featuretype_id in ( $1 );
 SQL;
-			$v = array (
-					implode ( ',', $mapbenderMetadata ['featureTypes'] ) 
-			);
-			$t = array (
-					's' 
-			);
+			$v = [implode ( ',', $mapbenderMetadata ['featureTypes'] )];
+			$t = ['s'];
 			$res = db_prep_query ( $sql, $v, $t );
 			// get enclosure of bboxes of the different featuretypes
 			while ( $row = db_fetch_array ( $res ) ) {
 				
-				$bbox = explode ( ',', $row ['featuretype_latlon_bbox'] );
+				$bbox = explode ( ',', (string) $row ['featuretype_latlon_bbox'] );
 				
 				if (! isset ( $mapbenderMetadata ['minx'] ) || ( float ) $mapbenderMetadata ['minx'] < ( float ) $bbox [0]) {
 					$mapbenderMetadata ['minx'] = $bbox [0];
@@ -678,9 +636,9 @@ SQL;
 	// metadata uuid (8-4),hash(downloadLink) (4-12);
 	
 	if (isset ( $mapbenderMetadata ['serviceUuid'] ) && $mapbenderMetadata ['serviceUuid'] != '') {
-		$servicePart = explode ( '-', $mapbenderMetadata ['serviceUuid'] );
+		$servicePart = explode ( '-', (string) $mapbenderMetadata ['serviceUuid'] );
 		// in case of wmslayer and dataurl use layer_uuid - cause the same metadata record may be coupled with more than one layer of a service
-		$mdPart = explode ( '-', $recordId );
+		$mdPart = explode ( '-', (string) $recordId );
 		switch ($generateFrom) {
 			case "wmslayer" :
 				$dlsFileIdentifier = $servicePart [0] . "-" . $servicePart [1] . "-" . "0002" . "-" . $mdPart [3] . "-" . $mdPart [4];
@@ -695,13 +653,13 @@ SQL;
 			case "metadata" :
 				// $dlsFileIdentifier = $servicePart[0]."-".$servicePart[1]."-".$mdPart[2]."-".$mdPart[3]."-".$mdPart[4];
 				// generate hash from downloadLink
-				$linkPart = md5 ( $mapbenderMetadata ['downloadLink'] );
+				$linkPart = md5 ( (string) $mapbenderMetadata ['downloadLink'] );
 				$dlsFileIdentifier = $mdPart [0] . "-" . $mdPart [1] . "-" . $mdPart [2] . "-" . substr ( $linkPart, - 12, 4 ) . "-" . substr ( $linkPart, - 12, 12 );
 				break;
 			case "remotelist" :
 			    // $dlsFileIdentifier = $servicePart[0]."-".$servicePart[1]."-".$mdPart[2]."-".$mdPart[3]."-".$mdPart[4];
 			    // generate hash from downloadLink
-			    $linkPart = md5 ( $mapbenderMetadata ['downloadLink'] );
+			    $linkPart = md5 ( (string) $mapbenderMetadata ['downloadLink'] );
 			    $dlsFileIdentifier = $mdPart [0] . "-" . $mdPart [1] . "-" . $mdPart [2] . "-" . substr ( $linkPart, - 12, 4 ) . "-" . substr ( $linkPart, - 12, 12 );
 			    break;
 		}
@@ -1004,7 +962,7 @@ SQL;
 	$electronicMailAddress->appendChild ( $email_cs );
 	
 	//add optional administrativeArea element - before email!
-	$keywordsArray = array();
+	$keywordsArray = [];
 	switch ($generateFrom) {
 	    case "wmslayer" :
 	        // dls is generated from wms for one layer
@@ -1012,12 +970,8 @@ SQL;
 				SELECT keyword.keyword as keyword FROM keyword, layer_keyword WHERE layer_keyword.fkey_layer_id=$1 AND layer_keyword.fkey_keyword_id=keyword.keyword_id union
 SELECT custom_category.custom_category_key as keyword FROM custom_category, layer_custom_category WHERE layer_custom_category.fkey_layer_id = $1 AND layer_custom_category.fkey_custom_category_id =  custom_category.custom_category_id AND custom_category_hidden = 0;
 SQL;
-	        $v = array (
-	            ( integer ) $mapbenderMetadata ["resourceId"]
-	        );
-	        $t = array (
-	            'i'
-	        );
+	        $v = [( integer ) $mapbenderMetadata ["resourceId"]];
+	        $t = ['i'];
 	        break;
 	    case "wfs" :
 	        $sql = <<<SQL
@@ -1026,24 +980,16 @@ SELECT custom_category.custom_category_key as keyword FROM custom_category, wfs_
 SQL;
 	        // get keywords for all featuretypes
 	        // $mapbenderMetadata['featureTypes'] - array of ft ids
-	        $v = array (
-	            implode ( ',', $mapbenderMetadata ['featureTypes'] )
-	        );
-	        $t = array (
-	            's'
-	        );
+	        $v = [implode ( ',', $mapbenderMetadata ['featureTypes'] )];
+	        $t = ['s'];
 	        break;
 	    default :
 	        $sql = <<<SQL
 			SELECT keyword.keyword as keyword FROM keyword, mb_metadata_keyword WHERE mb_metadata_keyword.fkey_metadata_id=$1 AND mb_metadata_keyword.fkey_keyword_id=keyword.keyword_id union
 SELECT custom_category.custom_category_key as keyword FROM custom_category, mb_metadata_custom_category WHERE mb_metadata_custom_category.fkey_metadata_id = $1 AND mb_metadata_custom_category.fkey_custom_category_id =  custom_category.custom_category_id AND custom_category_hidden = 0;
 SQL;
-	        $v = array (
-	            ( integer ) $mapbenderMetadata ["metadataId"]
-	        );
-	        $t = array (
-	            'i'
-	        );
+	        $v = [( integer ) $mapbenderMetadata ["metadataId"]];
+	        $t = ['i'];
 	        break;
 	}
 	$res = db_prep_query ( $sql, $v, $t );
@@ -1053,7 +999,7 @@ SQL;
 	    }
 	}
 	if (defined('ADMINISTRATIVE_AREA') && ADMINISTRATIVE_AREA != '') {
-	    $adminAreaObj = json_decode(ADMINISTRATIVE_AREA);
+	    $adminAreaObj = json_decode((string) ADMINISTRATIVE_AREA);
 	    if (in_array($adminAreaObj->keyword, $keywordsArray)) {
 	        $administrativeArea = $iso19139->createElement("gmd:administrativeArea");
 	        $administrativeArea_cs = $iso19139->createElement("gco:CharacterString");
@@ -1087,12 +1033,8 @@ SQL;
 	// only if generated from WMS datasource!!
 	if ($generateFrom == "wmslayer") {
 		$sql = "SELECT layer_preview.layer_map_preview_filename FROM layer_preview WHERE layer_preview.fkey_layer_id=$1";
-		$v = array (
-				( integer ) $mapbenderMetadata ["resourceId"] 
-		);
-		$t = array (
-				'i' 
-		);
+		$v = [( integer ) $mapbenderMetadata ["resourceId"]];
+		$t = ['i'];
 		$res = db_prep_query ( $sql, $v, $t );
 		$row = db_fetch_array ( $res );
 		// use the example version of bavaria
@@ -1145,17 +1087,11 @@ SQL;
 	// a special keyword for service type wms as INSPIRE likes it ;-) infoMapAccessService or infoFeatureAccessService
 	$keyword = $iso19139->createElement ( "gmd:keyword" );
 	$keyword_cs = $iso19139->createElement ( "gco:CharacterString" );
-	switch($generateFrom) {
-		case "wmslayer":
-			$keywordText = $iso19139->createTextNode("infoCoverageAccessService");
-			break;
-		case "wfs":	
-			$keywordText = $iso19139->createTextNode("infoFeatureAccessService");
-		    break;
-		default:
-			$keywordText = $iso19139->createTextNode("infoFeatureAccessService");
-			break;
-	}
+	$keywordText = match ($generateFrom) {
+     "wmslayer" => $iso19139->createTextNode("infoCoverageAccessService"),
+     "wfs" => $iso19139->createTextNode("infoFeatureAccessService"),
+     default => $iso19139->createTextNode("infoFeatureAccessService"),
+ };
 	$keywordText = $iso19139->createTextNode ( "infoFeatureAccessService" );
 	$keyword_cs->appendChild ( $keywordText );
 	$keyword->appendChild ( $keyword_cs );
@@ -1246,7 +1182,7 @@ SQL;
 	$SV_ServiceIdentification->appendChild ( $serviceTypeVersion );
 	
 	// Geographical Extent
-	$bbox = array ();
+	$bbox = [];
 	// initialize if no extent is defined in the database
 	if (! isset ( $mapbenderMetadata ['minx'] ) || ($mapbenderMetadata ['minx'] == '')) {
 		$mapbenderMetadata ['minx'] = - 180;
@@ -1426,7 +1362,7 @@ SQL;
 			break;
 		case 'metador' :
 			$operatesOn = $iso19139->createElement ( "srv:operatesOn" );
-			$operatesOn->setAttribute ( "xlink:href", $mapbenderPath . "php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $recordId . '#spatial_dataset_' . md5 ( $recordId ) );
+			$operatesOn->setAttribute ( "xlink:href", $mapbenderPath . "php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $recordId . '#spatial_dataset_' . md5 ( (string) $recordId ) );
 			$operatesOn->setAttribute ( "uuidref", $uniqueResourceIdentifierCodespace . $recordId );
 			$SV_ServiceIdentification->appendChild ( $operatesOn );
 			break;
@@ -1580,7 +1516,7 @@ SQL;
 }
 
 // function to give away the xml data
-function pushISO19139($iso19139Doc, $recordId, $outputFormat) {
+function pushISO19139($iso19139Doc, $recordId, $outputFormat): never {
 	$xml = fillISO19139 ( $iso19139Doc, $recordId );
 	proxyFile ( $xml, $outputFormat );
 	die ();
@@ -1623,14 +1559,12 @@ function validateInspireMetadata($iso19139Doc, $recordId) {
 	$validatorInterfaceObject->set ( 'httpContentType', 'multipart/form-data' ); // maybe given automatically
 	$xml = fillISO19139 ( $iso19139Doc, $recordId );
 	// first test with data from ram - doesn't function
-	$fields = array (
-			'dataFile' => urlencode ( $xml ) 
-	);
+	$fields = ['dataFile' => urlencode ( (string) $xml )];
 	// generate file identifier:
 	$fileId = guid ();
 	// generate temporary file under tmp
 	if ($h = fopen ( TMPDIR . "/" . $fileId . "iso19139_validate_tmp.xml", "w" )) {
-		if (! fwrite ( $h, $xml )) {
+		if (! fwrite ( $h, (string) $xml )) {
 			$e = new mb_exception ( "mod_layerISOMetadata: cannot write to file: " . TMPDIR . "iso19139_validate_tmp.xml" );
 		}
 		fclose ( $h );
@@ -1659,12 +1593,8 @@ function validateInspireMetadata($iso19139Doc, $recordId) {
 function getEpsgByLayerId($layer_id) { // from merge_layer.php
 	$epsg_list = "";
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array (
-			$layer_id 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	while ( $row = db_fetch_array ( $res ) ) {
 		$epsg_list .= $row ['epsg'] . " ";
@@ -1673,14 +1603,10 @@ function getEpsgByLayerId($layer_id) { // from merge_layer.php
 }
 function getEpsgArrayByLayerId($layer_id) { // from merge_layer.php
                                              // $epsg_list = "";
-	$epsg_array = array ();
+	$epsg_array = [];
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array (
-			$layer_id 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$cnt = 0;
 	while ( $row = db_fetch_array ( $res ) ) {
@@ -1694,7 +1620,7 @@ function guid() {
 		return com_create_guid ();
 	} else {
 		mt_srand ( ( double ) microtime () * 10000 ); // optional for php 4.2.0 and up.
-		$charid = strtoupper ( md5 ( uniqid ( rand (), true ) ) );
+		$charid = strtoupper ( md5 ( uniqid ( random_int (0, mt_getrandmax()), true ) ) );
 		$hyphen = chr ( 45 ); // "-"
 		$uuid = chr ( 123 ) . // "{"
 substr ( $charid, 0, 8 ) . $hyphen . substr ( $charid, 8, 4 ) . $hyphen . substr ( $charid, 12, 4 ) . $hyphen . substr ( $charid, 16, 4 ) . $hyphen . substr ( $charid, 20, 12 ) . chr ( 125 ); // "}"

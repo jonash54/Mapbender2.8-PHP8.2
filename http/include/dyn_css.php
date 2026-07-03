@@ -17,7 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../../conf/mapbender.conf");
+require_once(__DIR__ . "/../../conf/mapbender.conf");
+require_once(__DIR__ . "/../../lib/database-pgsql.php");
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 
@@ -39,8 +40,8 @@ if(isset($gui_id) && $gui_id != ""){
 		#
 		#
 		$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = $1 AND fkey_gui_id = $2 and var_type='file/css'";
-		$v = array($e_id_css,$gui_id);
-		$t = array('s','s');
+		$v = [$e_id_css, $gui_id];
+		$t = ['s', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 		while($row = db_fetch_array($res)){		
@@ -57,8 +58,8 @@ if(isset($gui_id) && $gui_id != ""){
 		
 	
 		$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = $1 AND fkey_gui_id = $2 and var_type='text/css'";
-		$v = array($e_id_css,$gui_id);
-		$t = array('s','s');
+		$v = [$e_id_css, $gui_id];
+		$t = ['s', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		$cnt = 0;
 		$style = "";
@@ -80,14 +81,14 @@ if(isset($gui_id) && $gui_id != ""){
 	#
 	#
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = $1 AND fkey_gui_id = $2 and var_type='php_var'";
-   	$v = array($e_id_css,$gui_id);
-	$t = array('s','s');
+   	$v = [$e_id_css, $gui_id];
+	$t = ['s', 's'];
 	$res = db_prep_query($sql,$v,$t);
 
 	echo "\n";
 	while($row = db_fetch_array($res))
 	{
-		${$row["var_name"]} = stripslashes($row["var_value"]);
+		${$row["var_name"]} = stripslashes((string) $row["var_value"]);
 		echo "\n";
 	}
 	
@@ -99,19 +100,19 @@ if(isset($gui_id) && $gui_id != ""){
 	#
 	#
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_e_id = $1 AND fkey_gui_id = $2 and var_type='var'";
-   	$v = array($e_id_css,$gui_id);
-	$t = array('s','s');
+   	$v = [$e_id_css, $gui_id];
+	$t = ['s', 's'];
 	$res = db_prep_query($sql,$v,$t);
 
 	echo "\n";
 	echo "<script type=\"text/javascript\">\n";
 	echo "<!--\n";	
-	$arrays = array();
+	$arrays = [];
 	$i=-1;
 	while($row = db_fetch_array($res))
 	{
-		if (mb_strpos($row["var_name"], "[")) {
-			$arrayname = mb_substr($row["var_name"], 0, mb_strpos($row["var_name"], "["));
+		if (mb_strpos((string) $row["var_name"], "[")) {
+			$arrayname = mb_substr((string) $row["var_name"], 0, mb_strpos((string) $row["var_name"], "["));
 			if (!in_array($arrayname, $arrays)) {
 				$i++;
 				$arrays[$i] = $arrayname;
@@ -121,14 +122,14 @@ if(isset($gui_id) && $gui_id != ""){
 		else {
 			echo "var ";
 		}
-		if (is_numeric(stripslashes($row["var_value"]))) {
-			echo $row["var_name"]." = ".stripslashes($row["var_value"]).";\n";
+		if (is_numeric(stripslashes((string) $row["var_value"]))) {
+			echo $row["var_name"]." = ".stripslashes((string) $row["var_value"]).";\n";
 		}
-		elseif (strpos(stripslashes($row["var_value"]), "[") === 0 || strpos(stripslashes($row["var_value"]), "{") === 0) {
-			echo $row["var_name"]." = ".stripslashes($row["var_value"]).";\n";
+		elseif (str_starts_with(stripslashes((string) $row["var_value"]), "[") || str_starts_with(stripslashes((string) $row["var_value"]), "{")) {
+			echo $row["var_name"]." = ".stripslashes((string) $row["var_value"]).";\n";
 		}
 		else {
-			echo $row["var_name"]." = '".str_replace(array('"',"'", "\r", "\n", "\0"), array('\"','\\\'','\r', '\n', '\0'), stripslashes($row["var_value"]))."';\n";
+			echo $row["var_name"]." = '".str_replace(['"', "'", "\r", "\n", "\0"], ['\"', '\\\'', '\r', '\n', '\0'], stripslashes((string) $row["var_value"]))."';\n";
 		}
 	}
 	echo "// -->\n";

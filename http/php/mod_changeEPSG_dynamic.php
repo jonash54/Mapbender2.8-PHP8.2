@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/mb_validateSession.php");
+require_once(__DIR__."/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -45,8 +45,8 @@ $gui_id = Mapbender::session()->get("mb_user_gui");
 $con = db_connect($DBSERVER,$OWNER,$PW);
 db_select_db(DB,$con);
 $sql = "SELECT e_target FROM gui_element WHERE e_id = 'changeEPSG' AND fkey_gui_id = $1";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql,$v,$t);
 $cnt_gui_wms = 0;
 $cnt_epsg_wms = 0;
@@ -54,8 +54,8 @@ $cnt_layer_wms = 0;
 
 /*get allocated wms from allocated gui  ***********************************************************/
 $sql_gui_wms = "SELECT fkey_wms_id FROM gui_wms WHERE fkey_gui_id = $1 ORDER BY fkey_wms_id";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res_gui_wms = db_prep_query($sql_gui_wms,$v,$t);
 while(db_fetch_row($res_gui_wms)){
 	$fkey_gui_id[$cnt_gui_wms] = db_result($res_gui_wms,$cnt_gui_wms,"fkey_gui_id");
@@ -64,8 +64,8 @@ while(db_fetch_row($res_gui_wms)){
 }					 
 /*get allocated wms from allocated gui  ***********************************************************/
 /*get allocated layer_id from allocated gui  ******************************************************/
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $sql_layer_wms = "SELECT  layer_id FROM layer WHERE fkey_wms_id IN (";
 for($i=0; $i<count($fkey_wms_id_1); $i++){
 	if($i>0){ $sql_layer_wms .= ",";}
@@ -85,8 +85,8 @@ while($row = db_fetch_array($res_layer_wms)){
 
 /*get allocated epsg-code from allocated wms  *****************************************************/
 
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $sql_epsg_wms = "SELECT DISTINCT wms_srs FROM wms_srs WHERE fkey_wms_id IN (";
 for($i=0; $i<count($fkey_wms_id_1); $i++){
 	if($i>0){ $sql_epsg_wms .= ",";}
@@ -109,10 +109,10 @@ echo "var myTarget = '".db_result($res,0,"e_target")."';";
 echo "</script>";
 # transform coordinates
 if(isset($_REQUEST["srs"])){
-	require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
+	require_once(__DIR__."/../../conf/mapbender.conf");
 	$con = pg_connect ($con_string) or die ("Error while connecting database DBname");
 	
-	$arraymapObj = mb_split("###", $_REQUEST["srs"]);
+	$arraymapObj = mb_split("###", (string) $_REQUEST["srs"]);
 	
 	echo "<script type='text/javascript'>";
 	echo "var newExtent = new Array();";
@@ -122,21 +122,21 @@ if(isset($_REQUEST["srs"])){
 		/*
 		 * @security_patch sqli done
 		 */
-		$sqlMinx = "SELECT X(transform(GeometryFromText('POINT(".pg_escape_string($temp[2])." ".pg_escape_string($temp[3]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",$_REQUEST["newSRS"])).")) as minx";
+		$sqlMinx = "SELECT X(transform(GeometryFromText('POINT(".pg_escape_string($temp[2])." ".pg_escape_string($temp[3]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",(string) $_REQUEST["newSRS"])).")) as minx";
 		$resMinx = @pg_query($con,$sqlMinx);
-		$minx = pg_result($resMinx,0,"minx");
+		$minx = pg_fetch_result($resMinx,0,"minx");
 		
-		$sqlMiny = "SELECT Y(transform(GeometryFromText('POINT(".pg_escape_string($temp[2])." ".pg_escape_string($temp[3]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",$_REQUEST["newSRS"])).")) as miny";
+		$sqlMiny = "SELECT Y(transform(GeometryFromText('POINT(".pg_escape_string($temp[2])." ".pg_escape_string($temp[3]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",(string) $_REQUEST["newSRS"])).")) as miny";
 		$resMiny = @pg_query($con,$sqlMiny);
-		$miny = pg_result($resMiny,0,"miny");
+		$miny = pg_fetch_result($resMiny,0,"miny");
 		
-		$sqlMaxx = "SELECT X(transform(GeometryFromText('POINT(".pg_escape_string($temp[4])." ".pg_escape_string($temp[5]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",$_REQUEST["newSRS"])).")) as maxx";
+		$sqlMaxx = "SELECT X(transform(GeometryFromText('POINT(".pg_escape_string($temp[4])." ".pg_escape_string($temp[5]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",(string) $_REQUEST["newSRS"])).")) as maxx";
 		$resMaxx = @pg_query($con,$sqlMaxx);
-		$maxx = pg_result($resMaxx,0,"maxx");
+		$maxx = pg_fetch_result($resMaxx,0,"maxx");
 		
-		$sqlMaxy = "SELECT Y(transform(GeometryFromText('POINT(".pg_escape_string($temp[4])." ".pg_escape_string($temp[5]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",$_REQUEST["newSRS"])).")) as maxy";
+		$sqlMaxy = "SELECT Y(transform(GeometryFromText('POINT(".pg_escape_string($temp[4])." ".pg_escape_string($temp[5]).")',".pg_escape_string(preg_replace("/EPSG:/","",$temp[1]))."),".pg_escape_string(preg_replace("/EPSG:/","",(string) $_REQUEST["newSRS"])).")) as maxy";
 		$resMaxy = @pg_query($con,$sqlMaxy);		 
-		$maxy = pg_result($resMaxy,0,"maxy");
+		$maxy = pg_fetch_result($resMaxy,0,"maxy");
 	
 		$extenty = $maxy - $miny;
 		$extentx = $maxx - $minx;

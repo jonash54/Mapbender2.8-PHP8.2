@@ -15,16 +15,16 @@
 //the script looks for a constant MAPBENDER_PATH
 //it must be defined in mapbender.conf
 
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_administration.php");
-require_once(dirname(__FILE__)."/../http/classes/class_user.php");
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_administration.php");
+require_once(__DIR__."/../http/classes/class_user.php");
 $admin = new administration();
 function getRootLayerId ($wms_id) {
 	$sql = "SELECT layer_id FROM layer, wms " . 
 		"WHERE wms.wms_id = layer.fkey_wms_id AND layer_pos='0' " . 
 		"AND wms.wms_id = $1";
-	$v=array($wms_id);
-	$t=array('i');
+	$v=[$wms_id];
+	$t=['i'];
 	$res=db_prep_query($sql,$v,$t);
 	$row=db_fetch_array($res);
 	return $row ? $row["layer_id"] : null;
@@ -33,7 +33,7 @@ function getRootLayerId ($wms_id) {
 $sql = "SELECT DISTINCT fkey_mb_user_id FROM mb_user_abo_ows";
 $res = db_query($sql);
 $cnt = 0;
-$user_id_all=array();
+$user_id_all=[];
 while($row = db_fetch_array($res)){
 	echo $cnt."\n";
 	$user_id_all[] = $row["fkey_mb_user_id"];
@@ -71,12 +71,12 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 	echo "User: ".$userid."\n";
 	//read out services from mb_user_abo_ows
 	$sql="SELECT fkey_wms_id FROM mb_user_abo_ows WHERE fkey_mb_user_id = $1";
-	$v=array($userid);
-	$t=array('i');
+	$v=[$userid];
+	$t=['i'];
 	$res=db_prep_query($sql,$v,$t);
 	$cnt = 0;
 	//initialize array
-	$wms_id_all=array();
+	$wms_id_all=[];
 	echo $subscribed_wms_text . ":\n";
 	//read results
 	while($row = db_fetch_array($res)){
@@ -92,8 +92,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		$sql = "SELECT status, status_comment, to_timestamp(timestamp_end) " . 
 			"AS timestamp_end FROM mb_monitor WHERE fkey_wms_id = $1 " . 
 			"ORDER BY timestamp_end DESC LIMIT 1";
-		$v = array($wmsid);
-		$t = array('i');
+		$v = [$wmsid];
+		$t = ['i'];
 		$res=db_prep_query($sql,$v,$t);
 		//read results
 		$row = db_fetch_array($res);
@@ -103,8 +103,8 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 		echo $wms_with_problems_text . ":\n";
 		#read wms_title
 		$sql="SELECT wms_title FROM wms WHERE wms_id = $1";
-		$v_wms_t = array($wmsid);
-		$t_wms_t = array('i');
+		$v_wms_t = [$wmsid];
+		$t_wms_t = ['i'];
 		$res_wms_t = db_prep_query($sql, $v_wms_t, $t_wms_t);
 		$row_wms_t = db_fetch_array($res_wms_t);
 		if ($wms_monitor_status == '-1') {
@@ -138,7 +138,7 @@ for ($iz = 0; $iz < count($user_id_all); $iz++) {
 				$admin->getEmailByUserId($userid), 
 				$user, 
 				$mail_user_topic . " " . date("F j, Y, G:i:s"), 
-				utf8_decode($body), 
+				mb_convert_encoding($body, 'ISO-8859-1'), 
 				$error_msg
 			);
 		}

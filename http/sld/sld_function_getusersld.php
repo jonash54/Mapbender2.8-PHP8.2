@@ -29,10 +29,10 @@
  * @author Markus Krzyzanowski
  */
 
-include_once(dirname(__FILE__)."/classes/StyledLayerDescriptor.php");
-include_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-include_once(dirname(__FILE__)."/../../core/globalSettings.php");
-include_once(dirname(__FILE__)."/sld_parse.php");
+include_once(__DIR__."/classes/StyledLayerDescriptor.php");
+include_once(__DIR__."/../../conf/mapbender.conf");
+include_once(__DIR__."/../../core/globalSettings.php");
+include_once(__DIR__."/sld_parse.php");
 
 /**
  * This function saves the data into the database
@@ -49,8 +49,8 @@ if (isset($_REQUEST["function"]))
 			$con = db_connect($DBSERVER,$OWNER,$PW);
 			db_select_db($DB,$con);
 			$sql = "SELECT * FROM sld_user_layer WHERE fkey_gui_id=$1 AND fkey_layer_id=$2 AND fkey_mb_user_id=$3";
-			$v = array($_REQUEST["sld_gui_id"], $_REQUEST["sld_layer_id"], $_REQUEST["user_id"]);
-			$t = array('s', 'i', 'i');
+			$v = [$_REQUEST["sld_gui_id"], $_REQUEST["sld_layer_id"], $_REQUEST["user_id"]];
+			$t = ['s', 'i', 'i'];
 			$res = db_prep_query($sql,$v,$t);			
 
 			if ( db_fetch_row($res, 0) )
@@ -64,7 +64,7 @@ if (isset($_REQUEST["function"]))
 		} //Used for mapbender integration - old deprecated
 		else if ( isset($_REQUEST["sld_layer_names"]) && isset($_REQUEST["user_id"]) )
 		{
-			$layer_names = split(",", urldecode($_REQUEST["sld_layer_names"]));
+			$layer_names = preg_split("#,#m", urldecode((string) $_REQUEST["sld_layer_names"]));
 			
 			$con = db_connect($DBSERVER,$OWNER,$PW);
 			db_select_db($DB,$con);
@@ -75,8 +75,8 @@ if (isset($_REQUEST["function"]))
 			foreach ($layer_names as $layer_name)
 			{
 				$sql = "SELECT * FROM layer WHERE layer_name=$1";
-				$v = array($layer_name);
-				$t = array('s');
+				$v = [$layer_name];
+				$t = ['s'];
 				$res = db_prep_query($sql,$v,$t);				
 
 				$layer_id = "";
@@ -84,8 +84,8 @@ if (isset($_REQUEST["function"]))
 				{
 					$layer_id = db_result($res, 0, "fkey_layer_id");
 					$sql = "SELECT * FROM sld_user_layer WHERE fkey_layer_id=$1 AND fkey_mb_user_id=$2";
-					$v = array($layer_id, $_REQUEST["user_id"]);
-					$t = array('i', 'i');
+					$v = [$layer_id, $_REQUEST["user_id"]];
+					$t = ['i', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 					
 					if ( db_fetch_row($res, 0) )
@@ -108,8 +108,8 @@ if (isset($_REQUEST["function"]))
 			$con = db_connect($DBSERVER,$OWNER,$PW);
 			db_select_db($DB,$con);
 			$sql = "SELECT fkey_layer_id FROM gui_layer WHERE fkey_gui_id=$1 AND gui_layer_wms_id=$2";
-			$v = array($_REQUEST["sld_gui_id"], $_REQUEST["sld_wms_id"]);
-			$t = array('s', 'i');
+			$v = [$_REQUEST["sld_gui_id"], $_REQUEST["sld_wms_id"]];
+			$t = ['s', 'i'];
 			$res = db_prep_query($sql,$v,$t);
 			
 			$sld_xml = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
@@ -119,8 +119,8 @@ if (isset($_REQUEST["function"]))
 			{
 				$layer_id = $row[0];
 				$sql = "SELECT * FROM sld_user_layer WHERE fkey_layer_id=$1 AND fkey_gui_id=$2";
-				$v = array($layer_id, $_REQUEST["sld_gui_id"]);
-				$t = array('i', 's');
+				$v = [$layer_id, $_REQUEST["sld_gui_id"]];
+				$t = ['i', 's'];
 				$res2 = db_prep_query($sql,$v,$t);
 
 				if ( db_fetch_row($res2, 0) )

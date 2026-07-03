@@ -29,26 +29,26 @@ class PropertyIsNull
 	 * Name of the Property
 	 * @var string
 	 */
-	var $ogcPropertyName = "";
+	public $ogcPropertyName = "";
 	
 	/**
 	 * String. Not sure was this is used for in ogc:filter.
 	 * An "isNull" comparison usually does not require a literal string.
 	 * @var string
 	 */
-	var $ogcLiteral = "";
+	public $ogcLiteral = "";
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -90,7 +90,7 @@ class PropertyIsNull
 		$temp .= $offset."  <input name=\"".$id."_ogcliteral\" value=\"".$this->ogcLiteral."\">\n";
 		$temp .= $offset." </td>\n";
 		$temp .= $offset." <td>\n";
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."  <a class=\"edit\" href=\"?function=deleteoperation&id=".$this->parent."&number=".$number."\">";
 		$temp .= $offset."  <img src='./img/minus.gif' border='0'>&nbsp;l&ouml;schen</a>\n";

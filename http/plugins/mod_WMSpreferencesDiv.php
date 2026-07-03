@@ -52,7 +52,7 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 $e_id = 'WMS_preferencesDiv';
 //$gui_id = array(Mapbender::session()->get("mb_user_gui"));
 
@@ -63,8 +63,8 @@ $vis = "";
 $wmsid = "";
 
 $sql_visible = "SELECT * FROM gui_wms WHERE fkey_gui_id = $1";
-$v = array(Mapbender::session()->get("mb_user_gui"));
-$t = array("s"); 
+$v = [Mapbender::session()->get("mb_user_gui")];
+$t = ["s"]; 
 $res_visible = db_prep_query($sql_visible, $v, $t); 
 $cnt_visible = 0; 
 

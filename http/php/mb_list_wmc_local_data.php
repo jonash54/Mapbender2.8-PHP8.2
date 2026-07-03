@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 //parse ajax params
 //activateRegistratingGroupFilter
@@ -44,12 +44,12 @@ if ($activateRegistratingGroupFilter == "1") {
        		'(fkey_user_id = $1 or wmc_local_data_public = 1);';
 }
 
-$v = array($user_id);
-$t = array("i");
+$v = [$user_id];
+$t = ["i"];
 $res = db_prep_query($sql, $v, $t);
-$wmcs = array();
+$wmcs = [];
 while ($row = db_fetch_array($res)) {
-    $wmc = array();
+    $wmc = [];
     $wmc[] = $row['wmc_serial_id'];
     $wmc[] = $row['wmc_title'];
     $wmc[] = $row['wmc_timestamp'];

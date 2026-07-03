@@ -1,20 +1,16 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_connector.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_connector.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
 
 class Skos {
-    var $uploadUrl; // url from which the resource has been registered
-    var $languageCodes; // array with supported language codes : e.g. array('en','de','fr');
-    var $conceptScheme; // ConceptScheme object of the skos representation
-    var $resolveSuccess;
-    public function __construct($uploadUrl) {
-        // mandatory
-        $this->uploadUrl = $uploadUrl;
+    // url from which the resource has been registered
+    public $languageCodes; // array with supported language codes : e.g. array('en','de','fr');
+    public $conceptScheme; // ConceptScheme object of the skos representation
+    public $resolveSuccess;
+    public function __construct(public $uploadUrl) {
         $this->resolveSuccess = false;
-        $this->languageCodes = array (
-            "en"
-        );
+        $this->languageCodes = ["en"];
         // import skos rdf from uploadUrl
     }
     public function importFromSkosRdf() {
@@ -28,7 +24,7 @@ class Skos {
             $skosRdf = $skosXml;
             libxml_use_internal_errors ( true );
             try {
-                $skosXml = simplexml_load_string ( $skosRdf );
+                $skosXml = simplexml_load_string ( (string) $skosRdf );
                 if ($skosXml === false) {
                     foreach ( libxml_get_errors () as $error ) {
                         $err = new mb_exception ( "classes/class_skos.php:" . $error->message );
@@ -108,7 +104,7 @@ class Skos {
 
                 // iterate tree recursively
                 $conceptObject = new concept ();
-                $conceptObject->conceptArray = array ();
+                $conceptObject->conceptArray = [];
                 foreach ( $this->conceptScheme->hasTopConcept as $topConceptId ) {
                     // $e = new mb_exception("work on top scheme:".$topConceptId);
                     array_push ( $conceptObject->conceptArray, $this->extractSubConcepts ( $skosXml, $topConceptId ) );
@@ -123,7 +119,7 @@ class Skos {
     }
     
     public function getIdentifierArray() {
-        $result = array();
+        $result = [];
         $result[] = $this->conceptScheme->identifier;
         $identifiersFromConceptArray = $this->identifiersToArray($this->conceptScheme->conceptArray);
         if (is_array($identifiersFromConceptArray) && count($identifiersFromConceptArray) > 0) {
@@ -135,7 +131,7 @@ class Skos {
     }
     
     public function identifiersToArray($array) {
-        $result = array();
+        $result = [];
         foreach ($array as $concept) {
             $result[] = $concept->identifier;
             //$e = new mb_exception("type of conceptArray: ".gettype($concept->conceptArray)." - count: ".count($concept->conceptArray));
@@ -158,7 +154,7 @@ class Skos {
         foreach ( $this->languageCodes as $languageCode ) {
             $conceptObject->prefLabel [$languageCode] = ( string ) ($xmlObject->xpath ( '/rdf:RDF/rdf:Description[@rdf:about="' . $conceptUri . '"]/skos:prefLabel[@xml:lang="' . $languageCode . '"]' ) [0]);
         }
-        $conceptObject->conceptArray = array ();
+        $conceptObject->conceptArray = [];
         
         
         
@@ -195,7 +191,7 @@ class Skos {
                 $skosRdf = $skosXml;
                 libxml_use_internal_errors ( true );
                 try {
-                    $skosXml = simplexml_load_string ( $skosRdf );
+                    $skosXml = simplexml_load_string ( (string) $skosRdf );
                     if ($skosXml === false) {
                         foreach ( libxml_get_errors () as $error ) {
                             $err = new mb_exception ( "classes/class_skos.php:" . $error->message );
@@ -223,19 +219,19 @@ class Skos {
                     $skosXml->registerXPathNamespace ( "vcard", "http://www.w3.org/2006/vcard/ns#" );
                     $skosXml->registerXPathNamespace ( "voaf", "http://labs.mondeca.com/vocab/voaf#" );
                     $skosXml->registerXPathNamespace ( "vann", "http://purl.org/vocab/vann/" );
-                    
+
                     //extract relevant information
                     //$conceptObject->conceptArray [$i]->identifier = ( string ) $conceptUri;
-                    
+
                     // extract title of subconcept
                     foreach ( $this->languageCodes as $languageCode ) {
                         $conceptObject->prefLabel [$languageCode] = ( string ) ($skosXml->xpath ( '/rdf:RDF/rdf:Description[@rdf:about="' . $conceptObject->identifier . '"]/skos:prefLabel[@xml:lang="' . $languageCode . '"]' ) [0]);
                     }
-                    
+
                     // $e = new mb_exception("Search recursive for elements with parent: ".(string)$subConcept[0]);
                     //only use first hierarchy ... 
                     //$subConceptObject = $this->extractSubConcepts ( $skosXml, ( string ) $conceptUri );
-                    
+
                     //array_push ( $conceptObject->conceptArray, $subConceptObject );
                 }
             }
@@ -265,12 +261,8 @@ class Skos {
         $sql = <<<SQL
 SELECT * FROM custom_category_origin WHERE uri = $1
 SQL;
-        $v = array (
-            $this->conceptScheme->identifier
-        );
-        $t = array (
-            's'
-        );
+        $v = [$this->conceptScheme->identifier];
+        $t = ['s'];
         $res = db_prep_query ( $sql, $v, $t );
         while ( $row = db_fetch_array ( $res ) ) {
             $customCategoryId [] = $row ['id'];
@@ -289,29 +281,15 @@ SQL;
 INSERT INTO custom_category_origin (upload_url, uri, type, uuid) VALUES ($1, $2, $3, $4)
 SQL;
             $uuid = new Uuid ();
-            $v = array (
-                $this->uploadUrl,
-                $this->conceptScheme->identifier,
-                'skos',
-                $uuid
-            );
-            $t = array (
-                's',
-                's',
-                's',
-                's'
-            );
+            $v = [$this->uploadUrl, $this->conceptScheme->identifier, 'skos', $uuid];
+            $t = ['s', 's', 's', 's'];
             $res = db_prep_query ( $sql, $v, $t );
             // return inserted id
             $sql = <<<SQL
 SELECT id FROM custom_category_origin WHERE uuid = $1
 SQL;
-            $v = array (
-                $uuid
-            );
-            $t = array (
-                's'
-            );
+            $v = [$uuid];
+            $t = ['s'];
             $res = db_prep_query ( $sql, $v, $t );
             $row = db_fetch_array ( $res );
             $e = new mb_exception ( "id of inserted skos classification scheme: " . $row ['id'] );
@@ -340,12 +318,8 @@ SQL;
         $sql = <<<SQL
 SELECT * FROM custom_category WHERE custom_category_key = $1
 SQL;
-        $v = array (
-            $conceptIdentifier
-        );
-        $t = array (
-            's'
-        );
+        $v = [$conceptIdentifier];
+        $t = ['s'];
         $res = db_prep_query ( $sql, $v, $t );
         while ( $row = db_fetch_array ( $res ) ) {
             $customCategoryEntryId [] = $row ['custom_category_id'];
@@ -370,24 +344,8 @@ SQL;
             $sql = <<<SQL
 INSERT INTO custom_category (custom_category_key, custom_category_code_en, custom_category_code_de, custom_category_parent_key, fkey_custom_category_origin_id, createdate, deletedate) VALUES ($1, $2, $3, $4, $5, $6, $7)
 SQL;
-            $v = array (
-                $conceptObject->identifier,
-                $conceptObject->prefLabel ['en'],
-                $conceptObject->prefLabel ['de'],
-                $categoryParentUri,
-                $categoryOriginId,
-                'now()',
-                null
-            );
-            $t = array (
-                's',
-                's',
-                's',
-                's',
-                'i',
-                's',
-                's'
-            );
+            $v = [$conceptObject->identifier, $conceptObject->prefLabel ['en'], $conceptObject->prefLabel ['de'], $categoryParentUri, $categoryOriginId, 'now()', null];
+            $t = ['s', 's', 's', 's', 'i', 's', 's'];
             $res = db_prep_query ( $sql, $v, $t );
             // $row = db_fetch_array($res);
         } else {
@@ -398,22 +356,8 @@ SQL;
             $sql = <<<SQL
 UPDATE custom_category SET custom_category_code_en = $1, custom_category_parent_key = $2, fkey_custom_category_origin_id = $3, custom_category_code_de = $5 , deletedate = $6 WHERE custom_category_key = $4
 SQL;
-            $v = array (
-                $conceptObject->prefLabel ['en'],
-                $categoryParentUri,
-                $categoryOriginId,
-                $conceptObject->identifier,
-                $conceptObject->prefLabel ['de'],
-                null
-            );
-            $t = array (
-                's',
-                's',
-                'i',
-                's',
-                's',
-                's'
-            );
+            $v = [$conceptObject->prefLabel ['en'], $categoryParentUri, $categoryOriginId, $conceptObject->identifier, $conceptObject->prefLabel ['de'], null];
+            $t = ['s', 's', 'i', 's', 's', 's'];
             $res = db_prep_query ( $sql, $v, $t );
             $e = new mb_exception ( "Skos concept with uri " . $conceptObject->identifier . " updated!" ); // Original json: ".json_encode($conceptObject));
         }
@@ -421,28 +365,28 @@ SQL;
 }
 
 class ConceptScheme {
-    var $identifier; // uri - same as @rdf:about
-    var $created;
-    var $issued;
+    public $identifier; // uri - same as @rdf:about
+    public $created;
+    public $issued;
     // var $uploadUrl; //url from which the resource has been registered
-    var $prefLabel; // associative array with one entry for each supported language code
-    var $definition; // associative array with one entry for each supported language code
-    var $hasTopConcept; // array with uris of topmost concepts in the scheme
-    var $conceptArray; // array with the Concept objects below the scheme
+    public $prefLabel; // associative array with one entry for each supported language code
+    public $definition; // associative array with one entry for each supported language code
+    public $hasTopConcept; // array with uris of topmost concepts in the scheme
+    public $conceptArray; // array with the Concept objects below the scheme
     public function __construct() {
         $this->identifier = "";
-        $this->conceptArray = array ();
+        $this->conceptArray = [];
     }
 }
 
 class Concept {
-    var $identifier; // uri - same as @rdf:about od Description element in skos rdf xml
+    public $identifier; // uri - same as @rdf:about od Description element in skos rdf xml
     // var $parent; //uri of the parent concept or conceptScheme
-    var $prefLabel; // associative array with one entry for each supported language code
-    var $conceptArray; // array with the Concept objects below the scheme (childs in hierarchy)
+    public $prefLabel; // associative array with one entry for each supported language code
+    public $conceptArray; // array with the Concept objects below the scheme (childs in hierarchy)
     public function __construct() {
         $this->identifier = "";
-        $this->conceptArray = array ();
+        $this->conceptArray = [];
     }
 }
 ?>

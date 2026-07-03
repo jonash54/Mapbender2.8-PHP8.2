@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -37,8 +37,8 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
 <?php
 $insert = "";
 $sql = "SELECT * FROM gui_element WHERE fkey_gui_id = $1 AND e_id= $2";
-$v = array($_REQUEST["gui"],$_REQUEST["element"]);
-$t = array('s','s');
+$v = [$_REQUEST["gui"], $_REQUEST["element"]];
+$t = ['s', 's'];
 $res = db_prep_query($sql,$v,$t);
 if($row = db_fetch_array($res)) {
    $insert .=  "INSERT INTO gui_element(";
@@ -89,13 +89,13 @@ if($row = db_fetch_array($res)) {
       $insert .=  "'".$row["e_url"]."'";
    $insert .=  ");\n";
    $insert = preg_replace("/,,/", ",NULL ,", $insert);
-   $insert = preg_replace("/,,/", ",NULL ,", $insert);
+   $insert = preg_replace("/,,/", ",NULL ,", (string) $insert);
 }
 
 	# export element vars
 	$sql = "SELECT * FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2";
-	$v = array($_REQUEST["gui"],$_REQUEST["element"]);
-	$t = array('s','s');
+	$v = [$_REQUEST["gui"], $_REQUEST["element"]];
+	$t = ['s', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	$cnt_res = 0;
 	while ($row = db_fetch_array($res)){
@@ -120,7 +120,7 @@ if($row = db_fetch_array($res)) {
    #------------------
 
    echo "<textarea rows=30 cols=100>";
-    echo preg_replace("/, ,/", ",NULL ,", $insert);
+    echo preg_replace("/, ,/", ",NULL ,", (string) $insert);
    echo "</textarea>";
 
 ?>

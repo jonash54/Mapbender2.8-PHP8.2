@@ -29,25 +29,25 @@ class ExternalGraphic
 	 * The onlineresource element from the xml-scheme.
 	 * @var string
 	 */
-	var $onlineresource = "";
+	public $onlineresource = "";
 	
 	/**
 	 * The format element from the xml-scheme.
 	 * @var string
 	 */
-	var $format = "";
+	public $format = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -82,7 +82,7 @@ class ExternalGraphic
 		$temp .= $offset."  <td>\n";
 		$temp .= $offset."   ExternalGraphic<br>\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", (string) $id);
 		$number = $number[count($number)-1];
 		$temp .= $offset."   <a class='edit' href=\"sld_function_handler.php?function=deleteexternalgraphicormark&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";
 		

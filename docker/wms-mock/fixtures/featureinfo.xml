@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FeatureInfo>
+  <Feature id="mock-1">
+    <attribute name="name">Test Feature</attribute>
+    <attribute name="value">42</attribute>
+  </Feature>
+</FeatureInfo>

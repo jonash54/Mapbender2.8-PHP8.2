@@ -39,12 +39,12 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_php.php';
 //generate array
-$projections = explode(',',$projections);
-$projectionsValue =  array();
-$projectionsName = array();
+$projections = explode(',',(string) $projections);
+$projectionsValue =  [];
+$projectionsName = [];
 for ($i=0; $i < count($projections); $i++){
 	$projectionList = explode(';',$projections[$i]);
 	if (count($projectionList) > 1) {

@@ -19,18 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__) . "/../../conf/mapbender.conf");
+require(__DIR__ . "/../../conf/mapbender.conf");
 
-require_once(dirname(__FILE__) . "/../../http/classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../../http/classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../../http/classes/class_mb_exception.php");
-require_once(dirname(__FILE__) . "/./classes/class_QueryHandler.php");
-require_once(dirname(__FILE__) . "/../../http/classes/class_ogr.php");
-$urlsToExclude = array();
+require_once(__DIR__ . "/../../http/classes/class_administration.php");
+require_once(__DIR__ . "/../../http/classes/class_connector.php");
+require_once(__DIR__ . "/../../http/classes/class_mb_exception.php");
+require_once(__DIR__ . "/./classes/class_QueryHandler.php");
+require_once(__DIR__ . "/../../http/classes/class_ogr.php");
+$urlsToExclude = [];
 $postData = false;
-if (is_file(dirname(__FILE__) . "/../../conf/excludeproxyurls.conf"))
+if (is_file(__DIR__ . "/../../conf/excludeproxyurls.conf"))
 {
-    require_once(dirname(__FILE__) . "/../../conf/excludeproxyurls.conf");
+    require_once(__DIR__ . "/../../conf/excludeproxyurls.conf");
 }
 //
 
@@ -39,7 +39,7 @@ $con = db_connect(DBSERVER, OWNER, PW);
 db_select_db(DB, $con);
 
 /* * *** conf **** */
-$imageformats = array("image/png", "image/gif", "image/jpeg", "image/jpg");
+$imageformats = ["image/png", "image/gif", "image/jpeg", "image/jpg"];
 $width = 400;
 $height = 400;
 /* * *** conf **** */
@@ -57,21 +57,21 @@ if (isset($postData) && $postData !== '') {
 $query = new QueryHandler($postData, $_REQUEST, $_SERVER['REQUEST_METHOD']);
 
 // an array with keys and values toLowerCase -> caseinsensitiv
-$reqParams = $query->getRequestParams($reqParams);
+$reqParams = $query->getRequestParams();
 //$e = new mb_exception(json_encode($reqParams));
 if ($reqParams['service'] == 'WFS') {
 	//switch for different parameter name - typename for wfs < 2.0 typenames for wfs >= 2.0
 	//$typeNameParameter = "typename"; //lowercase
 	switch ($reqParams['version']) {
 		case "2.0.0":
-			if (strtolower($reqParams['request']) == 'describefeaturetype') {
+			if (strtolower((string) $reqParams['request']) == 'describefeaturetype') {
 			    $typeNameParameter = "typename";
                         } else {
 			    $typeNameParameter = "typenames";
 			}
 			break;
 		case "2.0.2":
-			if (strtolower($reqParams['request']) == 'describefeaturetype') {
+			if (strtolower((string) $reqParams['request']) == 'describefeaturetype') {
 			    $typeNameParameter = "typename";
                         } else {
 			    $typeNameParameter = "typenames";
@@ -88,7 +88,7 @@ if ($reqParams['service'] == 'WFS') {
         	$testMatch = $reqParams[$typeNameParameter];
         	//simple pattern - without blanks!
        	 	$pattern = '/^[0-9a-zA-Z\.\-_:,]*$/';  
-        	if (!preg_match($pattern,$testMatch)){
+        	if (!preg_match($pattern,(string) $testMatch)){
              		//echo 'userId: <b>'.$testMatch.'</b> is not valid.<br/>';
                 	echo 'Parameter <b>'.$typeNameParameter.'</b> is not valid.<br/>';
                 	die();
@@ -106,7 +106,7 @@ $sid = $_REQUEST['sid'];
 $serviceId =  $_REQUEST['wms'];
 
 if (defined("OWSPROXY_SESSION_GRABBING_WHITELIST")) {
-    $whiteListArray = explode(",", OWSPROXY_SESSION_GRABBING_WHITELIST);
+    $whiteListArray = explode(",", (string) OWSPROXY_SESSION_GRABBING_WHITELIST);
     if (in_array($_SERVER["REMOTE_ADDR"], $whiteListArray)) {
         $grabbingAllowed = true;
         $e = new mb_notice("Grabbing allowed for IP: " . $_SERVER["REMOTE_ADDR"]);
@@ -207,7 +207,7 @@ if (getUserFromSession() == false || getUserFromSession() <= 0) {
         //kill actual session  
         $e = new mb_notice("delete temporary session file: " . $tmpSession);
         Mapbender::session()->storageDestroy($tmpSession);
-        throwE(array("Permission denied", " - no current session found and ", "public user not allowed to access ressource!"));
+        throwE(["Permission denied", " - no current session found and ", "public user not allowed to access ressource!"]);
         unset($tmpSession);
         die();
     }
@@ -226,7 +226,7 @@ $n = new administration;
 //Extra security - IP check 
 if (defined("OWSPROXY_BIND_IP") && OWSPROXY_BIND_IP == true) {
     if (Mapbender::session()->get('mb_user_ip') != $_SERVER['REMOTE_ADDR']) {
-        throwE(array("Session not identified.", "Permission denied.", "Please authenticate."));
+        throwE(["Session not identified.", "Permission denied.", "Please authenticate."]);
         die();
     }
 }
@@ -245,7 +245,7 @@ if (count($_REQUEST) > 0) {
     }
 }
 //check for kind of service
-switch (strtolower($reqParams['service'])) {
+switch (strtolower((string) $reqParams['service'])) {
 	case 'wms':
 		$wmsId = $n->getWmsIdFromOwsproxyString($query->getOwsproxyServiceId());
 		$owsproxyString = $query->getOwsproxyServiceId();
@@ -278,9 +278,9 @@ $userId = $_SESSION['mb_user_id'];
 
 /* ************ main workflow *********** */
 
-switch (strtolower($reqParams['request'])) {
+switch (strtolower((string) $reqParams['request'])) {
     case 'getcapabilities':
-	switch (strtolower($reqParams['service'])) {
+	switch (strtolower((string) $reqParams['service'])) {
 		case 'wfs':
 			$arrayOnlineresources = checkWfsPermission($query->getOwsproxyServiceId(), false, $userId);
         		$query->setOnlineResource($arrayOnlineresources['wfs_getcapabilities']);
@@ -301,7 +301,7 @@ switch (strtolower($reqParams['request'])) {
         		$query->setOnlineResource($arrayOnlineresources['wms_getcapabilities']);
         		$request = $query->getRequest();
         		if (isset($auth)) {
-            			getCapabilities($request, $auth);
+            			getCapabilities($request);
         		} else {
             			getCapabilities($request);
         		}
@@ -375,7 +375,7 @@ switch (strtolower($reqParams['request'])) {
             throwE("Permission denied");
             die();
         }
-        $query->setParam("layers", urldecode($layers)); //the decoding of layernames dont make problems - but not really good names will be requested also ;-)
+        $query->setParam("layers", urldecode((string) $layers)); //the decoding of layernames dont make problems - but not really good names will be requested also ;-)
         //Following is only needed for high quality print and is vendor specific for mapservers mapfiles!
         if (defined("OWSPROXY_SUPPORT_HQ_PRINTING") && OWSPROXY_SUPPORT_HQ_PRINTING) {
             //if url has integrated mapfile - exchange it
@@ -451,7 +451,7 @@ switch (strtolower($reqParams['request'])) {
             throwE("Permission denied");
             die();
         }
-        $query->setParam("layers", urldecode($layers));
+        $query->setParam("layers", urldecode((string) $layers));
         $request = $query->getRequest();
         if (isset($auth)) {
             getImage(false, $url, $auth);
@@ -480,7 +480,7 @@ switch (strtolower($reqParams['request'])) {
 	        	$storedQueryId = $reqParams['storedquery_id'];
 	        	$arrayOnlineresources = checkWfsStoredQueryPermission($owsproxyString, $storedQueryId, $userId);
 		} else {
-			$arrayFeatures = array($reqParams[$typeNameParameter]);
+			$arrayFeatures = [$reqParams[$typeNameParameter]];
 	        	$arrayOnlineresources = checkWfsPermission($owsproxyString, $arrayFeatures, $userId);
 		}
 		$query->setOnlineResource($arrayOnlineresources['wfs_getfeature']);
@@ -511,7 +511,7 @@ switch (strtolower($reqParams['request'])) {
 	    }
         break;
     case 'describefeaturetype':
-        $arrayFeatures = array($reqParams[$typeNameParameter]);
+        $arrayFeatures = [$reqParams[$typeNameParameter]];
         $arrayOnlineresources = checkWfsPermission($query->getOwsproxyServiceId(), $arrayFeatures, $userId);
         $query->setOnlineResource($arrayOnlineresources['wfs_describefeaturetype']);
         $request = $query->getRequest();
@@ -591,7 +591,7 @@ switch (strtolower($reqParams['request'])) {
         }
         break;
     default:
-		throwText(array("Request parameter not known to mapbender security proxy!"));
+		throwText(["Request parameter not known to mapbender security proxy!"]);
 		break;
 }
 
@@ -624,7 +624,7 @@ function throwImage($e)
     if (count($e) > 1) {
         for ($i = 0; $i < count($e); $i++) {
             $imageString = $e[$i];
-            ImageString($image, 3, 5, $i * 20, $imageString, $text_color);
+            ImageString($image, 3, 5, $i * 20, (string) $imageString, $text_color);
         }
     } else {
         if (is_array($e)) {
@@ -635,7 +635,7 @@ function throwImage($e)
         if ($imageString == "") {
             $imageString = "An unknown error occured!";
         }
-        ImageString($image, 3, 5, $i * 20, $imageString, $text_color);
+        ImageString($image, 3, 5, $i * 20, (string) $imageString, $text_color);
     }
     responseImage($image);
 }
@@ -685,7 +685,7 @@ function completeURL($url)
         if ($i > 0) {
             $url .= "&";
         }
-        $url .= $mykeys[$i] . "=" . urlencode($reqParams[$mykeys[$i]]);
+        $url .= $mykeys[$i] . "=" . urlencode((string) $reqParams[$mykeys[$i]]);
     }
     return $url;
 }
@@ -706,7 +706,7 @@ function getImage($log_id, $or, $auth = false, $mask = false)
         $header = "Content-Type: image/png";
     } else {
         //$e = new mb_exception("owsproxy/http/index.php: found in formatlist ");
-        $header = "Content-Type: ". stripslashes($reqParams['format']);
+        $header = "Content-Type: ". stripslashes((string) $reqParams['format']);
     }
     //$e = new mb_exception("owsproxy/http/index.php: header: " .$header);
     //log the image_requests to database
@@ -796,15 +796,15 @@ function sendToHost($host, $port, $method, $path, $data)
     $buf = '';
     if (empty($method))
         $method = 'POST';
-    $method = mb_strtoupper($method);
+    $method = mb_strtoupper((string) $method);
     $fp = fsockopen($host, $port);
     fputs($fp, "$method $path HTTP/1.1\r\n");
     fputs($fp, "Host: $host\r\n");
     fputs($fp, "Content-type: application/xml\r\n");
-    fputs($fp, "Content-length: " . strlen($data) . "\r\n");
+    fputs($fp, "Content-length: " . strlen((string) $data) . "\r\n");
     fputs($fp, "Connection: close\r\n\r\n");
     if ($method == 'POST')
-        fputs($fp, $data);
+        fputs($fp, (string) $data);
     while (!feof($fp)) $buf .= fgets($fp, 4096);
     fclose($fp);
     return $buf;
@@ -822,13 +822,13 @@ function getWfsFeaturesFromTransaction($data)
     if (!$data || $data == "") {
         return false;
     }
-    $features = array();
+    $features = [];
     $values = NULL;
     $tags = NULL;
     $parser = xml_parser_create();
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-    xml_parse_into_struct($parser, $data, $values, $tags);
+    xml_parse_into_struct($parser, (string) $data, $values, $tags);
 
     $code = xml_get_error_code($parser);
     if ($code) {
@@ -843,22 +843,22 @@ function getWfsFeaturesFromTransaction($data)
     $insertlevel = 0;
     foreach ($values as $element) {
         //features touched by insert
-        if (strtoupper($element['tag']) == "WFS:INSERT" && $element['type'] == "open") {
+        if (strtoupper((string) $element['tag']) == "WFS:INSERT" && $element['type'] == "open") {
             $insert = true;
-            $insertlevel = $element[level];
+            $insertlevel = $element["LEVEL"];
         }
-        if ($insert && $element[level] == $insertlevel + 1 && $element['type'] == "open") {
+        if ($insert && $element["LEVEL"] == $insertlevel + 1 && $element['type'] == "open") {
             array_push($features, $element['tag']);
         }
-        if (strtoupper($element['tag']) == "WFS:INSERT" && $element['type'] == "close") {
+        if (strtoupper((string) $element['tag']) == "WFS:INSERT" && $element['type'] == "close") {
             $insert = false;
         }
         //updated features - TODO - fix for wfs 2.0+ - typenames instead of typename!
-        if (strtoupper($element['tag']) == "WFS:UPDATE" && $element['type'] == "open") {
+        if (strtoupper((string) $element['tag']) == "WFS:UPDATE" && $element['type'] == "open") {
             array_push($features, $element['attributes']["typeName"]);
         }
         //deleted features
-        if (strtoupper($element['tag']) == "WFS:DELETE" && $element['type'] == "open") {
+        if (strtoupper((string) $element['tag']) == "WFS:DELETE" && $element['type'] == "open") {
 
             array_push($features, $element['attributes']["typeName"]);
         }
@@ -874,7 +874,7 @@ function getWfsFeaturesFromTransaction($data)
  */
 function doTransaction($url, $data)
 {
-    $arURL = parse_url($url);
+    $arURL = parse_url((string) $url);
     $host = $arURL["host"];
     $port = $arURL["port"];
     if ($port == '')
@@ -885,7 +885,7 @@ function doTransaction($url, $data)
     $result = sendToHost($host, $port, $method, html_entity_decode($path), $data);
 
     //delete header from result
-    $result = mb_eregi_replace("^[^<]*", "", $result);
+    $result = mb_eregi_replace("^[^<]*", "", (string) $result);
     $result = mb_eregi_replace("[^>]*$", "", $result);
 
     echo $result;
@@ -900,13 +900,13 @@ function matchUrls($content)
 	$owsproxyUrls = Mapbender::session()->get('owsproxyUrls');
 	if ($owsproxyUrls == false) {
 		$e = new mb_notice("owsproxyUrls does not exist - create it!");
-		$owsproxyUrls = array();
-		$owsproxyUrls['id'] = array();
-		$owsproxyUrls['url'] = array();
+		$owsproxyUrls = [];
+		$owsproxyUrls['id'] = [];
+		$owsproxyUrls['url'] = [];
 		Mapbender::session()->set('owsproxyUrls',$owsproxyUrls);
 	}
 	$pattern = "/[\"|\'](https*:\/\/[^\"|^\']*)[\"|\']/";
-	preg_match_all ( $pattern, $content, $matches );
+	preg_match_all ( $pattern, (string) $content, $matches );
 	for($i = 0; $i < count ( $matches [1] ); $i ++) {
 		$req = $matches [1] [$i];
 		$notice = new mb_notice ( "owsproxy found URL " . $i . ": " . $req );
@@ -917,16 +917,16 @@ function matchUrls($content)
 		// Generaly urls should not be exchanged. It must be controlled, if it directly come from the same server as the fi request. Those urls have always to be exchanged!
 		if ($exchangeUrlsWmsFi === "0") {
 			// get servername for featureinfo request
-			$url_array = parse_url ( $featureInfoUrl );
+			$url_array = parse_url ( (string) $featureInfoUrl );
 			$servername = $url_array ['scheme'] . "://" . $url_array ['host'];
 			// test if url came from same server - if not use original urls!
 			// switch for localhost/127.0.0.1 - they are the same!
 			if ($url_array ['host'] == 'localhost' || $url_array ['host'] == '127.0.0.1') {
-				if (strpos ( $req, $url_array ['scheme'] . "://" . "localhost" ) !== 0 && strpos ( $req, $url_array ['scheme'] . "://" . "127.0.0.1" ) !== 0) {
+				if (!str_starts_with($req, $url_array ['scheme'] . "://" . "localhost") && !str_starts_with($req, $url_array ['scheme'] . "://" . "127.0.0.1")) {
 					continue;
 				}
 			} else {
-				if (strpos ( $req, $servername ) !== 0) {
+				if (!str_starts_with($req, $servername)) {
 					continue;
 				}
 			}
@@ -958,7 +958,7 @@ function getExternalRequest($id)
             		if ($query_string != '') {
                 		$cUrl .= getConjunctionCharacter($cUrl) . $query_string;
             		}
-            		$metainfo = get_headers($cUrl, 1);
+            		$metainfo = get_headers($cUrl, true);
             		// just for the stupid InternetExplorer
             		header('Pragma: private');
             		header('Cache-control: private, must-revalidate');
@@ -974,22 +974,22 @@ function getExternalRequest($id)
 
 function removeOWSGetParams($query_string)
 {
-    $r = preg_replace("/.*request=external&/", "", $query_string);
+    $r = preg_replace("/.*request=external&/", "", (string) $query_string);
     return "";
 }
 
 function getConjunctionCharacter($url)
 {
-    if (strpos($url, "?")) {
-        if (strpos($url, "?") == strlen($url)) {
+    if (strpos((string) $url, "?")) {
+        if (strpos((string) $url, "?") == strlen((string) $url)) {
             $cchar = "";
-        } else if (strpos($url, "&") == strlen($url)) {
+        } else if (strpos((string) $url, "&") == strlen((string) $url)) {
             $cchar = "";
         } else {
             $cchar = "&";
         }
     }
-    if (strpos($url, "?") === false) {
+    if (!str_contains((string) $url, "?")) {
         $cchar = "?";
     }
     return $cchar;
@@ -1001,7 +1001,7 @@ function registerUrl($url)
 	//
 	$owsproxyUrls = Mapbender::session()->get('owsproxyUrls');
     	if (!in_array($url, $owsproxyUrls["url"])) {
-        	$id = md5($url);
+        	$id = md5((string) $url);
         	array_push($owsproxyUrls["url"], $url);
         	array_push($owsproxyUrls["id"], $id);
     	} else {
@@ -1019,8 +1019,7 @@ function getCapabilities($url)
 {
     global $arrayOnlineresources;
     global $sid, $serviceId;
-    $t = array(htmlentities($arrayOnlineresources["wms_getcapabilities"]), htmlentities($arrayOnlineresources["wms_getmap"]),
-        htmlentities($arrayOnlineresources["wms_getfeatureinfo"]));
+    $t = [htmlentities((string) $arrayOnlineresources["wms_getcapabilities"]), htmlentities((string) $arrayOnlineresources["wms_getmap"]), htmlentities((string) $arrayOnlineresources["wms_getfeatureinfo"])];
     $new = OWSPROXY . "/" . $sid . "/" . $serviceId . "?";
     $r = str_replace($t, $new, $arrayOnlineresources["wms_getcapabilities_doc"]);
     //delete trailing amp; 's
@@ -1033,8 +1032,7 @@ function getWfsCapabilities($request, $auth = false)
 {
     global $arrayOnlineresources, $postData, $query;
     global $sid, $serviceId;
-    $t = array(htmlentities($arrayOnlineresources["wfs_getcapabilities"]), htmlentities($arrayOnlineresources["wfs_getmap"]),
-        htmlentities($arrayOnlineresources["wfs_getfeatureinfo"]));
+    $t = [htmlentities((string) $arrayOnlineresources["wfs_getcapabilities"]), htmlentities((string) $arrayOnlineresources["wfs_getmap"]), htmlentities((string) $arrayOnlineresources["wfs_getfeatureinfo"])];
     $new = OWSPROXY . "/" . $sid . "/" . $serviceId . "?";
 	
     if ($postData == false) {
@@ -1091,15 +1089,15 @@ function getLegendUrl($wms)
     global $reqParams;
     //get wms id
     $sql = "SELECT * FROM wms WHERE wms_owsproxy = $1";
-    $v = array($wms);
-    $t = array("s");
+    $v = [$wms];
+    $t = ["s"];
     $res = db_prep_query($sql, $v, $t);
     if ($row = db_fetch_array($res)) {
         $wmsid = $row["wms_id"];
         $getLegendUrl = $row["wms_getlegendurl"];
 	//$e = new mb_exception("found : ".$getLegendUrl); //empty
     } else {
-        throwE(array("No wms data available."));
+        throwE(["No wms data available."]);
         die();
     }
     //get the url
@@ -1114,16 +1112,16 @@ function getLegendUrl($wms)
         $style = $reqParams['style'];
     }
     //$v = array($wmsid, $reqParams['layer'], $reqParams['style'], $reqParams['format']);
-    $v = array($wmsid, $reqParams['layer'], $style, $reqParams['format']);
-    $t = array("i", "s", "s", "s");
+    $v = [$wmsid, $reqParams['layer'], $style, $reqParams['format']];
+    $t = ["i", "s", "s", "s"];
     $res = db_prep_query($sql, $v, $t);
     if ($row = db_fetch_array($res)) {
-        if (strpos($row["legendurl"], 'http') !== 0) {
+        if (!str_starts_with((string) $row["legendurl"], 'http')) {
             return $getLegendUrl . $row["legendurl"];
         }
         return $row["legendurl"];
     } else {
-        throwE(array("No legend available."));
+        throwE(["No legend available."]);
         die();
     }
 }
@@ -1140,10 +1138,10 @@ function checkWmsPermission($wmsOws, $userId)
     $myguis = $n->getGuisByPermission($userId, true);
     $mywms = $n->getWmsByOwnGuis($myguis);
     $sql = "SELECT * FROM wms WHERE wms_owsproxy = $1";
-    $v = array($wmsOws);
-    $t = array("s");
+    $v = [$wmsOws];
+    $t = ["s"];
     $res = db_prep_query($sql, $v, $t);
-    $service = array();
+    $service = [];
     if ($row = db_fetch_array($res)) {
         $service["wms_id"] = $row["wms_id"];
         $service["wms_getcapabilities"] = $row["wms_getcapabilities"];
@@ -1154,12 +1152,12 @@ function checkWmsPermission($wmsOws, $userId)
     }
 
     if (!$row || count($mywms) == 0) {
-        throwE(array("No wms data available."));
+        throwE(["No wms data available."]);
         die();
     }
 
     if (!in_array($service["wms_id"], $mywms)) {
-        throwE(array("Permission denied.", " -> " . $service["wms_id"], implode(",", $mywms)));
+        throwE(["Permission denied.", " -> " . $service["wms_id"], implode(",", $mywms)]);
         die();
     }
     return $service;
@@ -1180,17 +1178,17 @@ function checkWfsPermission($wfsOws, $features, $userId)
     if ($features !== false) {
 	//check if we know the features requested
 	if (count($features) == 0) {
-	        throwE(array("No wfs_feature data available."));
+	        throwE(["No wfs_feature data available."]);
         	die();
     	}	
     }
 
     //get wfs
     $sql = "SELECT * FROM wfs WHERE wfs_owsproxy = $1";
-    $v = array($wfsOws);
-    $t = array("s");
+    $v = [$wfsOws];
+    $t = ["s"];
     $res = db_prep_query($sql, $v, $t);
-    $service = array();
+    $service = [];
     if ($row = db_fetch_array($res)) {
         $service["wfs_id"] = $row["wfs_id"];
         $service["wfs_getcapabilities"] = $row["wfs_getcapabilities"];
@@ -1199,7 +1197,7 @@ function checkWfsPermission($wfsOws, $features, $userId)
         $service["wfs_transaction"] = $row["wfs_transaction"];
         $service["wfs_getcapabilities_doc"] = $row["wfs_getcapabilities_doc"];
     } else {
-        throwE(array("No wfs data available."));
+        throwE(["No wfs data available."]);
         die();
     }
 
@@ -1210,12 +1208,12 @@ function checkWfsPermission($wfsOws, $features, $userId)
         $sql.= "ON wfs_featuretype.featuretype_id = wfs_conf.fkey_featuretype_id ";
         $sql.= "WHERE wfs_featuretype.featuretype_name = $2 ";
         $sql.= "AND wfs_featuretype.fkey_wfs_id = $1";
-        $v = array($service["wfs_id"], $feature);
-        $t = array("i", "s");
+        $v = [$service["wfs_id"], $feature];
+        $t = ["i", "s"];
         $res = db_prep_query($sql, $v, $t);
         if (!($row = db_fetch_array($res))) {
             $notice = new mb_exception("Permissioncheck failed no wfs conf for wfs " . $service["wfs_id"] . " with featuretype " . $feature);
-            throwE(array("No wfs_conf data for featuretype " . $feature));
+            throwE(["No wfs_conf data for featuretype " . $feature]);
             die();
         }
         $conf_id = $row["wfs_conf_id"];
@@ -1223,7 +1221,7 @@ function checkWfsPermission($wfsOws, $features, $userId)
         //check permission
         if (!in_array($conf_id, $myconfs)) {
             $notice = new mb_exception("Permissioncheck failed:" . $conf_id . " not in " . implode(",", $myconfs));
-            throwE(array("Permission denied.", " -> " . $conf_id, implode(",", $myconfs)));
+            throwE(["Permission denied.", " -> " . $conf_id, implode(",", $myconfs)]);
             die();
         }
     }
@@ -1244,15 +1242,15 @@ function checkWfsStoredQueryPermission($wfsOws, $storedQueryId, $userId)
     global $con, $n;
     $myconfs = $n->getWfsConfByPermission($userId);
     if ($storedQueryId === false) {
-	throwE(array("No storedquery_id data available."));
+	throwE(["No storedquery_id data available."]);
         die();
     }
     //get wfs
     $sql = "SELECT * FROM wfs WHERE wfs_owsproxy = $1";
-    $v = array($wfsOws);
-    $t = array("s");
+    $v = [$wfsOws];
+    $t = ["s"];
     $res = db_prep_query($sql, $v, $t);
-    $service = array();
+    $service = [];
     if ($row = db_fetch_array($res)) {
         $service["wfs_id"] = $row["wfs_id"];
         $service["wfs_getcapabilities"] = $row["wfs_getcapabilities"];
@@ -1261,24 +1259,24 @@ function checkWfsStoredQueryPermission($wfsOws, $storedQueryId, $userId)
         $service["wfs_transaction"] = $row["wfs_transaction"];
         $service["wfs_getcapabilities_doc"] = $row["wfs_getcapabilities_doc"];
     } else {
-        throwE(array("No wfs data available."));
+        throwE(["No wfs data available."]);
         die();
     }
     //get appropriate wfs_conf
     $sql = "SELECT wfs_conf.wfs_conf_id FROM wfs_conf WHERE fkey_wfs_id = $1 AND stored_query_id = $2";
-    $v = array($service["wfs_id"], $storedQueryId);
-    $t = array("i", "s");
+    $v = [$service["wfs_id"], $storedQueryId];
+    $t = ["i", "s"];
     $res = db_prep_query($sql, $v, $t);
     if (!($row = db_fetch_array($res))) {
     	$notice = new mb_exception("Permissioncheck failed no wfs conf for wfs " . $service["wfs_id"] . " with storedquery_id " . $storedQueryId);
-	throwE(array("No wfs_conf data for storedquery_id " . $storedQueryId));
+	throwE(["No wfs_conf data for storedquery_id " . $storedQueryId]);
 	die();
     }
     $conf_id = $row["wfs_conf_id"];
     //check permission
     if (!in_array($conf_id, $myconfs)) {
         $notice = new mb_exception("Permissioncheck failed:" . $conf_id . " not in " . implode(",", $myconfs));
-        throwE(array("Permission denied.", " -> " . $conf_id, implode(",", $myconfs)));
+        throwE(["Permission denied.", " -> " . $conf_id, implode(",", $myconfs)]);
         die();
     }
     return $service;
@@ -1287,13 +1285,13 @@ function checkWfsStoredQueryPermission($wfsOws, $storedQueryId, $userId)
 function getWfsOperationUrl($wfsOws, $operationName, $operationMethod) {
 	$timeBegin = microtime();
 	$sql = "SELECT wfs_getcapabilities_doc FROM wfs WHERE  wfs_owsproxy = $1";
-	$v = array($wfsOws);
-    	$t = array("s");
+	$v = [$wfsOws];
+    	$t = ["s"];
     	$res = db_prep_query($sql, $v, $t);
     	if ($row = db_fetch_array($res)) {
         	$capXml = $row["wfs_getcapabilities_doc"];
     	} else {
-        	throwE(array("No wfs data available."));
+        	throwE(["No wfs data available."]);
         	die();
     	}
 	//parse capabilities
@@ -1335,7 +1333,7 @@ function getWfsOperationUrl($wfsOws, $operationName, $operationMethod) {
 
 function DOMNodeListObjectValuesToArray($domNodeList) {
 	$iterator = 0;
-	$array = array();
+	$array = [];
 	foreach ($domNodeList as $item) {
     		$array[$iterator] = $item->nodeValue; // this is a DOMNode instance
     		// you might want to have the textContent of them like this
@@ -1348,8 +1346,8 @@ function DOMNodeListObjectValuesToArray($domNodeList) {
 function checkLayerPermission($wms_id, $l, $userId)
 {
     global $n, $owsproxyService;
-    $myl = explode(",", $l);
-    $r = array();
+    $myl = explode(",", (string) $l);
+    $r = [];
     foreach ($myl as $mysl) {
         if ($n->getLayerPermission($wms_id, $mysl, $userId) === true) {
             array_push($r, $mysl);
@@ -1366,7 +1364,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
     $startTime = microtime();
     if ($postData == false) {
         $d = new connector();
-        if (strtoupper($reqParams["resulttype"]) == "HITS") {
+        if (strtoupper((string) $reqParams["resulttype"]) == "HITS") {
             $d->set("timeOut", "200");
         }
         if ($header !== false) {
@@ -1379,9 +1377,9 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                 $d->load($url, $auth);
             } else {
                 #$d = new connector($url);
-                
+
                 $d->load($url);
-                
+
             }
 	    } else {
 	        #$d = new connector();
@@ -1396,7 +1394,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                 $d->load($url);
             }
 	    }
-	    
+
 	    $content = $d->file;
 	    $httpCode = $d->httpCode;
 	    //$e = new mb_exception("owsproxy/http/index.php: content: " . $content);
@@ -1417,9 +1415,9 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
     }
     $endTime = microtime();
     //$e = new mb_exception("owsproxy/http/index.php: Time for getting remote resource: ".(string)($endTime - $startTime));
-    if (strtoupper($reqParams["request"]) == "GETMAP") { // getmap
+    if (strtoupper((string) $reqParams["request"]) == "GETMAP") { // getmap
         $pattern_exc = '~EXCEPTION~i';
-        preg_match($pattern_exc, $content, $exception);
+        preg_match($pattern_exc, (string) $content, $exception);
         if (!$content) {
             if ($log_id != null && is_integer($log_id)) {
                 $n->updateWmsLog(0, "Mb2OWSPROXY - unable to load: " . $url, "text/plain", $log_id);
@@ -1435,7 +1433,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
         } else {
             $source = new Imagick();
             //if tiff (geotiff) was requested - read header to temporary file to add it later on
-            if (in_array(strtoupper($reqParams["format"]), array("TIFF", "TIF", "IMAGE/TIF", "IMAGE/TIFF"))) {
+            if (in_array(strtoupper((string) $reqParams["format"]), ["TIFF", "TIF", "IMAGE/TIF", "IMAGE/TIFF"])) {
                 //$e = new mb_notice("tiff format requested");
                 //Added 2022-09-21 to allow secured access to masked geotiff images via wms
                 //write image to tmp folder
@@ -1447,7 +1445,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                     $tmpGeoTiffFilename = ABSOLUTE_TMPDIR . '/' .$uuidGeoTiff . '.tif';
                     $tmpGeoTiffHeaderFilename = ABSOLUTE_TMPDIR . '/' .$uuidGeoTiff . '_header.txt';
                     if ($h = fopen($tmpGeoTiffFilename, "wb")) {
-                        if (!fwrite($h, $content)) {
+                        if (!fwrite($h, (string) $content)) {
                             $e = new mb_exception("owsproxy/http/index.php: Could not write GeoTIFF cache to " . $tmpGeoTiffFilename);
                         } else {
                             exec('listgeo ' . $tmpGeoTiffFilename . ' > ' . $tmpGeoTiffHeaderFilename, $output);
@@ -1472,7 +1470,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
             	$n->updateWmsLog($numColors <= 1 ? -1 : 1, null, null, $log_id);
             }
             header("Content-Type: " . $reqParams['format']);
-            if (in_array(strtoupper($reqParams["format"]), array("TIFF", "TIF", "IMAGE/TIF", "IMAGE/TIFF"))) {
+            if (in_array(strtoupper((string) $reqParams["format"]), ["TIFF", "TIF", "IMAGE/TIF", "IMAGE/TIFF"])) {
                 //Added 2022-09-21 to allow secured access to masked geotiff images via wms
                 //write tif to tmp folder
                 //add header from above
@@ -1512,12 +1510,12 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
             }
         }
         return true;
-    } else if (strtoupper($reqParams["request"]) == "GETFEATUREINFO") { // getmap
+    } else if (strtoupper((string) $reqParams["request"]) == "GETFEATUREINFO") { // getmap
 //		header("Content-Type: ".$reqParams['info_format']);
 //		$content = matchUrls($content);
 //		echo $content;
         $pattern_exc = '~EXCEPTION~i';
-        preg_match($pattern_exc, $content, $exception);
+        preg_match($pattern_exc, (string) $content, $exception);
         if (!$content) {
             if ($log_id != null) {
                 $n->updateWmsFiLog("Mb2OWSPROXY - unable to load: " . $url, "text/plain", $log_id);
@@ -1539,12 +1537,12 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
             echo $content;
         }
         return true;
-    } elseif (strtoupper($reqParams["request"]) == "GETFEATURE") {
+    } elseif (strtoupper((string) $reqParams["request"]) == "GETFEATURE") {
         $startTime = microtime();
         //new 2023-10-11: exchange url of describefeaturetype operation in collection to allow parsing of the schema
         $proxyUrl = OWSPROXY . "/" . $sid . "/" . $owsproxyString;
         $describeFeaturetypeUrl = getWfsOperationUrl($owsproxyString, 'DescribeFeatureType', 'Get');
-        $content = str_replace(rtrim($describeFeaturetypeUrl, '?'), $proxyUrl, $content);
+        $content = str_replace(rtrim((string) $describeFeaturetypeUrl, '?'), $proxyUrl, $content);
         //parse featureCollection and get number of objects
         //only possible if features should be logged!
         if ($log_id !== false) {
@@ -1578,7 +1576,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                     $featureCollectionXml->registerXPathNamespace("xlink", "http://www.w3.org/1999/xlink");
                     $featureCollectionXml->registerXPathNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
                     $featureCollectionXml->registerXPathNamespace("default", "");
-                    preg_match('@version=(?P<version>\d\.\d\.\d)&@i', strtolower($url), $version);
+                    preg_match('@version=(?P<version>\d\.\d\.\d)&@i', strtolower((string) $url), $version);
                     if (!$reqParams['version']) {
                         $e = new mb_notice("owsproxy/http/index.php: No version for wfs request given in reqParams!");
                     }
@@ -1642,7 +1640,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                 } 
                 if ($log_id !== false) {
                     //test for exception and return error for transparency
-                    if (strpos($content, ":ExceptionReport") !== false){
+                    if (str_contains($content, ":ExceptionReport")){
                         header("Content-Type: application/xml"); //default to gml
                         echo $content;
                         die();
@@ -1652,9 +1650,9 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                         echo $content;
                         die();
                     }
-                    $numberOfObjects = $ogr->ogrCountFeatures($content, urldecode($reqParams['outputformat']), $reqParams[$typeParameterName], true);
+                    $numberOfObjects = $ogr->ogrCountFeatures($content, urldecode((string) $reqParams['outputformat']), $reqParams[$typeParameterName], true);
                     if ($numberOfObjects == false) {
-                        $n->updateWfsLog(0, 'Could not count objects for requested format: ' . urldecode($reqParams['outputformat']), '', 0, $log_id);
+                        $n->updateWfsLog(0, 'Could not count objects for requested format: ' . urldecode((string) $reqParams['outputformat']), '', 0, $log_id);
                         header("Content-Type: application/json");
                         echo '{"error": true, "message": "Objects should be counted, but requested format could not be parsed by proxy. Please use another format, e.g. GML, Shape or GeoJSON!"}';
                         die();
@@ -1673,7 +1671,7 @@ function getDocumentContent($log_id, $url, $header = false, $auth = false, $mask
                 } else {
                     header("Content-Type: application/xml"); //default to gml
                 }
-                
+
                 echo $content;
             }
         } else {
@@ -1741,7 +1739,7 @@ function delTotalFromQuery($paramName,$queryString) {
 			$str2exchange = "";
 	}
 	$queryStringNew = preg_replace('/\b'.$paramName.'\=[^&]*&?/',$str2exchange,$queryString); //TODO find empty get params
-	$queryStringNew = ltrim($queryStringNew,'&');
+	$queryStringNew = ltrim((string) $queryStringNew,'&');
 	$queryStringNew = rtrim($queryStringNew,'&');
 	return $queryStringNew;
 }

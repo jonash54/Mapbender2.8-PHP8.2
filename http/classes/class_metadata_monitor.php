@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class Metadata_load_count {
 
@@ -35,8 +35,8 @@ class Metadata_load_count {
 
 		//check if an entry exists for the current metadata id
 		$sql = "SELECT COUNT(metadata_id) AS i FROM mb_metadata WHERE metadata_id = $1";
-		$v = array($metadata_id);
-		$t = array('i');
+		$v = [$metadata_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if (intval($row["i"]) === 0) {
@@ -45,8 +45,8 @@ class Metadata_load_count {
 
 		//check if an entry exists for the current metadata id
 		$sql = "SELECT load_count FROM metadata_load_count WHERE fkey_metadata_id = $1";
-		$v = array($metadata_id);
-		$t = array('i');
+		$v = [$metadata_id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 
@@ -54,15 +54,15 @@ class Metadata_load_count {
 		if ($row) {
 			$currentCount = $row["load_count"];
 			$sql = "UPDATE metadata_load_count SET load_count = $1 WHERE fkey_metadata_id = $2";
-			$v = array(intval($currentCount + 1), $metadata_id);
-			$t = array('i', 'i');
+			$v = [intval($currentCount + 1), $metadata_id];
+			$t = ['i', 'i'];
 			$res = db_prep_query($sql, $v, $t);
 		}
 		//if no, insert a new row with current metadata id and load_count = 1
 		else {
 			$sql = "INSERT INTO metadata_load_count (fkey_metadata_id, load_count) VALUES ($1, 1)";
-			$v = array($metadata_id);
-			$t = array('i');
+			$v = [$metadata_id];
+			$t = ['i'];
 			$res = db_prep_query($sql, $v, $t);
 		}
 	}
@@ -75,14 +75,14 @@ class Metadata_load_count {
 		//check for existing entry in load count table, if not exist - insert zero value
 		$sql = "SELECT fkey_metadata_id FROM metadata_load_count WHERE fkey_metadata_id IN (".$metadataIdString.")";
 		$res = db_query($sql);
-		$existingMetadataIds = array();
+		$existingMetadataIds = [];
 		while($row = db_fetch_array($res)) {
 			array_push($existingMetadataIds, $row["fkey_metadata_id"]);
 		}
 		//check for existing metadata in mb_metadata table
 		$sql = "SELECT metadata_id FROM mb_metadata WHERE metadata_id IN (".$metadataIdString.")";
 		$res = db_query($sql);
-		$existingMetadataIdsInMetadata = array();
+		$existingMetadataIdsInMetadata = [];
 		while($row = db_fetch_array($res)) {
 			array_push($existingMetadataIdsInMetadata, $row["metadata_id"]);
 		}

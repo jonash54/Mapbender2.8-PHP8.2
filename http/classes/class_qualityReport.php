@@ -1,10 +1,10 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/class_iso19139.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__ . "/class_iso19139.php");
 
 class QualityReport {
-	var $metadataType;
-	var $inspireInteroperability;
+	public $metadataType;
+	public $inspireInteroperability;
 
 	public function __construct () {
 		$this->metadataType = 'dataset';
@@ -19,7 +19,7 @@ class QualityReport {
 		$regulations = $iso19139->inspireRegulations;
 		//load xml snippet from filesystem as template
 		$reportDomObject = new DOMDocument();
-		$reportDomObject->load(dirname(__FILE__) . "/../geoportal/metadata_templates/mb_dataqualityreport.xml");
+		$reportDomObject->load(__DIR__ . "/../geoportal/metadata_templates/mb_dataqualityreport.xml");
 		$xpathReport = new DOMXpath($reportDomObject);
 		//$reportNodeList = $xpathLicense->query('/mb:dataqualityreport/gmd:report');
 		$xpathReport->registerNamespace("mb", "http://www.mapbender.org/metadata/dataqualityreport");

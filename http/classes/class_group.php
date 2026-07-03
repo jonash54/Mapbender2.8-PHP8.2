@@ -17,40 +17,40 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_RPCEndpoint.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
-require_once(dirname(__FILE__)."/../../lib/spatial_security.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_RPCEndpoint.php");
+require_once(__DIR__."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_Uuid.php");
+require_once(__DIR__."/../../lib/spatial_security.php");
 /**
  * A Mapbender user as described in the table mb_group.
  */
-class Group implements RPCObject {
+class Group implements RPCObject, \Stringable {
 	/**
 	 * @var Integer The Group ID
 	 */
 	protected $id;
-	var $name;
-	var $owner = 0;
-	var $description ="";
-	var $title;
-	var $address;
-	var $postcode;
-	var $city;
-	var $stateorprovince;
-	var $country;
-	var $voicetelephone;
-	var $facsimiletelephone;
-	var $email;
-	var $logo_path;	
-	var $spatialSecurity;
-	var $homepage;
-	var $uuid;
-	var $timestamp;
-	var $admin_code;
-    var $ckanId;
-	var $searchable;
-	var $external_id;
+	public $name;
+	public $owner = 0;
+	public $description ="";
+	public $title;
+	public $address;
+	public $postcode;
+	public $city;
+	public $stateorprovince;
+	public $country;
+	public $voicetelephone;
+	public $facsimiletelephone;
+	public $email;
+	public $logo_path;	
+	public $spatialSecurity;
+	public $homepage;
+	public $uuid;
+	public $timestamp;
+	public $admin_code;
+    public $ckanId;
+	public $searchable;
+	public $external_id;
 
     	static $displayName = "Group";
     	static $internalName = "group";
@@ -63,7 +63,7 @@ class Group implements RPCObject {
 	public function __construct ($groupId) {
 		//check if id is uuid or integer
 		$uuid = new Uuid();
-		if ($uuid->isValid($groupId)) {
+		if ($uuid->isValid()) {
 			$this->uuid = $groupId;
 		} else {
 			if (!is_numeric($groupId)) {
@@ -84,7 +84,7 @@ class Group implements RPCObject {
 	/**
 	 * @return String the ID of this group
 	 */
-	public function __toString () {
+	public function __toString (): string {
 		return (string) $this->id;
 	}
 
@@ -96,28 +96,7 @@ class Group implements RPCObject {
      * @return Assoc Array containing the fields to send to the user
      */
 	public function getFields () {
-		return array(
-			"name" => $this->name,
-			"owner" => $this->owner,
-			"description" => $this->description,
-			"title" => $this->title,
-	        "address" => $this->address,
-	        "postcode" => $this->postcode,
-	        "city" => $this->city,
-	        "stateorprovince" => $this->stateorprovince,
-	        "country" => $this->country,
-	        "voicetelephone" => $this->voicetelephone,
-	        "facsimiletelephone" => $this->facsimiletelephone,
-	        "email" => $this->email,
-	       	"logo_path" => $this->logo_path,
-			"spatialSecurity" => $this->spatialSecurity,
-			"homepage" => $this->homepage,
-			"admin_code" => $this->admin_code,
-			"external_id" => $this->external_id,
-			"uuid" => $this->uuid,
-			"searchable" => $this->searchable
-			//"ckanId" => $this->ckanId
-		);
+		return ["name" => $this->name, "owner" => $this->owner, "description" => $this->description, "title" => $this->title, "address" => $this->address, "postcode" => $this->postcode, "city" => $this->city, "stateorprovince" => $this->stateorprovince, "country" => $this->country, "voicetelephone" => $this->voicetelephone, "facsimiletelephone" => $this->facsimiletelephone, "email" => $this->email, "logo_path" => $this->logo_path, "spatialSecurity" => $this->spatialSecurity, "homepage" => $this->homepage, "admin_code" => $this->admin_code, "external_id" => $this->external_id, "uuid" => $this->uuid, "searchable" => $this->searchable];
 	}
 	
 	public function create() {
@@ -128,8 +107,8 @@ class Group implements RPCObject {
 		db_begin();
 		$uuid = new Uuid();
 		$sql_group_create = "INSERT INTO mb_group (mb_group_name, uuid) VALUES ($1, $2)";
-		$v = array($this->name, $uuid);
-		$t = array("s","s");
+		$v = [$this->name, $uuid];
+		$t = ["s", "s"];
 		$insert_result = db_prep_query($sql_group_create, $v, $t);
 
 		if (!$insert_result) {
@@ -148,7 +127,7 @@ class Group implements RPCObject {
 			try {
 				db_rollback();
 			}
-			catch (Exception $E)	{
+			catch (Exception)	{
 				$newE = new Exception("Could not set inital values of new group");
 				throw $newE;
 				return false;
@@ -167,25 +146,25 @@ class Group implements RPCObject {
 	public function change($changes) {
         //FIXME: validate input
 
-		$this->name = isset($changes->name) ? $changes->name : $this->name;
-		$this->owner = isset($changes->owner) ? $changes->owner : $this->owner;
-		$this->description = isset($changes->description) ? $changes->description : $this->description;
-		$this->id = isset($changes->id) ? $changes->id : $this->id;
-     	$this->title = isset($changes->title) ? $changes->title : $this->title;
-		$this->address = isset($changes->address) ? $changes->address : $this->address;
-		$this->postcode = isset($changes->postcode) ? $changes->postcode : $this->postcode;
-		$this->city = isset($changes->city) ? $changes->city : $this->city;
-		$this->stateorprovince = isset($changes->stateorprovince) ? $changes->stateorprovince : $this->stateorprovince;
-		$this->country = isset($changes->country) ? $changes->country : $this->country;
-		$this->voicetelephone = isset($changes->voicetelephone) ? $changes->voicetelephone : $this->voicetelephone;
-		$this->facsimiletelephone = isset($changes->facsimiletelephone) ? $changes->facsimiletelephone : $this->facsimiletelephone;
-		$this->email = isset($changes->email) ? $changes->email : $this->email;
-		$this->logo_path = isset($changes->logo_path) ? $changes->logo_path : $this->logo_path;
-		$this->spatialSecurity = isset($changes->spatialSecurity) ? $changes->spatialSecurity : $this->spatialSecurity;
-		$this->homepage = isset($changes->homepage) ? $changes->homepage : $this->homepage;
-		$this->admin_code = isset($changes->admin_code) ? $changes->admin_code : $this->admin_code;
-		$this->external_id = isset($changes->external_id) ? $changes->external_id : $this->external_id;
-		$this->searchable = isset($changes->searchable) ? $changes->searchable : $this->searchable;
+		$this->name = $changes->name ?? $this->name;
+		$this->owner = $changes->owner ?? $this->owner;
+		$this->description = $changes->description ?? $this->description;
+		$this->id = $changes->id ?? $this->id;
+     	$this->title = $changes->title ?? $this->title;
+		$this->address = $changes->address ?? $this->address;
+		$this->postcode = $changes->postcode ?? $this->postcode;
+		$this->city = $changes->city ?? $this->city;
+		$this->stateorprovince = $changes->stateorprovince ?? $this->stateorprovince;
+		$this->country = $changes->country ?? $this->country;
+		$this->voicetelephone = $changes->voicetelephone ?? $this->voicetelephone;
+		$this->facsimiletelephone = $changes->facsimiletelephone ?? $this->facsimiletelephone;
+		$this->email = $changes->email ?? $this->email;
+		$this->logo_path = $changes->logo_path ?? $this->logo_path;
+		$this->spatialSecurity = $changes->spatialSecurity ?? $this->spatialSecurity;
+		$this->homepage = $changes->homepage ?? $this->homepage;
+		$this->admin_code = $changes->admin_code ?? $this->admin_code;
+		$this->external_id = $changes->external_id ?? $this->external_id;
+		$this->searchable = $changes->searchable ?? $this->searchable;
 		return true;
 	}
 
@@ -211,32 +190,9 @@ class Group implements RPCObject {
 			"searchable = $17 ".
 			"WHERE mb_group_id = $18 ";
 
-			$v = array(
-				$this->name,
-				$this->owner,
-				$this->description,
-				$this->title,
-				$this->address,
-				$this->postcode,
-				$this->city,
-				$this->stateorprovince,
-				$this->country,
-				$this->voicetelephone,
-				$this->facsimiletelephone,
-				$this->email,
-				$this->logo_path,
-				$this->homepage,
-				$this->admin_code,
-				$this->external_id,
-				$this->searchable,
-				$this->id
-			);
+			$v = [$this->name, $this->owner, $this->description, $this->title, $this->address, $this->postcode, $this->city, $this->stateorprovince, $this->country, $this->voicetelephone, $this->facsimiletelephone, $this->email, $this->logo_path, $this->homepage, $this->admin_code, $this->external_id, $this->searchable, $this->id];
 
-			$t = array(
-				"s", "i", "s", "s", "s",
-				"i", "s", "s", "s", "s", 
-				"s", "s", "s", "s", "s", "s", "b", "i"
-			);
+			$t = ["s", "i", "s", "s", "s", "i", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "b", "i"];
 
 			$update_result = db_prep_query($sql_update,$v,$t);
 			if(!$update_result)	{
@@ -251,8 +207,8 @@ class Group implements RPCObject {
 
         //throw new Exception("I AM   : ". $this->id);
         $sql_group_remove = "DELETE FROM mb_group WHERE mb_group_id = $1";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$result = db_prep_query($sql_group_remove,$v,$t);
 		if($result == false)
 		{
@@ -263,8 +219,8 @@ class Group implements RPCObject {
 
 	public function exists() {
 		$sql_group = "SELECT group_id from mb_group WHERE mb_group_id = $1; ";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res_group = db_prep_query($sql_group,$v,$t);
 		if ($row = db_fetch_array($res_group)) {
 			return true;
@@ -277,12 +233,12 @@ class Group implements RPCObject {
 		if (isset($this->id) || isset($this->uuid)) {
 			if (isset($this->id) && is_numeric($this->id)) {
 				$sql_group = "SELECT * from mb_group WHERE mb_group_id = $1; ";
-				$v = array($this->id);
-				$t = array("i");
+				$v = [$this->id];
+				$t = ["i"];
 			} else {
 				$sql_group = "SELECT * from mb_group WHERE uuid = $1; ";
-				$v = array($this->uuid);
-				$t = array("s");
+				$v = [$this->uuid];
+				$t = ["s"];
 			}
 			$res_group = db_prep_query($sql_group,$v,$t);
 			if($row = db_fetch_array($res_group)){
@@ -323,104 +279,40 @@ class Group implements RPCObject {
     * @param outputFormat string "iso19139", "rdf", "ckan"
     */
     function export($outputFormat, $givenRole = false) {
-	$mappingHash = array(
-		//name
-		array(	groupAttribute => "name",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString",
-			deleteElementPath => false,
-			ckanName => "name"
-		),
-		//email
-		array(	groupAttribute => "email",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress",
-			ckanName => "department_email"
-		),
-		//deliveryPoint
-		array(	groupAttribute => "address",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint",
-			ckanName => "department_address"
-		),
-		//administrativeArea
-		array(	groupAttribute => "adminCode",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:administrativeArea/gmd:Country",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:administrativeArea",
-			ckanName => false
-		),
-		//postalCode
-		array(	groupAttribute => "postcode",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode",
-			ckanName => "department_postcode"
-		),
-		//country
-		array(	groupAttribute => "country",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country/gmd:Country",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country",
-			ckanName => false
-		),
-		//city
-		array(	groupAttribute => "city",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city",
-			ckanName => "department_city"
-		),
-		//voicetelephone
-		array(	groupAttribute => "voicetelephone",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice",
-			ckanName => false
-		),
-		//facsimiletelephone
-		array(	groupAttribute => "facsimiletelephone",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:facsimile",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:facsimile",
-			ckanName => false
-		),
-		//onlineResource
-		array(	groupAttribute => "homepage",
-			iso19139Path => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL",
-			deleteElementPath => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource",
-			ckanName => false
-		),
-		//created
-		array(	groupAttribute => "timestamp",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => "created"
-		),
-		//description
-		array(	groupAttribute => "description",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => "description"
-		),
-		//title
-		array(	groupAttribute => "title",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => array("title", "title_long")
-		),
-		//uuid
-		array(	groupAttribute => "uuid",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => false
-		),
-		//ckan uuid
-		array(	groupAttribute => "ckanId",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => "id"
-		),
-		//logo
-		array(	groupAttribute => "logo_path",
-			iso19139Path => false,
-			deleteElementPath => false,
-			ckanName => array("image_display_url", "image_url")
-		)
-	);
+	$mappingHash = [
+     //name
+     [\GROUPATTRIBUTE => "name", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString", \DELETEELEMENTPATH => false, \CKANNAME => "name"],
+     //email
+     [\GROUPATTRIBUTE => "email", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress", \CKANNAME => "department_email"],
+     //deliveryPoint
+     [\GROUPATTRIBUTE => "address", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint/gco:CharacterString", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:deliveryPoint", \CKANNAME => "department_address"],
+     //administrativeArea
+     [\GROUPATTRIBUTE => "adminCode", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:administrativeArea/gmd:Country", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:administrativeArea", \CKANNAME => false],
+     //postalCode
+     [\GROUPATTRIBUTE => "postcode", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode/gco:CharacterString", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:postalCode", \CKANNAME => "department_postcode"],
+     //country
+     [\GROUPATTRIBUTE => "country", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country/gmd:Country", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:country", \CKANNAME => false],
+     //city
+     [\GROUPATTRIBUTE => "city", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city/gco:CharacterString", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:city", \CKANNAME => "department_city"],
+     //voicetelephone
+     [\GROUPATTRIBUTE => "voicetelephone", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice", \CKANNAME => false],
+     //facsimiletelephone
+     [\GROUPATTRIBUTE => "facsimiletelephone", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:facsimile", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:facsimile", \CKANNAME => false],
+     //onlineResource
+     [\GROUPATTRIBUTE => "homepage", \ISO19139PATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL", \DELETEELEMENTPATH => "/mb:groupcontact/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource", \CKANNAME => false],
+     //created
+     [\GROUPATTRIBUTE => "timestamp", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => "created"],
+     //description
+     [\GROUPATTRIBUTE => "description", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => "description"],
+     //title
+     [\GROUPATTRIBUTE => "title", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => ["title", "title_long"]],
+     //uuid
+     [\GROUPATTRIBUTE => "uuid", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => false],
+     //ckan uuid
+     [\GROUPATTRIBUTE => "ckanId", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => "id"],
+     //logo
+     [\GROUPATTRIBUTE => "logo_path", \ISO19139PATH => false, \DELETEELEMENTPATH => false, \CKANNAME => ["image_display_url", "image_url"]],
+ ];
 	switch ($outputFormat) {
 		case "iso19139":
 			$e = new mb_exception("try to export group: ".$this->name);
@@ -428,7 +320,7 @@ class Group implements RPCObject {
 			//read template
 			//load xml from constraint generator
 			$contactDomObject = new DOMDocument();
-			$contactDomObject->load(dirname(__FILE__) . "/../geoportal/metadata_templates/mb_group_contact.xml");
+			$contactDomObject->load(__DIR__ . "/../geoportal/metadata_templates/mb_group_contact.xml");
 			$xpathContact = new DOMXpath($contactDomObject);
 			//$rootNamespace = $contactDomObject->lookupNamespaceUri($contactDomObject->namespaceURI);
 			$xpathContact->registerNamespace("mb", "http://www.mapbender.org/metadata/groupcontact");
@@ -478,7 +370,7 @@ class Group implements RPCObject {
 			for($a = 0; $a < count($mappingHash); $a++) {
 				if (isset($this->{$mappingHash[$a]['groupAttribute']}) && $this->{$mappingHash[$a]['groupAttribute']} !== "" && $mappingHash[$a]['ckanName'] !== false) {
 					if ($mappingHash[$a]['ckanName'] == 'name') {
-						$jsonOutput->{$mappingHash[$a]['ckanName']} = $this->specialCharsToSlug(str_replace('-','_',str_replace(' ','_',strtolower($this->{$mappingHash[$a]['groupAttribute']}))));
+						$jsonOutput->{$mappingHash[$a]['ckanName']} = $this->specialCharsToSlug(str_replace('-','_',str_replace(' ','_',strtolower((string) $this->{$mappingHash[$a]['groupAttribute']}))));
 					} else {
 						if (is_array($mappingHash[$a]['ckanName'])) {
 							foreach($mappingHash[$a]['ckanName'] as $ckanAttributeName) {
@@ -521,18 +413,18 @@ public function specialCharsToSlug($string) {
     */
     public static function getList($filter) {
 
-		$name = $filter->name ? $filter->name : null;
+		$name = $filter->name ?: null;
 		$id = $filter->id && is_numeric($filter->id) ? 
 			intval($filter->id) : null;
 		$owner = $filter->owner && is_numeric($filter->owner) ? 
 			intval($filter->owner) : null;
 		
-		$groups = Array();
+		$groups = [];
 		$sql_grouplist = "SELECT mb_group_id FROM mb_group";
 	  
-		$andConditions = array();
-		$v = array();
-		$t = array();
+		$andConditions = [];
+		$v = [];
+		$t = [];
 
 		if (!is_null($name)) {
 			$v[]= $name;
@@ -564,7 +456,7 @@ public function specialCharsToSlug($string) {
 			try {
 				$groups[] = new Group($row['mb_group_id']);
 			}
-			catch (Exception $E) {
+			catch (Exception) {
 				continue;
 				//FIXME: should catch some errors here
 			}
@@ -585,7 +477,7 @@ public function specialCharsToSlug($string) {
 		}
 
 		$sql_group = "SELECT mb_group_id FROM mb_group WHERE mb_group_name = $1";
-		$res_group = db_prep_query($sql_group, array($name), array("s"));
+		$res_group = db_prep_query($sql_group, [$name], ["s"]);
 		
 		if ($row = db_fetch_array($res_group)) {
 			return new Group($row['mb_group_id']);
@@ -605,25 +497,25 @@ public function specialCharsToSlug($string) {
 		$user = new User($id);
 		if (!$user->isValid()) {
 			new mb_exception("User ID " . $id . " invalid.");
-			return array();		
+			return [];		
 		}
 		$groups = $user->getGroupsByUser();
 		if (!is_array($groups)) {
 			new mb_notice("User " . $id . " is not member in any group.");
-			return array();
+			return [];
 		}
 		return $groups;
 	}
 	
 	public function getUser () {
 		if (!$this->isValid()) {
-			return array();
+			return [];
 		}
 		$sql = "SELECT fkey_mb_user_id FROM mb_user_mb_group WHERE fkey_mb_group_id = $1";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
-		$users = array();
+		$users = [];
 		while ($row = db_fetch_assoc($res)) {
 			$users[]= new User($row["fkey_mb_user_id"]);
 		}
@@ -635,8 +527,8 @@ public function specialCharsToSlug($string) {
 			return null;
 		}
 		$sql = "SELECT mb_group_owner FROM mb_group WHERE mb_group_id = $1";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_assoc($res);
 		$owner = new User(intval($row["mb_group_owner"]));

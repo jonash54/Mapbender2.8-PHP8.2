@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../../conf/bkgGeocoding.conf");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../../conf/bkgGeocoding.conf");
 if ($_REQUEST['resultTarget'] != 'web') {
 	(isset($_SERVER["argv"][1]))? ($user_id = $_SERVER["argv"][1]) : ($e = new mb_exception("geom: user lacks!"));
 	(isset($_SERVER["argv"][2]))? ($sstr = $_SERVER["argv"][2]) : ($e = new mb_exception("geom: string lacks!"));
@@ -27,7 +27,7 @@ if ($_REQUEST['resultTarget'] != 'web') {
 		$testMatch = $_REQUEST["map_height"];
 		// max 99999
 		$pattern = '/^([0-9]{0,4})([0-9]{1})$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo '<b>map_height</b> is not valid.<br/>'; 
 			die(); 		
  		}
@@ -41,7 +41,7 @@ if ($_REQUEST['resultTarget'] != 'web') {
 		$testMatch = $_REQUEST["map_width"];
 		// max 99999
 		$pattern = '/^([0-9]{0,4})([0-9]{1})$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo '<b>map_width</b> is not valid.<br/>'; 
 			die(); 		
  		}
@@ -56,7 +56,7 @@ if ($_REQUEST['resultTarget'] != 'web') {
 		$testMatch = $_REQUEST["maxResults"];
 		//give max 99 entries - more will be to slow
 		$pattern = '/^([0-9]{0,1})([0-9]{1})$/';		
- 		if (!preg_match($pattern,$testMatch)){ 
+ 		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo '<b>maxResults</b> is not valid.<br/>'; 
 			die(); 		
  		}
@@ -68,7 +68,7 @@ if ($_REQUEST['resultTarget'] != 'web') {
 		$testMatch = $_REQUEST["maxRows"];
 		//give max 99 entries - more will be to slow
 		$pattern = '/^([0-9]{0,1})([0-9]{1})$/';
-		if (!preg_match($pattern,$testMatch)){
+		if (!preg_match($pattern,(string) $testMatch)){
 			echo '<b>maxRows</b> is not valid.<br/>';
 			die();
 		}
@@ -175,7 +175,7 @@ $basUrl2 = "/geosearch?query=";
 $maxFeatures = $maxResult;
 //exchange some letters
 //$e = new mb_exception("searchText1: ".$searchText);
-$searchText= str_replace('ß', 'SS', str_replace('Ü', 'UE', str_replace('Ä', 'AE', str_replace('Ö', 'OE', mb_strtoupper($searchText)))));
+$searchText= str_replace('ß', 'SS', str_replace('Ü', 'UE', str_replace('Ä', 'AE', str_replace('Ö', 'OE', mb_strtoupper((string) $searchText)))));
 //$e = new mb_exception("searchText2: ".$searchText);
 if ($bundesland != false) {
 	$searchText .= "&filter=bundesland:".$bundesland;
@@ -186,7 +186,7 @@ $invokeUrl = $basUrl1.$key.$basUrl2.$searchText."&srsName=EPSG%3A".$searchEPSG."
 $searchConnector = new connector($invokeUrl);
 $searchConnector->set('timeOut', 5);
 $searchResult = $searchConnector->file;
-$gazetteerObject = json_decode($searchResult);
+$gazetteerObject = json_decode((string) $searchResult);
 //parse json
 $returnObject = new stdClass();
 $countGeonames = 0;
@@ -267,7 +267,7 @@ foreach ($gazetteerObject->features as $feature) {
 $returnObject->totalResultsCount = $countGeonames;
 
 if ($returnObject->totalResultsCount == 0) {
-	$returnObject->geonames = array();
+	$returnObject->geonames = [];
 }
 if (isset($callback) && $callback != '') {
 	$returnJson = $callback."(".json_encode($returnObject).")";

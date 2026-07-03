@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_stripRequest.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_configuration.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_gml_factory.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_stripRequest.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_wfs_configuration.php");
+require_once(__DIR__."/../classes/class_wfs.php");
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../classes/class_universal_gml_factory.php");
 
 $filter = $_REQUEST["filter"];
 $db_wfs_conf_id = $_REQUEST["db_wfs_conf_id"];
@@ -36,7 +36,7 @@ $destSrs = $_REQUEST["destSrs"];
  * TODO: this function is also in mod_wfs_result!! Maybe merge someday.
  */
 function isValidVarName ($varname) {
-	if (preg_match("/[\$]{1}_[a-z]+\[\"[a-z_]+\"\]/i", $varname) !== 0) {
+	if (preg_match("/[\$]{1}_[a-z]+\[\"[a-z_]+\"\]/i", (string) $varname) !== 0) {
 		return true;
 	}
 	return false;
@@ -51,12 +51,12 @@ function checkAccessConstraint($filter, $wfs_conf_id) {
 		"wfs_featuretype AS f, wfs_conf AS c " . 
 		"WHERE c.wfs_conf_id = $1 AND " . 
 		"c.fkey_featuretype_id = f.featuretype_id";
-	$v = array($wfs_conf_id);
-	$t = array('i');
+	$v = [$wfs_conf_id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	$row = db_fetch_array($res);
 	if ($row) {
-		$ns = substr($row["name"], 0, strpos($row["name"], ":")) . ":";
+		$ns = substr((string) $row["name"], 0, strpos((string) $row["name"], ":")) . ":";
 	}
 	else {
 		$ns = "";
@@ -72,8 +72,8 @@ function checkAccessConstraint($filter, $wfs_conf_id) {
 	$sql .= "WHERE wfs_conf_element.fkey_wfs_conf_id = $1 ";
 	$sql .= "ORDER BY wfs_conf_element.f_respos";
 			
-	$v = array($wfs_conf_id);
-	$t = array('i');
+	$v = [$wfs_conf_id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	while($row = db_fetch_array($res)){
 
@@ -91,7 +91,7 @@ function checkAccessConstraint($filter, $wfs_conf_id) {
 			$replacement = "\\1<And>\\2<ogc:PropertyIsEqualTo><ogc:PropertyName>" . 
 				$ns . $element_name . "</ogc:PropertyName><ogc:Literal>" . $user . 
 				"</ogc:Literal></ogc:PropertyIsEqualTo></And>\\3"; 
-			$filter = preg_replace($pattern, $replacement, $filter);
+			$filter = preg_replace($pattern, $replacement, (string) $filter);
 		}
 	}
 	return $filter;
@@ -100,8 +100,8 @@ function checkAccessConstraint($filter, $wfs_conf_id) {
 $filter = checkAccessConstraint($filter, $db_wfs_conf_id);
 
 $sql = "SELECT fkey_wfs_id FROM wfs_conf WHERE wfs_conf_id = $1";
-$v = array($db_wfs_conf_id);
-$t = array('i');
+$v = [$db_wfs_conf_id];
+$t = ['i'];
 $res = db_prep_query($sql, $v, $t);
 $row = db_fetch_array($res);
 $wfsId = $row["fkey_wfs_id"];

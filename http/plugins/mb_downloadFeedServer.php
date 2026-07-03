@@ -1,16 +1,16 @@
 <?php
 	//http://localhost/mapbender_trunk/plugins/mb_downloadFeedServer.php
-	require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-	require_once dirname(__FILE__) . "/../classes/class_user.php";
-	require_once dirname(__FILE__) . "/../classes/class_connector.php";
-	require_once(dirname(__FILE__)."/../classes/class_json.php");
-	require_once(dirname(__FILE__)."/../classes/class_gml2.php");
-	require_once(dirname(__FILE__)."/../classes/class_georss_geometry.php");
-	require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
-	require_once(dirname(__FILE__)."/../classes/class_rss_factory.php");
-	require_once(dirname(__FILE__)."/../classes/class_iso19139.php");
+	require_once __DIR__ . "/../../core/globalSettings.php";
+	require_once __DIR__ . "/../classes/class_user.php";
+	require_once __DIR__ . "/../classes/class_connector.php";
+	require_once(__DIR__."/../classes/class_json.php");
+	require_once(__DIR__."/../classes/class_gml2.php");
+	require_once(__DIR__."/../classes/class_georss_geometry.php");
+	require_once(__DIR__."/../classes/class_Uuid.php");
+	require_once(__DIR__."/../classes/class_rss_factory.php");
+	require_once(__DIR__."/../classes/class_iso19139.php");
 	
-	if (file_exists ( dirname ( __FILE__ ) . "/../../conf/excludeFromAtomFeedClient.json" )) {
+	if (file_exists ( __DIR__ . "/../../conf/excludeFromAtomFeedClient.json" )) {
 	    $configObject = json_decode ( file_get_contents ( "../../conf/excludeFromAtomFeedClient.json" ) );
 	}
 	if (isset ( $configObject ) && isset ( $configObject->urls )) {
@@ -40,7 +40,9 @@
 	}
 */
 class geoRSSEntry extends Feature{
-	public function parse($entry, $itemsToImport) {
+	// $itemsToImport given a default — LSP requires the override to be
+	// compatible with Feature::parse($domNode); PHP 8 fatals otherwise.
+	public function parse($entry, $itemsToImport = []) {
 		$tag = $currentSibling->nodeName;
 		if(in_array($tag, $importItems)){
 			$this->properties[$tag] = $currentSibling->nodeValue;
@@ -79,10 +81,8 @@ function logDlsUsage ($link, $s_title, $datasetid) {
 		$sql = <<<SQL
 UPDATE inspire_dls_log SET log_count = log_count + 1 WHERE log_id = $1
 SQL;
-		$v = array(
-			$logId
-		);
-		$t = array('i');
+		$v = [$logId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		return true;
 	} else {
@@ -90,12 +90,8 @@ SQL;
 		$sql = <<<SQL
 INSERT INTO inspire_dls_log (createdate, link, linktype, service_title, datasetid, log_count) VALUES (now(), $1, 'ATOM', $2, $3, 1)
 SQL;
-		$v = array(
-			$link,
-			$s_title,
-			$datasetid
-		);
-		$t = array('s','s','s');
+		$v = [$link, $s_title, $datasetid];
+		$t = ['s', 's', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		return true;
 	}
@@ -105,10 +101,8 @@ function isLinkAlreadyInDB($link){
 	$sql = <<<SQL
 SELECT log_id FROM inspire_dls_log WHERE link = $1 AND link <> '' ORDER BY lastchanged DESC
 SQL;
-	$v = array(
-		$link
-	);
-	$t = array('s');
+	$v = [$link];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 	while ($row = db_fetch_array($res)){
 		$logId[] = $row['log_id'];	
@@ -128,12 +122,10 @@ SQL;
 		$e = new mb_exception("plugins/mb_downloadFeedServer.php:"."Empty or no fileIdentifier found in the inspire_dls_log table! No log entry will be updated");
 		return false;
 	}
-	$v = array(
-		$uuid
-	);
-	$t = array('s');
+	$v = [$uuid];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
-	$logId = array();
+	$logId = [];
 	while ($row = db_fetch_array($res)){
 		$logId[] = $row['log_id'];	
 	}
@@ -149,7 +141,7 @@ SQL;
 
 function DOMNodeListObjectValuesToArray($domNodeList) {
 	$iterator = 0;
-	$array = array();
+	$array = [];
 	foreach ($domNodeList as $item) {
     		$array[$iterator] = $item->nodeValue; // this is a DOMNode instance
     		// you might want to have the textContent of them like this
@@ -160,7 +152,7 @@ function DOMNodeListObjectValuesToArray($domNodeList) {
 
 function DOMNodeListObjectValuesToHTML($domNodeList) {
 	$iterator = 0;
-	$array = array();
+	$array = [];
 	//$dom = new DOMDocument;
 	foreach ($domNodeList as $item) {
     		$array[$iterator] = $item->saveXML(); // this is a DOMNode instance
@@ -171,7 +163,7 @@ function DOMNodeListObjectValuesToHTML($domNodeList) {
 }
 
 function DOMNodeListObjectAttributes($domNodeList) {
-	$attributes = array();
+	$attributes = [];
 	foreach($domNodeList->attributes as $attribute_name => $attribute_node)
 	{
   		/** @var  DOMNode    $attribute_node */
@@ -182,12 +174,12 @@ function DOMNodeListObjectAttributes($domNodeList) {
 
 switch ($_REQUEST['method']) {
 	case "getServiceFeedObjectFromUrl" :
-		$serviceFeedUrl = htmlspecialchars_decode($_REQUEST['url']);//htmlspecialchars_decode is done to prohibit xss vulnerability of the client, which allows url as a get parameter
+		$serviceFeedUrl = htmlspecialchars_decode((string) $_REQUEST['url']);//htmlspecialchars_decode is done to prohibit xss vulnerability of the client, which allows url as a get parameter
         //secure client by use of blacklist
         //TODO: give back clean json - so that the client can generate a usefull message!
 		if ($urlsBlacklist != false) {
 		    foreach ($urlsBlacklist as $urlPart) {
-		        if (strpos($serviceFeedUrl, $urlPart) !== false) {
+		        if (str_contains($serviceFeedUrl, $urlPart)) {
 		            $e = new mb_exception("http/plugins/mb_downloadFeedServer.php:".'Found blacklist entry in downloadfeed url!');
 		            return false;
 		        }
@@ -399,9 +391,9 @@ switch ($_REQUEST['method']) {
 
 				//need attributes href and bbox of this element! Test old system
 				//$linksArray = DOMNodeListObjectValuesToHTML($links);
-					
+
 				//$e = new mb_exception("Count of found links: ".count($linksArray));
-				
+
 				//$e = new mb_exception("linksArray[0]: ".$linksArray[0]);
 				//echo var_dump($links->item(0));
 				//die();
@@ -429,10 +421,10 @@ switch ($_REQUEST['method']) {
 				}
 				//$link = $feedXML->xpath('/defaultns:feed/defaultns:entry/defaultns:link[contains(@rel,\'section\')]/@bbox');
 				//check if polygon is given
-				
+
 				//$feature->geometry->targetEPSG = "EPSG:4326";
 				//set geometry to null if geometry is not given!
-				
+
 				//if (isset($feature->geometry) && $feature->geometry!==false) {
 				$featureCollection->addFeature($feature);
 				$e = new mb_notice("Feature added to collection!");

@@ -55,14 +55,14 @@
 // 3802000 / 5825000
 //import some php vars to allow translation of objects in select boxes
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 include '../include/dyn_php.php';
 
-$projections = explode(',',$projections);
-$projectionsValue =  array();
-$projectionsName = array();
-$projectionsPlaceholderX = array();
-$projectionsPlaceholderY = array();
+$projections = explode(',',(string) $projections);
+$projectionsValue =  [];
+$projectionsName = [];
+$projectionsPlaceholderX = [];
+$projectionsPlaceholderY = [];
 for ($i=0; $i < count($projections); $i++){
 	$projectionList = explode(';',$projections[$i]);
 	if (count($projectionList) > 1) {

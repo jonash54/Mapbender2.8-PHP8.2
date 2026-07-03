@@ -18,10 +18,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //disable warnings
 ini_set('display_errors', 0);
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
+require_once(__DIR__."/../../conf/mapbender.conf");
+require_once(__DIR__."/../../conf/geoportal.conf");
+require_once(__DIR__."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../classes/class_connector.php");
 //Vars
 $url = WIKI_URL;
 $term = "";
@@ -39,15 +39,24 @@ $surl = "mediawiki/index.php/";
 //search mediawiki from localhost -> this will be much faster than over www
 $searchurl = $url;
 //$searchurl.="Special:Search?search=".urlencode($term)."&fulltext=Search&limit=".$maxresults."&offset=0";//OLD Version - now new mediwiki API is used
-$searchurl.="/api.php?action=query&list=search&srsearch=".urlencode($term)."&srwhat=text&format=xml";
+$searchurl.="/api.php?action=query&list=search&srsearch=".urlencode((string) $term)."&srwhat=text&format=xml";
 $e = new mb_notice("gaz_wiki: url to load: ".$searchurl);
 //load result by connector:
 $wikiConnectorObject = new connector($searchurl);
 $e = new mb_notice("gaz_wiki: read from connector".$wikiConnectorObject->file);
 //get results
 $wikiXmlString = $wikiConnectorObject->file;
-//load as xml object
-$wikiXmlObject = new SimpleXMLElement($wikiXmlString);
+// PHP 8 throws an uncatchable error on malformed input; SimpleXMLElement
+// already throws Exception when the body is non-XML (e.g. the wiki API is
+// down or unreachable from this host). Catch and return an empty result set.
+try {
+    $wikiXmlObject = new SimpleXMLElement($wikiXmlString);
+} catch (\Throwable $xmlErr) {
+    new mb_notice("gaz_wiki: external wiki returned non-XML; serving empty result");
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode([]);
+    die();
+}
 $e = new mb_notice("gaz_wiki: xml after parsing with php simplexml: ".$wikiXmlObject->asXML());
 //get the list of results 
 $lists = $wikiXmlObject->xpath('/api/query/search/p/@title');
@@ -70,28 +79,28 @@ if(count($lists)==0) {//no results returned
 	echo $xml->saveXML();
 } else {
 	//parse title matches 
-	while(list( , $node) = each($lists)) {
-     		$e = new mb_notice('/api/query/search/p/@title: '.$node);
-		$link = $surl.$node;
-		$title = $node;
-		$m = $xml->createElement('member');
-		$resultnode->appendChild($m);	
-		//create title
-		$ntitle = $xml->createElement('title');
-		$m->appendChild($ntitle);
-		$ttitle = $xml->createTextNode($title);
-		$ntitle->appendChild($ttitle);
-		//abstract
-		$abst = $xml->createElement('abstract');
-		$m->appendChild($abst);  
-		$tabst = $xml->createTextNode("");
-		$abst->appendChild($tabst);
-		//url
-		$nurl = $xml->createElement('url');
-		$m->appendChild($nurl);  
-		$turl = $xml->createTextNode($link);
-		$nurl->appendChild($turl);
-	}
+	foreach ($lists as $node) {
+     $e = new mb_notice('/api/query/search/p/@title: '.$node);
+     $link = $surl.$node;
+     $title = $node;
+     $m = $xml->createElement('member');
+     $resultnode->appendChild($m);
+     //create title
+     $ntitle = $xml->createElement('title');
+     $m->appendChild($ntitle);
+     $ttitle = $xml->createTextNode($title);
+     $ntitle->appendChild($ttitle);
+     //abstract
+     $abst = $xml->createElement('abstract');
+     $m->appendChild($abst);
+     $tabst = $xml->createTextNode("");
+     $abst->appendChild($tabst);
+     //url
+     $nurl = $xml->createElement('url');
+     $m->appendChild($nurl);
+     $turl = $xml->createTextNode($link);
+     $nurl->appendChild($turl);
+ }
 	$ready = $xml->createElement('ready');
 	$resultnode->appendChild($ready);
 	$tready = $xml->createTextNode("true");

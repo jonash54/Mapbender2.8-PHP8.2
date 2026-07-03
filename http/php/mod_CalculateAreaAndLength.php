@@ -10,8 +10,8 @@
 
 
 //import classes
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 
 /**
@@ -34,11 +34,11 @@ if ($geom_type == 'line') {
 }
 
 
-$v = array($geom_data);
-$t = array("c");
+$v = [$geom_data];
+$t = ["c"];
 $res = db_prep_query($sql, $v, $t);
 //fetch the array
-$rslt= array();
+$rslt= [];
 
 while ($row = db_fetch_array($res)) {
     $rslt[0] = round(floatval($row[0]), 4);

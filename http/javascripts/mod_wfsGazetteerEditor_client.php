@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-include(dirname(__FILE__) . "/../../core/epsg.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+include(__DIR__ . "/../../core/epsg.php");
 
 $gui_id = Mapbender::session()->get("mb_user_gui");
 $target = $_REQUEST["e_target"];
@@ -89,7 +89,7 @@ include '../include/dyn_css.php';
 	echo "var e_id_css = '" . $e_id_css . "';";
 	echo "var latLonSrsJson = '" . $latLonSrsJson . "';";
 
-	require(dirname(__FILE__)."/../javascripts/wfsFilter.js");
+	require(__DIR__."/../javascripts/wfsFilter.js");
 
 ?>
 // Element var maxHighlightedPoints

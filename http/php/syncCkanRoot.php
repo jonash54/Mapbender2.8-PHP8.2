@@ -5,11 +5,11 @@
 //@ini_set('error_reporting', E_ALL);
 //@ini_set('display_errors', 'stdout');	
 // Include class_ckanApi.php
-require_once(dirname(__FILE__).'/../classes/class_connector.php');
-require_once(dirname(__FILE__).'/../classes/class_group.php');
-require_once(dirname(__FILE__).'/../classes/class_syncCkan.php');
-require_once(dirname(__FILE__) . '/../php/mod_getDownloadOptions.php');
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__.'/../classes/class_connector.php');
+require_once(__DIR__.'/../classes/class_group.php');
+require_once(__DIR__.'/../classes/class_syncCkan.php');
+require_once(__DIR__ . '/../php/mod_getDownloadOptions.php');
+require_once(__DIR__.'/../../conf/ckan.conf');
 
 //TODO: Problem - datestamp for ckan_package - wrong????? Bug in 2.5.3??? Will the index not be updated???
 $registratingDepartments = false;
@@ -18,6 +18,7 @@ $outputFormat = "json";
 $compareTimestamps = false;
 $listAllMetadataInJson = true;
 //initiate resultObject to give back as json
+$resultObject = new stdClass();
 $resultObject->success = false;
 //$operation = "";
 //fix
@@ -25,7 +26,8 @@ if (isset($_REQUEST["syncDepartment"]) && $_REQUEST["syncDepartment"] !== "" && 
         $testMatch = $_REQUEST["syncDepartment"];
         //$pattern = '/^[0-9]*$/';  	
 	$pattern = '/^[\d,]*$/';
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
+                $resultObject->error = $resultObject->error ?? new stdClass();
                 $resultObject->error->message = 'Parameter syncDepartment is not valid (integer or csv integer list).';
                 echo json_encode($resultObject);
 		die();	
@@ -40,8 +42,8 @@ if (isset($_REQUEST["syncDepartment"]) && $_REQUEST["syncDepartment"] !== "" && 
 		$mapbenderUrl = "http://www.geoportal.rlp.de/mapbender";
 	}
 	$orgaConnector = new Connector($mapbenderUrl.'/php/mod_showOpenDataOrganizations.php');
-	$orgaList = json_decode($orgaConnector->file);
-	$orgaArray = array();
+	$orgaList = json_decode((string) $orgaConnector->file);
+	$orgaArray = [];
 	foreach ($orgaList as $orgaEntry) {
 		if (isset($orgaEntry->id)) {
 			$orgaArray[] = $orgaEntry->serialId;
@@ -54,12 +56,14 @@ if (isset($_REQUEST["syncDepartment"]) && $_REQUEST["syncDepartment"] !== "" && 
 if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
         $testMatch = $_REQUEST["userId"];
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
+                $resultObject->error = $resultObject->error ?? new stdClass();
                 $resultObject->error->message = 'Parameter userId is not valid (integer).';
                 echo json_encode($resultObject);
 		die();
         }
 	if ($testMatch !== Mapbender::session()->get("mb_user_id")) {
+		$resultObject->error = $resultObject->error ?? new stdClass();
 		$resultObject->error->message = 'Parameter userId is not equal to the userId from session information - maybe there is no current session!';
 		echo json_encode($resultObject);
 		die();
@@ -74,6 +78,7 @@ if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
 }
 
 if ($userId !== "1") {
+	$resultObject->error = $resultObject->error ?? new stdClass();
 	$resultObject->error->message = 'Your are not the root user!';
 	echo json_encode($resultObject);
 	die();
@@ -81,15 +86,15 @@ if ($userId !== "1") {
 
 //$e = new mb_exception($syncDepartment);
 //Test for csv or single value
-if (strpos($syncDepartment, ',') === false) {
-	$syncDepartmentArray = array($syncDepartment);
+if (!str_contains((string) $syncDepartment, ',')) {
+	$syncDepartmentArray = [$syncDepartment];
 	//$e = new mb_exception($syncDepartmentArray[0]);
 } else {
-	$syncDepartmentArray = explode(',', $syncDepartment);
+	$syncDepartmentArray = explode(',', (string) $syncDepartment);
 }
 //$e = new mb_exception(count($syncDepartmentArray));
 //result
-$syncResultArray = array();
+$syncResultArray = [];
 
 foreach($syncDepartmentArray as $syncDepartmentId) {
 	$syncDepartmentId = (integer)$syncDepartmentId;
@@ -97,12 +102,13 @@ foreach($syncDepartmentArray as $syncDepartmentId) {
 	//echo "test";
 	//get user which may sync the requested department
 	$sql = "SELECT fkey_mb_user_id FROM mb_user_mb_group WHERE fkey_mb_group_id = $1 AND mb_user_mb_group_type IN (2,3) ORDER BY mb_user_mb_group_type DESC LIMIT 1";
-	$v = array($syncDepartmentId);
-	$t = array('i');
+	$v = [$syncDepartmentId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	//$e = new mb_exception("sync department: ".$syncDepartmentId);
 	//$e = new mb_exception("res: ".json_encode($res));
 	if (!$res || is_null($res) || empty($res)) {
+		$resultObject->error = $resultObject->error ?? new stdClass();
 		$resultObject->error->message = 'No user for publishing department data found!';
 		echo json_encode($resultObject);
 		die();
@@ -119,7 +125,7 @@ foreach($syncDepartmentArray as $syncDepartmentId) {
 			$syncListJson = $syncCkanClass->getSyncListJson($departmentsArray, true);
 			//$syncDepartmentId = (string)$syncDepartmentId;
 			$syncCkanClass->syncOrgaId = $syncDepartmentId;
-			$syncList = json_decode($syncListJson);
+			$syncList = json_decode((string) $syncListJson);
 			if ($syncList->success = true) {
     				foreach ($syncList->result->geoportal_organization as $orga) {
 					/*$e = new mb_exception($orga->id);
@@ -130,7 +136,7 @@ foreach($syncDepartmentArray as $syncDepartmentId) {
 					if ($syncDepartmentId == $orga->id) {
             					//overwrite result with result from sync process
             					//$syncList = json_decode($syncCkanClass->syncSingleOrga(json_encode($orga)));
-	    					$syncList = json_decode($syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
+	    					$syncList = json_decode((string) $syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
 					}
     				}
 			}

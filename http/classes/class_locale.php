@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * sets the locale, depending on various settings:
@@ -27,13 +27,13 @@ require_once(dirname(__FILE__)."/../../core/globalSettings.php");
  *
  */
 class Mb_locale {
-	var $knownLanguages = null;
-	var $systemLocales = null;
-	var $browserLanguages = null;
-	var $os = null;
-	var $name = null;
-	var $defaultLanguage = "en";
-	var $status = "No locale set.";
+	public $knownLanguages = null;
+	public $systemLocales = null;
+	public $browserLanguages = null;
+	public $os = null;
+	public $name = null;
+	public $defaultLanguage = "en";
+	public $status = "No locale set.";
 
 	function __construct($languageId) {
 		if (!$languageId) {
@@ -116,7 +116,7 @@ class Mb_locale {
 					$e = new Mb_notice("locale " . $this->name . " ok on " . $this->os);
 
 					// from http://de3.php.net/manual/de/function.gettext.php
-					$path = bindtextdomain("Mapbender", dirname(__FILE__)."/../../resources/locale/");
+					$path = bindtextdomain("Mapbender", __DIR__."/../../resources/locale/");
 					$enc = bind_textdomain_codeset("Mapbender", "UTF-8");
 					$dom = textdomain("Mapbender");
 					return true;
@@ -175,98 +175,33 @@ class Mb_locale {
          * determines the available Locales on this system
          */
         function setSystemLocales() {
-			$this->systemLocales['pt_PT'] = array(
-				'linux' => 'pt_PT.utf8',
-				'windows' => 'Portuguese_Portugal.1252',
-				'bsd' => 'pt_PT',
-				'posix' => 'pt_PT'
-			);
-			$this->systemLocales['fr_FR'] = array(
-				'linux' => 'fr_FR.utf8',
-				'windows' => 'French_France.1252',
-				'bsd' => 'fr_FR',
-				'posix' => 'fr_FR'
-			);
-			$this->systemLocales['es_ES'] = array(
-				'linux' => 'es_ES.utf8',
-				'windows' => 'Spanish_Spain.1252',
-				'bsd' => 'es_ES',
-				'posix' => 'es_ES'
-			);
-			$this->systemLocales['it_IT'] = array(
-				'linux' => 'it_IT.utf8',
-				'windows' => 'Italian_Italy.1252',
-				'bsd' => 'it_IT',
-				'posix' => 'it_IT'
-			);
-			$this->systemLocales['de_DE'] = array(
-				'linux' => 'de_DE.utf8',
-				'windows' => 'German_Germany.1252',
-				'bsd' => 'de_DE',
-				'posix' => 'de_DE'
-			);
-			$this->systemLocales['en_US'] = array(
-				'linux' => 'en_US.utf8',
-				'windows' => 'English_United States.1252',
-				'bsd' => 'en_US',
-				'posix' => 'en_US'
-			);
-			$this->systemLocales['bg_BG'] = array(
-				'linux' => 'bg_BG.utf8',
-				'windows' => 'Bulgarian_Bulgaria.1251',
-				'bsd' => 'bg_BG',
-				'posix' => 'bg_BG'
-			);
-			$this->systemLocales['el_GR'] = array(
-				'linux' => 'el_GR.utf8',
-				'windows' => 'Greek_Greece.1253',
-				'bsd' => 'el_GR',
-				'posix' => 'el_GR'
-			);
-			$this->systemLocales['hu_HU'] = array(
-				'linux' => 'hu_HU.utf8',
-				'windows' => 'hu_HU.1250',
-				'bsd' => 'hu_HU',
-				'posix' => 'hu_HU'
-			);
+			$this->systemLocales['pt_PT'] = ['linux' => 'pt_PT.utf8', 'windows' => 'Portuguese_Portugal.1252', 'bsd' => 'pt_PT', 'posix' => 'pt_PT'];
+			$this->systemLocales['fr_FR'] = ['linux' => 'fr_FR.utf8', 'windows' => 'French_France.1252', 'bsd' => 'fr_FR', 'posix' => 'fr_FR'];
+			$this->systemLocales['es_ES'] = ['linux' => 'es_ES.utf8', 'windows' => 'Spanish_Spain.1252', 'bsd' => 'es_ES', 'posix' => 'es_ES'];
+			$this->systemLocales['it_IT'] = ['linux' => 'it_IT.utf8', 'windows' => 'Italian_Italy.1252', 'bsd' => 'it_IT', 'posix' => 'it_IT'];
+			$this->systemLocales['de_DE'] = ['linux' => 'de_DE.utf8', 'windows' => 'German_Germany.1252', 'bsd' => 'de_DE', 'posix' => 'de_DE'];
+			$this->systemLocales['en_US'] = ['linux' => 'en_US.utf8', 'windows' => 'English_United States.1252', 'bsd' => 'en_US', 'posix' => 'en_US'];
+			$this->systemLocales['bg_BG'] = ['linux' => 'bg_BG.utf8', 'windows' => 'Bulgarian_Bulgaria.1251', 'bsd' => 'bg_BG', 'posix' => 'bg_BG'];
+			$this->systemLocales['el_GR'] = ['linux' => 'el_GR.utf8', 'windows' => 'Greek_Greece.1253', 'bsd' => 'el_GR', 'posix' => 'el_GR'];
+			$this->systemLocales['hu_HU'] = ['linux' => 'hu_HU.utf8', 'windows' => 'hu_HU.1250', 'bsd' => 'hu_HU', 'posix' => 'hu_HU'];
         }
 
         /**
          * set the known languages
          */
         function setKnownLanguages() {
-                $this->knownLanguages = array(
-						'en_US' => 'en_US',
-						'en' => 'en_US',
-						'de_DE' => 'de_DE',
-						'de' => 'de_DE',
-						'bg_BG' => 'bg_BG',
-						'bg' => 'bg_BG',
-						'es_ES' => 'es_ES',
-						'es' => 'es_ES',
-						'nl_NL' => 'nl_NL',
-						'nl' => 'nl_NL',
-						'fr_FR' => 'fr_FR',
-						'fr' => 'fr_FR',
-						'el_GR' => 'el_GR',
-						'gr' => 'el_GR',
-						'hu_HU' => 'hu_HU',
-						'hu' => 'hu_HU',
-						'pt_PT' => 'pt_PT',
-						'pt' => 'pt_PT',												
-						'it_IT' => 'it_IT',
-						'it' => 'it_IT');
+                $this->knownLanguages = ['en_US' => 'en_US', 'en' => 'en_US', 'de_DE' => 'de_DE', 'de' => 'de_DE', 'bg_BG' => 'bg_BG', 'bg' => 'bg_BG', 'es_ES' => 'es_ES', 'es' => 'es_ES', 'nl_NL' => 'nl_NL', 'nl' => 'nl_NL', 'fr_FR' => 'fr_FR', 'fr' => 'fr_FR', 'el_GR' => 'el_GR', 'gr' => 'el_GR', 'hu_HU' => 'hu_HU', 'hu' => 'hu_HU', 'pt_PT' => 'pt_PT', 'pt' => 'pt_PT', 'it_IT' => 'it_IT', 'it' => 'it_IT'];
         }
 
         /**
          * sets the languages accepted by the client browser
          */
         function setBrowserLanguages () {
-                $this->browserLanguages = array();
+                $this->browserLanguages = [];
 
-            $bLangs = explode(',', $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
+            $bLangs = explode(',', (string) $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
             foreach ($bLangs as $lang) {
-                        if (strpos($lang, ';') === false)
+                        if (!str_contains($lang, ';'))
                                 array_push($this->browserLanguages, $lang);
                         else
                                 array_push($this->browserLanguages, substr($lang, 0, strpos($lang, ';')));

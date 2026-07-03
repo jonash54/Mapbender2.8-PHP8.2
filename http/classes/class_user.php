@@ -5,62 +5,62 @@
 # and Simplified BSD license.
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_RPCEndpoint.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
-require_once(dirname(__FILE__)."/../../lib/spatial_security.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_RPCEndpoint.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_Uuid.php");
+require_once(__DIR__."/../../lib/spatial_security.php");
 
 /**
  * A Mapbender user as described in the table mb_user.
  */
-class User implements RPCObject{
+class User implements RPCObject, \Stringable{
 	/**
 	 * @var Integer The User ID
 	 */
-	var $id;
-	var $name = "";
+	public $id;
+	public $name = "";
 	// var $password = ""; // password is readonly,
-	var $owner = 0;
-	var $description ="";
-	var $loginCount;
-	var $email = "";
-	var $phone ="";
-	var $department ="";
-	var $resolution = 72;
-	var $organization ="";
-	var $position = "";
-	var $phone1 = "";
-	var $fax = "";
-	var $deliveryPoint ="";
-	var $city ="";
-	var $postalCode = null;
-	var $country ="";
-	var $url ="";
-	var $realName = "";
-	var $street = "";
-	var $houseNumber = "";
-	var $reference = "";
-	var $forAttentionOf = "";
-    var $validFrom = null;
-    var $validTo = null;
-    var $passwordTicket = "";
-	var $firstName = "";
-	var $lastName = "";
-	var $academicTitle = "";
-    var $activationKey = "";
-	var $isActive = 'f';
-	var $createDigest = 'f';
-	var $preferredGui = '';
+	public $owner = 0;
+	public $description ="";
+	public $loginCount;
+	public $email = "";
+	public $phone ="";
+	public $department ="";
+	public $resolution = 72;
+	public $organization ="";
+	public $position = "";
+	public $phone1 = "";
+	public $fax = "";
+	public $deliveryPoint ="";
+	public $city ="";
+	public $postalCode = null;
+	public $country ="";
+	public $url ="";
+	public $realName = "";
+	public $street = "";
+	public $houseNumber = "";
+	public $reference = "";
+	public $forAttentionOf = "";
+    public $validFrom = null;
+    public $validTo = null;
+    public $passwordTicket = "";
+	public $firstName = "";
+	public $lastName = "";
+	public $academicTitle = "";
+    public $activationKey = "";
+	public $isActive = 'f';
+	public $createDigest = 'f';
+	public $preferredGui = '';
 	//new 2020-03-18 for compatibility to older typo3 based portal systems
-	var $wantsNewsletter = 'f';
-	var $allowsSurvey = 'f';
+	public $wantsNewsletter = 'f';
+	public $allowsSurvey = 'f';
 	//var $wantsSpatialSuggest = "nein"; //TODO bad model - should be boolean
-	var $wantsSpatialSuggest = 'f';
+	public $wantsSpatialSuggest = 'f';
 	//var $wantsGlossar = "nein"; //TODO bad model - should be boolean
-	var $wantsGlossar = 'f';
-	var $textSize = "textsize3";
-	var $spatialSecurity = "";
+	public $wantsGlossar = 'f';
+	public $textSize = "textsize3";
+	public $spatialSecurity = "";
 	
   static $displayName = "User";
   static $internalName = "user";
@@ -121,7 +121,7 @@ class User implements RPCObject{
 	/**
 	 * @return String the ID of this user
 	 */
-	public function __toString () {
+	public function __toString (): string {
 		return (string) $this->id;
 	}
 
@@ -130,47 +130,7 @@ class User implements RPCObject{
     * @return Assoc Array containing the fields to send to the user
     */
     public function getFields() {
-        $result = array(
-			"name" => $this->name,
-			"password" =>  "*************",
-			"owner" => $this->owner,
-			"description" => $this->description,
-			"loginCount" => $this->loginCount,
-			"email" => $this->email,
-			"phone" => $this->phone,
-			"department" => $this->department,
-			"resolution" => $this->resolution,
-			"organization" => $this->organization,
-			"position" => $this->position,
-			"phone1" => $this->phone1,
-			"fax" => $this->fax,
-			"deliveryPoint" => $this->deliveryPoint,
-			"city" => $this->city,
-			"postalCode" => $this->postalCode,
-			"country" => $this->country,
-			"url" => $this->url,
-			"realName" => $this->realName,
-			"street" => $this->street,
-			"houseNumber" => $this->houseNumber,
-			"reference" => $this->reference,
-			"forAttentionOf" => $this->forAttentionOf,
-			"validFrom" => $this->validFrom,
-			"validTo" => $this->validTo,
-			"passwordTicket" => $this->passwordTicket,
-			"firstName" => $this->firstName,
-			"lastName" => $this->lastName,
-			"academicTitle" => $this->academicTitle,
-			"activationKey" => $this->activationKey,
-			"isActive" => $this->isActive,
-			"createDigest" => $this->createDigest,
-			"preferredGui" => $this->preferredGui,
-        	"textSize" => $this->textSize,
-        	"wantsGlossar" => $this->wantsGlossar,
-        	"wantsSpatialSuggest" => $this->wantsSpatialSuggest,
-        	"allowsSurvey" => $this->allowsSurvey,
-        	"wantsNewsletter" => $this->wantsNewsletter,
-        	"spatialSecurity" => $this->spatialSecurity
-        );
+        $result = ["name" => $this->name, "password" =>  "*************", "owner" => $this->owner, "description" => $this->description, "loginCount" => $this->loginCount, "email" => $this->email, "phone" => $this->phone, "department" => $this->department, "resolution" => $this->resolution, "organization" => $this->organization, "position" => $this->position, "phone1" => $this->phone1, "fax" => $this->fax, "deliveryPoint" => $this->deliveryPoint, "city" => $this->city, "postalCode" => $this->postalCode, "country" => $this->country, "url" => $this->url, "realName" => $this->realName, "street" => $this->street, "houseNumber" => $this->houseNumber, "reference" => $this->reference, "forAttentionOf" => $this->forAttentionOf, "validFrom" => $this->validFrom, "validTo" => $this->validTo, "passwordTicket" => $this->passwordTicket, "firstName" => $this->firstName, "lastName" => $this->lastName, "academicTitle" => $this->academicTitle, "activationKey" => $this->activationKey, "isActive" => $this->isActive, "createDigest" => $this->createDigest, "preferredGui" => $this->preferredGui, "textSize" => $this->textSize, "wantsGlossar" => $this->wantsGlossar, "wantsSpatialSuggest" => $this->wantsSpatialSuggest, "allowsSurvey" => $this->allowsSurvey, "wantsNewsletter" => $this->wantsNewsletter, "spatialSecurity" => $this->spatialSecurity];
 		return $result;
 	}
 
@@ -183,11 +143,11 @@ class User implements RPCObject{
 
 	public function getGroupsByUser () {
 		$sql = "SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$result = db_prep_query($sql,$v,$t);
 
-		$groupArray = array();
+		$groupArray = [];
 		while ($row = db_fetch_array($result)) {
 			$groupArray[]= intval($row["fkey_mb_group_id"]);
 		}
@@ -201,8 +161,8 @@ class User implements RPCObject{
 		$uuid = new Uuid();
 
 		$sql_user_create = "INSERT INTO mb_user (mb_user_name, uuid, activation_key, is_active) VALUES ( $1 , $2 , $3, $4)";
-		$v = array($this->name, $uuid, md5($uuid), 'f');
-		$t = array("s","s","s","b");
+		$v = [$this->name, $uuid, md5($uuid), 'f'];
+		$t = ["s", "s", "s", "b"];
 
 		db_begin();
 
@@ -222,7 +182,7 @@ class User implements RPCObject{
 			try {
 				db_rollback();
 			}
-			catch(Exception $E)	{
+			catch(Exception)	{
 				throw new Exception("Could not set inital values of new user");
 			}
 		}
@@ -239,45 +199,45 @@ class User implements RPCObject{
         if($changes->owner) {
           $owner = User::byName($changes->owner);
         }
-		$this->name = isset($changes->name) ? $changes->name : $this->name;
+		$this->name = $changes->name ?? $this->name;
 		$this->owner = isset($changes->owner) ? $owner->id : $this->owner;
-		$this->description = isset($changes->description) ? $changes->description : $this->description;
-		$this->loginCount = isset($changes->loginCount) ? $changes->loginCount : $this->loginCount;
-		$this->email = isset($changes->email) ? $changes->email : $this->email;
-		$this->phone = isset($changes->phone) ? $changes->phone : $this->phone;
-		$this->department = isset($changes->department) ? $changes->department : $this->department;
-		$this->resolution = isset($changes->resolution) ? $changes->resolution : $this->resolution;
-		$this->organization = isset($changes->organization) ? $changes->organization : $this->organization;
-		$this->position = isset($changes->position) ? $changes->position : $this->position;
-		$this->phone1 = isset($changes->phone1) ? $changes->phone1 : $this->phone1;
-		$this->facsimile = isset($changes->facsimile) ? $changes->facsimile : $this->facsimile;
-		$this->deliveryPoint = isset($changes->deliveryPoint) ? $changes->deliveryPoint : $this->deliveryPoint;
-		$this->city = isset($changes->city) ? $changes->city : $this->city;
-		$this->postalCode = isset($changes->postalCode) ? $changes->postalCode : $this->postalCode;
-		$this->country = isset($changes->country) ? $changes->country : $this->country;
-		$this->url = isset($changes->url) ? $changes->url : $this->url;
-		$this->id = isset($changes->id) ? $changes->id : $this->id;
-		$this->realName = isset($changes->realName) ? $changes->realName : $this->realName;
-		$this->street = isset($changes->street) ? $changes->street : $this->street;
-		$this->houseNumber = isset($changes->houseNumber) ? $changes->houseNumber : $this->houseNumber;
-		$this->reference = isset($changes->reference) ? $changes->reference : $this->reference;
-		$this->forAttentionOf = isset($changes->forAttentionOf) ? $changes->forAttentionOf : $this->forAttentionOf;
-		$this->validFrom = isset($changes->validFrom) ? $changes->validFrom : $this->validFrom;
-		$this->validTo = isset($changes->validTo) ? $changes->validTo : $this->validTo;
-		$this->passwordTicket = isset($changes->passwordTicket) ? $changes->passwordTicket : $this->passwordTicket;
-		$this->firstName = isset($changes->firstName) ? $changes->firstName : $this->firstName;
-		$this->lastName = isset($changes->lastName) ? $changes->lastName : $this->lastName;
-		$this->academicTitle = isset($changes->academicTitle) ? $changes->academicTitle : $this->academicTitle;
-		$this->activationKey = isset($changes->activationKey) ? $changes->activationKey : $this->activationKey;
-		$this->isActive = isset($changes->isActive) ? $changes->isActive : $this->isActive;
-		$this->createDigest = isset($changes->createDigest) ? $changes->createDigest : $this->createDigest;
-		$this->preferredGui = isset($changes->preferredGui) ? $changes->preferredGui : $this->preferredGui;
-		$this->textSize= isset($changes->textSize) ? $changes->textSize : $this->textSize;
-		$this->wantsGlossar = isset($changes->wantsGlossar) ? $changes->wantsGlossar : $this->wantsGlossar;
-		$this->wantsSpatialSuggest = isset($changes->wantsSpatialSuggest) ? $changes->wantsSpatialSuggest : $this->wantsSpatialSuggest;
-		$this->allowsSurvey = isset($changes->allowsSurvey) ? $changes->allowsSurvey : $this->allowsSurvey;
-		$this->wantsNewsletter = isset($changes->wantsNewsletter) ? $changes->wantsNewsletter : $this->wantsNewsletter;
-		$this->spatialSecurity = isset($changes->spatialSecurity) ? $changes->spatialSecurity : $this->spatialSecurity;
+		$this->description = $changes->description ?? $this->description;
+		$this->loginCount = $changes->loginCount ?? $this->loginCount;
+		$this->email = $changes->email ?? $this->email;
+		$this->phone = $changes->phone ?? $this->phone;
+		$this->department = $changes->department ?? $this->department;
+		$this->resolution = $changes->resolution ?? $this->resolution;
+		$this->organization = $changes->organization ?? $this->organization;
+		$this->position = $changes->position ?? $this->position;
+		$this->phone1 = $changes->phone1 ?? $this->phone1;
+		$this->facsimile = $changes->facsimile ?? $this->facsimile;
+		$this->deliveryPoint = $changes->deliveryPoint ?? $this->deliveryPoint;
+		$this->city = $changes->city ?? $this->city;
+		$this->postalCode = $changes->postalCode ?? $this->postalCode;
+		$this->country = $changes->country ?? $this->country;
+		$this->url = $changes->url ?? $this->url;
+		$this->id = $changes->id ?? $this->id;
+		$this->realName = $changes->realName ?? $this->realName;
+		$this->street = $changes->street ?? $this->street;
+		$this->houseNumber = $changes->houseNumber ?? $this->houseNumber;
+		$this->reference = $changes->reference ?? $this->reference;
+		$this->forAttentionOf = $changes->forAttentionOf ?? $this->forAttentionOf;
+		$this->validFrom = $changes->validFrom ?? $this->validFrom;
+		$this->validTo = $changes->validTo ?? $this->validTo;
+		$this->passwordTicket = $changes->passwordTicket ?? $this->passwordTicket;
+		$this->firstName = $changes->firstName ?? $this->firstName;
+		$this->lastName = $changes->lastName ?? $this->lastName;
+		$this->academicTitle = $changes->academicTitle ?? $this->academicTitle;
+		$this->activationKey = $changes->activationKey ?? $this->activationKey;
+		$this->isActive = $changes->isActive ?? $this->isActive;
+		$this->createDigest = $changes->createDigest ?? $this->createDigest;
+		$this->preferredGui = $changes->preferredGui ?? $this->preferredGui;
+		$this->textSize= $changes->textSize ?? $this->textSize;
+		$this->wantsGlossar = $changes->wantsGlossar ?? $this->wantsGlossar;
+		$this->wantsSpatialSuggest = $changes->wantsSpatialSuggest ?? $this->wantsSpatialSuggest;
+		$this->allowsSurvey = $changes->allowsSurvey ?? $this->allowsSurvey;
+		$this->wantsNewsletter = $changes->wantsNewsletter ?? $this->wantsNewsletter;
+		$this->spatialSecurity = $changes->spatialSecurity ?? $this->spatialSecurity;
 		return true;
 	}
 
@@ -333,59 +293,9 @@ class User implements RPCObject{
 		if ($this->allowsSurvey !== 't') {$this->allowsSurvey = 'f';}
 		if ($this->wantsGlossar !== 't') {$this->wantsGlossar = 'f';}
 		
-		$v = array(
-			$this->name,
-			is_numeric($this->owner) ? intval($this->owner) : null,
-			$this->description !== "" ? $this->description : null,
-			$this->email !== "" ? $this->email : null,
-			$this->phone !== "" ? $this->phone : null,
-			$this->department !== "" ? $this->department : null,
-			is_numeric($this->resolution) ? intval($this->resolution) : null,
-			$this->organization !== "" ? $this->organization : null,
-			$this->position !== "" ? $this->position : null,
-			$this->phone1 !== "" ? $this->phone1 : null,
-			$this->fax !== "" ? $this->fax : null,
-			$this->deliveryPoint !== "" ? $this->deliveryPoint : null,
-			$this->city !== "" ? $this->city : null,
-			is_numeric($this->postalCode) ? intval($this->postalCode) : null,
-			$this->country !== "" ? $this->country : null,
-			$this->url !== "" ? $this->url : null,
-			$this->realName !== "" ? $this->realName : null,
-			$this->street !== "" ? $this->street : null,
-			$this->houseNumber !== "" ? $this->houseNumber : null,
-			$this->reference !== "" ? $this->reference : null,
-			$this->forAttentionOf !== "" ? $this->forAttentionOf : null,
-			$this->validFrom,
-			$this->validTo,
-			$this->passwordTicket !== "" ? $this->passwordTicket : null,
-			$this->firstName,
-			$this->lastName,
-			$this->academicTitle,
-			is_numeric($this->loginCount) ? intval($this->loginCount) : 0,
-			$this->activationKey !== "" ? $this->activationKey : null,
-			$this->isActive,
-			$this->createDigest,
-			$this->preferredGui,
-				
-			$this->textSize !== "" ? $this->textSize : null,
-			$this->allowsSurvey,
-			$this->wantsGlossar,
-			$this->wantsNewsletter,
-			$this->wantsSpatialSuggest,	
-				
-			is_numeric($this->id) ? intval($this->id) : null,
-		);
+		$v = [$this->name, is_numeric($this->owner) ? intval($this->owner) : null, $this->description !== "" ? $this->description : null, $this->email !== "" ? $this->email : null, $this->phone !== "" ? $this->phone : null, $this->department !== "" ? $this->department : null, is_numeric($this->resolution) ? intval($this->resolution) : null, $this->organization !== "" ? $this->organization : null, $this->position !== "" ? $this->position : null, $this->phone1 !== "" ? $this->phone1 : null, $this->fax !== "" ? $this->fax : null, $this->deliveryPoint !== "" ? $this->deliveryPoint : null, $this->city !== "" ? $this->city : null, is_numeric($this->postalCode) ? intval($this->postalCode) : null, $this->country !== "" ? $this->country : null, $this->url !== "" ? $this->url : null, $this->realName !== "" ? $this->realName : null, $this->street !== "" ? $this->street : null, $this->houseNumber !== "" ? $this->houseNumber : null, $this->reference !== "" ? $this->reference : null, $this->forAttentionOf !== "" ? $this->forAttentionOf : null, $this->validFrom, $this->validTo, $this->passwordTicket !== "" ? $this->passwordTicket : null, $this->firstName, $this->lastName, $this->academicTitle, is_numeric($this->loginCount) ? intval($this->loginCount) : 0, $this->activationKey !== "" ? $this->activationKey : null, $this->isActive, $this->createDigest, $this->preferredGui, $this->textSize !== "" ? $this->textSize : null, $this->allowsSurvey, $this->wantsGlossar, $this->wantsNewsletter, $this->wantsSpatialSuggest, is_numeric($this->id) ? intval($this->id) : null];
 
-		$t = array(
-			"s", "i", "s", "s", "s",
-			"s", "i", "s", "s", "s",
-			"s", "s", "s", "i", "s",
-			"s", "s", "s", "s", "s",
-			"s", "s", "s", "s", "s",
-			"s", "s", "i", "s", "b",
-			"b", "s", "s", "b", "b",
-			"b", "b", "i"
-		);
+		$t = ["s", "i", "s", "s", "s", "s", "i", "s", "s", "s", "s", "s", "s", "i", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "i", "s", "b", "b", "s", "s", "b", "b", "b", "b", "i"];
 
 		$update_result = db_prep_query($sql_update,$v,$t);
 		if(!$update_result)	{
@@ -399,8 +309,8 @@ class User implements RPCObject{
 	public function remove() {
 
 		$sql_user_remove = "DELETE FROM mb_user WHERE mb_user_id = $1";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$result = db_prep_query($sql_user_remove,$v,$t);
 
 		if($result == false) {
@@ -411,8 +321,8 @@ class User implements RPCObject{
     //TODO - check spatial security?
 	public function load() {
 		$sql_user = "SELECT * from mb_user WHERE mb_user_id = $1; ";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res_user = db_prep_query($sql_user,$v,$t);
 		if ($row = db_fetch_array($res_user)) {
 			$this->name = $row['mb_user_name'];
@@ -441,28 +351,16 @@ class User implements RPCObject{
 			$this->validTo = $row['mb_user_valid_to'];
 			$this->passwordTicket = $row['mb_user_password_ticket'];
 			$this->activationKey = $row['activation_key'];
-			switch ($row['is_active']) {
-				case "t":
-					$this->isActive = 't';
-					break;
-				case "f":
-					$this->isActive = 'f';
-					break;
-				default:
-					$this->isActive = 'f';
-					break;
-			}
-			switch ($row['create_digest']) {
-				case "t":
-					$this->createDigest = 't';
-					break;
-				case "f":
-					$this->createDigest = 'f';
-					break;
-				default:
-					$this->createDigest = 'f';
-					break;
-			}
+			$this->isActive = match ($row['is_active']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
+			$this->createDigest = match ($row['create_digest']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
 			$this->firstName = $row["mb_user_firstname"];
 			$this->lastName = $row["mb_user_lastname"];
 			$this->academicTitle = $row["mb_user_academictitle"];
@@ -470,50 +368,26 @@ class User implements RPCObject{
 			
 			$this->textSize = $row["mb_user_textsize"];
 			
-			switch ($row['mb_user_glossar_1']) {
-				case "t":
-					$this->wantsGlossar = 't';
-					break;
-				case "f":
-					$this->wantsGlossar = 'f';
-					break;
-				default:
-					$this->wantsGlossar = 'f';
-					break;
-			}
-			switch ($row['mb_user_spatial_suggest_1']) {
-				case "t":
-					$this->wantsSpatialSuggest = 't';
-					break;
-				case "f":
-					$this->wantsSpatialSuggest = 'f';
-					break;
-				default:
-					$this->wantsSpatialSuggest = 'f';
-					break;
-			}
-			switch ($row['mb_user_newsletter']) {
-				case "t":
-					$this->wantsNewsletter = 't';
-					break;
-				case "f":
-					$this->wantsNewsletter = 'f';
-					break;
-				default:
-					$this->wantsNewsletter = 'f';
-					break;
-			}
-			switch ($row['mb_user_allow_survey']) {
-				case "t":
-					$this->allowsSurvey = 't';
-					break;
-				case "f":
-					$this->allowsSurvey = 'f';
-					break;
-				default:
-					$this->allowsSurvey = 'f';
-					break;
-			}
+			$this->wantsGlossar = match ($row['mb_user_glossar_1']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
+			$this->wantsSpatialSuggest = match ($row['mb_user_spatial_suggest_1']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
+			$this->wantsNewsletter = match ($row['mb_user_newsletter']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
+			$this->allowsSurvey = match ($row['mb_user_allow_survey']) {
+       "t" => 't',
+       "f" => 'f',
+       default => 'f',
+   };
 			$this->spatialSecurity = spatial_security\database_read("user", $this->id);
 		}
 		else {
@@ -530,8 +404,8 @@ class User implements RPCObject{
 	public function validUserPasswordTicket($userTicket) {
 		$sql = "SELECT * FROM mb_user ";
 		$sql .= "WHERE mb_user_id = $1 AND mb_user_password_ticket = $2";
-	    	$v = array($this->id, $userTicket);
-		$t = array("i","s");
+	    	$v = [$this->id, $userTicket];
+		$t = ["i", "s"];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			if($row['mb_user_password_ticket'] == '' || $row['mb_user_password_ticket'] != $userTicket) {
@@ -556,12 +430,12 @@ class User implements RPCObject{
 		if ($this->createDigest == 't') {
 			$sql = "UPDATE mb_user SET password = $1, mb_user_password_ticket = '', mb_user_digest_hash = $2, mb_user_digest = $3,";
 			$sql .= " mb_user_aldigest = $4  WHERE mb_user_id = $5 AND mb_user_password_ticket = $6";
-			$v = array(password_hash($newPassword, PASSWORD_BCRYPT), $hashAlgo, hash(strtolower($hashAlgo), $this->name.";".$this->email.":".REALM.":".$newPassword), hash(strtolower($hashAlgo), $this->name.":".REALM.":".$newPassword), $this->id, $userTicket);
-			$t = array('s','s','s','s','i','s');
+			$v = [password_hash((string) $newPassword, PASSWORD_BCRYPT), $hashAlgo, hash(strtolower((string) $hashAlgo), $this->name.";".$this->email.":".REALM.":".$newPassword), hash(strtolower((string) $hashAlgo), $this->name.":".REALM.":".$newPassword), $this->id, $userTicket];
+			$t = ['s', 's', 's', 's', 'i', 's'];
 		} else {
 			$sql = "UPDATE mb_user SET password = $1, mb_user_password_ticket = '' WHERE mb_user_id = $2 AND mb_user_password_ticket = $3";
-			$v = array(password_hash($newPassword, PASSWORD_BCRYPT), $this->id, $userTicket);
-			$t = array('s','i','s');
+			$v = [password_hash((string) $newPassword, PASSWORD_BCRYPT), $this->id, $userTicket];
+			$t = ['s', 'i', 's'];
 		}
 		$update_result = db_prep_query($sql,$v,$t);
 		if (!$update_result)	{
@@ -580,12 +454,12 @@ class User implements RPCObject{
 		if ($this->createDigest == 't') {
 			$sql = "UPDATE mb_user SET password = $1, mb_user_password_ticket = '', mb_user_digest_hash = $2, mb_user_digest = $3,";
 			$sql .= " mb_user_aldigest = $4  WHERE mb_user_id = $5";
-			$v = array(password_hash($newPassword, PASSWORD_BCRYPT), $hashAlgo, hash(strtolower($hashAlgo), $this->name.";".$this->email.":".REALM.":".$newPassword), hash(strtolower($hashAlgo), $this->name.":".REALM.":".$newPassword), $this->id);
-			$t = array('s','s','s','s','i');
+			$v = [password_hash((string) $newPassword, PASSWORD_BCRYPT), $hashAlgo, hash(strtolower((string) $hashAlgo), $this->name.";".$this->email.":".REALM.":".$newPassword), hash(strtolower((string) $hashAlgo), $this->name.":".REALM.":".$newPassword), $this->id];
+			$t = ['s', 's', 's', 's', 'i'];
 		} else {
 			$sql = "UPDATE mb_user SET password = $1, mb_user_password_ticket = '' WHERE mb_user_id = $2";
-			$v = array(password_hash($newPassword, PASSWORD_BCRYPT), $this->id);
-			$t = array('s','i');
+			$v = [password_hash((string) $newPassword, PASSWORD_BCRYPT), $this->id];
+			$t = ['s', 'i'];
 		}
 		$update_result = db_prep_query($sql,$v,$t);
 		if (!$update_result)	{
@@ -599,9 +473,9 @@ class User implements RPCObject{
 	public function setNewUserPasswordTicket () {
 		$sql = "UPDATE mb_user SET mb_user_password_ticket = $1";
 		$sql.=" WHERE mb_user_id = $2";
-		$passwordTicket = substr(md5(uniqid(rand())),0,30);
-		$v = array($passwordTicket,$this->id);
-		$t = array('s','i');
+		$passwordTicket = substr(md5(uniqid(random_int(0, mt_getrandmax()))),0,30);
+		$v = [$passwordTicket, $this->id];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if(!$res){
 			$e= new mb_exception(1);
@@ -629,12 +503,12 @@ class User implements RPCObject{
 			$activateRedirectUrl = MAPBENDER_PATH."/php/mod_activateUserAccount.php?activationKey=";
 			$registerRedirectUrl = LOGIN;
 		}
-		return array($loginRedirectUrl,$activateRedirectUrl,$registerRedirectUrl);
+		return [$loginRedirectUrl, $activateRedirectUrl, $registerRedirectUrl];
 
 	}
 
 	public function sendUserLoginMail ($email = "",$name = "",$activation_key= "") {
-		list($loginRedirectUrl,$activateRedirectUrl,$registerRedirectUrl) = $this->checkDjango();
+		[$loginRedirectUrl, $activateRedirectUrl, $registerRedirectUrl] = $this->checkDjango();
 		$e = new mb_exception("send email function!");
 		$admin = new administration();
 
@@ -644,7 +518,7 @@ class User implements RPCObject{
 			$userMessage .= _mb("Please activate your account by click on following link").": \n";
 			$userMessage .= $activateRedirectUrl.$activation_key."\n";
 			$e = new mb_exception("sending email to name=".$name."  email=".$email." key=".$activation_key);
-			if(!$admin->sendEmail("", "", $email, $name, utf8_decode(_mb("Your Geoportal account")), utf8_decode($userMessage), $error_msg)) {
+			if(!$admin->sendEmail("", "", $email, $name, mb_convert_encoding(_mb("Your Geoportal account"), 'ISO-8859-1'), mb_convert_encoding($userMessage, 'ISO-8859-1'), $error_msg)) {
 				return _mb("Registry data could not be send. Please check mail address.");
 				$e = new mb_exception("MAIL FAIL!");
 			}
@@ -661,7 +535,7 @@ class User implements RPCObject{
 			$userMessage .= _mb("Follow this link to login to Mapbender").": \n";
 			$userMessage .= LOGIN."\n";
 			$userMail = $admin->getEmailByUserId($this->id);
-			if(!$admin->sendEmail("", "", $userMail, $this->name, utf8_decode(_mb("Your Mapbender Geoportal account")), utf8_decode($userMessage), $error_msg)) {
+			if(!$admin->sendEmail("", "", $userMail, $this->name, mb_convert_encoding(_mb("Your Mapbender Geoportal account"), 'ISO-8859-1'), mb_convert_encoding($userMessage, 'ISO-8859-1'), $error_msg)) {
 				return _mb("Registry data could not be send. Please check mail address.");
 				$e = new mb_exception("MAIL FAIL!");
 			}
@@ -676,13 +550,13 @@ class User implements RPCObject{
     */
 	public static function getList($filter) {
 		//FIXME: optimize
-		$name = $filter->name ? $filter->name : null;
+		$name = $filter->name ?: null;
 		$owner = $filter->owner && is_numeric($filter->owner) ? intval($filter->owner) : null;
-		$users = Array();
+		$users = [];
 		$sql_userlist = "SELECT mb_user_id FROM mb_user";
-		$andConditions = array();
-		$v = array();
-		$t = array();
+		$andConditions = [];
+		$v = [];
+		$t = [];
 		if (!is_null($name)) {
 			$v[]= $name;
 			$t[]= "s";
@@ -703,7 +577,7 @@ class User implements RPCObject{
 		    try {
 		        $users[] = new User($row['mb_user_id']);
 		    }
-		    catch(Exception $E) {
+		    catch(Exception) {
 		        continue;
 		        //FIXME: should catch some errors here
 		    }
@@ -742,8 +616,8 @@ class User implements RPCObject{
     public function selfRegisterNewUser($mbUserName, $mbUserEmail, $mbUserPassword, $mbUserOrganization, $mbUserDepartment, $mbUserPhone, $mbUserNewsletter=false, $mbUserAllowSurvey=false, $timestampDsgvoAccepted=0, $mbUserHashAlgo = 'MD5') {
 	//check if user with name already exists - if so return false
 	$sql = "SELECT * FROM mb_user WHERE mb_user_name = $1";
- 	$v = array($mbUserName); // wird in unserer Lösung immer md5 genutzt?
-	$t = array('s');
+ 	$v = [$mbUserName]; // wird in unserer Lösung immer md5 genutzt?
+	$t = ['s'];
  	$res = db_prep_query($sql, $v, $t);
 	if(db_numrows($res) == 0){
 		//$userAlreadyExists = false;
@@ -753,7 +627,7 @@ class User implements RPCObject{
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:selfRegisterNewUser()";
 		$this->returnObject->error->message = "User with name: ".$mbUserName." alreadyRegistrated!";
-		$this->returnObject->error->{__type} = "Content already exists";
+		$this->returnObject->error->{\__TYPE} = "Content already exists";
 		return json_encode($this->returnObject);
 	}
 	//mb_user_owner
@@ -779,20 +653,20 @@ class User implements RPCObject{
 	//define hard coded values
 	$mb_user_uuid = $uuid;
 	$mb_user_activation_key = md5($uuid);
-	$password = password_hash($mbUserPassword, PASSWORD_BCRYPT);
+	$password = password_hash((string) $mbUserPassword, PASSWORD_BCRYPT);
 	$mb_user_digest_hash = $mbUserHashAlgo;
 	$timestampDsgvoAccepted = 1; //bigint!
 	switch($mb_user_digest_hash) {
 		case "MD5":
-			$mb_user_digest = hash(strtolower($mb_user_digest_hash), $mbUserName.";".$mbUserEmail.":".REALM.":".$mbUserPassword);
-			$mb_user_aldigest = hash(strtolower($mb_user_digest_hash), $mbUserName.":".REALM.":".$mbUserPassword);
+			$mb_user_digest = hash(strtolower((string) $mb_user_digest_hash), $mbUserName.";".$mbUserEmail.":".REALM.":".$mbUserPassword);
+			$mb_user_aldigest = hash(strtolower((string) $mb_user_digest_hash), $mbUserName.":".REALM.":".$mbUserPassword);
 			//TODO deactivate in production
 			//$mb_user_password = hash(strtolower($mb_user_digest_hash), $mbUserPassword);
 			$mb_user_password = "";
 			break;
 		default:
-			$mb_user_digest = hash(strtolower($mb_user_digest_hash), $mbUserName.";".$mbUserEmail.":".REALM.":".$mbUserPassword);
-			$mb_user_aldigest = hash(strtolower($mb_user_digest_hash), $mbUserName.":".REALM.":".$mbUserPassword);
+			$mb_user_digest = hash(strtolower((string) $mb_user_digest_hash), $mbUserName.";".$mbUserEmail.":".REALM.":".$mbUserPassword);
+			$mb_user_aldigest = hash(strtolower((string) $mb_user_digest_hash), $mbUserName.":".REALM.":".$mbUserPassword);
 			//TODO deactivate in production
 			//$mb_user_password = hash(strtolower($mb_user_digest_hash), $mbUserPassword);
 			$mb_user_password = "";
@@ -808,8 +682,8 @@ class User implements RPCObject{
 	} else {
 		$mbUserAllowSurvey = 't';
 	}
-	$v = array($mbUserName, $mbUserEmail, $mbUserOrganization, $mbUserDepartment, $mbUserPhone, $mbUserNewsletter, $mbUserAllowSurvey, $timestampDsgvoAccepted, $mb_user_activation_key, 'f', (integer)$mb_user_owner, $password, $mb_user_digest, $mb_user_aldigest, $mb_user_digest_hash, $uuid, $mb_user_password);
-	$t = array('s','s','s','s','s','b','b','i','s','b','i','s','s','s','s','s','s');
+	$v = [$mbUserName, $mbUserEmail, $mbUserOrganization, $mbUserDepartment, $mbUserPhone, $mbUserNewsletter, $mbUserAllowSurvey, $timestampDsgvoAccepted, $mb_user_activation_key, 'f', (integer)$mb_user_owner, $password, $mb_user_digest, $mb_user_aldigest, $mb_user_digest_hash, $uuid, $mb_user_password];
+	$t = ['s', 's', 's', 's', 's', 'b', 'b', 'i', 's', 'b', 'i', 's', 's', 's', 's', 's', 's'];
 	$res = db_prep_query($sql, $v, $t);
 	if (!$res) {
 		$e = new mb_exception("classes/class_user.php: An error occured when trying to insert user '".$mbUserName."' into mapbender mb_user table!");
@@ -817,20 +691,20 @@ class User implements RPCObject{
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:selfRegisterNewUser()";
 		$this->returnObject->error->message = "An error occured when trying to insert user '".$mbUserName."' into mapbender mb_user table!";
-		$this->returnObject->error->{__type} = "Database exception";
+		$this->returnObject->error->{\__TYPE} = "Database exception";
 		return json_encode($this->returnObject);
 	}
 	//get id from user with initial uuid
 	$sql = "SELECT * FROM mb_user WHERE uuid = $1";
-	$v = array($mb_user_uuid);
-	$t = array('s');
+	$v = [$mb_user_uuid];
+	$t = ['s'];
 	$res = db_prep_query($sql, $v, $t);
 	//Important for json encode/decode: fetch assoc as associated array!
 	$row = db_fetch_assoc($res);
 	//insert user in to public group!
 	$sql = "INSERT INTO mb_user_mb_group (fkey_mb_user_id, fkey_mb_group_id) VALUES ($1, $2)";
-	$v = array($row['mb_user_id'], $publicGroupId);
-	$t = array('i', 'i');
+	$v = [$row['mb_user_id'], $publicGroupId];
+	$t = ['i', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	if (!$res) {
 		$e = new mb_exception("classes/class_user.php: An error occured when trying to insert user '".$row['mb_user_id']."' into group '".$publicGroupId."' of mapbender mb_group table!");
@@ -838,7 +712,7 @@ class User implements RPCObject{
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:selfRegisterNewUser()";
 		$this->returnObject->error->message = "An error occured when trying to insert user '".$row['mb_user_id']."' into group '".$publicGroupId."' of mapbender mb_group table!";
-		$this->returnObject->error->{__type} = "Database exception";
+		$this->returnObject->error->{\__TYPE} = "Database exception";
 		return json_encode($this->returnObject);
 	}
 	//return result
@@ -857,21 +731,22 @@ class User implements RPCObject{
     */
     public function authenticateUserByName($mbUserName, $userPassword, $mbUserHashAlgo = 'MD5') {
 	$sql = "SELECT * FROM mb_user WHERE mb_user_name = $1";
-	$v = array($mbUserName);
-	$t = array('s');
+	$v = [$mbUserName];
+	$t = ['s'];
 	$res = db_prep_query($sql, $v, $t);
 	if(db_numrows($res) == 0){
 		$e = new mb_notice("classes/class_user.php: "."No account for user ".$mbUserName. " found in mapbender database!");
 		$this->returnObject->success = false;
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:authenticateUserByName()";
+		$this->returnObject->error = new stdClass();
 		$this->returnObject->error->message = "No account for user with name: ".$mbUserName." found in mapbender database!";
-		$this->returnObject->error->{__type} = "Object not found";
+		$this->returnObject->error->{"__TYPE"} = "Object not found";
 		return json_encode($this->returnObject);
 	}
 	$row = db_fetch_array($res);
 	$mbUserEmail = $row['mb_user_email'];
-	list($loginRedirectUrl,$activateRedirectUrl,$registerRedirectUrl) = $this->checkDjango();
+	[$loginRedirectUrl, $activateRedirectUrl, $registerRedirectUrl] = $this->checkDjango();
 	//check all
 	//first login on new system, set (salt - maybe later - and ) new password when password column is empty, delete old unsecure md5 hash
 	//Test if account has already been activated by the user
@@ -884,7 +759,7 @@ class User implements RPCObject{
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:authenticateUserByName()";
 		$this->returnObject->error->message = "Account for user with name: ".$mbUserName." has not been activated til now. Please activate the account to allow authentication: ".$activateRedirectUrl;
-		$this->returnObject->error->{__type} = "Method not possible";
+		$this->returnObject->error->{\__TYPE} = "Method not possible";
 		return json_encode($this->returnObject);
 	} else if ($row['is_active'] == "t" or $row['is_active'] == ""){ //maybe for older users which are registrated before 06/2019
 		//change password only, if secure password not already given !!!!!!
@@ -892,26 +767,26 @@ class User implements RPCObject{
 		if($row['password'] == "" || $row['password'] == null){
 			$e = new mb_notice("classes/class_user.php: "."New bcrypt(ed) password not set - will be set now for user: ".$userName. "!");
 			$e = new mb_notice("classes/class_user.php: "."First check old password if this one exists!");
-			if($row['mb_user_password'] == hash(strtolower($mbUserHashAlgo), $userPassword)){
+			if($row['mb_user_password'] == hash(strtolower((string) $mbUserHashAlgo), (string) $userPassword)){
 				//generate bcrypt hash
 				$sql = "UPDATE mb_user SET password = $1 WHERE mb_user_id = $2";
-				$newCryptedPassword = password_hash($userPassword, PASSWORD_BCRYPT);
-				$v = array($newCryptedPassword, $row['mb_user_id']);
-				$t = array('s','i');
+				$newCryptedPassword = password_hash((string) $userPassword, PASSWORD_BCRYPT);
+				$v = [$newCryptedPassword, $row['mb_user_id']];
+				$t = ['s', 'i'];
 				$res = db_prep_query($sql,$v,$t);
 				// delete old hashed passwords (mostly md5)
 				if ($row['create_digest'] == 'f') {
 					$sql = "UPDATE mb_user SET mb_user_password = $1 , mb_user_digest = $2, mb_user_aldigest = $3 WHERE mb_user_id = $4";
-					$v = array('','','',$row['mb_user_id']);
-					$t = array('s','s','s','i');
+					$v = ['', '', '', $row['mb_user_id']];
+					$t = ['s', 's', 's', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 					$row['mb_user_password'] = '';
 					$row['mb_user_digest'] = '';
 					$row['mb_user_aldigest'] = '';
 				} else {
 					$sql = "UPDATE mb_user SET mb_user_password = $1 WHERE mb_user_id = $2";
-					$v = array('',$row['mb_user_id']);
-					$t = array('s','i');
+					$v = ['', $row['mb_user_id']];
+					$t = ['s', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 					$row['mb_user_password'] = '';
 				}
@@ -929,7 +804,7 @@ class User implements RPCObject{
 				unset($this->returnObject->result);
 				$this->returnObject->help = "class_user.php:authenticateUserByName()";
 				$this->returnObject->error->message = "Could not authenticate user ".$mbUserName. " with old password - either the password is wrong or the hash algo differs!";
-				$this->returnObject->error->{__type} = "Access denied";
+				$this->returnObject->error->{\__TYPE} = "Access denied";
 				return json_encode($this->returnObject);
 			}
 		} else {
@@ -937,30 +812,30 @@ class User implements RPCObject{
 //$e = new mb_exception("classes/class_user.php: "."New - secure - password: ".$row['password']);
 			// salt is included in the hashed password
 			$salt = $row['password'];
-			if (password_verify($userPassword, $salt)) {
+			if (password_verify((string) $userPassword, (string) $salt)) {
 				//delete all old unsecure passwords if given!!!
 				$e = new mb_notice("classes/class_user.php: "."Try to delete all unsecure passwords!");
 				if ($row['create_digest'] == 'f') {
 					$e = new mb_notice("classes/class_user.php: "."Try to delete all unsecure passwords!");
 					$sql = "UPDATE mb_user SET mb_user_password = $1 , mb_user_digest = $2, mb_user_aldigest = $3 WHERE mb_user_id = $4";
-					$v = array('','','',$row['mb_user_id']);
-					$t = array('s','s','s','i');
+					$v = ['', '', '', $row['mb_user_id']];
+					$t = ['s', 's', 's', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 				} else {
 					$sql = "UPDATE mb_user SET mb_user_password = $1, mb_user_digest = $2, mb_user_aldigest = $3 WHERE mb_user_id = $4";
-					$v = array('',hash(strtolower($mbUserHashAlgo), $mbUserName.";".$mbUserEmail.":".REALM.":".$userPassword),hash(strtolower($mbUserHashAlgo), $mbUserName.":".REALM.":".$userPassword),$row['mb_user_id']);
-					$t = array('s','s','s','i');
+					$v = ['', hash(strtolower((string) $mbUserHashAlgo), $mbUserName.";".$mbUserEmail.":".REALM.":".$userPassword), hash(strtolower((string) $mbUserHashAlgo), $mbUserName.":".REALM.":".$userPassword), $row['mb_user_id']];
+					$t = ['s', 's', 's', 'i'];
 					$res = db_prep_query($sql,$v,$t);
 				}
 				//successful login
 				$sql = "UPDATE mb_user SET mb_user_login_count = 0 WHERE mb_user_name = $1";
-				$v = array($mbUserName);
-				$t = array('s');
+				$v = [$mbUserName];
+				$t = ['s'];
 				$res = db_prep_query($sql,$v,$t);
 
 				$sql = "SELECT * FROM mb_user WHERE mb_user_name = $1";
-				$v = array($mbUserName);
-				$t = array('s');
+				$v = [$mbUserName];
+				$t = ['s'];
 				$res = db_prep_query($sql,$v,$t);
 				$row = db_fetch_assoc($res);
 				$this->returnObject->success = true;
@@ -978,14 +853,14 @@ class User implements RPCObject{
 			$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
 
 			$sql = "UPDATE mb_user SET is_active = False WHERE mb_user_name = $1";
-			$v = array($mbUserName);
-			$t = array('s');
+			$v = [$mbUserName];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
 			$activation_key = substr(str_shuffle($permitted_chars), 0, 50);
 
 			$sql = "UPDATE mb_user SET activation_key = $1 WHERE mb_user_name = $2";
-			$v = array($activation_key,$mbUserName);
-			$t = array('s','s');
+			$v = [$activation_key, $mbUserName];
+			$t = ['s', 's'];
 			$res = db_prep_query($sql,$v,$t);
 
 			$e = new mb_exception("classes/class_user.php: "."Password failed third time for ".$mbUserName. ". Account is now locked! Reactivation Mail was sent!");
@@ -993,7 +868,7 @@ class User implements RPCObject{
 			unset($this->returnObject->result);
 			$this->returnObject->help = "class_user.php:authenticateUserByName()";
 			$this->returnObject->error->message = "Password failed third time for ".$mbUserName. ". Account is now locked! Reactivation Mail was sent!";
-			$this->returnObject->error->{__type} = "Access denied";
+			$this->returnObject->error->{\__TYPE} = "Access denied";
 			# send reactivationmail
 			$e = new mb_exception("sending email to name=".$row['mb_user_name']."  email=".$row['mb_user_email']." key=".$activation_key);
 			if (defined("DJANGO_PORTAL") && DJANGO_PORTAL == true) {
@@ -1009,8 +884,8 @@ class User implements RPCObject{
 		}else{
 
 			$sql = "UPDATE mb_user SET mb_user_login_count = mb_user_login_count + 1 WHERE mb_user_name = $1";
-			$v = array($mbUserName);
-			$t = array('s');
+			$v = [$mbUserName];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
 
 			$e = new mb_exception("classes/class_user.php: "."Account for activated user ".$mbUserName. " could not be authenticated with given password!");
@@ -1018,7 +893,7 @@ class User implements RPCObject{
 			unset($this->returnObject->result);
 			$this->returnObject->help = "class_user.php:authenticateUserByName()";
 			$this->returnObject->error->message = "Account for activated user with name: ".$mbUserName." could not be authenticated with given password!";
-			$this->returnObject->error->{__type} = "Access denied";
+			$this->returnObject->error->{\__TYPE} = "Access denied";
 			return json_encode($this->returnObject);
 
 		}
@@ -1030,7 +905,7 @@ class User implements RPCObject{
 		unset($this->returnObject->result);
 		$this->returnObject->help = "class_user.php:authenticateUserByName()";
 		$this->returnObject->error->message = "Account for user (not active!) with name: ".$mbUserName." could not be authenticated with given password!";
-		$this->returnObject->error->{__type} = "Access denied";
+		$this->returnObject->error->{\__TYPE} = "Access denied";
 		return json_encode($this->returnObject);
 	}
     }
@@ -1045,16 +920,16 @@ class User implements RPCObject{
 	 */
 	public function getApplicationsByPermission ($ignorePublic = false, $categoryFilter = false) {
 		$mb_user_id = $this->id;
-		$arrayGuis = array();
-		$mb_user_groups = array();
+		$arrayGuis = [];
+		$mb_user_groups = [];
 		//exchange for the new role system - there are roles which don't include permissions explicitly
 		$sql_groups = "SELECT fkey_mb_group_id FROM ";
 		$sql_groups .= "(SELECT * from mb_user_mb_group left join mb_role on ";
 		$sql_groups .= " mb_user_mb_group.mb_user_mb_group_type = mb_role.role_id ";
 		$sql_groups .= " WHERE mb_role.role_exclude_auth != 1)  AS mb_user_mb_group WHERE fkey_mb_user_id = $1 ";
 		//$sql_groups = "SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 ";
-		$v = array($mb_user_id);
-		$t = array("i");
+		$v = [$mb_user_id];
+		$t = ["i"];
 		$res_groups = db_prep_query($sql_groups,$v,$t);
 		$cnt_groups = 0;
 		while($row = db_fetch_array($res_groups)){
@@ -1062,8 +937,8 @@ class User implements RPCObject{
 			$cnt_groups++;
 		}
 		if($cnt_groups > 0){
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql_g = "SELECT gui.gui_id FROM gui JOIN gui_mb_group ";
 			$sql_g .= " ON gui.gui_id = gui_mb_group.fkey_gui_id WHERE gui_mb_group.fkey_mb_group_id IN (";
 			for($i=0; $i<count($mb_user_groups);$i++){
@@ -1092,15 +967,15 @@ class User implements RPCObject{
 			$sql_guis .= " AND gui.gui_public = 1 ";
 		}
 		$sql_guis .= " GROUP BY gui.gui_id";
-                $v = array($mb_user_id);
-		$t = array("i");
+                $v = [$mb_user_id];
+		$t = ["i"];
                 if ($categoryFilter != false) {
 		    $sql_guis = "SELECT fkey_gui_id as gui_id from gui_gui_category as gui_id WHERE fkey_gui_id IN "."(".$sql_guis.") AND fkey_gui_category_id = $2";
 		    array_push($v, $categoryFilter);
 		    array_push($t, "i");
 		}
 		$res_guis = db_prep_query($sql_guis,$v,$t);
-		$guis = array();
+		$guis = [];
 		while($row = db_fetch_array($res_guis)){
 			if(!in_array($row['gui_id'],$arrayGuis)){
 				array_push($arrayGuis,$row["gui_id"]);
@@ -1118,8 +993,8 @@ class User implements RPCObject{
 
 	public function getOwnedWfs () {
 		$sql = "SELECT wfs_id FROM wfs WHERE wfs_owner = $1";
-		$res = db_prep_query($sql, array($this->id), array("i"));
-		$wfsIdArray = array();
+		$res = db_prep_query($sql, [$this->id], ["i"]);
+		$wfsIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$wfsIdArray[]= $row["wfs_id"];
 		}
@@ -1127,11 +1002,11 @@ class User implements RPCObject{
 	}
 
 	public function getWfsByPermission () {
-		$wfsArray = array();
+		$wfsArray = [];
 		$appArray = $this->getApplicationsByPermission();
 		if (is_array($appArray) && count($appArray) > 0) {
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT DISTINCT fkey_wfs_id FROM gui_wfs WHERE fkey_gui_id IN (";
 			for ($i = 0; $i < count($appArray); $i++) {
 				if($i > 0) {
@@ -1153,12 +1028,12 @@ class User implements RPCObject{
 	}
 
 	public function getWfsConfByWfsOwner () {
-		$wfsConfIdArray = array();
+		$wfsConfIdArray = [];
 
 		$sql = "SELECT * FROM wfs_conf, wfs WHERE wfs.wfs_owner = $1 AND " .
 			"wfs_conf.fkey_wfs_id = wfs.wfs_id ORDER BY wfs_conf.wfs_conf_id";
-		$v = array($this->id);
-		$t = array('i');
+		$v = [$this->id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		while($row = db_fetch_array($res)){
 			$wfsConfIdArray[]= $row["wfs_conf_id"];
@@ -1177,15 +1052,15 @@ class User implements RPCObject{
 		if (count($array_guis) == 0) {
 			return false;
 		}
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		//Example sql: select featuretype_id from wfs_featuretype where fkey_wfs_id in (340, 341, 342) and featuretype_name in ('AXE_ROUTE','AX_Flurstueck') and featuretype_id in (select fkey_featuretype_id from wfs_conf where wfs_conf_id in (select fkey_wfs_conf_id from gui_wfs_conf where gui_id in ('testgui')));
 		$sql = "SELECT featuretype_id FROM wfs_featuretype WHERE fkey_wfs_id = $1 ";
 		$v[0] = $wfsId;
 		$t[0] = 'i';
 		$sql .= "AND featuretype_name IN (";
 		$c = 2;
-		$featuretypeArray = explode(",", $typenames);
+		$featuretypeArray = explode(",", (string) $typenames);
 		$numberOfFeaturetypes = count($featuretypeArray);
 		//test for string or array?
 		for ($i = 0; $i < $numberOfFeaturetypes; $i++) {
@@ -1241,7 +1116,7 @@ class User implements RPCObject{
 	 */
 	public function getWfsConfByPermission () {
 		$userid = $this->id;
-	 	$guisByPer = array();
+	 	$guisByPer = [];
 //	 	1.
 		$adm = new administration();
 	 	$guisByPer = $adm->getGuisByPermission($userid, true);
@@ -1249,7 +1124,7 @@ class User implements RPCObject{
 		if (func_num_args() === 1) {
 			$arg1 = func_get_arg(0);
 			if (!is_array($arg1)) {
-				$arg1 = array($arg1);
+				$arg1 = [$arg1];
 			}
 
 			$appIdArray = $arg1;
@@ -1260,10 +1135,10 @@ class User implements RPCObject{
 //		$e = new mb_exception(serialize($guisByPer));
 
 //	 	2.
-		$ownWFSconfs = array();
+		$ownWFSconfs = [];
 		if(count($guisByPer)>0){
-			$v = array();
-			$t = array();
+			$v = [];
+			$t = [];
 			$sql = "SELECT wfs_conf.wfs_conf_id  FROM gui_wfs_conf, wfs_conf " .
 					"where wfs_conf.wfs_conf_id = gui_wfs_conf.fkey_wfs_conf_id " .
 					"and gui_wfs_conf.fkey_gui_id IN(";
@@ -1294,11 +1169,11 @@ class User implements RPCObject{
 	public function getWmcByOwner () {
 		$sql = "SELECT wmc_serial_id FROM mb_user_wmc ";
 		$sql .= "WHERE fkey_user_id = $1 GROUP BY wmc_serial_id";
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res_wmc = db_prep_query($sql, $v, $t);
 
-  		$wmcArray = array();
+  		$wmcArray = [];
 		while($row = db_fetch_array($res_wmc)){
 			array_push($wmcArray, $row["wmc_serial_id"]);
 		}
@@ -1316,10 +1191,10 @@ class User implements RPCObject{
 		if ($ignorePublic == true) {
 			$sql .= " AND wmc_public = 1";
 		}
-		$v = array($this->id);
-		$t = array("i");
+		$v = [$this->id];
+		$t = ["i"];
 		$res_wmc = db_prep_query($sql, $v, $t);
-  		$wmcArray = array();
+  		$wmcArray = [];
 		while($row = db_fetch_array($res_wmc)){
 			$wmcObj = new stdClass();
 			$wmcObj->wmc_serial_id = $row["wmc_serial_id"];
@@ -1332,8 +1207,8 @@ class User implements RPCObject{
 
 	public function isLayerAccessible ($layerId) {
 		$array_guis = $this->getApplicationsByPermission();
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT * FROM gui_layer WHERE fkey_gui_id IN (";
 		$c = 1;
 		for ($i = 0; $i < count($array_guis); $i++) {
@@ -1355,11 +1230,11 @@ class User implements RPCObject{
 
 	public function getAccessableLayers ($layerIdArray) {
 		if (gettype($layerIdArray) !== "array" || (gettype($layerIdArray) == "array" && count($layerIdArray) == 0) ) {
-			return array(0);
+			return [0];
 		}
 		$array_guis = $this->getApplicationsByPermission();
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT DISTINCT fkey_layer_id FROM gui_layer WHERE fkey_gui_id IN (";
 		$c = 1;
 		for ($i = 0; $i < count($array_guis); $i++) {
@@ -1388,7 +1263,7 @@ class User implements RPCObject{
 		}
 		$sql .= ") AND gui_layer_status = 1";
 		$res = db_prep_query($sql,$v,$t);
-		$allowedLayerIdArray = array();
+		$allowedLayerIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$allowedLayerIdArray[] = $row["fkey_layer_id"];
 		}
@@ -1397,8 +1272,8 @@ class User implements RPCObject{
 
 	public function isWmsAccessible ($wms_id) {
 		$array_guis = $this->getApplicationsByPermission();
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$sql = "SELECT * FROM gui_wms WHERE fkey_gui_id IN (";
 		$c = 1;
 		for ($i = 0; $i < count($array_guis); $i++) {
@@ -1423,8 +1298,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 } else {
 		$sql = "SELECT metadata_id FROM mb_metadata WHERE fkey_mb_user_id = $1";
 }
-		$res = db_prep_query($sql, array($this->id), array("i"));
-		$metadataIdArray = array();
+		$res = db_prep_query($sql, [$this->id], ["i"]);
+		$metadataIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$metadataIdArray[]= $row["metadata_id"];
 		}
@@ -1433,8 +1308,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 
 	public function getOwnedWms () {
 		$sql = "SELECT wms_id FROM wms WHERE wms_owner = $1";
-		$res = db_prep_query($sql, array($this->id), array("i"));
-		$wmsIdArray = array();
+		$res = db_prep_query($sql, [$this->id], ["i"]);
+		$wmsIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$wmsIdArray[]= $row["wms_id"];
 		}
@@ -1443,8 +1318,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 
 	public function getOwnedWmsScheduler () {
 		$sql = "SELECT scheduler_id FROM scheduler, wms WHERE wms.wms_id = scheduler.fkey_wms_id AND wms.wms_owner = $1";
-		$res = db_prep_query($sql, array($this->id), array("i"));
-		$wmsSchedulerIdArray = array();
+		$res = db_prep_query($sql, [$this->id], ["i"]);
+		$wmsSchedulerIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$wmsSchedulerIdArray[]= $row["scheduler_id"];
 		}
@@ -1454,8 +1329,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 
 	public function getOwnedGeodata () {
 		$sql = "SELECT metadata_id FROM mb_metadata WHERE fkey_mb_user_id = $1";
-		$res = db_prep_query($sql, array($this->id), array("i"));
-		$geodataIdArray = array();
+		$res = db_prep_query($sql, [$this->id], ["i"]);
+		$geodataIdArray = [];
 		while ($row = db_fetch_array($res)) {
 			$e = new mb_exception("metadata_id: ".$row["metadata_id"]);
 			$geodataIdArray[]= $row["metadata_id"];
@@ -1466,11 +1341,11 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 	public function isWmsOwner ($wms_id) {
 		// first get guis which deploy this wms.
         $sql = "SELECT fkey_gui_id FROM gui_wms WHERE fkey_wms_id = $1 GROUP BY fkey_gui_id";
-		$v = array($wms_id);
-		$t = array('i');
+		$v = [$wms_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 
-		$gui = array();
+		$gui = [];
 		while($row = db_fetch_array($res)){
 			$gui[] = $row["fkey_gui_id"];
 		}
@@ -1478,8 +1353,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
         if (count($gui) === 0) {
         	return false;
 		}
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 		$c = 1;
 		$sql = "(SELECT mb_user.mb_user_id FROM mb_user JOIN gui_mb_user ";
 		$sql .= "ON mb_user.mb_user_id = gui_mb_user.fkey_mb_user_id ";
@@ -1514,7 +1389,7 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 
 		$res = db_prep_query($sql,$v,$t);
 
-		$user = array();
+		$user = [];
 		while($row = db_fetch_array($res)){
 			$user[] = intval($row["mb_user_id"]);
 		}
@@ -1539,8 +1414,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 					$sql = "INSERT INTO mb_user_abo_ows (fkey_mb_user_id, fkey_wfs_id) VALUES ($1, $2)";
 					break;
 			}
-			$v = array($this->id, $id);
-			$t = array('i', 'i');
+			$v = [$this->id, $id];
+			$t = ['i', 'i'];
 			$res = db_prep_query($sql, $v, $t);
 			return ($res) ? true : false;
 		}
@@ -1563,8 +1438,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 					"AND fkey_mb_user_id = $2";
 				break;
 		}
-		$v = array($id, $this->id);
-		$t = array('i', 'i');
+		$v = [$id, $this->id];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		return ($res) ? true : false;
 	}
@@ -1607,8 +1482,8 @@ $sql = "SELECT metadata_id FROM mb_metadata WHERE type = 'application' AND fkey_
 					"fkey_mb_user_id = $2 LIMIT 1";
 				break;
 		}
-		$v = array($id, $this->id);
-		$t = array('i', 'i');
+		$v = [$id, $this->id];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		switch ($serviceType) {

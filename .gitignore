@@ -1,7 +1,63 @@
 /logs/*.log
+/log/*.log
+/log/php-errors.log
+/log/mb_error_*.log
+/http/phpcheck.php
 /http/tmp/*.png
 /http/tmp/*.pdf
 /http/tmp/*.xml
 /http/tmp/*.gfs
 /http/tmp/wmc/*
 /tools/tmp/*
+
+# --- PHP 8 migration workspace ---
+/.env
+
+# Mapbender conf/ render-from-dist files. The entrypoint copies the
+# matching *-dist template into place on first start; only the templates
+# belong in git. A few config files in upstream don't have a -dist
+# counterpart and are committed as-is — exempt those explicitly.
+/conf/*.conf
+/conf/*.json
+/conf/*.map
+/conf/*.js
+!/conf/*.conf-dist
+!/conf/*.json-dist
+!/conf/*.map-dist
+!/conf/*.js-dist
+!/conf/isoMetadata.conf
+!/conf/mimetype.conf
+!/conf/session.conf
+!/conf/excludeFromMonitoring.json
+!/conf/excludeHarvestMetadataUrls.json
+!/conf/geoJsonDefaultStyle.json
+/.remember/
+/.claude/
+/.idea/
+/.vscode/
+
+# composer (used only for migration tools, not committed)
+/vendor/
+/composer.lock
+
+# node / playwright
+/tests/characterization/node_modules/
+/tests/characterization/test-results/
+/tests/characterization/playwright-report/
+/tests/characterization/blob-report/
+/tests/characterization/.cache/
+
+# docker volumes / runtime data
+/docker/postgis/data/
+/docker/legacy/runtime/
+/docker/php8/runtime/
+
+# tool reports
+/migration-tools/reports/
+/.phpunit.cache/
+/.phpstan.cache/
+/.rector-cache/
+
+# OS junk
+.DS_Store
+Thumbs.db

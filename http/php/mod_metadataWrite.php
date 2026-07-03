@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__)."/../classes/class_metadata.php");
+require_once(__DIR__."/../classes/class_metadata.php");
 $userId = $_SERVER["argv"][1];
 $searchId = $_SERVER["argv"][2];
 $searchText = $_SERVER["argv"][3];

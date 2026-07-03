@@ -32,6 +32,6 @@
  };
 <?php
 ob_start();
-require_once(dirname(__FILE__) . "/../../lib/event.js");
-require_once(dirname(__FILE__) . "/../../lib/core.js");
+require_once(__DIR__ . "/../../lib/event.js");
+require_once(__DIR__ . "/../../lib/core.js");
 ?>

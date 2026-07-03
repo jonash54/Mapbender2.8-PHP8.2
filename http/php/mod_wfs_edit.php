@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require(__DIR__."/../classes/class_wfs_conf.php");
 $wfsConf = new wfs_conf();
 $resultObj['result'] = '';
 $resultObj['success'] = false;
@@ -52,7 +52,7 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
   		font-size : 12px;
   		color: #808080
   	}
-  	
+
   	-->
 </style>
 <title>wfs_edit</title>
@@ -131,34 +131,34 @@ if(isset($_POST["save"])){
         	$sql .= "0";
         }
         $sql .= " WHERE wfs_conf_id = $9;";
-        
-        $v = array($_POST["wfs_conf_abstract"], $_POST["g_label"], $_POST["g_label_id"], $_POST["g_button"], $_POST["g_button_id"], $_POST["g_style"], $_POST["g_buffer"], $_POST["g_res_style"], $_POST["gaz"]);
-        $t = array("s", "s", "s", "s", "s", "s", "s", "s", "i");
+
+        $v = [$_POST["wfs_conf_abstract"], $_POST["g_label"], $_POST["g_label_id"], $_POST["g_button"], $_POST["g_button_id"], $_POST["g_style"], $_POST["g_buffer"], $_POST["g_res_style"], $_POST["gaz"]];
+        $t = ["s", "s", "s", "s", "s", "s", "s", "s", "i"];
         $res = db_prep_query($sql, $v, $t);
-		        
+
 		if (isset($_POST["f_geom"])) {
 	        $sql = "UPDATE wfs_conf_element SET f_geom = 1 ";
 	        $sql .= "WHERE fkey_wfs_conf_id = $1 AND f_id = $2;";
-	        $v = array($_POST["gaz"], $_POST["f_geom"]);
-	        $t = array("i", "s");
+	        $v = [$_POST["gaz"], $_POST["f_geom"]];
+	        $t = ["i", "s"];
 			$res = db_prep_query($sql, $v, $t);
-			
+
 			$sql = "UPDATE wfs_conf_element SET f_geom = 0 ";
 	        $sql .= "WHERE fkey_wfs_conf_id = $1 AND f_id <> $2;";
-	        $v = array($_POST["gaz"], $_POST["f_geom"]);
-	        $t = array("i", "s");
+	        $v = [$_POST["gaz"], $_POST["f_geom"]];
+	        $t = ["i", "s"];
 			$res = db_prep_query($sql, $v, $t);
 		}
 		else {
 			$sql = "UPDATE wfs_conf_element SET f_geom = 0 ";
 	        $sql .= "WHERE fkey_wfs_conf_id = $1;";
-	        $v = array($_POST["gaz"]);
-	        $t = array("i");
+	        $v = [$_POST["gaz"]];
+	        $t = ["i"];
 			$res = db_prep_query($sql, $v, $t);
 		}
-		
+
         for($i=0; $i<$_POST["num"]; $i++){
-        	
+
                 $sql = "UPDATE wfs_conf_element SET f_search = '";
                 if (!empty($_POST["f_search".$i])) {
                 	$sql .= "1";
@@ -210,8 +210,8 @@ if(isset($_POST["save"])){
                 $sql .= ", f_operator = $10";
 				$sql .= " WHERE fkey_wfs_conf_id = $11 AND f_id = $12;";
 
-				$v = array($_POST["f_pos".$i], $_POST["f_min_input".$i], $_POST["f_style_id".$i], $_POST["f_label".$i], $_POST["f_label_id".$i], $_POST["f_respos".$i], $_POST["f_form_element_html".$i], $_POST["f_auth_varname".$i], $_POST["f_detailpos".$i], $_POST["f_operator".$i], $_POST["gaz"], $_POST["f_id".$i]);
-				$t = array("s", "i", "s", "s", "s", "s", "s", "s", "i", "s", "i", "s");
+				$v = [$_POST["f_pos".$i], $_POST["f_min_input".$i], $_POST["f_style_id".$i], $_POST["f_label".$i], $_POST["f_label_id".$i], $_POST["f_respos".$i], $_POST["f_form_element_html".$i], $_POST["f_auth_varname".$i], $_POST["f_detailpos".$i], $_POST["f_operator".$i], $_POST["gaz"], $_POST["f_id".$i]];
+				$t = ["s", "i", "s", "s", "s", "s", "s", "s", "i", "s", "i", "s"];
                 $res = db_prep_query($sql, $v, $t);
         }
 }
@@ -242,7 +242,7 @@ echo "</select>";
 function toImage($text) {
 	$angle = 90;
 	if (extension_loaded("gd2")) {
-		return "<img src='../php/createImageFromText.php?text=" . urlencode($text) . "&angle=" . $angle . "'>";
+		return "<img src='../php/createImageFromText.php?text=" . urlencode((string) $text) . "&angle=" . $angle . "'>";
 	}
 	return $text;
 }
@@ -257,8 +257,8 @@ if (isset($_POST["gaz"])) {
 		die();
 	}
         $sql = "SELECT * FROM wfs_conf WHERE wfs_conf_id = $1";
-        $v = array($_POST["gaz"]);
-        $t = array("i");
+        $v = [$_POST["gaz"]];
+        $t = ["i"];
         $res = db_prep_query($sql, $v, $t);
         if($row = db_fetch_array($res)){
                 echo "<table>";
@@ -281,10 +281,10 @@ if (isset($_POST["gaz"])) {
         $sql = "SELECT * FROM wfs_conf_element ";
         $sql .= "JOIN wfs_element ON wfs_conf_element.f_id = wfs_element.element_id ";
         $sql .= "WHERE fkey_wfs_conf_id = $1 ORDER BY f_id";
-		$v = array($_POST["gaz"]);
-		$t = array("i");
+		$v = [$_POST["gaz"]];
+		$t = ["i"];
         $res = db_prep_query($sql, $v, $t);
-		
+
         echo "<table border='1'>";
         echo "<tr valign = bottom>";
                 echo "<td>" . toImage('ID') . "</td>";
@@ -342,8 +342,8 @@ if (isset($_POST["gaz"])) {
                 echo "<td><input name='f_toupper".$cnt."' type='checkbox'";
                 if($row["f_toupper"] == 1){ echo " checked"; }
                 echo "></td>";
-                echo "<td><input name='f_label".$cnt."' type='text' size='4' value=\"".htmlentities($row["f_label"], ENT_QUOTES, "UTF-8")."\"></td>";
-                echo "<td><input name='f_label_id".$cnt."' type='text' size='2' value=\"".htmlentities($row["f_label_id"], ENT_QUOTES, "UTF-8")."\"></td>";
+                echo "<td><input name='f_label".$cnt."' type='text' size='4' value=\"".htmlentities((string) $row["f_label"], ENT_QUOTES, "UTF-8")."\"></td>";
+                echo "<td><input name='f_label_id".$cnt."' type='text' size='2' value=\"".htmlentities((string) $row["f_label_id"], ENT_QUOTES, "UTF-8")."\"></td>";
                 echo "<td><input name='f_show".$cnt."' type='checkbox'";
                 if($row["f_show"] == 1){ echo " checked"; }
                 echo "></td>";
@@ -358,8 +358,8 @@ if (isset($_POST["gaz"])) {
                 echo "<td><input name='f_edit".$cnt."' type='checkbox'";
                 if($row["f_edit"] == 1){ echo " checked"; }
                 echo "></td>";
-                echo "<td><textarea name='f_form_element_html".$cnt."' cols='15' rows='1' >".htmlentities($row["f_form_element_html"], ENT_QUOTES, "UTF-8")."</textarea></td>";
-                echo "<td><input name='f_auth_varname$cnt' type='text' size='8' value=\"" . htmlentities($row["f_auth_varname"], ENT_QUOTES, "UTF-8") . "\"></td>";
+                echo "<td><textarea name='f_form_element_html".$cnt."' cols='15' rows='1' >".htmlentities((string) $row["f_form_element_html"], ENT_QUOTES, "UTF-8")."</textarea></td>";
+                echo "<td><input name='f_auth_varname$cnt' type='text' size='8' value=\"" . htmlentities((string) $row["f_auth_varname"], ENT_QUOTES, "UTF-8") . "\"></td>";
                 echo "<td><select name='f_operator".$cnt."' id='f_operator".$cnt."' ";
                 if($row["f_search"] != 1){
                 	echo "disabled";
@@ -389,7 +389,7 @@ if (isset($_POST["gaz"])) {
 				echo "<option value='greater_equal_than' ";
                 if($row["f_operator"] == 'greater_equal_than'){ echo " selected"; }
 				echo ">>=</option>";
-				
+
      			echo "</select></td>";
                 echo "</tr>";
                 $cnt++;

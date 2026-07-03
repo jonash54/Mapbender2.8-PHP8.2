@@ -26,9 +26,9 @@
  * and Simplified BSD license.  
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
-require_once(dirname(__FILE__)."/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once(__DIR__."/mb_validateSession.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 
 //new mb_notice("########### SCHABLONE:");
 $loadWithTemplate = Mapbender::session()->get("loadWithTemplate");
@@ -44,13 +44,13 @@ Mapbender.events.afterInit.register(function () {
 <!--	if(loadWithTemplate != '' && loadWithTemplate == '1') {-->
 	if(true) {
     <?php
-        $v = array($wmc_id);
-        $t = array('i');
+        $v = [$wmc_id];
+        $t = ['i'];
 
         $sql  = "SELECT target,type,key,value";
         $sql .= " FROM mb_user_wmc_template WHERE fkey_wmc_id = $1";
         $result = db_prep_query($sql,$v,$t);
-        $elements = array();
+        $elements = [];
         while($row = db_fetch_array($result)){
             if($row["type"]=="text") {
                 $elements[$row["target"]][$row["type"]] = $row["value"];

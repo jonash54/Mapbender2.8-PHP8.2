@@ -22,10 +22,10 @@
 * getlegendurl
 *
 **/
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_connector.php");
 
 class SaveLegend{
 
@@ -36,7 +36,7 @@ class SaveLegend{
 		$x = new connector($url);
 		//save file in tmp folder to extract right size - sometimes the size could not be detected by url!
 		if($legendFileHandle = fopen($legend_filename, "w")){
-			fwrite($legendFileHandle,$x->file);
+			fwrite($legendFileHandle,(string) $x->file);
 			fclose($legendFileHandle);
 			$e = new mb_notice("SaveLegend: new legend file created: ".$legend_filename);
 		} else {

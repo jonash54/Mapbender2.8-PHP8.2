@@ -17,23 +17,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_cswClient.php");
-require_once(dirname(__FILE__)."/class_iso19139.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_cswClient.php");
+require_once(__DIR__."/class_iso19139.php");
 /**
  * Class to propagate metadata from mapbender to connected metadata catalogues
  * @author armin11
  *
  */
 class propagateMetadata {
-	var $cswId;
-	var $resourceType;
+	public $cswId;
+	public $resourceType;
 	//var $operation; // 'push' or 'delete'
-	var $resourceIds = array();
-	var $resourceUuids = array();
-	var $active = false;
-	var $absolutePath;
-	var $cswClient;
+	public $resourceIds = [];
+	public $resourceUuids = [];
+	public $active = false;
+	public $absolutePath;
+	public $cswClient;
 	
 	public function __construct() {
 				if (defined("SYNC_CHANGES_TO_CSW") && SYNC_CHANGES_TO_CSW == true && defined("SYNC_CATALOGUE_ID") && is_int(SYNC_CATALOGUE_ID)) {

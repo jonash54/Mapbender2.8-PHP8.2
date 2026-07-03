@@ -1,12 +1,12 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -50,22 +50,13 @@ mb_metadata WHERE metadata_id IN ($geodataList);
 
 SQL;
 		$res = db_query($sql);
-		$resultObj = array(
-			"header" => array(
-				_mb("Geodata ID"),
-				_mb("title"),
-				_mb("last change"),
-				_mb("change"),
-				_mb("origin"),
-				_mb("datasetid"),
-				_mb("uuid")
-			), 
-			"data" => array()
-		);
+		$resultObj = ["header" => [_mb("Geodata ID"), _mb("title"), _mb("last change"), _mb("change"), _mb("origin"), _mb("datasetid"), _mb("uuid")], "data" => []];
 
 		while ($row = db_fetch_row($res)) {
 			// convert NULL to '', NULL values cause datatables to crash
-			$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+			$walk = array_walk($row, function (&$s) {
+       $s = strval($s);
+   });
 			$resultObj["data"][]= $row;
 		}
 		$ajaxResponse->setResult($resultObj);
@@ -79,30 +70,9 @@ SQL;
 		$wms = new wms();
 		$wms->createObjFromDBNoGui($wmsId);//here the owsproxyurls will be read out - to make previews with proxy urls
 
-		$fields = array(
-			"wms_id", 
-			"wms_abstract", 
-			"wms_title", 
-			"fees", 
-			"accessconstraints", 
-			"contactperson", 
-			"contactposition", 
-			"contactvoicetelephone", 
-			"contactfacsimiletelephone", 
-			"contactorganization", 
-			"address", 
-			"city", 
-			"stateorprovince", 
-			"postcode", 
-			"country", 
-			"contactelectronicmailaddress",
-			"wms_timestamp", 
-			"wms_timestamp_create",
-			"wms_network_access",
-			"fkey_mb_group_id"
-		);
+		$fields = ["wms_id", "wms_abstract", "wms_title", "fees", "accessconstraints", "contactperson", "contactposition", "contactvoicetelephone", "contactfacsimiletelephone", "contactorganization", "address", "city", "stateorprovince", "postcode", "country", "contactelectronicmailaddress", "wms_timestamp", "wms_timestamp_create", "wms_network_access", "fkey_mb_group_id"];
 
-		$resultObj = array();
+		$resultObj = [];
 		foreach ($fields as $field) {
 			if ($field == "wms_timestamp" || $field == "wms_timestamp_create") {
 				if ($wms->$field != "") {
@@ -118,7 +88,7 @@ SQL;
 		}
 		
 		// layer searchable
-		$resultObj["layer_searchable"] = array();
+		$resultObj["layer_searchable"] = [];
 		foreach ($wms->objLayer as $layer) {
 			if (intval($layer->layer_searchable) === 1) {
 				$resultObj["layer_searchable"][] = intval($layer->layer_uid);
@@ -136,7 +106,7 @@ WHERE keyword_id = fkey_keyword_id AND fkey_layer_id IN (
 SQL;
 
 		$keywordRes = db_query($keywordSql);
-		$keywords = array();
+		$keywords = [];
 		while ($keywordRow = db_fetch_assoc($keywordRes)) {
 			$keywords[]= $keywordRow["keyword"];
 		}
@@ -171,10 +141,10 @@ SQL;
 SELECT fkey_mb_group_id, mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM (SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 AND mb_user_mb_group_type = 2) AS a LEFT JOIN mb_group ON a.fkey_mb_group_id = mb_group.mb_group_id
 
 SQL;
-			$v = array($userId);
-			$t = array('i');
+			$v = [$userId];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["fkey_mb_group_id"] = $row["fkey_mb_group_id"];
@@ -193,10 +163,10 @@ SQL;
 SELECT mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM mb_group WHERE mb_group_id = $1
 
 SQL;
-			$v = array($resultObj["fkey_mb_group_id"]);
-			$t = array('i');
+			$v = [$resultObj["fkey_mb_group_id"]];
+			$t = ['i'];
 			$res = db_prep_query($sql,$v,$t);
-			$row = array();
+			$row = [];
 			if ($res) {
 				$row = db_fetch_assoc($res);
 				$resultObj["mb_group_title"] = $row["mb_group_title"];
@@ -228,7 +198,7 @@ FROM layer WHERE layer_id = $layerId;
 SQL;
 		$res = db_query($sql);
 
-		$resultObj = array();
+		$resultObj = [];
 		while ($row = db_fetch_assoc($res)) {
 			foreach ($row as $key => $value) {
 				$resultObj[$key] = $value;
@@ -272,7 +242,7 @@ WHERE keyword_id = fkey_keyword_id AND fkey_layer_id = $layerId
 SQL;
 		$res = db_query($sql);
 
-		$resultObj["layer_keyword"] = array();
+		$resultObj["layer_keyword"] = [];
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj["layer_keyword"][]= $row["keyword"];
 		}
@@ -284,11 +254,11 @@ WHERE fkey_layer_id = $layerId ) as relation ON
 mb_metadata.metadata_id = relation.fkey_metadata_id WHERE mb_metadata.origin IN ('capabilities','external','metador','upload')
 SQL;
 		$res = db_query($sql);
-		$resultObj["md_metadata"]->metadata_id = array();
-		$resultObj["md_metadata"]->uuid = array();
-		$resultObj["md_metadata"]->origin = array();
-		$resultObj["md_metadata"]->linktype = array();
-		$resultObj["md_metadata"]->link = array();
+		$resultObj["md_metadata"]->metadata_id = [];
+		$resultObj["md_metadata"]->uuid = [];
+		$resultObj["md_metadata"]->origin = [];
+		$resultObj["md_metadata"]->linktype = [];
+		$resultObj["md_metadata"]->link = [];
 		$i = 0;
 		while ($row = db_fetch_assoc($res)) {
 			$resultObj["md_metadata"]->metadata_id[$i]= $row["metadata_id"];
@@ -316,7 +286,7 @@ SQL;
 
 		$res = db_query($sql);
 
-		$rows = array();
+		$rows = [];
 		while ($row = db_fetch_assoc($res)) {
 			$rows[] = $row;
 		}
@@ -329,25 +299,11 @@ SQL;
 			} else {
 				$inspireCats = 0;
 				}
-			return array(
-				"left" => $left,
-				"right" => $right,
-				"parent" => $row["layer_parent"] !== "" ? intval($row["layer_parent"]) : null,
-				"pos" => intval($row["layer_pos"]),
-				"attr" => array (
-					"layer_id" => intval($row["layer_id"]),
-					"layer_name" => $row["layer_name"],
-					"layer_title" => $row["layer_title"],
-					"layer_abstract" => $row["layer_abstract"],
-					"layer_searchable" => intval($row["layer_searchable"]),
-					"layer_coupling" => intval($row["count_coupling"]),
-					"inspire_cats" => intval($inspireCats)
-				)
-			);
+			return ["left" => $left, "right" => $right, "parent" => $row["layer_parent"] !== "" ? intval($row["layer_parent"]) : null, "pos" => intval($row["layer_pos"]), "attr" => ["layer_id" => intval($row["layer_id"]), "layer_name" => $row["layer_name"], "layer_title" => $row["layer_title"], "layer_abstract" => $row["layer_abstract"], "layer_searchable" => intval($row["layer_searchable"]), "layer_coupling" => intval($row["count_coupling"]), "inspire_cats" => intval($inspireCats)]];
 		}
 
 		function addSubTree ($rows, $i, $left) {
-			$nodeArray = array();
+			$nodeArray = [];
 			$addNewNode = true;
 			for ($j = $i; $j < count($rows); $j++) {
 				$row = $rows[$j];
@@ -390,9 +346,7 @@ SQL;
 		
 
 		$nodeArray = addSubTree($rows, 0, 1);
-		$resultObj = array(
-			"nestedSets" => $nodeArray
-		);
+		$resultObj = ["nestedSets" => $nodeArray];
 		
 		$ajaxResponse->setResult($resultObj);
 		$ajaxResponse->setSuccess(true);
@@ -415,26 +369,7 @@ SQL;
 		$wms = new wms();
 		$wms->createObjFromDBNoGui($wmsId,false);//here the original urls will be used - cause the object will used to update the wms table
 		
-		$columns = array(
-			"wms_abstract", 
-			"wms_title", 
-			"fees", 
-			"accessconstraints", 
-			"contactperson", 
-			"contactposition", 
-			"contactvoicetelephone", 
-			"contactfacsimiletelephone", 
-			"contactorganization", 
-			"address", 
-			"city", 
-			"stateorprovince", 
-			"postcode", 
-			"country", 
-			"contactelectronicmailaddress",
-			"wms_termsofuse",
-			"wms_network_access",
-			"fkey_mb_group_id"
-		);
+		$columns = ["wms_abstract", "wms_title", "fees", "accessconstraints", "contactperson", "contactposition", "contactvoicetelephone", "contactfacsimiletelephone", "contactorganization", "address", "city", "stateorprovince", "postcode", "country", "contactelectronicmailaddress", "wms_termsofuse", "wms_network_access", "fkey_mb_group_id"];
 		foreach ($columns as $c) {
 			$value = $data->wms->$c;
 			if (!is_null($value)) {
@@ -482,20 +417,13 @@ SQL;
 				$ajaxResponse->setMessage(_mb("Could not get layer with ID ".$layerId));
 				$ajaxResponse->send();						
 			}
-			$columns = array(
-				"layer_abstract",
-				"layer_title",
-				"layer_keyword",
-				"layer_md_topic_category_id",
-				"layer_inspire_category_id",
-				"layer_custom_category_id"
-			);
+			$columns = ["layer_abstract", "layer_title", "layer_keyword", "layer_md_topic_category_id", "layer_inspire_category_id", "layer_custom_category_id"];
 
 			foreach ($columns as $c) {
 				$value = $data->layer->$c;
 				$e = new mb_notice("plugins/mb_metadata_server.php: layer entry for ".$c.": ".$data->layer->$c);
 				if ($c === "layer_keyword") {
-					$layer->$c = explode(",", $value);
+					$layer->$c = explode(",", (string) $value);
 					foreach ($layer->$c as &$val) {
 						$val = trim($val);
 					}
@@ -505,7 +433,7 @@ SQL;
 					|| $c === "layer_custom_category_id"
 				) {
 					if (!is_array($value)) {
-						$layer->$c = array($value);
+						$layer->$c = [$value];
 					}
 					else {
 						$layer->$c = $value;
@@ -544,10 +472,10 @@ SQL;
 SELECT mb_group_name, mb_group_title, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_logo_path, mb_group_voicetelephone FROM mb_group WHERE mb_group_id = $1
 
 SQL;
-		$v = array($mbGroupId);
-		$t = array('i');
+		$v = [$mbGroupId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["fkey_mb_group_id"] = $mbGroupId;
@@ -570,10 +498,10 @@ SQL;
 SELECT fkey_wms_id from layer where layer_id = $1
 
 SQL;
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["wms_id"]= $row['fkey_wms_id']; 
@@ -589,10 +517,10 @@ SQL;
 SELECT * from mb_metadata where metadata_id = $1
 
 SQL;
-		$v = array($metadataId);
-		$t = array('i');
+		$v = [$metadataId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["metadata_id"]= $row['metadata_id']; //serial
@@ -646,10 +574,10 @@ case "getInitialLayerMetadata" :
 SELECT layer_title, layer_abstract from layer where layer_id = $1
 
 SQL;
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$row = array();
+		$row = [];
 		if ($res) {
 			$row = db_fetch_assoc($res);
 			$resultObj["title"]= $row['layer_title']; //serial
@@ -677,12 +605,12 @@ SQL;
 UPDATE mb_metadata SET link = $2, title = $3, abstract = $4, format = $5, ref_system = $6, export2csw = $7, inspire_top_consistence = $8, tmp_reference_1 = $9, tmp_reference_2 = $10, lineage = $11, spatial_res_type = $12, spatial_res_value = $13, inspire_charset = $14, changedate = now(), update_frequency = $15 WHERE metadata_id = $1
 
 SQL;
-		$v = array($metadataId, $data->link, $data->title, $data->abstract, $data->format, $data->ref_system, $data->export2csw, $data->inspire_top_consistence, $data->tmp_reference_1, $data->tmp_reference_2, $data->lineage, $data->spatial_res_type, $data->spatial_res_value, $data->inspire_charset, $data->update_frequency);
-		$t = array('i','s','s','s','s','s','b','b','s','s','s','s','s','s','s');
+		$v = [$metadataId, $data->link, $data->title, $data->abstract, $data->format, $data->ref_system, $data->export2csw, $data->inspire_top_consistence, $data->tmp_reference_1, $data->tmp_reference_2, $data->lineage, $data->spatial_res_type, $data->spatial_res_value, $data->inspire_charset, $data->update_frequency];
+		$t = ['i', 's', 's', 's', 's', 's', 'b', 'b', 's', 's', 's', 's', 's', 's', 's'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not update metadata object in database!"));
 			$ajaxResponse->send();
@@ -799,7 +727,7 @@ SQL;
 			}
 			//delete getRecordByIdResponse from xml if there
 			$regex = "#<csw:GetRecordByIdResponse .*?>#";
-			$output = preg_replace($regex,"",$metaData);
+			$output = preg_replace($regex,"",(string) $metaData);
 			$regex = "#</csw:GetRecordByIdResponse>#";
 			$output = preg_replace($regex,"",$output);
 			//$e = new mb_exception($output);
@@ -896,13 +824,13 @@ SQL;
 INSERT INTO mb_metadata (link, uuid, origin, title, abstract, format, ref_system, export2csw, inspire_top_consistence, tmp_reference_1, tmp_reference_2, lineage, spatial_res_type, spatial_res_value, inspire_charset, createdate, datasetid, randomid, data, harvestresult) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now(), $16, $17, $18, 1)
 
 SQL;
-				$v = array($link, $uuid[0], $origin, $title[0], $abstract[0], $format, $ref_system, $export2csw,$inspire_top_consistence,$tmp_reference_1[0],$tmp_reference_2[0],$lineage,$spatial_res_type,$spatial_res_value,$inspire_charset, $datasetid, $randomid, $metaData);
-				$t = array('s','s','s','s','s','s','s','b','b','s','s','s','s','s','s','s','s','s');
+				$v = [$link, $uuid[0], $origin, $title[0], $abstract[0], $format, $ref_system, $export2csw, $inspire_top_consistence, $tmp_reference_1[0], $tmp_reference_2[0], $lineage, $spatial_res_type, $spatial_res_value, $inspire_charset, $datasetid, $randomid, $metaData];
+				$t = ['s', 's', 's', 's', 's', 's', 's', 'b', 'b', 's', 's', 's', 's', 's', 's', 's', 's', 's'];
 		
 				try {
 					$res = db_prep_query($sql,$v,$t);
 				}
-				catch (Exception $e){
+				catch (Exception){
 					abort(_mb("Insert of harvested metadata into database failed!"));
 				}
 			
@@ -916,13 +844,13 @@ SQL;
 INSERT INTO mb_metadata (link, uuid, origin, title, abstract, format, ref_system, export2csw, inspire_top_consistence, tmp_reference_1, tmp_reference_2, lineage, spatial_res_type, spatial_res_value, inspire_charset, createdate, randomid, update_frequency) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now(), $16, $17)
 
 SQL;
-			$v = array($link, $uuid, $origin, $title, $abstract, $format, $ref_system, $export2csw,$inspire_top_consistence,$tmp_reference_1,$tmp_reference_2,$lineage,$spatial_res_type,$spatial_res_value,$inspire_charset, $randomid, $update_frequency);
-			$t = array('s','s','s','s','s','s','s','b','b','s','s','s','s','s','s','s','s');
+			$v = [$link, $uuid, $origin, $title, $abstract, $format, $ref_system, $export2csw, $inspire_top_consistence, $tmp_reference_1, $tmp_reference_2, $lineage, $spatial_res_type, $spatial_res_value, $inspire_charset, $randomid, $update_frequency];
+			$t = ['s', 's', 's', 's', 's', 's', 's', 'b', 'b', 's', 's', 's', 's', 's', 's', 's', 's'];
 		
 			try {
 				$res = db_prep_query($sql,$v,$t);
 			}
-			catch (Exception $e){
+			catch (Exception){
 				abort(_mb("Insert of edited metadata into database failed!"));
 			}
 		}
@@ -934,8 +862,8 @@ SELECT metadata_id FROM mb_metadata WHERE randomid = $1
 
 SQL;
 		//maybe there are more than one results - which should be used??? case of creating new linkage with old metadata TODO TODO
-		$v = array($randomid);
-		$t = array('s');
+		$v = [$randomid];
+		$t = ['s'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
@@ -951,12 +879,12 @@ SQL;
 		INSERT INTO ows_relation_metadata (fkey_metadata_id, fkey_layer_id) VALUES ($1, $2)
 
 SQL;
-		$v = array($metadata_id, $layerId);
-		$t = array('i','i');
+		$v = [$metadata_id, $layerId];
+		$t = ['i', 'i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 				abort(_mb("Cannot write relation between ows and metadata to database!"));
 		}
 		if ($dbInsertFailed != true) {	
@@ -971,12 +899,12 @@ SQL;
 DELETE FROM mb_metadata WHERE metadata_id = $1
 
 SQL;
-		$v = array($metadataId);
-		$t = array('i');
+		$v = [$metadataId];
+		$t = ['i'];
 		try {
 			$res = db_prep_query($sql,$v,$t);
 		}
-		catch (Exception $e){
+		catch (Exception){
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Could not delete metadata from database!"));
 			$ajaxResponse->send();
@@ -1035,9 +963,9 @@ SQL;
 		$regex = "#<csw:GetRecordByIdResponse .*?>#";
 		$output = preg_replace($regex,"",$metaData);
 		$regex = "#</csw:GetRecordByIdResponse>#";
-		$output = preg_replace($regex,"",$output);
+		$output = preg_replace($regex,"",(string) $output);
 		//$e = new mb_exception($output);
-		$iso19139Xml = simplexml_load_string($output);
+		$iso19139Xml = simplexml_load_string((string) $output);
 		$e = new mb_exception('');
 		
 		//get elements for database from xml by using xpath
@@ -1114,8 +1042,8 @@ INSERT INTO mb_metadata (link, uuid, origin, title, abstract, format, ref_system
 SQL;
 			
 		$xml = $iso19139Xml->asXML();
-		$v = array($link, $uuid[0], $origin, $title[0], $abstract[0], $format, $ref_system, $export2csw,$inspire_top_consistence,$tmp_reference_1[0],$tmp_reference_2[0],$lineage,$spatial_res_type,$spatial_res_value,$inspire_charset, $datasetid, $randomid, $xml);
-		$t = array('s','s','s','s','s','s','s','b','b','s','s','s','s','s','s','s','s','s');
+		$v = [$link, $uuid[0], $origin, $title[0], $abstract[0], $format, $ref_system, $export2csw, $inspire_top_consistence, $tmp_reference_1[0], $tmp_reference_2[0], $lineage, $spatial_res_type, $spatial_res_value, $inspire_charset, $datasetid, $randomid, $xml];
+		$t = ['s', 's', 's', 's', 's', 's', 's', 'b', 'b', 's', 's', 's', 's', 's', 's', 's', 's', 's'];
 		
 		try {
 				$res = db_prep_query($sql,$v,$t);
@@ -1131,8 +1059,8 @@ SELECT metadata_id FROM mb_metadata WHERE randomid = $1
 
 SQL;
 	//maybe there are more than one results - which should be used??? case of creating new linkage with old metadata TODO TODO
-	$v = array($randomid);
-	$t = array('s');
+	$v = [$randomid];
+	$t = ['s'];
 	try {
 		$res = db_prep_query($sql,$v,$t);
 	}
@@ -1148,12 +1076,12 @@ SQL;
 	INSERT INTO ows_relation_metadata (fkey_metadata_id, fkey_layer_id) VALUES ($1, $2)
 
 SQL;
-	$v = array($metadata_id, $layerId);
-	$t = array('i','i');
+	$v = [$metadata_id, $layerId];
+	$t = ['i', 'i'];
 	try {
 		$res = db_prep_query($sql,$v,$t);
 	}
-	catch (Exception $e){
+	catch (Exception){
 			abort(_mb("Cannot write relation between ows and metadata to database!"));
 	}
 	if ($dbInsertFailed != true) {	

@@ -19,19 +19,19 @@
 
 /********** Configuration*************************************************/
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-include(dirname(__FILE__)."/../include/dyn_js.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_json.php");
+include(__DIR__."/../include/dyn_js.php");
 
-$tab_ids = array();
-include(dirname(__FILE__)."/../include/dyn_php.php");
+$tab_ids = [];
+include(__DIR__."/../include/dyn_php.php");
 
 
 echo "var tab_titles = [];\n";
 for ($i=0; $i < count($tab_ids); $i++) {
 	$sql = "SELECT gettext($1, e_title) AS e_title FROM gui_element WHERE fkey_gui_id = $2 AND e_id = $3";
-	$v = array(Mapbender::session()->get("mb_lang"), $gui_id, $tab_ids[$i]);
-	$t = array("s", "s", "s");
+	$v = [Mapbender::session()->get("mb_lang"), $gui_id, $tab_ids[$i]];
+	$t = ["s", "s", "s"];
 	$res = db_prep_query($sql, $v, $t);
 	$row = db_fetch_array($res);
 	echo "tab_titles[" . $i . "] = '" . $row["e_title"] . "';\n";	
@@ -42,9 +42,9 @@ $output = $json->encode($tab_ids);
 
 echo "var tab_ids = " . $output . ";";	
 if (!isset($expandable) || !$expandable) {
-	include(dirname(__FILE__) . "/mod_tab.js");
+	include(__DIR__ . "/mod_tab.js");
 }
 else {
-	include(dirname(__FILE__) . "/mod_tab_expandable.js");
+	include(__DIR__ . "/mod_tab_expandable.js");
 }
 ?>

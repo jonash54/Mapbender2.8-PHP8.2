@@ -17,29 +17,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
 
-class gml2 {
-	var $geomtype_point = 'Point';					
-	var $geomtype_polygon = 'Polygon';
-	var $geomtype_line = 'LineString';
-	var $geomtype_multipolygon = 'MultiPolygon'; 
-	var $geomtype_multiline = 'MultiLine';
-	var $geometries = array();	
-	var $member = -1;
-	var $geomtype = array();	
-	var $keys = array();
-	var $values = array();
-	var $geometry = array();
-	var $bbox = array();
-	var $doc;
-	var $geomFeaturetypeElement = null;
+class gml2 implements \Stringable {
+	public $geomtype_point = 'Point';					
+	public $geomtype_polygon = 'Polygon';
+	public $geomtype_line = 'LineString';
+	public $geomtype_multipolygon = 'MultiPolygon'; 
+	public $geomtype_multiline = 'MultiLine';
+	public $geometries = [];	
+	public $member = -1;
+	public $geomtype = [];	
+	public $keys = [];
+	public $values = [];
+	public $geometry = [];
+	public $bbox = [];
+	public $doc;
+	public $geomFeaturetypeElement = null;
 	
 	
 	function __construct(){
-		$this->geometries = array($this->geomtype_point, $this->geomtype_polygon, $this->geomtype_line, $this->geomtype_multipolygon, $this->geomtype_multiline);
+		$this->geometries = [$this->geomtype_point, $this->geomtype_polygon, $this->geomtype_line, $this->geomtype_multipolygon, $this->geomtype_multiline];
 	}
         
         /**
@@ -73,13 +73,13 @@ class gml2 {
 	}
 
 	function removeWhiteSpace ($string) {
-		return preg_replace("/\>(\s)+\</", "><", trim($string));
+		return preg_replace("/\>(\s)+\</", "><", trim((string) $string));
 	}
 	
 	function sepNameSpace($s){
-		$c = mb_strpos($s,":"); 
+		$c = mb_strpos((string) $s,":"); 
 		if($c>0){
-			return mb_substr($s,$c+1);
+			return mb_substr((string) $s,$c+1);
 		}
 		else{
 			return $s;
@@ -139,15 +139,15 @@ class gml2 {
 //		$pathOgr = OGR2OGR_PATH;
 		$w = $this->toFile($fGml);
 		// - get EPSC-Code from GML-File--
-		
+
 		$data = file_get_contents($fGml);//		
 		$gmlDoc = new SimpleXMLElement($data);
-				
+
 		$gmlDoc->registerXPathNamespace('xls', 'http://www.opengis.net/xls');
 		$gmlDoc->registerXPathNamespace('gml', 'http://www.opengis.net/gml');
 
 		$gmlBboxes = $gmlDoc->xpath("//gml:Box");	//<gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
-		
+
 		if(count($gmlBboxes)>0){
 			$bbox_str = $gmlBboxes[0]['srsName'];			
 			$pos_raute = strpos($bbox_str, '#');
@@ -157,14 +157,14 @@ class gml2 {
 			$e = new mb_exception("class_gml2.php:toShape() => no EPSG in GML(" . $fGml . ").");
 		}
 		// ---
-		
-		
+
+
 		$str_ogr = $pathOgr.' -a_srs EPSG:'.$epsg.' -f "ESRI Shapefile" "'.$fShape.'" '.$fGml;
 		$e = new mb_exception("ogr-Befehl:".$str_ogr);
-		
+
  		$exec = $pathOgr.' -a_srs EPSG:'.$epsg.' -f "ESRI Shapefile" "'.$fShape.'" '.$fGml;
-		
-		
+
+
 		/*
 		 * @security_patch exec done
 		 * Added escapeshellcmd()
@@ -172,13 +172,13 @@ class gml2 {
 
  		//$exec = $pathOgr.' -f "ESRI Shapefile" "'.$fShape.'" '.$fGml;
  		exec(escapeshellcmd($exec));
- 		
+
  		$exec = 'zip -j '.$unique.' '.$unique.'.shp '.$unique.'.dbf '.$unique.'.shx '.$unique.'.gfs '.$unique.'.gml '.$unique.'.prj ';
  		exec(escapeshellcmd($exec));
 
 		$exec = 'rm -f '.$unique.' '.$unique.'.shp '.$unique.'.dbf '.$unique.'.shx '.$unique.'.gfs '.$unique.'.gml '.$unique.'.prj ';
 		exec(escapeshellcmd($exec));
-		
+
 		$exec = 'chmod 777 '.$unique.'.*';
 		exec(escapeshellcmd($exec));
 		//echo "<a href='../tmp/".$unique.".zip'>Download ".$prefix."<a>";
@@ -206,8 +206,8 @@ class gml2 {
 		return true;
 	}
 	
-	function __toString () {
-		return $this->doc;
+	function __toString (): string {
+		return (string) $this->doc;
 	}
 
 
@@ -238,7 +238,7 @@ class gml2 {
 		xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 		xml_parser_set_option($parser,XML_OPTION_SKIP_WHITE,1);
 		xml_parser_set_option($parser,XML_OPTION_TARGET_ENCODING,CHARSET);
-		xml_parse_into_struct($parser,$data,$values,$tags);
+		xml_parse_into_struct($parser,(string) $data,$values,$tags);
 		$code = xml_get_error_code ($parser);
 		if ($code) {
 			$line = xml_get_current_line_number($parser); 
@@ -248,25 +248,25 @@ class gml2 {
 		
 		foreach ($values as $element) {
 			#$e = new mb_exception($element[tag]);
-			if(strtoupper($this->sepNameSpace($element[tag])) == strtoupper("boundedBy") && $element[type] == "open"){
+			if(strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("boundedBy") && $element["TYPE"] == "open"){
 				$boundedBy = true;
 			}
 			if ($boundedBy) {
-				if(strtoupper($this->sepNameSpace($element[tag])) == strtoupper("box")){
+				if(strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("box")){
 					
 					$epsgAttr = "";
 					if(isset($element['attributes'])){
-						$epsgAttr = isset($element['attributes']['srsName']) ? $element['attributes']['srsName'] : "";
+						$epsgAttr = $element['attributes']['srsName'] ?? "";
 					}
 		
-					if(strstr($epsgAttr,'#') !== false){
+					if(str_contains((string) $epsgAttr,'#')){
 						// http://www.opengis.net/gml/srs/epsg.xml#4326
-						$parts = explode('#',$epsgAttr);
+						$parts = explode('#',(string) $epsgAttr);
 						$epsg == isset($parts[1]) ? $parts[1] : "";
-					}else if (strstr($epsgAttr,':') !== false){
+					}else if (str_contains((string) $epsgAttr,':')){
 						// EPSG:31466
 						// urn:ogc:def:crs:EPSG:6.5:4326 
-						$parts = explode(':',$epsgAttr);
+						$parts = explode(':',(string) $epsgAttr);
 						$parts = array_reverse($parts);
 						 if(isset($parts[0])){
 						 	$epsg =  $parts[0];
@@ -280,38 +280,38 @@ class gml2 {
 					}
 					$this->epsg = $epsg;
 				}
-				if(strtoupper($this->sepNameSpace($element[tag])) == strtoupper("coordinates")){
-					$this->bbox = explode(",", str_replace(",,","",str_replace(" ",",",trim($element[value]))));
+				if(strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("coordinates")){
+					$this->bbox = explode(",", str_replace(",,","",str_replace(" ",",",trim((string) $element["VALUE"]))));
 					$boundedBy=false;
 				}
 			}
-			if(strtoupper($this->sepNameSpace($element[tag])) == strtoupper("featureMember") && $element[type] == "open"){
+			if(strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("featureMember") && $element["TYPE"] == "open"){
 				$this->member++;
-				$this->keys[$this->member] = array();
-				$this->value[$this->member] = array();
-				$this->geometry[$this->member] = array();
+				$this->keys[$this->member] = [];
+				$this->value[$this->member] = [];
+				$this->geometry[$this->member] = [];
 				$section = true;
 				$cnt_geom = 0;
 			}
 			if($section == true){
-				if( in_array($this->sepNameSpace($element[tag]),$this->geometries) && $element[type] == "open"){
+				if( in_array($this->sepNameSpace($element["TAG"]),$this->geometries) && $element["TYPE"] == "open"){
 					$geom = true;
-					$this->geomtype[$this->member] = $this->sepNameSpace($element[tag]);
+					$this->geomtype[$this->member] = $this->sepNameSpace($element["TAG"]);
 				}
-				else if(in_array($this->sepNameSpace($element[tag]),$this->geometries) && $element[type] == "close"){
+				else if(in_array($this->sepNameSpace($element["TAG"]),$this->geometries) && $element["TYPE"] == "close"){
 					$cnt_geom++;
 					$geom = false;
 				}
 				if($geom == true){
-					if (strtoupper($this->sepNameSpace($element[tag])) == strtoupper("coordinates")) {
-						$this->geometry[$this->member][$cnt_geom] =  str_replace(",,","",str_replace(" ",",",trim($element[value])));
+					if (strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("coordinates")) {
+						$this->geometry[$this->member][$cnt_geom] =  str_replace(",,","",str_replace(" ",",",trim((string) $element["VALUE"])));
 						$coordinates = true;
 						// XXX: Increment counter to get all geometries of a feature member, 
 						// comment it out to only show first geometry of featuremember
 						$cnt_geom++;
 					}
-					else if (!$coordinates && trim($element[value])) {
-						$coords = str_replace(",,","",str_replace(" ",",",trim($element[value])));
+					else if (!$coordinates && trim((string) $element["VALUE"])) {
+						$coords = str_replace(",,","",str_replace(" ",",",trim((string) $element["VALUE"])));
 						$tmp_array = explode(",", $coords);
 						if (count($tmp_array > 1)) {
 							$this->geometry[$this->member][$cnt_geom] =  $coords;
@@ -322,14 +322,14 @@ class gml2 {
 						}
 					}
 				}
-				else if(strtoupper($this->sepNameSpace($element[tag])) == strtoupper("featureMember") && $element[type] == "close"){
+				else if(strtoupper((string) $this->sepNameSpace($element["TAG"])) == strtoupper("featureMember") && $element["TYPE"] == "close"){
 					$section = false;	
 					$el = -1;
 				}
 				else{
 					$el++;
-					$this->values[$this->member][$el] = $element[value];
-					$this->keys[$this->member][$el] = $element[tag];	
+					$this->values[$this->member][$el] = $element["VALUE"];
+					$this->keys[$this->member][$el] = $element["TAG"];	
 				}
 			}
 		}
@@ -368,8 +368,8 @@ class gml2 {
 	 * @deprecated
 	 */
 	function getXfromMemberAsString($memberCount,$geomCount){
-		$t = explode(",",$this->geometry[$memberCount][$geomCount]);
-		$x = array();
+		$t = explode(",",(string) $this->geometry[$memberCount][$geomCount]);
+		$x = [];
 		for($i=0; $i<(count($t)-1); $i=$i+2){
 			array_push($x,$t[$i]);
 		}
@@ -380,8 +380,8 @@ class gml2 {
 	 * @deprecated
 	 */
 	function getYfromMemberAsString($memberCount,$geomCount){
-		$t = explode(",",$this->geometry[$memberCount][$geomCount]);
-		$y = array();
+		$t = explode(",",(string) $this->geometry[$memberCount][$geomCount]);
+		$y = [];
 		for($i=1; $i<=(count($t)-1); $i=$i+2){
 			array_push($y,$t[$i]);
 		}
@@ -447,8 +447,8 @@ class gml2 {
 		for ($j=0; $j<count($this->geometry[$i]); $j++) {
 			$js .= "q.addGeometry(current_geomtype);\n";
 			
-			$x_array = explode(",", $this->getXfromMemberAsString($i, $j));
-			$y_array = explode(",", $this->getYfromMemberAsString($i, $j));
+			$x_array = explode(",", (string) $this->getXfromMemberAsString($i, $j));
+			$y_array = explode(",", (string) $this->getYfromMemberAsString($i, $j));
 			
 			for ($k=0; $k<count($x_array); $k++) {
 				$js .= "q.get(-1).addPointByCoordinates(parseFloat(".$x_array[$k]."), parseFloat(".$y_array[$k]."));\n";
@@ -466,8 +466,8 @@ class gml2 {
 
 
 class FeatureCollection {
-	var $type = "FeatureCollection";
-	var $featureArray = array();
+	public $type = "FeatureCollection";
+	public $featureArray = [];
 	
 	public function __construct() {
 		
@@ -495,18 +495,18 @@ class FeatureCollection {
 }
 
 class Feature {
-	var $type = "Feature";
-	var $fid;
-	var $geometry = false;
-	var $properties = array();
-	var $geomFeaturetypeElement = null;
+	public $type = "Feature";
+	public $fid;
+	public $geometry = false;
+	public $properties = [];
+	public $geomFeaturetypeElement = null;
 	
 	public function __construct() {
 	}
 	
 	function sepNameSpace($s){
-		list($ns,$FeaturePropertyName) = mbw_split(":",$s);
-		$nodeName = array('ns' => $ns, 'value' => $FeaturePropertyName);
+		[$ns, $FeaturePropertyName] = mbw_split(":",$s);
+		$nodeName = ['ns' => $ns, 'value' => $FeaturePropertyName];
 		return $nodeName;
 	}
 	
@@ -631,7 +631,7 @@ class Feature {
 		}
 
 		
-		$prop = array();
+		$prop = [];
 		
 		$str .= ", \"properties\": ";
 		$cnt = 0;
@@ -650,7 +650,7 @@ class Feature {
 
 class GMLLine {
 
-	var $pointArray = array();
+	public $pointArray = [];
 
 	public function __construct() {
 		
@@ -661,7 +661,7 @@ class GMLLine {
 		while ($currentSibling) {
 			
 			foreach(explode(' ',$currentSibling->nodeValue) as $cords){
-				list($x,$y,$z) = explode(',',$cords);
+				[$x, $y, $z] = explode(',',$cords);
 				$this->addPoint($x, $y);
 			}
 			$currentSibling = $currentSibling->nextSibling;
@@ -669,7 +669,7 @@ class GMLLine {
 	}
 	
 	protected function addPoint ($x, $y) {
-		array_push($this->pointArray, array("x" => $x, "y" => $y));
+		array_push($this->pointArray, ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGeoJSON () {
@@ -694,7 +694,7 @@ class GMLLine {
 
 class GMLPoint {
 
-	var $point;
+	public $point;
 
 	public function __construct() {
 		
@@ -703,7 +703,7 @@ class GMLPoint {
 	public function parsePoint ($domNode) {
 		$currentSibling = $domNode->firstChild;
 		while ($currentSibling) {
-			list($x, $y, $z) = explode(" ", $currentSibling->nodeValue);
+			[$x, $y, $z] = explode(" ", $currentSibling->nodeValue);
 			$this->setPoint($x, $y);
 			$currentSibling = $currentSibling->nextSibling;
 		}
@@ -711,7 +711,7 @@ class GMLPoint {
 	
 	protected function setPoint ($x, $y) {
 #		echo "x: " . $x . " y: " . $y . "\n";
-		$this->point = array("x" => $x, "y" => $y);
+		$this->point = ["x" => $x, "y" => $y];
 	}
 	
 	public function toGeoJSON () {
@@ -730,8 +730,8 @@ class GMLPoint {
 
 class GMLPolygon {
 
-	var $pointArray = array();
-	var $innerRingArray = array();
+	public $pointArray = [];
+	public $innerRingArray = [];
 
 	public function __construct() {
 		
@@ -752,9 +752,9 @@ class GMLPolygon {
 //			$value = $coordsDom->nodeValue;				
 //			echo "===> name: ".$name. ", Value: ".$value."<br>";
 			
-			foreach(explode(' ',$coordsDom->nodeValue) as $pointCoords){
+			foreach(explode(' ',(string) $coordsDom->nodeValue) as $pointCoords){
 
-				list($x,$y,$z) = explode(',',$pointCoords);
+				[$x, $y, $z] = explode(',',$pointCoords);
 				$this->addPoint($x, $y);
 				}
 			
@@ -769,9 +769,9 @@ class GMLPolygon {
 				foreach ($coordinates as $coordinate) {
 					$coordsDom = dom_import_simplexml($coordinate);
 						
-					foreach(explode(' ',$coordsDom->nodeValue) as $pointCoords){
+					foreach(explode(' ',(string) $coordsDom->nodeValue) as $pointCoords){
 		
-						list($x,$y,$z) = explode(',',$pointCoords);
+						[$x, $y, $z] = explode(',',$pointCoords);
 						$this->addPointToRing($ringCount, $x, $y);
 					}
 				}
@@ -781,16 +781,16 @@ class GMLPolygon {
 	}
 	
 	protected function addPoint ($x, $y) {
-		array_push($this->pointArray, array("x" => $x, "y" => $y));
+		array_push($this->pointArray, ["x" => $x, "y" => $y]);
 	}
 	
 	protected function addPointToRing ($i, $x, $y) {
 		if (count($this->innerRingArray) <= $i) {
-			array_push($this->innerRingArray, array());
+			array_push($this->innerRingArray, []);
 		}
 		$index = count($this->innerRingArray);
 		$currentIndex = ($i < $index ? $i : $index);
-		array_push($this->innerRingArray[$currentIndex], array("x" => $x, "y" => $y));
+		array_push($this->innerRingArray[$currentIndex], ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGeoJSON () {
@@ -835,8 +835,8 @@ class GMLEnvelope extends GMLPolygon{
 		$corner1 = $domNode->firstChild;
 		$corner2 = $corner1->nextSibling;
 		
-		list($y1,$x1) = explode(' ',$corner1->nodeValue);
-		list($y2,$x2) = explode(' ',$corner2->nodeValue);
+		[$y1, $x1] = explode(' ',$corner1->nodeValue);
+		[$y2, $x2] = explode(' ',$corner2->nodeValue);
 
 		$this->addPoint($x1, $y1);
 		$this->addPoint($x1, $y2);
@@ -850,7 +850,7 @@ class GMLEnvelope extends GMLPolygon{
 
 class GMLMultiLine {
 
-	var $lineArray = array();
+	public $lineArray = [];
 
 	public function __construct() {
 		
@@ -866,7 +866,7 @@ class GMLMultiLine {
 		$cnt=0;
 		foreach ($allCoords as $Coords) {
 			
-			$this->lineArray[$cnt] = array();
+			$this->lineArray[$cnt] = [];
 			
 			$coordsDom = dom_import_simplexml($Coords);
 				
@@ -874,8 +874,8 @@ class GMLMultiLine {
 //			$value = $coordsDom->nodeValue;				
 //			echo "===> name: ".$name. ", Value: ".$value."<br>";
 			
-			foreach(explode(' ',$coordsDom->nodeValue) as $pointCoords){
-				list($x,$y,$z) = explode(',',$pointCoords);
+			foreach(explode(' ',(string) $coordsDom->nodeValue) as $pointCoords){
+				[$x, $y, $z] = explode(',',$pointCoords);
 				$this->addPoint($x, $y, $cnt);
 				}
 			
@@ -885,7 +885,7 @@ class GMLMultiLine {
 	}
 	
 	protected function addPoint ($x, $y, $i) {
-		array_push($this->lineArray[$i], array("x" => $x, "y" => $y));
+		array_push($this->lineArray[$i], ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGeoJSON () {
@@ -920,8 +920,8 @@ class GMLMultiLine {
 
 class GMLMultiPolygon {
 
-	var $polygonArray = array();
-	var $innerRingArray = array();
+	public $polygonArray = [];
+	public $innerRingArray = [];
 
 	public function __construct() {
 		
@@ -929,9 +929,9 @@ class GMLMultiPolygon {
 
 	protected function addPointToRing ($i, $j, $x, $y) {
 		if (count($this->innerRingArray[$i]) <= $j) {
-			array_push($this->innerRingArray[$i], array());
+			array_push($this->innerRingArray[$i], []);
 		}
-		array_push($this->innerRingArray[$i][$j], array("x" => $x, "y" => $y));
+		array_push($this->innerRingArray[$i][$j], ["x" => $x, "y" => $y]);
 	}
 	
 
@@ -947,18 +947,18 @@ class GMLMultiPolygon {
 		foreach ($allPolygons as $polygon) {
 			$allCoords = $polygon->xpath("gml:outerBoundaryIs/gml:LinearRing/gml:coordinates");
 				
-			$this->polygonArray[$cnt] = array();
+			$this->polygonArray[$cnt] = [];
 			foreach ($allCoords as $Coords) {
 				
 				$coordsDom = dom_import_simplexml($Coords);
 					
-				foreach (explode(' ',$coordsDom->nodeValue) as $pointCoords) {
-					list($x,$y,$z) = explode(',',$pointCoords);
+				foreach (explode(' ',(string) $coordsDom->nodeValue) as $pointCoords) {
+					[$x, $y, $z] = explode(',',$pointCoords);
 					$this->addPoint($x, $y, $cnt);
 				}
 			}
 			
-			$this->innerRingArray[$cnt] = array();
+			$this->innerRingArray[$cnt] = [];
 			$innerRingNodeArray = $polygon->xpath("gml:innerBoundaryIs");
 			if ($innerRingNodeArray) {
 				$ringCount = 0;
@@ -969,9 +969,9 @@ class GMLMultiPolygon {
 						foreach ($coordinates as $coordinate) {
 							$coordsDom = dom_import_simplexml($coordinate);
 								
-							foreach(explode(' ',$coordsDom->nodeValue) as $pointCoords){
+							foreach(explode(' ',(string) $coordsDom->nodeValue) as $pointCoords){
 				
-								list($x,$y,$z) = explode(',',$pointCoords);
+								[$x, $y, $z] = explode(',',$pointCoords);
 								$this->addPointToRing($cnt, $ringCount, $x, $y);
 							}
 						}
@@ -987,7 +987,7 @@ class GMLMultiPolygon {
 	
 	protected function addPoint ($x, $y, $i) {
 
-		array_push($this->polygonArray[$i], array("x" => $x, "y" => $y));
+		array_push($this->polygonArray[$i], ["x" => $x, "y" => $y]);
 	}
 	
 	public function toGeoJSON () {

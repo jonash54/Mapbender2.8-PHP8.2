@@ -5,11 +5,11 @@
 //@ini_set('error_reporting', E_ALL);
 //@ini_set('display_errors', 'stdout');	
 // Include class_ckanApi.php
-require_once(dirname(__FILE__).'/../classes/class_connector.php');
-require_once(dirname(__FILE__).'/../classes/class_group.php');
-require_once(dirname(__FILE__).'/../classes/class_syncCkan.php');
-require_once(dirname(__FILE__) . '/../php/mod_getDownloadOptions.php');
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__.'/../classes/class_connector.php');
+require_once(__DIR__.'/../classes/class_group.php');
+require_once(__DIR__.'/../classes/class_syncCkan.php');
+require_once(__DIR__ . '/../php/mod_getDownloadOptions.php');
+require_once(__DIR__.'/../../conf/ckan.conf');
 
 //http://localhost/mb_trunk/php/mod_syncCkan_server.php?userId=1&compareTimestamps=true&syncDepartment=25&operation=syncCkan
 
@@ -21,6 +21,7 @@ $outputFormat = "json";
 $compareTimestamps = false;
 $listAllMetadataInJson = true;
 //initiate resultObject to give back as json
+$resultObject = new stdClass();
 $resultObject->success = false;
 $operation = false;
 
@@ -32,7 +33,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 	//validate to csv integer list
 	$testMatch = $_REQUEST["registratingDepartments"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'registratingDepartments: <b>'.$testMatch.'</b> is not valid.<br/>';
 		$resultObject->error->message = 'Parameter registratingDepartments is not valid (integer or cs integer list).';
 		echo json_encode($resultObject);	
@@ -45,7 +46,7 @@ if (isset($_REQUEST["registratingDepartments"]) & $_REQUEST["registratingDepartm
 if (isset($_REQUEST["syncDepartment"]) && $_REQUEST["syncDepartment"] !== "" && $_REQUEST["syncDepartment"] !== null) {
         $testMatch = $_REQUEST["syncDepartment"];
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 $resultObject->error->message = 'Parameter syncDepartment is not valid (integer).';
                 echo json_encode($resultObject);
 		die();	
@@ -57,7 +58,7 @@ if (isset($_REQUEST["syncDepartment"]) && $_REQUEST["syncDepartment"] !== "" && 
 if (isset($_REQUEST["orgaId"]) && $_REQUEST["orgaId"] !== "" && $_REQUEST["orgaId"] !== null) {
         $testMatch = $_REQUEST["orgaId"];
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 $resultObject->error->message = 'Parameter orgaId is not valid (integer).';
                 echo json_encode($resultObject);
 		die();	
@@ -80,7 +81,7 @@ if (isset($_REQUEST["operation"]) && $_REQUEST["operation"] !== "" && $_REQUEST[
 if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
         $testMatch = $_REQUEST["userId"];
         $pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 $resultObject->error->message = 'Parameter userId is not valid (integer).';
                 echo json_encode($resultObject);
 		die();
@@ -282,7 +283,7 @@ if (isset($orgaId)){
 			}
 			break;
 	}
-	$returnObject = array();
+	$returnObject = [];
 	//initialize ckanApi
 	$syncCkanClass->ckanApiKey = API_KEY;
 	while ($row = db_fetch_array($result)) {
@@ -316,7 +317,7 @@ if (isset($orgaId)){
 				$requestPostJson = json_encode($requestPost);
 				//try to read orga
 				$ckanResult = $syncCkanClass->getRemoteCkanOrga($requestPostJson);
-				$ckanResultObject = json_decode($ckanResult);
+				$ckanResultObject = json_decode((string) $ckanResult);
 				$e = new mb_notice("php/mod_syncCkan_server.php: check for existing orga in external ckan instance: ".$requestPostJson);
 				if ($ckanResultObject->success == true) {
 					//give back ckan id of organization
@@ -325,7 +326,7 @@ if (isset($orgaId)){
 					$ckanResultOrgaRevList = $syncCkanClass->getRemoteCkanOrgaRevList($requestPostJson);
 //$e = new mb_exception("orga rev list: ".$ckanResultOrgaRevList);
 					//extract last timestamp:
-					$ckanResultOrgaRevListObject = json_decode($ckanResultOrgaRevList);
+					$ckanResultOrgaRevListObject = json_decode((string) $ckanResultOrgaRevList);
 					//check for update if needed!
 					if ($ckanResultOrgaRevListObject->success == true) {
 						$dateTimeCkanOrga = new DateTime($ckanResultOrgaRevListObject->result[0]->timestamp);
@@ -350,7 +351,7 @@ if (isset($orgaId)){
 //$e = new mb_exception("php/mod_syncCkan_server.php: try to create group id: ".$orga->serialId." ".$ckanOrgaRepresentation);
     					$ckanResult = $syncCkanClass->createRemoteCkanOrga($ckanOrgaRepresentation);
 //$e = new mb_exception("php/mod_syncCkan_server.php: result of creation: ". $ckanResult);
-    					$ckanResultObject = json_decode($ckanResult);
+    					$ckanResultObject = json_decode((string) $ckanResult);
     					if ($ckanResultObject->success == true) {
 						$e = new mb_notice("php/mod_syncCkan_server.php: organization successfully created!");
     					} else {
@@ -361,7 +362,7 @@ if (isset($orgaId)){
 				//read ckan representation of internal group from registry - sync all ckan orgas with mapbender!!!!
 				$ckanOrgaRepresentation = $syncCkanClass->getInternalOrgaAsCkan($orga->serialId);
 				//$e = new mb_exception("php/mod_syncCkan_server.php: returned ckan orga from mapbender: ".$ckanOrgaRepresentation);
-				$ckanOrgaRepresentationObject = json_decode($ckanOrgaRepresentation);
+				$ckanOrgaRepresentationObject = json_decode((string) $ckanOrgaRepresentation);
 				$ckanOrgaPreferredName = $ckanOrgaRepresentationObject->name;
 				$requestPost = new stdClass();
 				$requestPost->{'id'} = (string)$ckanOrgaPreferredName;
@@ -369,19 +370,19 @@ if (isset($orgaId)){
 				//check if already exists and/or state is "deleted"- than update and set to active
 				$ckanResult = $syncCkanClass->getRemoteCkanOrga($requestPostJson);
 //$e = new mb_exception("php/mod_syncCkan_server.php: remote ckan organization: ".$ckanResult);
-				$ckanResultObject = json_decode($ckanResult);
+				$ckanResultObject = json_decode((string) $ckanResult);
 				if ($ckanResultObject->success == false) {
 					$e = new mb_notice("php/mod_syncCkan_server.php: organization not found - try to create it!");
     					//try to create it
     					$ckanResult = $syncCkanClass->createRemoteCkanOrga($ckanOrgaRepresentation);
 //$e = new mb_exception("php/mod_syncCkan_server.php: result of creation: ". $ckanResult);
-    					$ckanResultObject = json_decode($ckanResult);
+    					$ckanResultObject = json_decode((string) $ckanResult);
     					if ($ckanResultObject->success == true) {
 //$e = new mb_exception("php/mod_syncCkan_server.php: organization successfully created!: ");
 						//store uuid of external created ckan organization into mapbender database as foreign key
 						$sql = "UPDATE mb_group SET mb_group_ckan_uuid = $1 WHERE mb_group_id = $2";
-						$v = array($ckanResultObject->result->id, $orga->serialId);		
-						$t = array('s', 'i');
+						$v = [$ckanResultObject->result->id, $orga->serialId];		
+						$t = ['s', 'i'];
 						$update_result = db_prep_query($sql,$v,$t);
 						if(!$update_result)	{
 							throw new Exception("Database error updating mb_group table with ckan uuid attribute!");
@@ -395,8 +396,8 @@ if (isset($orgaId)){
 				} else {
 					//a organization was found with the requested name - get the id from this organisation and fill it into the mapbender database before updating
 					$sql = "UPDATE mb_group SET mb_group_ckan_uuid = $1 WHERE mb_group_id = $2";
-					$v = array($ckanResultObject->result->id, $orga->serialId);		
-					$t = array('s', 'i');
+					$v = [$ckanResultObject->result->id, $orga->serialId];		
+					$t = ['s', 'i'];
 					$update_result = db_prep_query($sql,$v,$t);
 					if(!$update_result)	{
 						throw new Exception("Database error updating mb_group table with ckan uuid attribute!");
@@ -410,7 +411,7 @@ if (isset($orgaId)){
 					$ckanResultOrgaRevList = $syncCkanClass->getRemoteCkanOrgaRevList($requestPostJson);
 //$e = new mb_exception("orga rev list: ".$ckanResultOrgaRevList);
 					//extract last timestamp:
-					$ckanResultOrgaRevListObject = json_decode($ckanResultOrgaRevList);
+					$ckanResultOrgaRevListObject = json_decode((string) $ckanResultOrgaRevList);
 					//check for update if needed!
 					if ($ckanResultOrgaRevListObject->success == true) {
 						$dateTimeCkanOrga = new DateTime($ckanResultOrgaRevListObject->result[0]->timestamp);
@@ -435,7 +436,7 @@ if (isset($orgaId)){
 			$requestPost->{'id'} = $editingUserName;
 			$requestPostJson = json_encode($requestPost);
 			$ckanResultUser = $syncCkanClass->getRemoteCkanUser($requestPostJson);
-			$ckanResultUserObject = json_decode($ckanResultUser);	
+			$ckanResultUserObject = json_decode((string) $ckanResultUser);	
 			if ($ckanResultUserObject->success == true) {
 				//check if user has already editor role in organization
 			        //update user
@@ -452,7 +453,7 @@ if (isset($orgaId)){
 				//$requestPost->groups[1]->name = "opendata";
 				$requestPostJson = json_encode($requestPost);
 				$ckanResultUser = $syncCkanClass->updateRemoteCkanUser($requestPostJson);
-				$ckanResultUserObject = json_decode($ckanResultUser);
+				$ckanResultUserObject = json_decode((string) $ckanResultUser);
 			} else {
 				//create user
 				$requestPost = new stdClass();
@@ -462,7 +463,7 @@ if (isset($orgaId)){
 				$requestPostJson = json_encode($requestPost);
 				$ckanResultUser = $syncCkanClass->createRemoteCkanUser($requestPostJson);
 //$e = new mb_exception("get user:  ".$ckanResultUser);
-				$ckanResultUserObject = json_decode($ckanResultUser);
+				$ckanResultUserObject = json_decode((string) $ckanResultUser);
 
 			}
 			//read apikey:
@@ -471,8 +472,8 @@ if (isset($orgaId)){
 				$userId = $ckanResultUserObject->result->id;
 				//store key into mapbender group table
 				$sql = "UPDATE mb_group SET mb_group_ckan_api_key_text = $1 WHERE mb_group_id = $2";
-				$v = array($apiKey, $orga->serialId);		
-				$t = array('s', 'i');
+				$v = [$apiKey, $orga->serialId];		
+				$t = ['s', 'i'];
 				$update_result = db_prep_query($sql,$v,$t);
 				if(!$update_result) {
 					throw new Exception("Database error updating mb_group table with ckan api-key attribute!");
@@ -488,7 +489,7 @@ if (isset($orgaId)){
 			$requestPostJson = json_encode($requestPost);
 			$ckanResultMember = $syncCkanClass->getRemoteCkanMember($requestPostJson);
 //$e = new mb_exception("get member:  ".$ckanResultMember);
-			$ckanResultMemberObject = json_decode($ckanResultMember);
+			$ckanResultMemberObject = json_decode((string) $ckanResultMember);
 //$e = new mb_exception("number of editors:  ".count($ckanResultMemberObject->result));
 			if (count($ckanResultMemberObject->result == 0)) {
 				//add membership for editor
@@ -528,7 +529,7 @@ if ($operation == 'listCatalogues') {
 	//invoke check for csw
 	$result = new stdClass();
 	//check for datasets - ckan vs. csw
-	$result->result = json_decode($syncCkanClass->getSyncListCswJson($departmentsArray, $listAllMetadataInJson = true));
+	$result->result = json_decode((string) $syncCkanClass->getSyncListCswJson($departmentsArray, $listAllMetadataInJson = true));
 	$result->success = true;
 	header('Content-type:application/json;charset=utf-8');
 	echo json_encode($result);
@@ -552,7 +553,7 @@ if ($operation == 'syncCkan') {
 	if (isset($orgaId) && $orgaId !== null) {
 		$syncCkanClass->syncOrgaId = $orgaId;
 	}
-	$syncList = json_decode($syncListJsonCkan);
+	$syncList = json_decode((string) $syncListJsonCkan);
 	if ($syncList->success = true) {
     		foreach ($syncList->result->external_ckan as $orga) {
         		//TODO try to sync single orga - the class has already set the syncOrgaId if wished!
@@ -561,7 +562,7 @@ if ($operation == 'syncCkan') {
             			//$syncList = json_decode($syncCkanClass->syncSingleCsw(json_encode($orga)));
 				//new function
 //$e = new mb_exception($syncListJsonCkan);
-				$syncList = json_decode($syncCkanClass->syncSingleDataSource(json_encode($orga), "ckan"));
+				$syncList = json_decode((string) $syncCkanClass->syncSingleDataSource(json_encode($orga), "ckan"));
 			//}
     		}
 	}
@@ -585,7 +586,7 @@ if ($operation == 'syncCsw') {
 	$syncListJsonCsw = $syncCkanClass->getSyncListCswJson($departmentsArray, $syncCkanClass->syncOrgaId, true);
 	//for synching use right orga id for getting apikey for invoking $syncCkanClass->syncSingleCsw
 	$syncCkanClass->syncOrgaId = $orgaId;
-	$syncList = json_decode($syncListJsonCsw);
+	$syncList = json_decode((string) $syncListJsonCsw);
 	if ($syncList->success = true) {
     		foreach ($syncList->result->external_csw as $orga) {
         		//TODO try to sync single orga - the class has already set the syncOrgaId if wished!
@@ -593,8 +594,8 @@ if ($operation == 'syncCsw') {
             			//overwrite result with result from sync process
             			//$syncList = json_decode($syncCkanClass->syncSingleCsw(json_encode($orga)));
 				//new function
-				
-				$syncList = json_decode($syncCkanClass->syncSingleDataSource(json_encode($orga), "portalucsw"));
+
+				$syncList = json_decode((string) $syncCkanClass->syncSingleDataSource(json_encode($orga), "portalucsw"));
 			    //}
     		}
 	}
@@ -610,14 +611,14 @@ $departmentsArray = $syncCkanClass->getMapbenderOrganizations();
 //second parameter is listAllMetadataInJson ( = true) - it is needed if we want to sync afterwards. The syncList includes all necessary information about one organization
 
 $syncListJson = $syncCkanClass->getSyncListJson($departmentsArray, true);
-$syncList = json_decode($syncListJson);
+$syncList = json_decode((string) $syncListJson);
 if ($syncList->success = true) {
     foreach ($syncList->result->geoportal_organization as $orga) {
         //try to sync single orga - the class has already set the syncOrgaId if wished!
     	if ($syncDepartment == $orga->id) {
                 //overwrite result with result from sync process
                 //$syncList = json_decode($syncCkanClass->syncSingleOrga(json_encode($orga)));
-    	    $syncList = json_decode($syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
+    	    $syncList = json_decode((string) $syncCkanClass->syncSingleDataSource(json_encode($orga), "mapbender", true));
     	}
     }
 }

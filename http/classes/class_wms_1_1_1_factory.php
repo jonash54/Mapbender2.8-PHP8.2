@@ -5,12 +5,12 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_wms_factory.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
-require_once dirname(__FILE__) . "/../classes/class_connector.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
-require_once (dirname ( __FILE__ ) . "/class_cache.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_wms_factory.php";
+require_once __DIR__ . "/../classes/class_wms.php";
+require_once __DIR__ . "/../classes/class_connector.php";
+require_once __DIR__ . "/../classes/class_administration.php";
+require_once (__DIR__ . "/class_cache.php");
 
 /**
  * Creates WMS < 1.2 objects from a capabilities documents.
@@ -54,16 +54,16 @@ class Wms_1_1_1_Factory extends WmsFactory {
 		$start = microtime(true);
 		//try to read wms_obj fom cache if already given
 		if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
-		    if ($cache->cachedVariableExists ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5($appId) ) != false) {
+		    if ($cache->cachedVariableExists ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5((string) $appId) ) != false) {
 		        $e = new mb_notice("classes/class_wms_1_1_1_factory.php: Read existing wms obj with id " . $wmsId . " from cache!");
-		        $myWms = $cache->cachedVariableFetch ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5($appId) );
+		        $myWms = $cache->cachedVariableFetch ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5((string) $appId) );
 		    } else {
 		        //try to read wms obj from db
 		        $e = new mb_notice("classes/class_wms_1_1_1_factory.php: Read existing wms obj with id " . $wmsId . " from database!");
 		        $returnObject = $this->createFromDb($wmsId, $appId);
 		        if ($cache->isActive && defined("CACHE_TIME_WMS_LAYER") && is_int(CACHE_TIME_WMS_LAYER)) {
 		            $e = new mb_notice("classes/class_wms_1_1_1_factory.php: Write wms obj with id " . $wmsId . " to database!");
-		            $cache->cachedVariableAdd ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5($appId), $returnObject, CACHE_TIME_WMS_LAYER );
+		            $cache->cachedVariableAdd ( 'mapbender: wms_obj_cache_' . $wmsId . '_' . md5((string) $appId), $returnObject, CACHE_TIME_WMS_LAYER );
 		        }
 		        $myWms = $returnObject;
 		    }
@@ -81,7 +81,7 @@ class Wms_1_1_1_Factory extends WmsFactory {
 		// Find layers that have both parents and children for testing:
 		// SELECT DISTINCT q.layer_id, q.layer_pos, q.layer_parent FROM layer q, layer r WHERE r.layer_parent <> '' AND q.layer_pos = CAST(r.layer_parent AS numeric) and q.layer_parent = '0' and q.fkey_wms_id = r.fkey_wms_id
 		$currentLayer = $myWms->getLayerById($id);
-		$keep = array();
+		$keep = [];
 		$parents = $currentLayer->getParents();
 		foreach ($parents as $parent) {
 			$keep[]= $parent->layer_uid;

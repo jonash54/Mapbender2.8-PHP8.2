@@ -5,21 +5,18 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class log {
-	var $dir = LOG_DIR;
-	var $log_username = true;
-
-	var $url = array();
+	public $dir = LOG_DIR;
+	public $log_username = true;
 	/*
 	 * {'file' || 'db'}
 	 */
-	var $logtype = 'db';
+	public $logtype = 'db';
 	
-	function __construct($module,$req,$time_client,$type = ""){
+	function __construct($module,public $url,$time_client,$type = ""){
 
-		$this->url = $req;
 		if($type == "")
 			$type = $this->logtype;
 
@@ -59,12 +56,12 @@ class log {
 				$sql .= "gui, module, ip, username, userid, request";
 				$sql .= ") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
 
-				$v = array($time_client, strtotime("now"), "[".date("d/M/Y:H:i:s O")."]", SID, Mapbender::session()->get("mb_user_gui"), $module, Mapbender::session()->get("mb_user_ip"), Mapbender::session()->get("mb_user_name"), Mapbender::session()->get("mb_user_id"), $this->url[$i]);
-				$t = array("s", "s", "s", "s", "s", "s", "s", "s", "s", "s");
+				$v = [$time_client, strtotime("now"), "[".date("d/M/Y:H:i:s O")."]", SID, Mapbender::session()->get("mb_user_gui"), $module, Mapbender::session()->get("mb_user_ip"), Mapbender::session()->get("mb_user_name"), Mapbender::session()->get("mb_user_id"), $this->url[$i]];
+				$t = ["s", "s", "s", "s", "s", "s", "s", "s", "s", "s"];
 				$res = db_prep_query($sql, $v, $t)or die(db_error());
 
 				if(!$res){
-					include_once(dirname(__FILE__)."/class_mb_exception.php");
+					include_once(__DIR__."/class_mb_exception.php");
 					$e = new mb_exception("class_log: Writing table mb_log failed.");
 				}
 			}

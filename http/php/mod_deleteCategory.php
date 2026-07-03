@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="deleteCategory";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done
  */
@@ -26,7 +26,7 @@ require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
 $categoryList=$_POST["categoryList"];
 $del=$_POST["del"];
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 ?>
 
@@ -63,13 +63,13 @@ function validate(){
 ###delete
 if($del){
 	$sql = "DELETE FROM gui_category WHERE category_name = $1";
-	$v = array($categoryList);
-	$t = array('s');
+	$v = [$categoryList];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
 }
 ###
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT * from gui_category";
 	$sql .= " order by category_name";
 	$res = db_prep_query($sql,$v,$t);

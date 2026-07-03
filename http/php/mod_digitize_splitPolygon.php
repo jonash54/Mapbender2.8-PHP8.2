@@ -5,8 +5,8 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 
@@ -24,13 +24,13 @@ $anyPolygonPattern = "(" . $singlePolygonPattern . ")|(" . $multiPolygonPattern 
 $linePattern = "LINESTRING \(" . $pointPattern . ",( )*" . $pointPattern . "(,( )*" . $pointPattern . ")*\)";
 
 $pattern = "/" . $anyPolygonPattern . "/";
-if (!preg_match($pattern, $polygonText)) {
+if (!preg_match($pattern, (string) $polygonText)) {
 	echo "not a polygon.";
 	die();
 }
 
 $pattern = "/" . $linePattern . "/";
-if (!preg_match($pattern, $lineText)) {
+if (!preg_match($pattern, (string) $lineText)) {
 	echo "not a line.";
 	die();
 }
@@ -47,12 +47,12 @@ $sql = "SELECT astext(multi(geom)) FROM dump ((" .
 
 $res = db_query($sql);    
 
-$polygonArray = array();
+$polygonArray = [];
 while ($row = db_fetch_array($res)) {
 	array_push($polygonArray, $row[0]);
 }
 
-$data = array("geometries" => $polygonArray);
+$data = ["geometries" => $polygonArray];
 
 $output = $json->encode($data);
 

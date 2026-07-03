@@ -21,10 +21,10 @@
 //altered to tools folder - 2019-11-06
 //require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
 //require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../http/classes/class_connector.php");
+require_once(__DIR__ . "/../core/globalSettings.php");
+require_once(__DIR__ . "/../http/classes/class_connector.php");
 
-if (file_exists(dirname(__FILE__)."/../conf/exportIsoMetadata.json")) {
+if (file_exists(__DIR__."/../conf/exportIsoMetadata.json")) {
      $configObject = json_decode(file_get_contents("../conf/exportIsoMetadata.json"));
 }
 
@@ -53,8 +53,8 @@ $res = db_query($sql);
 $sql = "SELECT layer_id ";
 $sql .= "FROM ".$wmsView." WHERE export2csw = true";
 //$sql .= "FROM layer WHERE layer_id IN (20203,20202)";
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res = db_prep_query($sql,$v,$t);
 
 $generatorScript = '/php/mod_layerISOMetadata.php?';
@@ -106,7 +106,7 @@ while($row = db_fetch_array($res)){
 	logMessages("File for layer ".$layerId." will be generated");
 	//generate temporary files under tmp
 	if($h = fopen($metadataDir."/mapbenderServiceMetadata_".$layerId."_iso19139.xml","w")){
-		if(!fwrite($h,$ISOFile)){
+		if(!fwrite($h,(string) $ISOFile)){
 			$e = new mb_exception("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/mapbenderLayerMetadata_".$row['layer_id']."_iso19139.xml");
 		}
 	logMessages("Service metadata file for layer ".$layerId." written to ".$metadataDir);
@@ -134,7 +134,7 @@ SQL;
 			logMessages("Metadata uuid: ".$row_metadata['uuid']);
 			//generate temporary files under tmp
 			if($h = fopen($metadataDir."/mapbenderDataMetadata_".$layerId."_".$row_metadata['uuid']."_iso19139.xml","w")){
-				if(!fwrite($h,$ISOFile)){
+				if(!fwrite($h,(string) $ISOFile)){
 					$e = new mb_exception("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/metadata/mapbenderMetadata_".$layerId."_".$row_metadata['uuid']."_iso19139.xml");
 				}
 				logMessages("Data metadate file for layer ".$row['layer_id']." and metadata ".$row_metadata['uuid']." written to ".$metadataDir);
@@ -147,7 +147,7 @@ SQL;
 		//get download options for specific metadata
 		
 		$downloadOptionsConnector = new connector($generatorBaseUrlDlsOption."id=".$row_metadata["uuid"]);
-		$downloadOptions = json_decode($downloadOptionsConnector->file);
+		$downloadOptions = json_decode((string) $downloadOptionsConnector->file);
 		if ($downloadOptions != null) {
 			logMessages("Coupled DLS:");
 			foreach ($downloadOptions->{$row_metadata["uuid"]}->option as $option) {
@@ -172,7 +172,7 @@ SQL;
 						$generatorDlsUrl = $generatorBaseUrlDls."Id=".$row_metadata["uuid"]."&outputFormat=iso19139&generateFrom=metadata";
 						$dlsOption = $option->type;
 						//generate downloadservice uuid from metadata_uuid and hash of link 		
-						$mdPart = explode('-',$row_metadata["uuid"]);
+						$mdPart = explode('-',(string) $row_metadata["uuid"]);
 						$linkPart = md5($option->link);
 						$dlsOptionId = $mdPart[0]."-".$mdPart[1]."-".$mdPart[2]."-".substr($linkPart, -12, 4)."-".substr($linkPart, -8, 8);
 						break;
@@ -183,7 +183,7 @@ SQL;
 					$generatorInterfaceObject = new connector($generatorDlsUrl);
 					$ISOFile = $generatorInterfaceObject->file;
 					if($h = fopen($metadataDir."/mapbenderDlsMetadata_".$row_metadata["uuid"]."_".$dlsOption."_".$dlsOptionId."_iso19139.xml","w")){
-						if(!fwrite($h,$ISOFile)){
+						if(!fwrite($h,(string) $ISOFile)){
 							$e = new mb_exception("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/mapbenderDlsMetadata_".$row_metadata["uuid"]."_".$dlsOption."_".$dlsOptionId."_iso19139.xml");
 						}
 						fclose($h);
@@ -201,15 +201,15 @@ SQL;
 					ft.fkey_wfs_id = wfs_id WHERE (wfs_version = '2.0.0' OR wfs_version = '2.0.2');
 
 SQL;
-					$v = array($row_metadata["metadata_id"]);
-					$t = array('i');
+					$v = [$row_metadata["metadata_id"]];
+					$t = ['i'];
 					$res_wfs2 = db_prep_query($sqlWfs2,$v,$t);
 					while ($row_wfs2 = db_fetch_array($res_wfs2)) {
 						$generatorDlsUrlWfs2 = $generatorBaseUrlDlsWfs2."SERVICE=WFS&outputFormat=iso19139&Id=".$row_wfs2['featuretype_id'];
 						$generatorInterfaceObject = new connector($generatorDlsUrlWfs2);
 						$ISOFile = $generatorInterfaceObject->file;
 						if($h = fopen($metadataDir."/mapbenderDlsWfs2Metadata_".$row_metadata["uuid"]."_".$row_wfs2['featuretype_id']."_iso19139.xml","w")){
-							if(!fwrite($h,$ISOFile)){
+							if(!fwrite($h,(string) $ISOFile)){
 								$e = new mb_exception("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/mapbenderDlsWfs2Metadata_".$row_metadata["uuid"]."_".$row_wfs2['featuretype_id']."_iso19139.xml");
 							}
 							fclose($h);
@@ -226,8 +226,8 @@ SQL;
 }
 //export application metadata
 $sql_app = "select uuid, export2csw from mb_metadata where type = 'application' and searchable = true and export2csw = true;";
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res_app = db_prep_query($sql_app, $v, $t);
 while ($row_app = db_fetch_array($res_app)) {
     $generatorUrlMetadata = $generatorBaseUrlMetadata."outputFormat=iso19139&id=".$row_app['uuid'];
@@ -237,7 +237,7 @@ while ($row_app = db_fetch_array($res_app)) {
     logMessages("Metadata uuid: ".$row_app['uuid']);
     //generate temporary files under tmp
     if($h = fopen($metadataDir."/mapbenderApplicationMetadata_".$row_app['uuid']."_iso19139.xml","w")){
-        if(!fwrite($h,$ISOFile)){
+        if(!fwrite($h,(string) $ISOFile)){
             logMessages("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/metadata/mapbenderMetadata_".$row_app['uuid']."_iso19139.xml");
 	}
 	logMessages("Application metadata file with metadata uuid ".$row_app['uuid']." written to ".$metadataDir);
@@ -249,8 +249,8 @@ while ($row_app = db_fetch_array($res_app)) {
 
 $sql_rest = "select wfs_featuretype.featuretype_id from wfs_featuretype where fkey_wfs_id in (select wfs_id from wfs where wfs_id in (select fkey_wfs_id from wfs_termsofuse inner join termsofuse on fkey_termsofuse_id = termsofuse_id where termsofuse.isopen = 1) and wfs_version = '2.0.0') and featuretype_searchable = 1";
 
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res_rest = db_prep_query($sql_rest, $v, $t);
 while ($row_rest = db_fetch_array($res_rest)) {
     //$generatorUrlMetadata = $generatorBaseUrlMetadata."outputFormat=iso19139&id=".$row_app['uuid'];
@@ -261,7 +261,7 @@ while ($row_rest = db_fetch_array($res_rest)) {
     logMessages("Featuretype id: ".$row_rest['featuretype_id']);
     //generate temporary files under tmp
     if($h = fopen($metadataDir."/mapbenderRestMetadata_".$row_rest['featuretype_id']."_iso19139.xml","w")){
-        if(!fwrite($h,$ISOFile)){
+        if(!fwrite($h,(string) $ISOFile)){
             logMessages("mod_exportISOMetadata.php: cannot write to file: ".$metadataDir."/metadata/mapbenderRestMetadata_".$row_rest['featuretype_id']."_iso19139.xml");
 	}
 	logMessages("REST metadata file with featuretype_id ".$row_rest['featuretype_id']." written to ".$metadataDir);

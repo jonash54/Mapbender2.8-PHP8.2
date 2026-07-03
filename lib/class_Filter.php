@@ -49,8 +49,8 @@ class Filter {
 			}
 		}
 		else if (func_num_args() === 1) {
-			if (in_array(strtoupper(func_get_arg(0)), explode(",", Filter::BOOLEAN))) {
-				$this->value = strtoupper(func_get_arg(0));
+			if (in_array(strtoupper((string) func_get_arg(0)), explode(",", Filter::BOOLEAN))) {
+				$this->value = strtoupper((string) func_get_arg(0));
 			}
 		}
 		else {
@@ -61,8 +61,8 @@ class Filter {
 	public function toSql ($parameterCount = 1) {
 		$sqlObject = new stdClass();
 		$sqlObject->sql = "";
-		$sqlObject->v = array();
-		$sqlObject->t = array();			
+		$sqlObject->v = [];
+		$sqlObject->t = [];			
 		
 		if ($this->isComplex()) {
 			$i = $parameterCount;
@@ -89,7 +89,7 @@ class Filter {
 		else {
 			if (is_array($this->value)) {
 				if ($this->operator === "IN") {
-					$parameters = array();
+					$parameters = [];
 					foreach ($this->value as $value) {
 						$parameters[]= "$" . $parameterCount++;
 						$sqlObject->v[]= $value;
@@ -107,9 +107,9 @@ class Filter {
 					$this->key . " " . $this->operator . " $" . $parameterCount : 
 						(!is_null($this->value) ? $this->value : "");
 				$sqlObject->v = !is_null($this->key) && !is_null($this->operator) && !is_null($this->value) ? 
-					array($this->value) : array();
+					[$this->value] : [];
 				$sqlObject->t = !is_null($this->key) && !is_null($this->operator) && !is_null($this->value) ? 
-					array($this->getType($this->value)) : array();
+					[$this->getType($this->value)] : [];
 			}
 			return $sqlObject;			
 		}

@@ -18,11 +18,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /********** Configuration*************************************************/
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
-$tab_ids = array();
-include(dirname(__FILE__)."/../include/dyn_php.php");
-include(dirname(__FILE__)."/../include/dyn_js.php");
+$tab_ids = [];
+include(__DIR__."/../include/dyn_php.php");
+include(__DIR__."/../include/dyn_js.php");
 
 //default styles
 echo 'try{if(horiztab_style){}}catch(e){horiztab_style="-moz-border-radius-topleft: 5px;-moz-border-radius-topright: 5px;-webkit-border-top-left-radius: 5px;-webkit-border-top-right-radius: 5px;font-size:7pt;border:solid #222222 1px;padding:1px 8px 1px 8px;line-height:22px;background:#aaaaaa;cursor:pointer;white-space:nowrap;";}';
@@ -34,13 +34,13 @@ echo 'styleObj.addClass("tabButton", horiztab_style);';
 echo 'styleObj.addClass("tabButtonActive", horiztab_style_active);';
 
 //write tab creation javascript function
-echo "open_tab_".$e_id."=".($open_tab?$open_tab:0).";\n";
+echo "open_tab_".$e_id."=".($open_tab ?: 0).";\n";
 echo "function init_".$e_id."(){";
 echo "$(\"#".$e_id."\").tabControl()";
 for ($i=0; $i < count($tab_ids); $i++) {
 	$sql = "SELECT gettext($1, e_title) AS e_title FROM gui_element WHERE fkey_gui_id = $2 AND e_id = $3";
-	$v = array(Mapbender::session()->get("mb_lang"), $gui_id, $tab_ids[$i]);
-	$t = array("s", "s", "s");
+	$v = [Mapbender::session()->get("mb_lang"), $gui_id, $tab_ids[$i]];
+	$t = ["s", "s", "s"];
 	$res = db_prep_query($sql, $v, $t);
 	$row = db_fetch_array($res);
 	echo ".addTab({title:\"".$row["e_title"]."\",id:\"".$tab_ids[$i]."\"})";	

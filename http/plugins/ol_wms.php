@@ -34,12 +34,12 @@ ol_map.mapbenderEvents.mapInstantiated.register(function () {
 	var ol_map = Mapbender.modules[options.target[0]];
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_wms.php");
 
 $sql = "SELECT fkey_wms_id FROM gui_wms WHERE fkey_gui_id = $1 ORDER BY gui_wms_position";
-$v = array(Mapbender::session()->get("mb_user_gui"));
-$t = array('s');
+$v = [Mapbender::session()->get("mb_user_gui")];
+$t = ['s'];
 $res = db_prep_query($sql,$v,$t);
 
 $cnt=0;

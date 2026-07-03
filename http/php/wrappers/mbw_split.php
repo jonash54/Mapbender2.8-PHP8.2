@@ -29,28 +29,28 @@ function mbw_split() {
     $phpversion = phpversion();
     $pars = func_get_args();
     $result = null;
-    if (strpos($phpversion, "5.") === 0) {
+    if (str_starts_with($phpversion, "5.")) {
         switch ($phpversion[2]) {
             case "0":
             case "1":
             case "2":
-               $result =  split($pars);
+               $result =  preg_split('#' . preg_quote($pars, '#') . '#m');
                break;
             default:
                 if ($pars[2] == null) {
-                    $result = explode($pars[0],$pars[1]);
+                    $result = explode($pars[0],(string) $pars[1]);
                 }
                 else {
-                    $result = explode($pars[0],$pars[1],$pars[2]);
+                    $result = explode($pars[0],(string) $pars[1],$pars[2]);
                 }
         }
     }
-    else if (strpos($phpversion, "7.") === 0) {
+    else if (str_starts_with($phpversion, "7.")) {
         if ($pars[2] == null) {
-            $result = explode($pars[0],$pars[1]);
+            $result = explode($pars[0],(string) $pars[1]);
         }
         else {
-            $result = explode($pars[0],$pars[1],$pars[2]);
+            $result = explode($pars[0],(string) $pars[1],$pars[2]);
         }
     }
     return $result;

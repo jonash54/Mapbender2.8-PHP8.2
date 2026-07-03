@@ -58,7 +58,7 @@ That's it.  You should now be ready to use PHPMailer!
 A Simple Example:
 
 <?php
-require(dirname(__FILE__) . "/class.phpmailer.php");
+require(__DIR__ . "/class.phpmailer.php");
 
 $mail = new PHPMailer();
 

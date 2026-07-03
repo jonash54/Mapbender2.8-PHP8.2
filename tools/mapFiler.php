@@ -159,8 +159,8 @@ function division($x){
 
  if(isset($myLocation) && $myLocation != ""){
 	# what is to do...
-	$myFile = basename($myLocation);
-	$myDir = dirname($myLocation);
+	$myFile = basename((string) $myLocation);
+	$myDir = dirname((string) $myLocation);
 	$suffix = strstr($myFile, ".");
 
 	
@@ -171,7 +171,7 @@ function division($x){
 	else{
 		if($verz = opendir($myDir)){
 			while ($myFile = readdir ($verz)) {
-				if($myFile != ".." && $myFile != "." && is_file($myDir."/".$myFile) && strstr($myFile, $suffix)){
+				if($myFile != ".." && $myFile != "." && is_file($myDir."/".$myFile) && strstr($myFile, (string) $suffix)){
 					modify($myDir, $myFile);                         
 					echo "modified: " . $myDir . "/" . $myFile. "<br />";
 				}

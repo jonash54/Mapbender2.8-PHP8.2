@@ -1,12 +1,12 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_user.php");
 $hostName = $_SERVER['HTTP_HOST'];
 
 $resourceType = "layer";
 $userId = 2;
 $resourceId = "";
-$allowedResourceTypes = array("layer", "featuretype");
+$allowedResourceTypes = ["layer", "featuretype"];
 
 $resultObj['result'] = '';
 $resultObj['success'] = false;
@@ -24,7 +24,7 @@ if (isset($_REQUEST["userId"]) & $_REQUEST["userId"] != "") {
  $testMatch = $_REQUEST["userId"];
  //give max 99 entries - more will be to slow
  $pattern = '/^[0-9]*$/';
- if (!preg_match($pattern,$testMatch)){
+ if (!preg_match($pattern,(string) $testMatch)){
  //echo 'userId: <b>'.$testMatch.'</b> is not valid.<br/>';
  echo 'Parameter <b>userId</b> is not valid (integer).<br/>';
  die();
@@ -55,7 +55,7 @@ if (isset($_REQUEST["resourceId"]) & $_REQUEST["resourceId"] != "") {
     //validate to csv integer list
     $testMatch = $_REQUEST["resourceId"];
     $pattern = '/^[\d,]*$/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         //echo 'resourceIds: <b>'.$testMatch.'</b> is not valid.<br/>';
         echo 'Parameter <b>resourceId</b> is not valid (integer or cs integer list).<br/>';
         die();
@@ -76,8 +76,8 @@ switch ($resourceType) {
         $accessability = $user->isLayerAccessible($resourceId);
         break;
     case "featuretype":
-        $v = array($resourceId);
-        $t = array('i');
+        $v = [$resourceId];
+        $t = ['i'];
         $sql = "SELECT fkey_wfs_id, featuretype_name FROM wfs_featuretype WHERE wfs_featuretype.featuretype_id = $1";
         $res = db_prep_query($sql, $v, $t);
         $row = db_fetch_array($res);

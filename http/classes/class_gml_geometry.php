@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_feature_collection.php");
-require_once(dirname(__FILE__)."/../classes/class_crs.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_feature_collection.php");
+require_once(__DIR__."/../classes/class_crs.php");
 
 abstract class GmlGeometry {
 
@@ -35,14 +35,7 @@ abstract class GmlGeometry {
 	
 	public $srs;
 	
-	public $latLonSrs = array(
-		"urn:x-ogc:def:crs:EPSG:4326",
-		"urn:x-ogc:def:crs:EPSG:4258",
-		"urn:x-ogc:def:crs:EPSG:31466",
-		"urn:x-ogc:def:crs:EPSG:31467",
-		"urn:x-ogc:def:crs:EPSG:31468",
-		"urn:x-ogc:def:crs:EPSG:31469"
-	);
+	public $latLonSrs = ["urn:x-ogc:def:crs:EPSG:4326", "urn:x-ogc:def:crs:EPSG:4258", "urn:x-ogc:def:crs:EPSG:31466", "urn:x-ogc:def:crs:EPSG:31467", "urn:x-ogc:def:crs:EPSG:31468", "urn:x-ogc:def:crs:EPSG:31469"];
 	
 	public function isLatLonSrs ($geomSrs) {
 		//use user defined $latLonSrsArray from file epsg.php for check 

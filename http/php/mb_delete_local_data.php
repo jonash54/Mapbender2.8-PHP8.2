@@ -16,8 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
 
 // user id in session
 $user_id = Mapbender::session()->get("mb_user_id");
@@ -28,8 +28,8 @@ $serial_id;
 $wmc_serial_id = $_POST["id"];
 // sql statement to get the wmc object and the serial_id
 $sql = 'Select wmc from mb_user_wmc where wmc_serial_id = $1 and wmc_has_local_data = 1 and fkey_user_id = $2;';
-$v = array($wmc_serial_id, $user_id);
-$t = array("c", "i");
+$v = [$wmc_serial_id, $user_id];
+$t = ["c", "i"];
 $res = db_prep_query($sql, $v, $t);
 // fetch result
 if ($row = db_fetch_array($res)) {
@@ -46,8 +46,8 @@ if ($row = db_fetch_array($res)) {
         $wmc->update_existing($newWmcXml, $serial_id);
         // send sql to update the local-data flag
         $sql =  'UPDATE mb_user_wmc mb  SET wmc_has_local_data = 0 WHERE wmc_serial_id = $1';
-        $v = array($wmc_serial_id);
-        $t = array("s");
+        $v = [$wmc_serial_id];
+        $t = ["s"];
 
         $res = db_prep_query($sql, $v, $t);
         echo('{"success":true}');

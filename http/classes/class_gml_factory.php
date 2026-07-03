@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 /**
  * Creates GML objects from GML documents.
@@ -30,7 +30,7 @@ require_once(dirname(__FILE__)."/../classes/class_json.php");
 abstract class GmlFactory {
 
 	public function removeWhiteSpace ($string) {
-		$str = preg_replace("/\>(\s)+\</", "><", trim($string));
+		$str = preg_replace("/\>(\s)+\</", "><", trim((string) $string));
 //		$str = preg_replace("/\\n/", "\\n", $str);
 		return $str;
 		
@@ -72,10 +72,10 @@ abstract class GmlFactory {
 							$isLatLonSrs = $geometry->isLatLonSrs($srs);
 							foreach ($currentRing as $coords) {
 								if ($isLatLonSrs) {
-									list($y, $x) = $coords;
+									[$y, $x] = $coords;
 								}
 								else {
-									list($x, $y) = $coords;
+									[$x, $y] = $coords;
 								}
 	
 								// exterior ring							
@@ -92,10 +92,10 @@ abstract class GmlFactory {
 					case "POINT":
 						$geometry = new GMLPoint();
 						if ($geometry->isLatLonSrs($srs)) {
-							list($y, $x) = $currentGeometry->coordinates;
+							[$y, $x] = $currentGeometry->coordinates;
 						}
 						else {
-							list($x, $y) = $currentGeometry->coordinates;
+							[$x, $y] = $currentGeometry->coordinates;
 						}
 
 						$geometry->setPoint($x, $y);
@@ -106,10 +106,10 @@ abstract class GmlFactory {
 						for ($i = 0; $i < count($currentGeometry->coordinates); $i++) {
 							$currentPoint = $currentGeometry->coordinates[$i];
 							if ($isLatLonSrs) {
-								list($y, $x) = $currentPoint;
+								[$y, $x] = $currentPoint;
 							}
 							else {
-								list($x, $y) = $currentPoint;
+								[$x, $y] = $currentPoint;
 							}
 							$geometry->addPoint($x, $y);
 						}
@@ -120,10 +120,10 @@ abstract class GmlFactory {
 						for ($i = 0; $i < count($currentGeometry->coordinates); $i++) {
 							$currentLinePoint = $currentGeometry->coordinates[$i];
 							if ($isLatLonSrs) {
-								list($y, $x) = $currentLinePoint;
+								[$y, $x] = $currentLinePoint;
 							}
 							else {
-								list($x, $y) = $currentLinePoint;
+								[$x, $y] = $currentLinePoint;
 							}
 							$geometry->addPoint($x, $y);
 						}
@@ -138,10 +138,10 @@ abstract class GmlFactory {
 								
 								foreach ($currentRing as $coords) {
 									if ($isLatLonSrs) {
-										list($y, $x) = $coords;
+										[$y, $x] = $coords;
 									}
 									else {
-										list($x, $y) = $coords;
+										[$x, $y] = $coords;
 									}
 		
 									// exterior ring							
@@ -163,10 +163,10 @@ abstract class GmlFactory {
 							$isLatLonSrs = $geometry->isLatLonSrs($srs);
 							foreach ($currentLine as $currentLinePoint) {
 								if ($isLatLonSrs) {
-									list($y, $x) = $currentLinePoint;
+									[$y, $x] = $currentLinePoint;
 								}
 								else {
-									list($x, $y) = $currentLinePoint;
+									[$x, $y] = $currentLinePoint;
 								}
 								$geometry->addPoint($x, $y, $i);
 							}

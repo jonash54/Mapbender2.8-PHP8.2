@@ -23,16 +23,16 @@
 * get/post '___' separated maprequests
 *
 **/
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_connector.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_connector.php");
 
 class weldMaps2JPEG{
 	function __construct($urls,$filename, $encode = true){
 		if(!$urls || $urls == ""){
 			$e = new mb_exception("weldMaps2JPEG: no maprequests delivered");
 		}
-		$url = explode("___", $urls);
+		$url = explode("___", (string) $urls);
 		for($i=0; $i<count($url); $i++){
                 	if ($url[$i] != false) {
 				$obj1 = new stripRequest($url[$i]);
@@ -41,7 +41,7 @@ class weldMaps2JPEG{
 		}
 		//following is only possible, if parameters with and height are given :-( - when getlegendgraphic is used - otherwise we have to get the original width and height from capabilities - or mapbender database itself!
 		//check if url is of type getlegendgraphic or getmap - these are considered here
-		$request = strtoupper($obj1->get("REQUEST"));
+		$request = strtoupper((string) $obj1->get("REQUEST"));
 //$e = new mb_exception(strtoupper($obj1->get("REQUEST")));
 //$e = new mb_exception("count url: ".count($url));
 		if ($request !== "GETMAP" && $request !== "GETLEGENDGRAPHIC") {
@@ -90,7 +90,7 @@ class weldMaps2JPEG{
 		for($i=0; $i<count($url); $i++){
 			if ($url[$i] != false) { //sometimes some false urls will be send? - don't use them
 				//before encode the url it should be decoded to be secure that a decoded url is used!
-				$url[$i] = urldecode($url[$i]);
+				$url[$i] = urldecode((string) $url[$i]);
 				$obj = new stripRequest($url[$i]);
 				$url[$i] = $obj->setPNG();
 				$url[$i] = $obj->encodeGET($encode);

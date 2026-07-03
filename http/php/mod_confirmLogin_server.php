@@ -1,10 +1,10 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
 
 $command = $_POST["command"];
 $pattern = "/[a-z]/i";
-if (!preg_match($pattern, $command)) {
+if (!preg_match($pattern, (string) $command)) {
 	echo "Command not valid!";
 	die;
 }
@@ -17,7 +17,7 @@ if (!is_numeric($userId)) {
 
 $userTicket = $_POST["userTicket"];
 $pattern = "/[a-z0-9]{30}/i";
-if (!preg_match($pattern, $userTicket)) {
+if (!preg_match($pattern, (string) $userTicket)) {
 	echo "User Ticket not valid!";
 	die;
 }

@@ -14,8 +14,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-require_once(dirname(__FILE__) . '/../../core/globalSettings.php');
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__ . '/../../core/globalSettings.php');
+require_once(__DIR__.'/../../conf/ckan.conf');
 
 if (defined("CKAN_SERVER_PORT") && CKAN_SERVER_PORT !== '') {
     $ckanApiUrl = CKAN_SERVER_IP.":".CKAN_SERVER_PORT;

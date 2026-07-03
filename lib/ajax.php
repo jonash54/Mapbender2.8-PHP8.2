@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../http/classes/class_json.php");
-require_once(dirname(__FILE__) . "/class_Mapbender.php");
+require_once(__DIR__ . "/../http/classes/class_json.php");
+require_once(__DIR__ . "/class_Mapbender.php");
 
 /**
  * Represents an incoming JSON-RPC. It will NOT send a response to the client!
@@ -37,7 +37,7 @@ class AjaxRequest {
 	protected $method = "";
 	protected $json = null;
 	protected $id = null;
-	protected $paramObject = array();
+	protected $paramObject = [];
 	
 	public function __construct ($requestArray) {
 		$this->json = new Mapbender_JSON();
@@ -115,8 +115,8 @@ class AjaxRequest {
  * $ajaxResponse->send();
  */
 class AjaxResponse extends AjaxRequest {
-	private $data = array();
-	private $highLevelAttributes = array();
+	private $data = [];
+	private $highLevelAttributes = [];
 	private $success = true;
 	private $error = null;
 	private $message = "";
@@ -197,9 +197,7 @@ class AjaxResponse extends AjaxRequest {
 		$this->success = $trueOrFalse;
 		
 		if (!$this->success && is_numeric($code)) {
-			$this->error = array(
-				"code" => intval($code)
-			);
+			$this->error = ["code" => intval($code)];
 		}
 	}
 	
@@ -221,14 +219,14 @@ class AjaxResponse extends AjaxRequest {
 	/**
 	 * Send the response to the client.
 	 */
-	public function send () {
+	public function send (): never {
 		header("Content-type:application/json; charset=" . CHARSET);
 		echo $this->getData();
 		die;
 	}
 	
 	private function getData () {
-		$dataObject = array();
+		$dataObject = [];
 		$dataObject["data"] = $this->data;
 		if ($this->success) {
 			$dataObject["success"] = true;
@@ -236,10 +234,7 @@ class AjaxResponse extends AjaxRequest {
 		}
 		else {
 			if (is_null($this->error)) {
-				$this->error = array(
-					"code" => -1,
-					"message" => $this->message
-				);
+				$this->error = ["code" => -1, "message" => $this->message];
 			}
 			else if (is_array($this->error) 
 				&& is_numeric($this->error["code"]) 
@@ -248,11 +243,7 @@ class AjaxResponse extends AjaxRequest {
 				$this->error["message"] = $this->message;
 			}
 		}
-		$obj = array(
-			"result" => $dataObject,
-			"error" => $this->error,
-			"id" => $this->id
-		);
+		$obj = ["result" => $dataObject, "error" => $this->error, "id" => $this->id];
 		//add highlevel attributes
 		foreach ($this->highLevelAttributes as $key => $value) {
 			$obj[$key] = $value;

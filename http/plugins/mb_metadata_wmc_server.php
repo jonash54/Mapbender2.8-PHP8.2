@@ -1,12 +1,12 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wmc.php";
-require_once(dirname(__FILE__)."/../classes/class_wmc_factory.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wmc.php";
+require_once(__DIR__."/../classes/class_wmc_factory.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -36,20 +36,13 @@ LEFT JOIN wmc_load_count ON wmc_load_count.fkey_wmc_serial_id = mb_user_wmc.wmc_
 
 SQL;
 		$res = db_query($sql);
-		$resultObj = array(
-			"header" => array(
-				"WMC ID",
-				"Titel",
-				"Timestamp",
-				"Load Count",
-				""
-			), 
-			"data" => array()
-		);
+		$resultObj = ["header" => ["WMC ID", "Titel", "Timestamp", "Load Count", ""], "data" => []];
 
 		while ($row = db_fetch_row($res)) {
 			// convert NULL to '', NULL values cause datatables to crash
-			$walk = array_walk($row, create_function('&$s', '$s=strval($s);'));
+			$walk = array_walk($row, function (&$s) {
+       $s = strval($s);
+   });
 			$link = "<a class='cancelClickEvent' target='_blank' href='../php/mod_showMetadata.php?".
 					"languageCode=".Mapbender::session()->get("mb_lang")."&resource=wmc&id=".$row[0]."'>"._mb("Metadata")."</a>";
 			array_push($row, $link);
@@ -73,7 +66,7 @@ SQL;
 		$res = db_query($sql);
 		$row = db_fetch_assoc($res);
 		
-		$resultObj = array();
+		$resultObj = [];
 		$resultObj['wmc_id'] = $row['wmc_id'];
 		$resultObj['wmc_abstract'] = $row['abstract'];
 		$resultObj['wmc_title'] = $row['wmc_title'];
@@ -91,7 +84,7 @@ fkey_wmc_serial_id = $wmcId ORDER BY keyword
 SQL;
 
 		$keywordRes = db_query($keywordSql);
-		$keywords = array();
+		$keywords = [];
 		while ($keywordRow = db_fetch_assoc($keywordRes)) {
 			$keywords[]= $keywordRow["keyword"];
 		}
@@ -147,7 +140,7 @@ SQL;
 		try {
 			$wmcId = intval($data->wmc->wmc_id);
 		}
-		catch (Exception $e) {
+		catch (Exception) {
 			$ajaxResponse->setSuccess(false);
 			$ajaxResponse->setMessage(_mb("Invalid WMC ID."));
 			$ajaxResponse->send();						
@@ -161,25 +154,17 @@ SQL;
 			$ajaxResponse->send();	
 		}
 		
-		$columns = array(
-			"wmc_abstract", 
-			"wmc_title",
-			"wmc_keyword",
-			"isoTopicCats",
-			"inspireCats",
-			"customCats",
-			"public"
-		);
+		$columns = ["wmc_abstract", "wmc_title", "wmc_keyword", "isoTopicCats", "inspireCats", "customCats", "public"];
 		
 		foreach ($columns as $c) {
 			$value = $data->wmc->$c;
 			if ($c === "wmc_keyword") {
-				$wmc->$c = explode(",", $value);
+				$wmc->$c = explode(",", (string) $value);
 				foreach ($wmc->$c as &$val) {
 					$val = trim($val);
 				}
 				if(!$value) {
-					$wmc->$c = array();
+					$wmc->$c = [];
 				}
 			}
 			elseif ($c === "isoTopicCats" 
@@ -188,10 +173,10 @@ SQL;
 			) {
 				if (!is_array($value)) {
 					if(!$value) {
-						$wmc->$c = array();
+						$wmc->$c = [];
 					}
 					else {
-						$wmc->$c = array($value);
+						$wmc->$c = [$value];
 					}
 				}
 				else {

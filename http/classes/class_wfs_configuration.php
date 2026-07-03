@@ -17,36 +17,36 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 /**
  * This is the configuration of a WFS featuretype element. It belongs
  * to a configuration of a WFS featuretype.
  */
 class WfsConfigurationElement {
-	var $id;
-	var $name;
-	var $type;
-	var $search;
-	var $styleId;
-	var $toUpper;
-	var $label;
-	var $labelId;
-	var $geom;
-	var $show;
-	var $mandatory;
-	var $respos;
-	var $minInput;
-	var $formElementHtml;
-	var $authVarname;
-	var $detailPos;
-	var $operator;
-	var $showDetail;
-	var $helptext;
-	var $category;
+	public $id;
+	public $name;
+	public $type;
+	public $search;
+	public $styleId;
+	public $toUpper;
+	public $label;
+	public $labelId;
+	public $geom;
+	public $show;
+	public $mandatory;
+	public $respos;
+	public $minInput;
+	public $formElementHtml;
+	public $authVarname;
+	public $detailPos;
+	public $operator;
+	public $showDetail;
+	public $helptext;
+	public $category;
 	
 	/**
 	 * Creates a WFS featuretype element configuration from an object.
@@ -92,17 +92,8 @@ class WfsConfigurationElement {
 	 */
 	public static function insertIntoDb ($wfsConfId, $el) {
 		$sql = file_get_contents("../../sql/insert_wfs_conf_element.sql");
-		$v = array(
-			$wfsConfId,	$el->id, $el->geom,	$el->search, $el->pos,
-			$el->styleId, $el->toUpper,	$el->label,	$el->labelId,
-			$el->show, $el->respos, $el->formElementHtml, $el->edit,
-			$el->mandatory,	$el->authVarname, $el->operator,
-			$el->showDetail, $el->detailPos, $el->minInput, $el->helptext, $el->category
-		);
-		$t = array(
-			"i", "i", "i", "i", "i", "s", "i", "s", "s", "i", 
-			"i", "s", "i", "i", "s", "s", "i", "i", "i", "s", "s"
-		);
+		$v = [$wfsConfId, $el->id, $el->geom, $el->search, $el->pos, $el->styleId, $el->toUpper, $el->label, $el->labelId, $el->show, $el->respos, $el->formElementHtml, $el->edit, $el->mandatory, $el->authVarname, $el->operator, $el->showDetail, $el->detailPos, $el->minInput, $el->helptext, $el->category];
+		$t = ["i", "i", "i", "i", "i", "s", "i", "s", "s", "i", "i", "s", "i", "i", "s", "s", "i", "i", "i", "s", "s"];
 		
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
@@ -119,17 +110,8 @@ class WfsConfigurationElement {
 	 */
 	public static function updateInDb ($wfsConfId, $el) {
 		$sql = file_get_contents("../../sql/update_wfs_conf_element.sql");
-		$v = array(
-			$el->geom, $el->search, $el->pos, $el->styleId, $el->toUpper,
-			$el->label,	$el->labelId, $el->show, $el->respos, 
-			$el->formElementHtml, $el->edit, $el->mandatory,
-			$el->authVarname, $el->operator, $el->showDetail, $el->detailPos,  
-			$el->minInput, $el->helptext, $el->category, $el->id, $wfsConfId
-		);
-		$t = array(
-			"i", "i", "i", "s", "i", "s", "s", "i", "i", 
-			"s", "i", "i", "s", "s", "i", "i", "i", "s", "s", "i", "i"
-		);
+		$v = [$el->geom, $el->search, $el->pos, $el->styleId, $el->toUpper, $el->label, $el->labelId, $el->show, $el->respos, $el->formElementHtml, $el->edit, $el->mandatory, $el->authVarname, $el->operator, $el->showDetail, $el->detailPos, $el->minInput, $el->helptext, $el->category, $el->id, $wfsConfId];
+		$t = ["i", "i", "i", "s", "i", "s", "s", "i", "i", "s", "i", "i", "s", "s", "i", "i", "i", "s", "s", "i", "i"];
 		
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
@@ -153,20 +135,20 @@ class WfsConfigurationElement {
  */
 class WfsConfiguration {
 	
-	var $id;
-	var $type;
-	var $wfsId;
-	var $featureTypeId;
-	var $featureTypeName;
-	var $label; 
-	var $labelId;
-	var $style;
-	var $button;
-	var $buttonId;
-	var $buffer;
-	var $resStyle;
-	var $elementArray = array();
-	var $storedQueryElementArray = array();
+	public $id;
+	public $type;
+	public $wfsId;
+	public $featureTypeId;
+	public $featureTypeName;
+	public $label; 
+	public $labelId;
+	public $style;
+	public $button;
+	public $buttonId;
+	public $buffer;
+	public $resStyle;
+	public $elementArray = [];
+	public $storedQueryElementArray = [];
 
 	function __construct () {
 	}
@@ -214,7 +196,7 @@ class WfsConfiguration {
 
 			$allowedWfsConfIds = $user->getWfsConfByPermission();
 
-			$idArray = array_intersect(array($this->id), $allowedWfsConfIds);
+			$idArray = array_intersect([$this->id], $allowedWfsConfIds);
 
 			if (count($idArray) === 1) {
 				return true;
@@ -285,15 +267,8 @@ class WfsConfiguration {
 		db_begin();
 
 		$sql = file_get_contents("../../sql/update_wfs_conf.sql");
-		$v = array(
-			$wfsConf->abstr, $wfsConf->label, $wfsConf->labelId, 
-			$wfsConf->button, $wfsConf->buttonId, $wfsConf->style, 
-			$wfsConf->buffer, $wfsConf->resStyle, $wfsConf->description, 
-			$wfsConf->type, $wfsConf->id
-		);
-		$t = array(
-			"s", "s", "s", "s", "s", "s", "d", "s", "s", "i", "i"
-		);
+		$v = [$wfsConf->abstr, $wfsConf->label, $wfsConf->labelId, $wfsConf->button, $wfsConf->buttonId, $wfsConf->style, $wfsConf->buffer, $wfsConf->resStyle, $wfsConf->description, $wfsConf->type, $wfsConf->id];
+		$t = ["s", "s", "s", "s", "s", "s", "d", "s", "s", "i", "i"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("WFS Conf update failed.");
@@ -331,15 +306,8 @@ class WfsConfiguration {
 		db_begin();
 		
 		$sql = file_get_contents("../../sql/insert_wfs_conf.sql");
-		$v = array(
-			$wfsConf->abstr, $wfsConf->wfsId, $wfsConf->featureTypeId,
-			$wfsConf->label, $wfsConf->labelId, $wfsConf->button, 
-			$wfsConf->buttonId, $wfsConf->style, $wfsConf->buffer, 
-			$wfsConf->resStyle, $wfsConf->description, $wfsConf->type
-		);
-		$t = array(
-			"s", "i", "i", "s", "s", "s", "s", "s", "d", "s", "s", "i"
-		);
+		$v = [$wfsConf->abstr, $wfsConf->wfsId, $wfsConf->featureTypeId, $wfsConf->label, $wfsConf->labelId, $wfsConf->button, $wfsConf->buttonId, $wfsConf->style, $wfsConf->buffer, $wfsConf->resStyle, $wfsConf->description, $wfsConf->type];
+		$t = ["s", "i", "i", "s", "s", "s", "s", "s", "d", "s", "s", "i"];
 		$res = db_prep_query($sql, $v, $t);
 		if (!$res) {
 			$e = new mb_exception("WFS Conf insert failed.");
@@ -405,8 +373,8 @@ SELECT * FROM wfs_conf JOIN wfs ON wfs_conf.fkey_wfs_id = wfs.wfs_id
 WHERE wfs_conf.wfs_conf_id = $1 LIMIT 1
 SQL;
 
-        $v = array($wfsConf->id);
-        $t = array("i");
+        $v = [$wfsConf->id];
+        $t = ["i"];
         $res = db_prep_query($sql, $v, $t);
         $row = db_fetch_array($res);
 		
@@ -428,8 +396,8 @@ SQL;
 SELECT featuretype_name FROM wfs_featuretype WHERE featuretype_id = $1 LIMIT 1
 SQL;
 
-        $v = array($wfsConf->featureTypeId);
-        $t = array("i");
+        $v = [$wfsConf->featureTypeId];
+        $t = ["i"];
         $res = db_prep_query($sql, $v, $t);
         $row = db_fetch_array($res);
 		
@@ -441,8 +409,8 @@ ON wfs_conf_element.f_id = wfs_element.element_id
 WHERE wfs_conf_element.fkey_wfs_conf_id = $1 
 ORDER BY wfs_conf_element.f_id
 SQL;
-		$v = array($wfsConf->id);
-		$t = array('i');
+		$v = [$wfsConf->id];
+		$t = ['i'];
 		$res = db_prep_query($sql, $v, $t);
 	
 		
@@ -466,7 +434,7 @@ SQL;
 			$element->minInput = intval($row["f_min_input"]);
 //			$element->formElementHtmlTemplate = $row["f_html_template"];
 			$element->formElementHtml = $row["f_form_element_html"];
-			$element->authVarname = stripslashes($row["f_auth_varname"]);
+			$element->authVarname = stripslashes((string) $row["f_auth_varname"]);
 			$element->detailPos = intval($row["f_detailpos"]);
 			$element->operator = $row["f_operator"];
 			$element->showDetail = intval($row["f_show_detail"]);
@@ -484,8 +452,8 @@ SELECT * FROM wfs_stored_query_params
 WHERE fkey_wfs_conf_id = $1 AND stored_query_id = $2
 ORDER BY query_param_id
 SQL;
-			$v = array($wfsConf->id, $wfsConf->storedQueryId);
-			$t = array('i', 's');
+			$v = [$wfsConf->id, $wfsConf->storedQueryId];
+			$t = ['i', 's'];
 			$res = db_prep_query($sql, $v, $t);
 			while ($row = db_fetch_array($res)) {
 				$storedQueryElement = new StoredQueryElement();
@@ -518,11 +486,11 @@ SQL;
  */
 class StoredQueryElement {
 
-	var $id;
-	var $name;
-	var $type;
-	var $wfsConfId;
-	var $storedQueryId;
+	public $id;
+	public $name;
+	public $type;
+	public $wfsConfId;
+	public $storedQueryId;
 	
 	function __construct () {
 	}

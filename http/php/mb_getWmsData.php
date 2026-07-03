@@ -1,16 +1,16 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_wms.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 function getRootLayerId ($wms_id) {
 	$sql = "SELECT layer_id FROM layer, wms " . 
 		"WHERE wms.wms_id = layer.fkey_wms_id AND layer_pos='0' " . 
 		"AND wms.wms_id = $1";
-	$v=array($wms_id);
-	$t=array('i');
+	$v=[$wms_id];
+	$t=['i'];
 	$res=db_prep_query($sql,$v,$t);
 	$row=db_fetch_array($res);
 	return $row ? $row["layer_id"] : null;
@@ -37,20 +37,19 @@ if ($command == "getWmsData") {
 	
 	//get existing DB wms information 
     	$sql = "SELECT * from layer WHERE fkey_wms_id = $1 ORDER BY layer_pos";
-    	$v = array ($wms);
-    	$t = array ('i');
+    	$v = [$wms];
+    	$t = ['i'];
    	$res = db_prep_query($sql, $v, $t);
     
-   	$dbObj = array();
+   	$dbObj = [];
     
 	while ($row = db_fetch_array($res)) {
-        	$dbObj[] = array (
-            	//"id" => $row["layer_id"],
-            	"pos" => $row["layer_pos"],
-            	"parent"   => $row["layer_parent"],
-            	"name"   => $row["layer_name"]
-            	//"title"   => $row["layer_title"]
-        	);
+        	$dbObj[] = [
+             //"id" => $row["layer_id"],
+             "pos" => $row["layer_pos"],
+             "parent"   => $row["layer_parent"],
+             "name"   => $row["layer_name"],
+         ];
    	}
     
     	//get xml wms information
@@ -68,10 +67,7 @@ if ($command == "getWmsData") {
 	$updateWms->optimizeWMS();
 	$xmlObj = $updateWms->getLayerInfo();
 	
-	$resultObj = array(
-	    "dbObj" => $dbObj,
-	    "xmlObj" =>  $xmlObj
-	);
+	$resultObj = ["dbObj" => $dbObj, "xmlObj" =>  $xmlObj];
 	
 	$layerJson = json_encode($resultObj);
 	
@@ -92,17 +88,14 @@ if ($command == "getWmsData") {
 	} else {
 		$useAuthentication = false;
 	}
-	
-	$changedLayerArray = array();
+
+	$changedLayerArray = [];
 	for ($i=0; $i<count($_POST['dbOldNames']); $i++) {
-	    $changedLayerArray[] = array(
-	        "oldLayerName" => $_POST['dbOldNames'][$i],
-	        "newLayerName" => $_POST['dbCurrentNames'][$i]
-	    );    
+	    $changedLayerArray[] = ["oldLayerName" => $_POST['dbOldNames'][$i], "newLayerName" => $_POST['dbCurrentNames'][$i]];    
 	}
-	
+
 	#$changedLayerObj = json_encode($changedLayerArray);
-	
+
     	$mywms = new wms();
     if(empty($_POST['harvestDatasetMetadata']) || $_POST['harvestDatasetMetadata'] == 'false') {
 		$mywms->harvestCoupledDatasetMetadata = false;
@@ -156,7 +149,7 @@ if ($command == "getWmsData") {
 		$subscribers_ids = $admin->getSubscribersByWms($myWMS);
 		//if some person exists which is interested in changing of wms information ;-)
 		if (($owner_ids && count($owner_ids)>0) || ($subscribers_ids && count($subscribers_ids)>0)) {
-			$notification_mail_addresses = array();
+			$notification_mail_addresses = [];
 			$j=0;
 			for ($i=0; $i<count($owner_ids); $i++) {
 				$adr_tmp = $admin->getEmailByUserId($owner_ids[$i]);
@@ -195,7 +188,7 @@ if ($command == "getWmsData") {
 			$error_msg = "";
 
 			for ($i=0; $i<count($notification_mail_addresses); $i++) {
-				if (!$admin->sendEmail($replyto, $from, $notification_mail_addresses[$i], $notification_mail_addresses[$i], _mb("Update of an observed WMS"), utf8_decode($body), $error)) {
+				if (!$admin->sendEmail($replyto, $from, $notification_mail_addresses[$i], $notification_mail_addresses[$i], _mb("Update of an observed WMS"), mb_convert_encoding($body, 'ISO-8859-1'), $error)) {
 					if ($error){
 						$error_msg .= $error . " ";
 					}

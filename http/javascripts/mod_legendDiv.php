@@ -14,7 +14,7 @@
  INSERT INTO gui_element_vars(fkey_gui_id, fkey_e_id, var_name, var_value, context, var_type) VALUES('<app_id>', 'legend', 'showgroupedlayertitle', 'true', 'show the title of the grouped layers in the legend' ,'var');
  INSERT INTO gui_element_vars(fkey_gui_id, fkey_e_id, var_name, var_value, context, var_type) VALUES('<app_id>', 'legend', 'showlayertitle', 'true', 'show the layer title in the legend' ,'var');
  INSERT INTO gui_element_vars(fkey_gui_id, fkey_e_id, var_name, var_value, context, var_type) VALUES('<app_id>', 'legend', 'showwmstitle', 'true', 'show the wms title in the legend' ,'var');
- 
+
  */
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -80,9 +80,9 @@ function mod_legend_pos(frameName){
 						else{
 							legendUrl = mb_mapObj[ind].wms[i].getLegendUrlByGuiLayerStyle(layerNames[j],layerStyle);
 						}
-	
+
 						if (legendUrl !== false){
-	
+
 	//	 					if(layerParent == 0){
 			 					if(showlayertitle == 'true'){
 	                                                        	str_tmp += "<div><span class='titles'>" + layerTitle+ "</span></div>";
@@ -127,9 +127,9 @@ function mod_legend_pos(frameName){
 						else{
 							legendUrl = mb_mapObj[ind].wms[i].getLegendUrlByGuiLayerStyle(layerNames[j],layerStyle);
 						}
-	
+
 						if (legendUrl !== false){
-	
+
 	//	 					if(layerParent == 0){
 			 					if(showlayertitle == 'true'){
 	                                                        	str_tmp += "<div><span class='titles'>" + layerTitle+ "</span></div>";

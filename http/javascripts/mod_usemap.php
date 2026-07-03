@@ -39,7 +39,7 @@ function mod_usemap_init(){
 	url += "&height=" + mb_mapObj[ind].height;
 	url += "&gui_id=<?php echo $gui_id;?>";
 	url += "&e_id=<?php echo $e_id;?>";
-	
+
 
 	$("#um_img").css({
   		position:'absolute', 
@@ -47,7 +47,7 @@ function mod_usemap_init(){
 	  	height:mb_mapObj[ind].height, 
 	  	zIndex:100
 	});
-	
+
 	var req = new Mapbender.Ajax.Request({
 		url: "../php/mod_usemap.php",
 		method: "createUsemap",

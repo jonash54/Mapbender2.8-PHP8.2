@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__file__)."/spatial_security.php";
+require_once __DIR__."/spatial_security.php";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -185,76 +185,40 @@ if($action == 'save'){
 		$user->city = $city;
 		$user->country = $country;
 		$user->spatialSecurity = $spatialSecurity;
-		switch ($create_digest) {
-			case "on":
-				$user->createDigest = 't';
-				break;
-			case "off":
-				$user->createDigest = 'f';
-				break;
-			default: 
-				$user->createDigest = 'f';
-				break;
-		}
-		switch ($is_active) {
-			case "on":
-				$user->isActive = 't';
-				break;
-			case "off":
-				$user->isActive = 'f';
-				break;
-			default: 
-				$user->isActive = 'f';
-				break;
-		}
+		$user->createDigest = match ($create_digest) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->isActive = match ($is_active) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
 		$user->preferredGui = $fkey_preferred_gui_id;
 		$user->textSize = $textsize;
-		switch ($wants_newsletter) {
-			case "on":
-				$user->wantsNewsletter = 't';
-				break;
-			case "off":
-				$user->wantsNewsletter = 'f';
-				break;
-			default:
-				$user->wantsNewsletter = 'f';
-				break;
-		}
-		switch ($allows_survey) {
-			case "on":
-				$user->allowsSurvey = 't';
-				break;
-			case "off":
-				$user->allowsSurvey = 'f';
-				break;
-			default:
-				$user->allowsSurvey = 'f';
-				break;
-		}
-		switch ($wants_spatial_suggest) {
-			case "on":
-				$user->wantsSpatialSuggest = 't';
-				break;
-			case "off":
-				$user->wantsSpatialSuggest = 'f';
-				break;
-			default:
-				$user->wantsSpatialSuggest = 'f';
-				break;
-		}
-		switch ($wants_glossar) {
-			case "on":
-				$user->wantsGlossar = 't';
-				break;
-			case "off":
-				$user->wantsGlossar = 'f';
-				break;
-			default:
-				$user->wantsGlossar = 'f';
-				break;
-		}
-		
-		
+		$user->wantsNewsletter = match ($wants_newsletter) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->allowsSurvey = match ($allows_survey) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->wantsSpatialSuggest = match ($wants_spatial_suggest) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->wantsGlossar = match ($wants_glossar) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+
+
 		$user->create();
 		$user->setNewUserPasswordTicket();
 		//TODO: check function !
@@ -295,74 +259,38 @@ if ($action == 'update') {
 		$user->country = $country;
 		$user->spatialSecurity = $spatialSecurity;
 		$user->loginCount = $login_count;
-		switch ($create_digest) {
-			case "on":
-				$user->createDigest = 't';
-				break;
-			case "off":
-				$user->createDigest = 'f';
-				break;
-			default: 
-				$user->createDigest = 'f';
-				break;
-		}
-		switch ($is_active) {
-			case "on":
-				$user->isActive = 't';
-				break;
-			case "off":
-				$user->isActive = 'f';
-				break;
-			default: 
-				$user->isActive = 'f';
-				break;
-		}
+		$user->createDigest = match ($create_digest) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->isActive = match ($is_active) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
 		$user->preferredGui = $fkey_preferred_gui_id;
 		$user->textSize = $textsize;
-		switch ($wants_newsletter) {
-			case "on":
-				$user->wantsNewsletter = 't';
-				break;
-			case "off":
-				$user->wantsNewsletter = 'f';
-				break;
-			default:
-				$user->wantsNewsletter = 'f';
-				break;
-		}
-		switch ($allows_survey) {
-			case "on":
-				$user->allowsSurvey = 't';
-				break;
-			case "off":
-				$user->allowsSurvey = 'f';
-				break;
-			default:
-				$user->allowsSurvey = 'f';
-				break;
-		}
-		switch ($wants_spatial_suggest) {
-			case "on":
-				$user->wantsSpatialSuggest = 't';
-				break;
-			case "off":
-				$user->wantsSpatialSuggest = 'f';
-				break;
-			default:
-				$user->wantsSpatialSuggest = 'f';
-				break;
-		}
-		switch ($wants_glossar) {
-			case "on":
-				$user->wantsGlossar = 't';
-				break;
-			case "off":
-				$user->wantsGlossar = 'f';
-				break;
-			default:
-				$user->wantsGlossar = 'f';
-				break;
-		}
+		$user->wantsNewsletter = match ($wants_newsletter) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->allowsSurvey = match ($allows_survey) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->wantsSpatialSuggest = match ($wants_spatial_suggest) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
+		$user->wantsGlossar = match ($wants_glossar) {
+      "on" => 't',
+      "off" => 'f',
+      default => 'f',
+  };
 		$user->commit();
 
 		$user->setNewUserPasswordTicket();
@@ -450,7 +378,7 @@ if ((!isset($editSelf) || !$editSelf)) {
 		//$available Guis :
 		//$e = new mb_exception("guis:".json_encode($user->getApplicationsByPermission (false, 2)));
 		if ($selected_user && intval($selected_user) === $user->id) {
-			echo '<option value="'.htmlentities($user->id, ENT_QUOTES, 'UTF-8').'" title="'.htmlentities($user->email, ENT_QUOTES, 'UTF-8').'" selected="selected">'.htmlentities($user->name, ENT_QUOTES, "UTF-8").'</option>';
+			echo '<option value="'.htmlentities($user->id, ENT_QUOTES, 'UTF-8').'" title="'.htmlentities((string) $user->email, ENT_QUOTES, 'UTF-8').'" selected="selected">'.htmlentities((string) $user->name, ENT_QUOTES, "UTF-8").'</option>';
 		}
 		
 		$cnt_user = count($userArray);
@@ -512,14 +440,14 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Username").":</td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='name' value='".htmlentities($name, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='name' value='".htmlentities((string) $name, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
    echo "<td>"._mb("Firstname").":</td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='firstname' value='".htmlentities($firstname, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='firstname' value='".htmlentities((string) $firstname, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -527,14 +455,14 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Lastname").":</td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='lastname' value='".htmlentities($lastname, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='lastname' value='".htmlentities((string) $lastname, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
    echo "<td>"._mb("Academic title").":</td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='academic_title' value='".htmlentities($academic_title, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='academic_title' value='".htmlentities((string) $academic_title, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -553,7 +481,7 @@ if($withPasswordInsertion == 'true') {
 	         echo $myPW;
 	      }
 	      echo "' >";
-	      echo "<input type='hidden' name='password_plain' value='".htmlentities($password, ENT_QUOTES, "UTF-8")."'>";
+	      echo "<input type='hidden' name='password_plain' value='".htmlentities((string) $password, ENT_QUOTES, "UTF-8")."'>";
 	   echo "</td>";
 	echo "</tr>";
 	
@@ -576,7 +504,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Description").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='description' value='".htmlentities($description, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='description' value='".htmlentities((string) $description, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -584,7 +512,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Email").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='email' value='".htmlentities($email, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='email' value='".htmlentities((string) $email, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -592,7 +520,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Phone").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='phone' value='".htmlentities($phone, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='phone' value='".htmlentities((string) $phone, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -600,7 +528,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Facsimile").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='facsimile' value='".htmlentities($facsimile, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='facsimile' value='".htmlentities((string) $facsimile, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -614,7 +542,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Street").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='street' value='".htmlentities($street, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='street' value='".htmlentities((string) $street, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -622,7 +550,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Housenumber").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='housenumber' value='".htmlentities($housenumber, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='housenumber' value='".htmlentities((string) $housenumber, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -630,7 +558,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Delivery Point").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='delivery_point' value='".htmlentities($delivery_point, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='delivery_point' value='".htmlentities((string) $delivery_point, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -638,7 +566,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Postal Code").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='postal_code' value='".htmlentities($postal_code, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='postal_code' value='".htmlentities((string) $postal_code, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -646,7 +574,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("City").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='city' value='".htmlentities($city, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='city' value='".htmlentities((string) $city, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -654,7 +582,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Organization").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='organization' value='".htmlentities($organization, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='organization' value='".htmlentities((string) $organization, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -662,7 +590,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Department").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='department' value='".htmlentities($department, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='department' value='".htmlentities((string) $department, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -670,7 +598,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Position").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='position' value='".htmlentities($position, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='position' value='".htmlentities((string) $position, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -678,7 +606,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Country").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='country' value='".htmlentities($country, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='country' value='".htmlentities((string) $country, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -686,7 +614,7 @@ echo "</tr>";
 echo "<tr>";
 echo "<td>"._mb("Textsize").": </td>";
 echo "<td>";
-echo "<input type='text' size='20' name='textsize' value='".htmlentities($textsize, ENT_QUOTES, "UTF-8")."'>";
+echo "<input type='text' size='20' name='textsize' value='".htmlentities((string) $textsize, ENT_QUOTES, "UTF-8")."'>";
 echo "</td>";
 echo "</tr>";
 
@@ -756,7 +684,7 @@ if ($preferredGuiCategory != false && count($user->getApplicationsByPermission(f
 echo "<tr>";
    echo "<td>"._mb("Preferred GUI")." (".implode(", ", $user->getApplicationsByPermission(false, $preferredGuiCategory))."): </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='fkey_preferred_gui_id' value='".htmlentities($fkey_preferred_gui_id, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='fkey_preferred_gui_id' value='".htmlentities((string) $fkey_preferred_gui_id, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 }
@@ -769,8 +697,8 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Owner").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='owner_name' value='".htmlentities($owner_name, ENT_QUOTES, "UTF-8")."' readonly>";
-      echo "<input type='hidden' size='30' name='owner_id' value='".htmlentities($owner_id, ENT_QUOTES, "UTF-8")."' readonly>";
+      echo "<input type='text' size='30' name='owner_name' value='".htmlentities((string) $owner_name, ENT_QUOTES, "UTF-8")."' readonly>";
+      echo "<input type='hidden' size='30' name='owner_id' value='".htmlentities((string) $owner_id, ENT_QUOTES, "UTF-8")."' readonly>";
    echo "</td>";
 echo "</tr>";
 
@@ -788,7 +716,7 @@ echo "</tr>";
 echo "<tr>";
    echo "<td>"._mb("Login_count").": </td>";
    echo "<td>";
-      echo "<input type='text' size='30' name='login_count' value='".htmlentities($login_count, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='text' size='30' name='login_count' value='".htmlentities((string) $login_count, ENT_QUOTES, "UTF-8")."'>";
    echo "</td>";
 echo "</tr>";
 
@@ -798,7 +726,7 @@ echo "</tr>";
 #echo "<tr>";
 #   echo "<td>Resolution: </td>";
 #   echo "<td>";
-      echo "<input type='hidden' size='30' name='resolution' value='".htmlentities($resolution, ENT_QUOTES, "UTF-8")."'>";
+      echo "<input type='hidden' size='30' name='resolution' value='".htmlentities((string) $resolution, ENT_QUOTES, "UTF-8")."'>";
 #   echo "</td>";
 #echo "</tr>";
 

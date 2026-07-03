@@ -25,14 +25,14 @@
 //2. read the metadata addon information and fill the rest from the wms/mb_user/mb_group/layer table
 //3. give back the harvested content of the column data - if conform?
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
-require_once(dirname(__FILE__) . "/../php/mod_validateInspire.php");
-require_once(dirname(__FILE__) . "/../classes/class_iso19139.php");
-require_once(dirname(__FILE__) . "/../classes/class_owsConstraints.php");
-require_once(dirname(__FILE__) . "/../classes/class_qualityReport.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_Uuid.php");
+require_once(__DIR__ . "/../php/mod_validateInspire.php");
+require_once(__DIR__ . "/../classes/class_iso19139.php");
+require_once(__DIR__ . "/../classes/class_owsConstraints.php");
+require_once(__DIR__ . "/../classes/class_qualityReport.php");
 
 $con = db_connect(DBSERVER, OWNER, PW);
 db_select_db(DB, $con);
@@ -79,17 +79,11 @@ if ($_REQUEST['OUTPUTFORMAT'] == "iso19139" || $_REQUEST['OUTPUTFORMAT'] == "rdf
 
 if (!($_REQUEST['CN'] == "false")) {
 	//overwrite outputFormat for special headers:
-	switch ($_SERVER["HTTP_ACCEPT"]) {
-		case "application/rdf+xml":
-			$outputFormat = "rdf";
-			break;
-		case "text/html":
-			$outputFormat = "html";
-			break;
-		default:
-			$outputFormat = "iso19139";
-			break;
-	}
+	$outputFormat = match ($_SERVER["HTTP_ACCEPT"]) {
+     "application/rdf+xml" => "rdf",
+     "text/html" => "html",
+     default => "iso19139",
+ };
 }
 //if validation is requested
 //
@@ -118,8 +112,8 @@ $sql = <<<SQL
 SELECT *, st_xmin(the_geom) || ',' || st_ymin(the_geom) || ',' || st_xmax(the_geom) || ',' || st_ymax(the_geom)  as bbox2d, st_asgml(3, bounding_geom) as bounding_polygon FROM mb_metadata WHERE uuid = $1 ORDER BY lastchanged DESC LIMIT 1
 
 SQL;
-$v = array($uuid);
-$t = array('s');
+$v = [$uuid];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 if (!$res) {
 	echo "No record with uuid " . $recordId . " found in mapbender database!";
@@ -128,14 +122,14 @@ if (!$res) {
 $row = db_fetch_assoc($res);
 $mb_metadata = $row;
 
-if (in_array($mb_metadata['origin'], array("external", "capabilities")) && isset($mb_metadata['link']) && $mb_metadata['link'] != "") {
+if (in_array($mb_metadata['origin'], ["external", "capabilities"]) && isset($mb_metadata['link']) && $mb_metadata['link'] != "") {
     //only update remote metadata, if cache=false is explicitly requested!
     if ($forceCache == false) {
         $e = new mb_notice("php/mod_dataISOMetadata.php: cache=false is set (default value) - try to resolve remote metadata and update it!");
         //try to update metadata from remote resource 
         $newMetadata = new Iso19139();
         //TODO: Maybe allow metadata from other mapbender registries!
-        if (strpos($mb_metadata['link'], MAPBENDER_PATH . "/php/mod_dataISOMetadata.php") !== false) {
+        if (str_contains((string) $mb_metadata['link'], MAPBENDER_PATH . "/php/mod_dataISOMetadata.php")) {
         	$e = new mb_exception("php/mod_dataISOMetadata.php: recursion found - can't invoke metadata with id: " . $mb_metadata['metadata_id']);
         	echo "Recursion exception - metadata has self reference in mapbender database!";
         	die();     
@@ -217,9 +211,9 @@ if (isset($row['bounding_polygon']) && $row['bounding_polygon'] != '') {
 	$mb_metadata['boundingPolygonGml'] = false;
 }
 //convert dates to timestamps
-$mb_metadata['createdate'] = strtotime($mb_metadata['createdate']);
-$mb_metadata['changedate'] = strtotime($mb_metadata['changedate']);
-$mb_metadata['lastchanged'] = strtotime($mb_metadata['lastchanged']);
+$mb_metadata['createdate'] = strtotime((string) $mb_metadata['createdate']);
+$mb_metadata['changedate'] = strtotime((string) $mb_metadata['changedate']);
+$mb_metadata['lastchanged'] = strtotime((string) $mb_metadata['lastchanged']);
 //check which kind of metadata was found:
 switch ($mb_metadata['origin']) {
 	case 'metador':
@@ -309,7 +303,7 @@ switch ($mb_metadata['origin']) {
 }
 
 //function to give away the xml data
-function pushISO19139($iso19139Doc, $recordId, $outputFormat)
+function pushISO19139($iso19139Doc, $recordId, $outputFormat): never
 {
 	$xml = fillISO19139($iso19139Doc, $recordId);
 	proxyFile($xml, $outputFormat);
@@ -366,8 +360,8 @@ function exchangeLicenceAndContact($metadataXml, $metadata_id, $fkeyGroupId, $li
 		if (isset($fkeyGroupId) && (int)$fkeyGroupId > 0) {
 			//select group information
 			$sqlDep = "SELECT mb_group_name, mb_group_title, mb_group_id, mb_group_logo_path, mb_group_address, mb_group_email, mb_group_postcode, mb_group_city, mb_group_voicetelephone, mb_group_facsimiletelephone FROM mb_group WHERE mb_group_id = $1 LIMIT 1";
-			$vDep = array($fkeyGroupId);
-			$tDep = array('i');
+			$vDep = [$fkeyGroupId];
+			$tDep = ['i'];
 			$resDep = db_prep_query($sqlDep, $vDep, $tDep);
 			$departmentMetadata = db_fetch_array($resDep);
 			//exchange contact information
@@ -516,10 +510,10 @@ function generateDescriptiveKeywords($iso19139, $descriptiveKeywordsArray, $keyw
                 //define HVD base uri - this is used as key for HVD categories - if such an uri is found, get the german translation for the theme and add a thesaurus!
                 $hvdBaseUri = "http://data.europa.eu/bna/";
                 //in RLP the categories codes are extended: "HVD - " - this must be removed before exporting them ;-)
-                if (strpos($key, $hvdBaseUri) == 0 && $key != 'inspireidentifiziert') {
+                if (str_starts_with((string) $key, $hvdBaseUri) && $key != 'inspireidentifiziert') {
                     $e = new mb_exception("HVD cat found!");
                     $keywordAnchor = $iso19139->createElement("gmx:Anchor");
-                    $keywordAnchorText = $iso19139->createTextNode(preg_replace("/^HVD - /", "", $value));
+                    $keywordAnchorText = $iso19139->createTextNode(preg_replace("/^HVD - /", "", (string) $value));
                     //$keywordAnchorText = $iso19139->createTextNode($row['custom_category_code_de']);
                     $keywordAnchor->setAttribute("xlink:href", $key);
                     $keywordAnchor->appendChild($keywordAnchorText);
@@ -832,13 +826,13 @@ function fillISO19139($iso19139, $recordId)
 	$identificationInfo = $iso19139->createElement("gmd:identificationInfo");
 	$MD_DataIdentification = $iso19139->createElement("gmd:MD_DataIdentification");
 
-	$MD_DataIdentification->setAttribute("id", "spatial_dataset_" . md5($mb_metadata['uuid']));
+	$MD_DataIdentification->setAttribute("id", "spatial_dataset_" . md5((string) $mb_metadata['uuid']));
 	//add http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode
 
 	$spatialRepresentationType = $iso19139->createElement("gmd:spatialRepresentationType");
 	$MD_SpatialRepresentationTypeCode = $iso19139->createElement("gmd:MD_SpatialRepresentationTypeCode");
 	$MD_SpatialRepresentationTypeCode->setAttribute("codeList", "http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode");
-	if (in_array($mb_metadata['format'], array("GeoTIFF"))) {
+	if (in_array($mb_metadata['format'], ["GeoTIFF"])) {
 		$MD_SpatialRepresentationTypeCode->setAttribute("codeListValue", "grid");
 	} else {
 		$MD_SpatialRepresentationTypeCode->setAttribute("codeListValue", "vector");
@@ -877,8 +871,8 @@ function fillISO19139($iso19139, $recordId)
 	#Do things for B 5.3 date of revision
 	//this should be created from the information of maintenance if available
 	//some initialization for the temporal extent:
-	$beginPositionValue = date('Y-m-d', strtotime($mb_metadata['tmp_reference_1']));
-	$endPositionValue = date('Y-m-d', strtotime($mb_metadata['tmp_reference_2']));
+	$beginPositionValue = date('Y-m-d', strtotime((string) $mb_metadata['tmp_reference_1']));
+	$endPositionValue = date('Y-m-d', strtotime((string) $mb_metadata['tmp_reference_2']));
 	$dateOfLastRevision = date('Y-m-d');
 
 	if (isset($mb_metadata['update_frequency']) && $mb_metadata['update_frequency'] != "") {
@@ -957,21 +951,21 @@ function fillISO19139($iso19139, $recordId)
     //if the metadata will be initiated via class, the identifier may already be there - here the metadata is called by sql :-(
 
 	if (isset($departmentMetadata['mb_group_registry_url']) && $departmentMetadata['mb_group_registry_url'] !== "") {
-		if (substr($departmentMetadata['mb_group_registry_url'], -1) !== '/') {
+		if (!str_ends_with((string) $departmentMetadata['mb_group_registry_url'], '/')) {
 			$uniqueResourceIdentifierCodespace = $departmentMetadata['mb_group_registry_url'] . '/';
 		} else {
 			$uniqueResourceIdentifierCodespace =  $departmentMetadata['mb_group_registry_url'];
 		}
 	} else {
 		if (isset($departmentMetadata['mb_group_homepage']) && $departmentMetadata['mb_group_homepage'] !== "") {
-			if (substr($departmentMetadata['mb_group_homepage'], -1) !== '/') {
+			if (!str_ends_with((string) $departmentMetadata['mb_group_homepage'], '/')) {
 				$uniqueResourceIdentifierCodespace = $departmentMetadata['mb_group_homepage'] . '/' . 'registry/spatial/dataset/';
 			} else {
 				$uniqueResourceIdentifierCodespace =  $departmentMetadata['mb_group_homepage'] . 'registry/spatial/dataset/';
 			}
 		} else {
 			if (defined('METADATA_DEFAULT_CODESPACE')) {
-				if (substr($departmentMetadata['mb_group_homepage'], -1) !== '/') {
+				if (!str_ends_with((string) $departmentMetadata['mb_group_homepage'], '/')) {
 					$uniqueResourceIdentifierCodespace = METADATA_DEFAULT_CODESPACE . '/' . 'registry/spatial/dataset/';
 				} else {
 					$uniqueResourceIdentifierCodespace =  METADATA_DEFAULT_CODESPACE . 'registry/spatial/dataset/';
@@ -1056,17 +1050,17 @@ function fillISO19139($iso19139, $recordId)
 	
 	//add optional administrativeArea element - before email!
 	$sql = "SELECT DISTINCT keyword.keyword FROM keyword, mb_metadata_keyword WHERE mb_metadata_keyword.fkey_metadata_id=$1 AND mb_metadata_keyword.fkey_keyword_id=keyword.keyword_id";
-	$v = array((int)$mb_metadata['metadata_id']);
-	$t = array('i');
+	$v = [(int)$mb_metadata['metadata_id']];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
-	$keywordsArray = array();
+	$keywordsArray = [];
 	while ($row = db_fetch_array($res)) {
 	    if (isset($row['keyword']) && $row['keyword'] != "") {
 	        $keywordsArray[] = $row['keyword'];
 	    }
 	}
 	if (defined('ADMINISTRATIVE_AREA') && ADMINISTRATIVE_AREA != '') {
-	    $adminAreaObj = json_decode(ADMINISTRATIVE_AREA);
+	    $adminAreaObj = json_decode((string) ADMINISTRATIVE_AREA);
 	    if (in_array($adminAreaObj->keyword, $keywordsArray)) {
         	$administrativeArea = $iso19139->createElement("gmd:administrativeArea");
         	$administrativeArea_cs = $iso19139->createElement("gco:CharacterString");
@@ -1122,7 +1116,7 @@ function fillISO19139($iso19139, $recordId)
 	/*
 	 * Get keywords from custom categories - they are normally based on controlled vocabularies
 	 */
-	$descriptiveCustomKeywords = array();
+	$descriptiveCustomKeywords = [];
 	$sql = <<<SQL
 
 SELECT custom_category.custom_category_key, custom_category.custom_category_code_de FROM custom_category WHERE custom_category_id IN (
@@ -1142,8 +1136,8 @@ SELECT wfs_featuretype_custom_category.fkey_custom_category_id from wfs_featuret
 ) AND custom_category_hidden = 0
 
 SQL;
-	$v = array((int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']);
-	$t = array('i', 'i', 'i');
+	$v = [(int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']];
+	$t = ['i', 'i', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	while ($row = db_fetch_array($res)) {
 	    if ($row['custom_category_key'] && $row['custom_category_key'] != '' && $row['custom_category_key'] != 'inspireidentifiziert') {
@@ -1162,7 +1156,7 @@ SQL;
 	 * INSPIRE Categories - came from a controllled vocabulary (GEMET ...) 
 	 */
 	//read out the inspire categories and push them in as controlled keywords
-	$descriptiveInspireKeywords = array(); 
+	$descriptiveInspireKeywords = []; 
 	$sql = <<<SQL
 
 SELECT inspire_category.inspire_category_code_en FROM inspire_category WHERE inspire_category_id IN (
@@ -1183,8 +1177,8 @@ SELECT wfs_featuretype_inspire_category.fkey_inspire_category_id from wfs_featur
 
 SQL;
 
-	$v = array((int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']);
-	$t = array('i', 'i', 'i');
+	$v = [(int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']];
+	$t = ['i', 'i', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	while ($row = db_fetch_array($res)) {
 	    if (isset($row['inspire_category_code_en']) && $row['inspire_category_code_en'] != "") {
@@ -1199,7 +1193,7 @@ SQL;
 	 */
 	//generate keyword part - for services the inspire themes are not applicable!!!**********
 	//read keywords for resource out of the database/not only layer keywords also featuretype keywords if given!
-	$descriptiveStandardKeywords = array();
+	$descriptiveStandardKeywords = [];
 	if ($inspireidentifiziert) {
 	    $descriptiveStandardKeywords[] = 'inspireidentifiziert';
 	}
@@ -1208,8 +1202,8 @@ SQL;
 	    $sql = "SELECT metadata_id, termsofuse.isopen from mb_metadata LEFT OUTER JOIN";
 	    $sql .= "  md_termsofuse ON  (mb_metadata.metadata_id = md_termsofuse.fkey_metadata_id) LEFT OUTER JOIN termsofuse ON";
 	    $sql .= " (md_termsofuse.fkey_termsofuse_id=termsofuse.termsofuse_id) where mb_metadata.metadata_id = $1";
-	    $v = array();
-	    $t = array();
+	    $v = [];
+	    $t = [];
 	    array_push($t, "i");
 	    array_push($v, (int)$mb_metadata['metadata_id']);
 	    $res = db_prep_query($sql,$v,$t);
@@ -1221,8 +1215,8 @@ SQL;
 	    }
 	}
 	$sql = "SELECT DISTINCT keyword.keyword FROM keyword, mb_metadata_keyword WHERE mb_metadata_keyword.fkey_metadata_id=$1 AND mb_metadata_keyword.fkey_keyword_id=keyword.keyword_id";
-	$v = array((int)$mb_metadata['metadata_id']);
-	$t = array('i');
+	$v = [(int)$mb_metadata['metadata_id']];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	while ($row = db_fetch_array($res)) {
 	    if (isset($row['keyword']) && $row['keyword'] != "") {
@@ -1349,8 +1343,8 @@ SELECT wfs_featuretype_md_topic_category.fkey_md_topic_category_id from wfs_feat
 
 SQL;
 
-	$v = array((int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']);
-	$t = array('i', 'i', 'i');
+	$v = [(int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id'], (int)$mb_metadata['metadata_id']];
+	$t = ['i', 'i', 'i'];
 	$res = db_prep_query($sql, $v, $t);
 	$e = new mb_notice("look for topic: ");
 	$countTopic = 0;
@@ -1401,26 +1395,26 @@ SQL;
 		$MD_DataIdentification->appendChild($extent);
 	}
 	#Geographical Extent
-	$bbox = array();
+	$bbox = [];
 	//initialize if no extent is defined in the database
 	$bbox[0] = -180.00;
 	$bbox[1] = -90.00;
 	$bbox[2] = 180.00;
 	$bbox[3] = 90.00;
 	if (isset($mb_metadata['bbox2d']) & ($mb_metadata['bbox2d'] != '')) {
-		$bbox = explode(',', $mb_metadata['bbox2d']);
+		$bbox = explode(',', (string) $mb_metadata['bbox2d']);
 	}
 	//simple function to add two digits to value if there is no point in string
-	if (strpos($bbox[0], '.') === false) {
+	if (!str_contains($bbox[0], '.')) {
 		$bbox[0] = $bbox[0] . '.00';
 	}
-	if (strpos($bbox[1], '.') === false) {
+	if (!str_contains($bbox[1], '.')) {
 		$bbox[1] = $bbox[1] . '.00';
 	}
-	if (strpos($bbox[2], '.') === false) {
+	if (!str_contains($bbox[2], '.')) {
 		$bbox[2] = $bbox[2] . '.00';
 	}
-	if (strpos($bbox[3], '.') === false) {
+	if (!str_contains($bbox[3], '.')) {
 		$bbox[3] = $bbox[3] . '.00';
 	}
 	$extent = $iso19139->createElement("gmd:extent");
@@ -1530,7 +1524,7 @@ Guidelines) if conformant datasets are published TBD*/
 	$gmd_linkage = $iso19139->createElement("gmd:linkage");
 	$gmd_URL = $iso19139->createElement("gmd:URL");
 	//use downloadurl if given
-	$downloadUrls = json_decode($mb_metadata['datalinks']);
+	$downloadUrls = json_decode((string) $mb_metadata['datalinks']);
 	$downloadUrl = $downloadUrls->downloadLinks[0]->{0};
 	if ($mb_metadata['type'] == 'application') {
 		if (((isset($mb_metadata['fkey_gui_id']) && $mb_metadata['fkey_gui_id'] != '') && isset($mb_metadata['fkey_mapviewer_id'])) || ((isset($mb_metadata['fkey_wmc_serial_id']) && $mb_metadata['fkey_wmc_serial_id'] != '') && isset($mb_metadata['fkey_mapviewer_id']))) {

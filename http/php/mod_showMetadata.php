@@ -17,17 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__)."/../classes/class_connector.php";
-require_once dirname(__FILE__)."/../classes/class_administration.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
-require_once dirname(__FILE__) . "/../classes/class_wms.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once(dirname(__FILE__)."/../classes/class_owsConstraints.php"); 
-require_once dirname(__FILE__) . "/../../tools/wms_extent/extent_service.conf";
-require_once dirname(__FILE__) . "/../extensions/phpqrcode/phpqrcode.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__."/../classes/class_connector.php";
+require_once __DIR__."/../classes/class_administration.php";
+require_once __DIR__ . "/../classes/class_user.php";
+require_once __DIR__ . "/../classes/class_wms.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once(__DIR__."/../classes/class_owsConstraints.php"); 
+require_once __DIR__ . "/../../tools/wms_extent/extent_service.conf";
+require_once __DIR__ . "/../extensions/phpqrcode/phpqrcode.php";
 
-if (file_exists ( dirname ( __FILE__ ) . "/../../conf/linkedDataProxy.json" )) {
+if (file_exists ( __DIR__ . "/../../conf/linkedDataProxy.json" )) {
     $configObject = json_decode ( file_get_contents ( "../../conf/linkedDataProxy.json" ) );
 }
 if (isset ( $configObject ) && isset ( $configObject->behind_rewrite ) && $configObject->behind_rewrite == true) {
@@ -61,7 +61,7 @@ $mapbenderServerUrl = $mapbenderPathArray['scheme']."://".$mapbenderPathArray['h
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -85,7 +85,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["id"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>id</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -526,8 +526,8 @@ switch ($resource) {
 	case "wms":
 		//get root layer information
 		$sql = "SELECT layer_id FROM layer WHERE fkey_wms_id = $1 AND layer_pos = 0";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		$layerId = $row["layer_id"];
@@ -539,8 +539,8 @@ switch ($resource) {
 		$sql .= "wms.stateorprovince, wms.postcode, wms.contactvoicetelephone, wms.contactfacsimiletelephone, ";
 		$sql .= "wms.contactelectronicmailaddress, wms.country ";
 		$sql .= "FROM layer, wms WHERE layer.layer_id = $1 AND layer.fkey_wms_id = wms.wms_id LIMIT 1";
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$serviceType = 'wms';
 		$resourceSymbol = "<img src='../img/osgeo_graphics/geosilk/server_map.png' alt='".$translation['wms']." - Bild' title='".$translation['wms']."'> - ".$translation['wms'];
 		break;
@@ -554,8 +554,8 @@ switch ($resource) {
 		$sql .= "wms.stateorprovince, wms.postcode, wms.contactvoicetelephone, wms.contactfacsimiletelephone, ";
 		$sql .= "wms.contactelectronicmailaddress, wms.country ";
 		$sql .= "FROM layer, wms WHERE layer.layer_id = $1 AND layer.fkey_wms_id = wms.wms_id LIMIT 1";
-		$v = array($layerId);
-		$t = array('i');
+		$v = [$layerId];
+		$t = ['i'];
 		$serviceType = 'wms';
 		$resourceSymbol = "<img src='../img/osgeo_graphics/Layer.png' alt='".$translation['layer']." - Bild' title='".$translation['layer']."'> - ".$translation['layer'];
 		break;
@@ -567,8 +567,8 @@ switch ($resource) {
 		$sql .= "wfs.administrativearea as stateorprovince, wfs.postalcode as postcode, wfs.voice as contactvoicetelephone, wfs.facsimile as contactfacsimiletelephone, ";
 		$sql .= "wfs.electronicmailaddress as contactelectronicmailaddress, wfs.country ";
 		$sql .= "FROM wfs WHERE wfs_id = $1";
-		$v = array($wfsId);
-		$t = array('i');
+		$v = [$wfsId];
+		$t = ['i'];
 		$resourceSymbol = "<img src='../img/osgeo_graphics/geosilk/server_vector.png' alt='".$translation['wfs']." - Bild' title='".$translation['wfs']."'> - ".$translation['wfs'];
 		$serviceType = 'wfs';
 		break;
@@ -581,8 +581,8 @@ switch ($resource) {
 		$sql .= "wfs.administrativearea as stateorprovince, wfs.postalcode as postcode, wfs.voice as contactvoicetelephone, wfs.facsimile as contactfacsimiletelephone, ";
 		$sql .= "wfs.electronicmailaddress as contactelectronicmailaddress, wfs.country, wfs_featuretype.featuretype_latlon_bbox as featuretype_latlon_bbox ";
 		$sql .= "FROM wfs_featuretype, wfs WHERE wfs_featuretype.featuretype_id = $1 AND wfs_featuretype.fkey_wfs_id = wfs.wfs_id LIMIT 1";
-		$v = array($featuretypeId);
-		$t = array('i');
+		$v = [$featuretypeId];
+		$t = ['i'];
 		$serviceType = 'wfs';
 		$resourceSymbol = "<img src='../img/osgeo_graphics/geosilk/vector.png' alt='".$translation['featuretype']." - Bild' title='".$translation['featuretype']."'> - ".$translation['featuretype'];
 		$serviceType = 'wfs';	
@@ -593,8 +593,8 @@ switch ($resource) {
 		//die(); 	
 		$wfsConfId = $id;
 		$sql1 = "SELECT fkey_featuretype_id from wfs_conf WHERE wfs_conf_id = $1";
-		$v1 = array($wfsConfId);
-		$t1 = array('i');
+		$v1 = [$wfsConfId];
+		$t1 = ['i'];
 		$res1 = db_prep_query($sql1,$v1,$t1);
 		$wfsConfResult = db_fetch_array($res1);
 		$featuretypeId = $wfsConfResult['fkey_featuretype_id'];
@@ -605,8 +605,8 @@ switch ($resource) {
 		$sql .= "wfs.administrativearea as stateorprovince, wfs.postalcode as postcode, wfs.voice as contactvoicetelephone, wfs.facsimile as contactfacsimiletelephone, ";
 		$sql .= "wfs.electronicmailaddress as contactelectronicmailaddress, wfs.country ";
 		$sql .= "FROM wfs_featuretype, wfs WHERE wfs_featuretype.featuretype_id = $1 AND wfs_featuretype.fkey_wfs_id = wfs.wfs_id LIMIT 1";
-		$v = array($featuretypeId);
-		$t = array('i');
+		$v = [$featuretypeId];
+		$t = ['i'];
 		$serviceType = 'wfs';
 		$resourceSymbol = "<img src='../img/osgeo_graphics/geosilk/vector.png' alt='".$translation['featuretype']." - Bild' title='".$translation['featuretype']."'> - ".$translation['featuretype'];
 		$serviceType = 'wfs';	
@@ -619,8 +619,8 @@ switch ($resource) {
 		$sql .= "mb_user.mb_user_country as stateorprovince, mb_user.mb_user_postal_code as postcode, mb_user.mb_user_phone as contactvoicetelephone, mb_user.mb_user_phone1 as contactfacsimiletelephone, ";
 		$sql .= "mb_user.mb_user_email as contactelectronicmailaddress ";
 		$sql .= "FROM mb_user_wmc, mb_user WHERE mb_user_wmc.wmc_serial_id = $1 AND mb_user_wmc.fkey_user_id = mb_user.mb_user_id LIMIT 1";
-		$v = array($wmcId);
-		$t = array('i');
+		$v = [$wmcId];
+		$t = ['i'];
 		$serviceType = 'wmc';
 		$resourceSymbol = "<img src='../img/osgeo_graphics/Mapset.png' alt='".$translation['wmc']." - Bild' title='".$translation['wmc']."'> - ".$translation['wmc'];
 		break;
@@ -685,8 +685,8 @@ if ($resource == 'wmc') {
 //Get Geometry Type if featuretype info was requested
 if ($resource == 'featuretype') {
 	$getTypeSql = "SELECT element_id, element_type from wfs_element WHERE fkey_featuretype_id = $1 AND element_type LIKE '%PropertyType';";
-	$vgetType = array($resourceMetadata['contentid']);
-	$tgetType = array('i');
+	$vgetType = [$resourceMetadata['contentid']];
+	$tgetType = ['i'];
 	$resGetType = db_prep_query($getTypeSql,$vgetType,$tgetType);
 	$featuretypeElements = db_fetch_array($resGetType);
 	$resourceMetadata['featuretype_geomType'] = $featuretypeElements['element_type'];
@@ -704,16 +704,16 @@ if ($resource == 'wmc') {
 //db select for service quality
 if ($resource == 'wms' or $resource == 'layer') {
 	$sql = "SELECT availability, last_status, fkey_upload_id FROM mb_wms_availability WHERE fkey_wms_id = $1";
-	$v = array($serviceId);
-	$t = array('i');
+	$v = [$serviceId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$serviceQuality = db_fetch_array($res);
 }
 //db select for service quality
 if ($resource == 'wfs' or $resource == 'featuretype' or $resource == 'wfs-conf') {
 	$sql = "SELECT availability, last_status, fkey_upload_id FROM mb_wfs_availability WHERE fkey_wfs_id = $1";
-	$v = array($serviceId);
-	$t = array('i');
+	$v = [$serviceId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$serviceQuality = db_fetch_array($res);
 }
@@ -721,13 +721,13 @@ if ($resource == 'wfs' or $resource == 'featuretype' or $resource == 'wfs-conf')
 if ($resource == 'wms' or $resource == 'layer') {
 	//get bbox and crs codes for single layer - maybe some entries ;-)
 	$sql = "SELECT * FROM layer_epsg WHERE fkey_layer_id = $1";
-	$contentBboxes = array();
-	$v = array($layerId);
-	$t = array('i');
+	$contentBboxes = [];
+	$v = [$layerId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$j = 0;
 	while ($row = db_fetch_array($res)){
-		$contentBboxes[$j] = array();
+		$contentBboxes[$j] = [];
 		$contentBboxes[$j]['epsg'] = $row['epsg'];
 		$contentBboxes[$j]['minx'] = $row['minx'];
 		$contentBboxes[$j]['miny'] = $row['miny'];
@@ -751,13 +751,13 @@ if ($resource == 'wfs' || $resource == 'featuretype') {
 	//Added distinct to select because wfs registration allowed inserting the same crs multiple times 
 	//Issue is fixed but until the registry is cleaned up this is a workaround
 	$sql = "SELECT DISTINCT * FROM wfs_featuretype_epsg WHERE fkey_featuretype_id = $1";
-	$contentBboxes = array();
-	$v = array($featuretypeId);
-	$t = array('i');
+	$contentBboxes = [];
+	$v = [$featuretypeId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	$j = 0;
 	while ($row = db_fetch_array($res)){
-		$contentBboxes[$j] = array();
+		$contentBboxes[$j] = [];
 		$contentBboxes[$j]['epsg'] = $row['epsg'];
 		$contentBboxes[$j]['minx'] = $row['minx'];
 		$contentBboxes[$j]['miny'] = $row['miny'];
@@ -1133,7 +1133,7 @@ if (($resource == 'featuretype') ) {
 
 	$html .= $t_a.$translation['crs'].$t_b.$epsgString.$t_c;
     $help = $resourceMetadata['featuretype_latlon_bbox'];
-    if($resourceMetadata['featuretype_latlon_bbox'] && strlen($resourceMetadata['featuretype_latlon_bbox']) > 6){
+    if($resourceMetadata['featuretype_latlon_bbox'] && strlen((string) $resourceMetadata['featuretype_latlon_bbox']) > 6){
         $wgs84Bbox =  $resourceMetadata['featuretype_latlon_bbox'];
     }
 }
@@ -1145,7 +1145,7 @@ if ($resource == 'wmc') {
 		$getMapUrl = $admin->getExtentGraphic(explode(",", $wgs84Bbox));
 	} elseif ($resourceMetadata['contentcrs'] != ''){
 		//transform crs
-		$oldEPSG = preg_replace("/EPSG:/","", $resourceMetadata['contentcrs']);
+		$oldEPSG = preg_replace("/EPSG:/","", (string) $resourceMetadata['contentcrs']);
 		$ll = transform(
 					floatval($resourceMetadata['contentminx']), 
 					floatval($resourceMetadata['contentminy']), 
@@ -1199,17 +1199,11 @@ if ($resource == 'featuretype' or $resource == 'wfs-conf' or $resource == "wfs")
 		$describeFeaturetypeUrl = $mapbenderServerUrl."/registry/wfs/".$resourceMetadata['serviceid']."?";
 		$wfsGetCapabilitiesUrl = $describeFeaturetypeUrl;
 	}
-	switch ($resourceMetadata['serviceversion']) {
-		case "2.0.0":
-			$featureTypeName = "typeNames";
-			break;
-		case "2.0.2":
-			$featureTypeName = "typeNames";
-			break;
-		default:
-			$featureTypeName = "typeName";
-			break;
-	}
+	$featureTypeName = match ($resourceMetadata['serviceversion']) {
+     "2.0.0" => "typeNames",
+     "2.0.2" => "typeNames",
+     default => "typeName",
+ };
 }
 
 if (isset($resourceMetadata['wfs_describefeaturetype']) && ($resourceMetadata['wfs_describefeaturetype'] != '')) {
@@ -1269,7 +1263,7 @@ SQL;
 		}
 		//Pull download options for specific dataset from mapbender database and show them
 		$downloadOptionsConnector = new connector("http://localhost".$_SERVER['SCRIPT_NAME']."/../mod_getDownloadOptions.php?id=".$row["uuid"]);
-		$downloadOptions = json_decode($downloadOptionsConnector->file);
+		$downloadOptions = json_decode((string) $downloadOptionsConnector->file);
 		//var_dump($downloadOptions);
 		if (defined("MAPBENDER_PATH") && MAPBENDER_PATH != '') { 
 			$mapbenderUrl = MAPBENDER_PATH;
@@ -1278,7 +1272,7 @@ SQL;
 		}
 		//$metadataList .= "<a href='../php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$row["uuid"]."'>".$row["uuid"]."</a> <a href='../php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$row["uuid"]."&validate=true'>".$translation['validate']."</a>";
 		$metadataList .= "<a href='../php/mod_exportIso19139.php?url=".urlencode($mapbenderUrl."/php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$row["uuid"])."'>".$row["uuid"]."</a> <a href='../php/mod_dataISOMetadata.php?outputFormat=iso19139&id=".$row["uuid"]."&validate=true'>".$translation['validate']."</a>"." <a href='../php/mod_dataISOMetadata.php?outputFormat=rdf&id=".$row["uuid"]."&CN=false'><img style='border: none;' src='../img/rdf_w3c_icon.48.gif' title='".$translation['inspireMetadata']." - RDF/XML (BETA)"."' style='width:34px;height:34px' alt='' /></a>";
-		
+
 		if ($downloadOptions != null) {
 			foreach ($downloadOptions->{$row["uuid"]}->option as $option) {
 				switch ($option->type) {
@@ -1305,7 +1299,7 @@ SQL;
 		$html .= $t_a.$translation['Coupled Metadata'].$t_b;
 		$html .= $metadataList;
 	}
-	
+
 	//$html .= $t_c;
 	//$html .= $tableEnd;
 }
@@ -1634,7 +1628,7 @@ echo $html;
 
 //functions (from old metadata module):
 function displayText($string) {
-    $string = mb_eregi_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    $string = mb_eregi_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     $string = mb_eregi_replace("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     $string = mb_eregi_replace("\n", "<br>", $string);
     return $string;
@@ -1656,15 +1650,15 @@ function transform ($x, $y, $oldEPSG, $newEPSG) {
 		$resMiny = db_query($sqlMiny);
 		$miny = floatval(db_result($resMiny,0,"miny"));
 
-	return array("x" => $minx, "y" => $miny);
+	return ["x" => $minx, "y" => $miny];
 	
 }
 function getConjunctionCharacter ($url) {
-	if (mb_strpos($url, "?") !== false) { 
-		if (mb_substr($url, mb_strlen($url)-1, 1) == "?") { 
+	if (mb_strpos((string) $url, "?") !== false) { 
+		if (mb_substr((string) $url, mb_strlen((string) $url)-1, 1) == "?") { 
 			return "";
 		}
-		else if (mb_substr($url, mb_strlen($url)-1, 1) == "&"){
+		else if (mb_substr((string) $url, mb_strlen((string) $url)-1, 1) == "&"){
 			return "";
 		}
 		else {

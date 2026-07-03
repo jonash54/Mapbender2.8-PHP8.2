@@ -19,13 +19,13 @@
 
 //script is invoked from cms to delete a mapbender user profile from the mapbender db
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 //$admin = new Administration();
 
-function abort ($message) {
+function abort ($message): never {
 	global $ajaxResponse;
 	$ajaxResponse->setSuccess(false);
 	$ajaxResponse->setMessage($message);
@@ -61,8 +61,8 @@ $message = "";
 
 $sql = "SELECT count(a.service_id) from (SELECT wms_id AS service_id, 'wms' AS service_type FROM wms WHERE wms_owner = $1 UNION SELECT wfs_id AS service_id, 'wfs' as service_type from wfs WHERE wfs_owner = $1 LIMIT 1) AS a;";
 
-$v = array(getUserFromSession());
-$t = array('i');
+$v = [getUserFromSession()];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 
 while($row = db_fetch_array($res)){
@@ -72,8 +72,8 @@ while($row = db_fetch_array($res)){
 }
 
 $sql = "SELECT count(fkey_gui_id) FROM  (SELECT fkey_gui_id FROM gui_mb_user WHERE fkey_mb_user_id = $1 AND  mb_user_type = 'owner' LIMIT 1) AS a;";
-$v = array(getUserFromSession());
-$t = array('i');
+$v = [getUserFromSession()];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 
 while($row = db_fetch_array($res)){
@@ -84,8 +84,8 @@ while($row = db_fetch_array($res)){
 
 $sql = "SELECT count(fkey_wms_id) FROM mb_proxy_log INNER JOIN (SELECT wms_id FROM wms WHERE (wms_pricevolume NOTNULL AND wms_pricevolume <> 0) OR (wms_price_fi NOTNULL AND wms_price_fi <> 0)) as a ON a.wms_id = mb_proxy_log.fkey_wms_id WHERE fkey_mb_user_id = $1 LIMIT 1;";
 
-$v = array(getUserFromSession());
-$t = array('i');
+$v = [getUserFromSession()];
+$t = ['i'];
 $res = db_prep_query($sql,$v,$t);
 
 while($row = db_fetch_array($res)){
@@ -102,8 +102,8 @@ if ($message !=="") {
 switch ($ajaxResponse->getMethod()){
 	case "deleteUserProfile" :
 		$sql = "DELETE FROM mb_user WHERE mb_user_id = $1;";
-		$v = array(getUserFromSession());
-		$t = array('i');
+		$v = [getUserFromSession()];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if ($res !== false) {
 			$ajaxResponse->setSuccess(true);

@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_csw.php"); 
-require_once(dirname(__FILE__)."/../classes/class_cswrecord.php"); 
-require_once(dirname(__FILE__)."/../classes/class_administration.php"); 
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_csw.php"); 
+require_once(__DIR__."/../classes/class_cswrecord.php"); 
+require_once(__DIR__."/../classes/class_administration.php"); 
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 //require_once(dirname(__FILE__)."/../classes/class_connector.php");
 
 /*
@@ -48,29 +48,29 @@ $getrecords_query = $_REQUEST['getrecordsquery'];
 $admin = new administration();
 $guiIdArray = $admin->getGuisByPermission($userId, false);
 
-$resultObj = array();
-$resultObj['cats'] = array();
+$resultObj = [];
+$resultObj['cats'] = [];
 
 if($DEBUG_)
-array_push($resultObj['cats'],array("id"=>'id',"title"=>'test'));
+array_push($resultObj['cats'],["id"=>'id', "title"=>'test']);
 
 if ($command == "getrecordssimple") {
 	//$resultObj["cats"] = array();
 	if($DEBUG_)
-	array_push($resultObj['cats'],array("id"=>'id2',"title"=>$getrecords_type));	
-	$catalogIDs = array();
+	array_push($resultObj['cats'],["id"=>'id2', "title"=>$getrecords_type]);	
+	$catalogIDs = [];
 	
-	switch(mb_strtolower($getrecords_type)){
+	switch(mb_strtolower((string) $getrecords_type)){
 		
 		case 'get':
 			$guicats = get_catalogs_for_gui($guiId);
 			if($DEBUG_)
-			$guicats = array('13');
+			$guicats = ['13'];
 			$catalogIDs = get_catalogs_by_supported_type($guicats,'getrecords','get');
 			//$catalogIDs = get_catalogs_by_supported_type(array(9,10),'getrecords','get');
 			//$catalogIDs['7']= 'ac';		
 			if($DEBUG_)
-				array_push($resultObj['cats'],array("id"=>'id35'.$guiId,"title"=>$guicats[0]));
+				array_push($resultObj['cats'],["id"=>'id35'.$guiId, "title"=>$guicats[0]]);
 			break;
 		case 'post':
 			
@@ -93,9 +93,9 @@ if ($command == "getrecordssimple") {
 		//$cat_obj = new csw();
 		//$cat_obj->createCatObjFromDB($catalogs);
 		//list($getrecordsurl,$getrecordsxml) = getrecords_get_build_query($url,$simplesearch);
-		list($getrecordsurl,$getrecordsxml) = getrecords_build_query($url['getrecords'],$getrecords_type,$command);
+		[$getrecordsurl, $getrecordsxml] = getrecords_build_query($url['getrecords'],$getrecords_type,$command);
 		if($DEBUG_)
-		array_push($resultObj['cats'],array("id"=>$catalog_id,"title"=>$getrecordsurl));
+		array_push($resultObj['cats'],["id"=>$catalog_id, "title"=>$getrecordsurl]);
 		//array_push($resultObj['cats'],array("title"=>$catalog_id.'url',"abstractt"=>$getrecordsurl));
 		//Create Record Objects
 		$e = new mb_exception('getrecordbyid'.$url['getrecordbyid']);
@@ -110,12 +110,12 @@ if ($command == "getrecordssimple") {
 				$abstract = $SummaryRecordObj->getAbstract();
 				$identifier = $SummaryRecordObj->getIdentifier();
 				#new mb_exception("mod_searchCatQueryBuilder.php: Identifier: ".$identifier);
-				array_push($resultObj['cats'],array("title"=>$title,"abstractt"=>$abstract, "identifier"=>$identifier,"url"=>$url['getrecordbyid']));
+				array_push($resultObj['cats'],["title"=>$title, "abstractt"=>$abstract, "identifier"=>$identifier, "url"=>$url['getrecordbyid']]);
 			}
 		}
 		else {
 			$e = new mb_exception("php/mod_searchCatQueryBuilder_server.php: CAT getrecords returned an ows:exception!");
-		    array_push($resultObj['cats'],array("title"=>"OWS Exception","abstractt"=>$RecordObj->getrecords_exception_text));
+		    array_push($resultObj['cats'],["title"=>"OWS Exception", "abstractt"=>$RecordObj->getrecords_exception_text]);
 		}
 	}
 }
@@ -135,7 +135,7 @@ function getrecords_build_query($getrecords_url,$type,$command){
 	$typename = 'csw:Record';
 	$service='CSW';
 	global $simplesearch;
-	switch(strtolower($type)){
+	switch(strtolower((string) $type)){
 		case 'get':
 			$url = $getrecords_url.'?request='.$request.'&service='.$service.'&ResultType='.$resulttype.'&TypeNames='.$typename.'&version='.$version;
 			if($command=='getrecordssimple'){
@@ -167,7 +167,7 @@ function getrecords_build_query($getrecords_url,$type,$command){
 			break;
 	}
 	
-	return array($url,$xml);
+	return [$url, $xml];
 	
 }	
 
@@ -200,10 +200,10 @@ function getrecords_advanced_get($url){
  */
 function get_catalogs_for_gui($gui_id){
 	$sql = "select fkey_cat_id from gui_cat where fkey_gui_id = $1";
-	$v = array($gui_id);
-	$t = array('s');
+	$v = [$gui_id];
+	$t = ['s'];
 	$res = db_prep_query($sql,$v,$t);
-	$list_of_cat = array();
+	$list_of_cat = [];
 	while($row = db_fetch_array($res)){
 		array_push($list_of_cat,$row['fkey_cat_id']);
 	}
@@ -227,7 +227,7 @@ function getrecords_get_build_query($url,$search){
 	$url_encode = $url.'?request='.$request.'&service='.$service.'&ResultType='.$resulttype.'&TypeNames='.$typename.'&version='.$version;
 	//$url_encode = urlencode($url_encode);
 	
-	return array($url_encode,null);
+	return [$url_encode, null];
 }
 
 /**
@@ -240,25 +240,25 @@ function getrecords_get_build_query($url,$search){
 function get_catalogs_by_supported_type($cat_array,$operation_type,$fetch_mode){
 	
 				//array_push($resultObj['cats'],array("id"=>'id5',"title"=>$operation_type));
-	$cat_supported = array();
+	$cat_supported = [];
 	
 	$sql = "select fk_cat_id,param_value from cat_op_conf where param_name=$1 and param_type=$2";
-	$v = array($fetch_mode,$operation_type);	
-	$t = array('s','s');
+	$v = [$fetch_mode, $operation_type];	
+	$t = ['s', 's'];
 	$res = db_prep_query($sql,$v,$t);
 	
 	
 	while($row = db_fetch_array($res)){
 		//array_push($list_of_cat,$row['fkey_cat_id']);
 		if($DEBUG_)
-				array_push($resultObj['cats'],array("id"=>'id4',"title"=>$row));
+				array_push($resultObj['cats'],["id"=>'id4', "title"=>$row]);
 		if(in_array($row['fk_cat_id'],$cat_array,true)){
 			//array_push($cat_supported,$row['fk_cat_id']);
 			$cat_supported[$row['fk_cat_id']]['getrecords'] = $row['param_value'];
 			//get url entry for getrecordbyid:
 			$sql2 = "select fk_cat_id,param_value from cat_op_conf where fk_cat_id=$1 and param_type=$2 and param_name='get'";
-	        $v2 = array($row['fk_cat_id'],'getrecordbyid');	
-	        $t2 = array('i','s');
+	        $v2 = [$row['fk_cat_id'], 'getrecordbyid'];	
+	        $t2 = ['i', 's'];
 	        $res2 = db_prep_query($sql2,$v2,$t2);
 	        while($row2 = db_fetch_array($res2)){
 	            $e = new mb_exception("mod_searchCatQueryBuilder.php: getrecordbyidurl:  ".$row2['param_value']);

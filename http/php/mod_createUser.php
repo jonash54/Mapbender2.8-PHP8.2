@@ -18,15 +18,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../conf/mapbender.conf";
+require_once __DIR__ . "/../../conf/mapbender.conf";
 if (PORTAL !== true) {
 	echo "This module is disabled. Please check your mapbender.conf.";
 	die;
 }
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_gui.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_gui.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_user.php");
 
 /*  
  * @security_patch irv done
@@ -103,7 +103,7 @@ function validateInput(){
 if($action == 'save'){
 	$user = new User();
 	//TODO: MD5 is not secure - use SHA256 instead!
-	$returnObject = json_decode($user->selfRegisterNewUser($name, $email, $password, "user dummy orga", $department, $phone, false, false, 0, 'MD5'));
+	$returnObject = json_decode((string) $user->selfRegisterNewUser($name, $email, $password, "user dummy orga", $department, $phone, false, false, 0, 'MD5'));
 	if ($returnObject->success == false) {
 		echo "<script language='JavaScript'>alert('Username must be unique!');</script>";
 	} else {
@@ -181,8 +181,8 @@ echo "<table border='0'>";
 
 if(isset($selected_user) && $selected_user != 0){
 	$sql = "SELECT * FROM mb_user WHERE mb_user_id = $1 ORDER BY mb_user_name ";
-	$v = array($selected_user);
-	$t = array('i');
+	$v = [$selected_user];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	if(db_fetch_row($res)){
 		$name = db_result($res,0,"mb_user_name");
@@ -196,8 +196,8 @@ if(isset($selected_user) && $selected_user != 0){
 		$resolution = db_result($res,0,"mb_user_resolution");
 	}
 	$sql = "SELECT mb_user_name FROM mb_user WHERE mb_user_id = $1 ";
-	$v = array($owner_id);
-	$t = array('i');
+	$v = [$owner_id];
+	$t = ['i'];
 	$res = db_prep_query($sql,$v,$t);
 	if(db_fetch_row($res)){
 		$owner_name = db_result($res,0,"mb_user_name");

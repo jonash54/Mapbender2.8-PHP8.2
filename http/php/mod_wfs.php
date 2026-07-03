@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -96,12 +96,12 @@ var iamready = false;
 <?php
 
 function myNl2br ($str) {
-	return preg_replace('#\r?\n#', '\\n', $str);
+	return preg_replace('#\r?\n#', '\\n', (string) $str);
 }
 
 echo "<script language='JavaScript' type='text/javascript'>";
 if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
-	$wfs = mb_split(",",$_REQUEST['id']);
+	$wfs = mb_split(",",(string) $_REQUEST['id']);
 	
 	$con = db_connect($DBSERVER,$OWNER,$PW);
 	db_select_db($DB,$con);
@@ -113,8 +113,8 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 		$sql .= "JOIN wfs ON wfs_conf.fkey_wfs_id = wfs.wfs_id ";
 		$sql .= "WHERE wfs_conf.wfs_conf_id = $1";
 		
-		$v = array($wfs[$i]);
-		$t = array('i');
+		$v = [$wfs[$i]];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 	
 		if($row = db_fetch_array($res)){
@@ -126,11 +126,11 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 			echo "wfs_conf[".$i."]['wfs_conf_abstract']  = '".$row["wfs_conf_abstract"]."';";
 			echo "wfs_conf[".$i."]['g_label']  = '".$row["g_label"]."';";
 			echo "wfs_conf[".$i."]['g_label_id']  = '".$row["g_label_id"]."';";
-			echo "wfs_conf[".$i."]['g_style']  = \"".preg_replace("/\n/", "", preg_replace("/\r/", "", $row["g_style"]))."\";";
+			echo "wfs_conf[".$i."]['g_style']  = \"".preg_replace("/\n/", "", preg_replace("/\r/", "", (string) $row["g_style"]))."\";";
 			echo "wfs_conf[".$i."]['g_button']  = '".$row["g_button"]."';";
 			echo "wfs_conf[".$i."]['g_button_id']  = '".$row["g_button_id"]."';";
 			echo "wfs_conf[".$i."]['g_buffer']  = '".$row["g_buffer"]."';";
-			echo "wfs_conf[".$i."]['g_res_style']  = \"".preg_replace("/\n/", "", preg_replace("/\r/", "", $row["g_res_style"]))."\";";
+			echo "wfs_conf[".$i."]['g_res_style']  = \"".preg_replace("/\n/", "", preg_replace("/\r/", "", (string) $row["g_res_style"]))."\";";
 			echo "wfs_conf[".$i."]['g_use_wzgraphics']  = '".$row["g_use_wzgraphics"]."';";
 			echo "wfs_conf[".$i."]['fkey_featuretype_id']  = '".$row["fkey_featuretype_id"]."';";
 			echo "wfs_conf[".$i."]['wfs_getfeature']  = '".$row["wfs_getfeature"]."';";
@@ -143,8 +143,8 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 		
 		$sql = "SELECT * FROM wfs_featuretype_namespace";
 		$sql .= " WHERE fkey_wfs_id = $1 AND fkey_featuretype_id = $2";
-		$v = array($wfs_id,$featuretype_id);
-		$t = array('i','i');
+		$v = [$wfs_id, $featuretype_id];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		echo "wfs_conf[".$i."]['namespaces'] = new Array();";
 		$counter = 0;
@@ -158,8 +158,8 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 		//get OtherSRS if available
 		$sql = "SELECT * FROM wfs_featuretype_epsg";
 		$sql .= " WHERE fkey_featuretype_id = $1";
-		$v = array($featuretype_id);
-		$t = array('i');
+		$v = [$featuretype_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		echo "wfs_conf[".$i."]['other_srs'] = new Array();";
 		$counter = 0;
@@ -171,8 +171,8 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 		
 		$sql = "SELECT * FROM wfs_featuretype ";
 		$sql .= "WHERE fkey_wfs_id = $1 AND featuretype_id = $2";
-		$v = array($wfs_id,$featuretype_id);
-		$t = array('i','i');
+		$v = [$wfs_id, $featuretype_id];
+		$t = ['i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if($row = db_fetch_array($res)){
 			echo "wfs_conf[".$i."]['featuretype_name']  = '".$row["featuretype_name"]."';";
@@ -186,8 +186,8 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 		$sql .= " ORDER BY wfs_conf_element.f_respos";
 		#$sql .= "AND wfs_conf_element.f_search = 1 ORDER BY wfs_conf_element.f_search;";
 				
-		$v = array($wfs[$i]);
-		$t = array('i');
+		$v = [$wfs[$i]];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		echo "wfs_conf[".$i."]['element']  = new Array();";
@@ -198,24 +198,24 @@ if(isset($_REQUEST['id']) && $_REQUEST['id']!=""){
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_search'] = ".$row["f_search"].";";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_style_id'] = '".$row["f_style_id"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_toupper'] = '".$row["f_toupper"]."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_label'] = '".htmlentities($row["f_label"], ENT_QUOTES, "UTF-8")."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_label'] = '".htmlentities((string) $row["f_label"], ENT_QUOTES, "UTF-8")."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_label_id'] = '".$row["f_label_id"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_show'] = '".$row["f_show"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_respos'] = '".$row["f_respos"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_show_detail'] = '".$row["f_show_detail"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_detailpos'] = '".$row["f_detailpos"]."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['element_name'] = '".htmlentities($row["element_name"], ENT_QUOTES, "UTF-8")."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['element_type'] = '".htmlentities($row["element_type"], ENT_QUOTES, "UTF-8")."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['element_name'] = '".htmlentities((string) $row["element_name"], ENT_QUOTES, "UTF-8")."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['element_type'] = '".htmlentities((string) $row["element_type"], ENT_QUOTES, "UTF-8")."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_geom'] = '".$row["f_geom"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_gid'] = '".$row["f_gid"]."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_form_element_html'] = \"".(preg_replace("/\n/", "", preg_replace("/\r/", "", $row["f_form_element_html"])))."\";";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_form_element_html'] = \"".(preg_replace("/\n/", "", preg_replace("/\r/", "", (string) $row["f_form_element_html"])))."\";";
 //			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_form_element_html'] = \"\";";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_edit'] = '".$row["f_edit"]."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_mandatory'] = '".$row["f_mandatory"]."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_auth_varname'] = '".htmlentities($row["f_auth_varname"], ENT_QUOTES, "UTF-8")."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_auth_varname'] = '".htmlentities((string) $row["f_auth_varname"], ENT_QUOTES, "UTF-8")."';";
 			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_operator'] = '".$row["f_operator"]."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_helptext'] = '".myNl2br(htmlentities($row["f_helptext"], ENT_QUOTES, "UTF-8"))."';";
-			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_category_name'] = '".htmlentities($row["f_category_name"], ENT_QUOTES, "UTF-8")."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_helptext'] = '".myNl2br(htmlentities((string) $row["f_helptext"], ENT_QUOTES, "UTF-8"))."';";
+			echo "wfs_conf[".$i."]['element'][".$cnt."]['f_category_name'] = '".htmlentities((string) $row["f_category_name"], ENT_QUOTES, "UTF-8")."';";
 			$cnt++;
 		}
 		if($cnt == 0){die("wfs_conf data not available");}		

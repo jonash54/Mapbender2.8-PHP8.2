@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //http://localhost/mapbender_trunk/php/wfs.php?featuretype_id=21018&INSPIRE=1&REQUEST=GetCapabilities&VERSION=1.0.0&SERVICE=wfs&withChilds=1
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_layer_monitor.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../classes/class_owsMetadataUrl.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_layer_monitor.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_owsMetadataUrl.php");
 //
 $admin = new administration();
 //
@@ -32,7 +32,7 @@ foreach($_GET as $key => $val) {
 
 $requestType = $_GET["REQUEST"];
 $version = $_GET["VERSION"];
-$service = strtoupper($_GET["SERVICE"]);
+$service = strtoupper((string) $_GET["SERVICE"]);
 
 //check for integer value WFS_ID
 if (isset($_REQUEST["WFS_ID"]) & $_REQUEST["WFS_ID"] != "") {
@@ -40,7 +40,7 @@ if (isset($_REQUEST["WFS_ID"]) & $_REQUEST["WFS_ID"] != "") {
     $testMatch = $_REQUEST["WFS_ID"];
     //give max 99 entries - more will be to slow
     $pattern = '/[0-9]*+/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         //echo 'maxResults: <b>'.$testMatch.'</b> is not valid.<br/>';
         echo 'Parameter <b>WFS_ID</b> is not valid integer.<br/>';
         die();
@@ -55,7 +55,7 @@ if (isset($_REQUEST["FEATURETYPE_ID"]) & $_REQUEST["FEATURETYPE_ID"] != "") {
     $testMatch = $_REQUEST["FEATURETYPE_ID"];
     //give max 99 entries - more will be to slow
     $pattern = '/[0-9]*+/';
-    if (!preg_match($pattern,$testMatch)){
+    if (!preg_match($pattern,(string) $testMatch)){
         //echo 'maxResults: <b>'.$testMatch.'</b> is not valid.<br/>';
         echo 'Parameter <b>FEATURETYPE_ID</b> is not valid integer.<br/>';
         die();
@@ -150,7 +150,7 @@ if (!isset($requestType) || $requestType === "" || ($service == "WFS" && $reques
 //
 // check if version param is set
 //
-if (!isset($version) || $version === "" || ($service == "WFS" && !($version == "1.0.0" || $version == "1.1.0" || strpos($version, '2.0') == 0))) {
+if (!isset($version) || $version === "" || ($service == "WFS" && !($version == "1.0.0" || $version == "1.1.0" || str_starts_with((string) $version, '2.0')))) {
 	// optional parameter, set to 1.0.0 if not set
 	$version = "1.0.0";
 }
@@ -162,8 +162,8 @@ if (!isset($featuretypeId) || !is_numeric($featuretypeId)) {
     //check if WFS_ID is set instead
     if (isset($wfsId) || is_numeric($wfsId)) {
         $wfs_sql = "SELECT * FROM wfs WHERE wfs_id = $1 LIMIT 1";
-        $v = array($wfsId);
-        $t = array("i");
+        $v = [$wfsId];
+        $t = ["i"];
         $res_wfs_sql = db_prep_query($wfs_sql, $v, $t);
         $wfs_row = db_fetch_array($res_wfs_sql);
         if (!$wfs_row["wfs_id"]) {
@@ -183,8 +183,8 @@ if (!isset($featuretypeId) || !is_numeric($featuretypeId)) {
 } else {
     $wfs_sql = "SELECT * FROM wfs AS w, wfs_featuretype AS f " .
         "where f.featuretype_id = $1 AND f.fkey_wfs_id = w.wfs_id LIMIT 1";
-    $v = array($featuretypeId);
-    $t = array("i");
+    $v = [$featuretypeId];
+    $t = ["i"];
     $res_wfs_sql = db_prep_query($wfs_sql, $v, $t);
     $wfs_row = db_fetch_array($res_wfs_sql);
     if (!$wfs_row["wfs_id"]) {
@@ -198,8 +198,8 @@ if (!isset($featuretypeId) || !is_numeric($featuretypeId)) {
 //Get Geometry Type if featuretype info was requested
 if ($resource == 'featuretype') {
 	$getTypeSql = "SELECT element_id, element_type from wfs_element WHERE fkey_featuretype_id = $1 AND element_type LIKE '%PropertyType';";
-	$vgetType = array($resourceMetadata['contentid']);
-	$tgetType = array('i');
+	$vgetType = [$resourceMetadata['contentid']];
+	$tgetType = ['i'];
 	$resGetType = db_prep_query($getTypeSql,$vgetType,$tgetType);
 	$featuretypeElements = db_fetch_array($resGetType);
 	$resourceMetadata['featuretype_geomType'] = $featuretypeElements['element_type'];
@@ -241,8 +241,8 @@ if ($featuretypeId != false) {
     #Load existing XML from database
     $xml_sql = "SELECT w.wfs_getcapabilities_doc as doc,f.featuretype_name as fname FROM wfs AS w, wfs_featuretype AS f " .
     		"WHERE f.featuretype_id = $1 AND f.fkey_wfs_id = w.wfs_id;";
-    $v = array($featuretypeId);
-    $t = array("i");
+    $v = [$featuretypeId];
+    $t = ["i"];
     $res_xml_sql = db_prep_query($xml_sql, $v, $t);
     $xml_row = db_fetch_array($res_xml_sql);
 } else {
@@ -255,7 +255,7 @@ if ($featuretypeId != false) {
 $doc->loadXML($xml_row["doc"]);
 $xpath = new DOMXPath($doc);
 
-if(strpos($version, '2.0') !== false) {
+if(str_contains((string) $version, '2.0')) {
     $xpath->registerNamespace("wfs", "http://www.opengis.net/wfs/2.0");
 } else {
     $xpath->registerNamespace("wfs", "http://www.opengis.net/wfs");
@@ -396,10 +396,10 @@ mb_metadata.metadata_id = relation.fkey_metadata_id WHERE mb_metadata.origin IN 
 
 SQL;
 $res_metadata = db_query($sql);
-$metadataUrl = array();
-$linkType = array();
-$format = array();
-$datasetId = array();
+$metadataUrl = [];
+$linkType = [];
+$format = [];
+$datasetId = [];
 //
 $k = 0;
 //infos about the registrating department, check first if a special metadata point of contact is defined in the service table
@@ -590,13 +590,13 @@ e>
 		//try to extract local identifier from complete unique resource identifier 
 		//now try to check if a single slash is available and if the md_identifier is a url
 		$parsedUrl = parse_url($singleDatasetId);
-		if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && strpos($parsedUrl['path'],'/') !== false) {
+		if (($parsedUrl['scheme'] == 'http' || $parsedUrl['scheme'] == 'https') && str_contains($parsedUrl['path'],'/')) {
 			$explodedUrl = explode('/', $singleDatasetId);
 			$codeText = $explodedUrl[count($explodedUrl) - 1];
 			$namespaceText = rtrim($singleDatasetId, $codeText);	
 		} else {
 			//check old way with # as separator
-			if (strpos($singleDatasetId, '#') !== false && count(explode('#', $singleDatasetId) == 2) ) {
+			if (str_contains($singleDatasetId, '#') && count(explode('#', $singleDatasetId) == 2) ) {
 				$codeText = explode('#', $singleDatasetId)[1];
 				$namespaceText = explode('#', $singleDatasetId)[0];
 			} else {

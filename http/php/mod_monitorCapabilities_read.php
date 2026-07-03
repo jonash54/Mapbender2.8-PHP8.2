@@ -30,10 +30,10 @@ if (isset($_REQUEST["serviceType"]) & $_REQUEST["serviceType"] != "") {
 	$serviceType = $testMatch;
 	$testMatch = NULL;
 }
-$serviceType= strtoupper($serviceType);
+$serviceType= strtoupper((string) $serviceType);
 //TODO: Check wether request parameters cannot be found! Since this is not handled, update will not be available!
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_wms.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -99,8 +99,8 @@ switch ($serviceType) {
 			if ($upd_wmsid) {
 				// get upload URL
 				$sql = "SELECT wms_upload_url, wms_owner FROM wms WHERE wms_id = $1";
-				$v = array($upd_wmsid);
-						$t = array("i");
+				$v = [$upd_wmsid];
+						$t = ["i"];
 				$res = db_prep_query($sql, $v, $t);
 				$row = db_fetch_array($res);
 				$uploadUrl = $row["wms_upload_url"];
@@ -164,8 +164,8 @@ switch ($serviceType) {
 			if ($upd_wfsid) {
 				// get upload URL
 				$sql = "SELECT wfs_upload_url, wfs_owner FROM wfs WHERE wfs_id = $1";
-				$v = array($upd_wfsid);
-				$t = array("i");
+				$v = [$upd_wfsid];
+				$t = ["i"];
 				$res = db_prep_query($sql, $v, $t);
 				$row = db_fetch_array($res);
 				$uploadUrl = $row["wfs_upload_url"];
@@ -178,8 +178,8 @@ switch ($serviceType) {
 				$url = $uploadUrl;
 				//get authentication information from db
 				$sql = "SELECT wfs_auth_type, wfs_username, wfs_password from wfs WHERE wfs_id = $1 ";
-				$v = array($id);
-				$t = array('i');
+				$v = [$id];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
 				$row = db_fetch_assoc($res);
 				$auth['auth_type'] = $row["wfs_auth_type"];
@@ -225,28 +225,28 @@ switch ($serviceType) {
 	case "WMS":
 		$sql = "SELECT mb_wms_availability.* FROM mb_wms_availability, wms " . 
 			"WHERE mb_wms_availability.fkey_wms_id = wms.wms_id AND wms.wms_owner = $1";
-		$res = db_prep_query($sql, array($_SESSION["mb_user_id"]), array("i"));
+		$res = db_prep_query($sql, [$_SESSION["mb_user_id"]], ["i"]);
 		break;
 	case "WFS":
 		$sql = "SELECT mb_wfs_availability.* FROM mb_wfs_availability, wfs " . 
 			"WHERE mb_wfs_availability.fkey_wfs_id = wfs.wfs_id AND wfs.wfs_owner = $1";
-		$res = db_prep_query($sql, array($_SESSION["mb_user_id"]), array("i"));
+		$res = db_prep_query($sql, [$_SESSION["mb_user_id"]], ["i"]);
 		break;
 }
 
 
-$wms = array();
-$wms_id = array();
+$wms = [];
+$wms_id = [];
 
-$wfs = array();
-$wfs_id = array();
+$wfs = [];
+$wfs_id = [];
 
-$upload_id = array();
-$avg_response_time = array();
-$comment = array();
-$upload_url = array();
-$updated = array();
-$status = array();
+$upload_id = [];
+$avg_response_time = [];
+$comment = [];
+$upload_url = [];
+$updated = [];
+$status = [];
 
 while($row = db_fetch_array($res)){
 	switch ($serviceType) {

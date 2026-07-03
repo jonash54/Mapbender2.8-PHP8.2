@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 $showOnlyDatasetMetadata = "false";
 $showOnlyUnlinkedOrganizations = "false";
 //params: opendata licenses, only metadata, ....
@@ -111,7 +111,7 @@ switch ($showOnlyDatasetMetadata) {
 		break;
 }
 
-$returnObject = array();
+$returnObject = [];
 
 while ($row = db_fetch_array($result)) {
         unset($orga);

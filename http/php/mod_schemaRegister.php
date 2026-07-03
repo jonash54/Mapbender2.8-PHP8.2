@@ -16,8 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_Uuid.php";
 
 /* Initial import of json */
 
@@ -63,7 +63,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["id"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>id</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -90,20 +90,20 @@ switch($operation) {
 		$sql = "SELECT uuid, id, title, updated FROM json_schema WHERE public IS TRUE ";
 		switch($geometryType) {
 			case "false":
-				$v = array();
-				$t = array();
+				$v = [];
+				$t = [];
 				break;
 			default:
 				$sql .= "AND geomtype = $1";
-				$v = array((integer)$geometryType);
-				$t = array("i");
+				$v = [(integer)$geometryType];
+				$t = ["i"];
 				break;	
 		}
 		break;
 	case "show":
 		$sql = "SELECT schema FROM json_schema WHERE id = $1 AND public IS TRUE ";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
                 break;
 }
 
@@ -111,10 +111,10 @@ $res = db_prep_query($sql, $v, $t);
 
 switch($operation) {	
 	case "list":
-		$schemaArray = array();
+		$schemaArray = [];
 		$j = 0;
 		while ($row = db_fetch_array($res)) {
-			$schemaArray[$j] = array();
+			$schemaArray[$j] = [];
 			$schemaArray[$j]['id'] = $row['id'];
 			$schemaArray[$j]['uuid'] = $row['uuid'];
 			$schemaArray[$j]['updated'] = date(DATE_ATOM, $row['updated']);
@@ -126,7 +126,7 @@ switch($operation) {
 	case "show":
 		$row = db_fetch_array($res);
 		$schema = $row["schema"];
-		echo json_encode(json_decode($schema));
+		echo json_encode(json_decode((string) $schema));
 		break;
 }
 

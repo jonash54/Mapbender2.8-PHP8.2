@@ -17,36 +17,36 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * An abstract class modelling an OGC web service (OWS), for example
  * Web Map Service (WMS) or Web Feature Service (WFS).
  */
 abstract class Ows {
-	var $id;
-	var $name;
-	var $title;
-	var $alternate_title;
-	var $summary;
-	var $uploadUrl;
-	var $getCapabilities;
-	var $getCapabilitiesDoc;
-	var $fees;
-	var $accessconstraints;
-	var $individualName;
-	var $positionName;
-	var $providerName;
-	var $city;
-	var $deliveryPoint;
-	var $administrativeArea;
-	var $postalCode;
-	var $voice;
-	var $facsimile;
-	var $electronicMailAddress;
-	var $country;
-	var $termsofuse;
-	var $auth = false; //array 'auth_type', 'auth_username', 'auth_password', default false
+	public $id;
+	public $name;
+	public $title;
+	public $alternate_title;
+	public $summary;
+	public $uploadUrl;
+	public $getCapabilities;
+	public $getCapabilitiesDoc;
+	public $fees;
+	public $accessconstraints;
+	public $individualName;
+	public $positionName;
+	public $providerName;
+	public $city;
+	public $deliveryPoint;
+	public $administrativeArea;
+	public $postalCode;
+	public $voice;
+	public $facsimile;
+	public $electronicMailAddress;
+	public $country;
+	public $termsofuse;
+	public $auth = false; //array 'auth_type', 'auth_username', 'auth_password', default false
 	
 	/**
 	 * Removes the namespace from a tag name.
@@ -57,9 +57,9 @@ abstract class Ows {
 	 * @param $s String
 	 */
 	final protected function sepNameSpace($s) {
-		$c = strpos($s, ":"); 
+		$c = strpos((string) $s, ":"); 
 		if ($c > 0) {
-			return substr($s, $c + 1);
+			return substr((string) $s, $c + 1);
 		}
 		return $s;
 	}
@@ -73,9 +73,9 @@ abstract class Ows {
 	 * @param $s String
 	 */
 	final public function getNameSpace($s) {
-		$c = strpos($s, ":"); 
+		$c = strpos((string) $s, ":"); 
 		if ($c !== false) {
-			return substr($s, 0, $c);
+			return substr((string) $s, 0, $c);
 		}
 		return $s;
 	}
@@ -93,11 +93,11 @@ abstract class Ows {
 		// if yes, ...
 		if ($pos > -1) { 
 			// if the last character is "?", return ""
-			if (substr($url, -1) == "?") { 
+			if (str_ends_with($url, "?")) { 
 				return "";
 			}
 			// if the last character is "&", return ""
-			else if (substr($url, -1) == "&") {
+			else if (str_ends_with($url, "&")) {
 				return "";
 			}
 			// "?" exists, so the conunction character must be "&"

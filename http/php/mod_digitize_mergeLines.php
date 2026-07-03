@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 
@@ -38,12 +38,12 @@ $pattern = "/" . $linePattern . "/";
 #	die();
 #}
 
-if (!preg_match($pattern, $line1)) {
+if (!preg_match($pattern, (string) $line1)) {
 	echo "Line 1 not a line.";
 	die();
 }
 
-if (!preg_match($pattern, $line2)) {
+if (!preg_match($pattern, (string) $line2)) {
 	echo "Line 2 not a line.";
 	die();
 }
@@ -75,14 +75,14 @@ if($row['a'] == 't' || $row['b'] == 't' || $row['c'] == 't' || $row['d'] == 't')
 	#echo $sql;
 	$res = db_query($sql);    
 	
-	$lineArray = array();
+	$lineArray = [];
 	$row = db_fetch_array($res);
 	
-	$data = array("line" => $row[0]);
+	$data = ["line" => $row[0]];
 	
 }
 else {
-	$data = array("line" => "");
+	$data = ["line" => ""];
 }
 
 $output = $json->encode($data);

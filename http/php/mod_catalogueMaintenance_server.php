@@ -1,11 +1,11 @@
 <?php
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_json.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_json.php");
 //classes for monitoring
-require_once dirname(__FILE__) ."/../classes/class_administration.php";
-require_once dirname(__FILE__) ."/../../tools/mod_monitorCapabilities_defineGetMapBbox.php";
-require_once dirname(__FILE__) ."/../classes/class_bbox.php";
-require_once(dirname(__FILE__)."/../../lib/class_Monitor.php");
+require_once __DIR__ ."/../classes/class_administration.php";
+require_once __DIR__ ."/../../tools/mod_monitorCapabilities_defineGetMapBbox.php";
+require_once __DIR__ ."/../classes/class_bbox.php";
+require_once(__DIR__."/../../lib/class_Monitor.php");
 
 //check for catalogue admin id 
 $resultObj['result'] = '';
@@ -60,13 +60,13 @@ if (isset($_REQUEST["resourceIds"]) & $_REQUEST["resourceIds"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["resourceIds"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		$resultObj['success'] = false;
 		$resultObj['message'] = "Parameter <b>resourceIds</b> is not valid (integer or cs integer list).";
 		echo json_encode($resultObj);
 		die(); 		
  	}
-	$resourceIdsArray = explode(",",$testMatch);	
+	$resourceIdsArray = explode(",",(string) $testMatch);	
 	if (count($resourceIdsArray) > 3) {
 		$resultObj['success'] = false;
 		$resultObj['message'] = "Parameter <b>resourceIds</b> is not allowed to have more than 3 entries (cs integer list).";
@@ -77,14 +77,9 @@ if (isset($_REQUEST["resourceIds"]) & $_REQUEST["resourceIds"] != "") {
 	$testMatch = NULL;
 }
 
-$allowedFunctions = array(
-	'wms' => array('reindex','monitor'),
-	'wfs' => array('reindex'),
-	'dataset' => array('reindex'),
-	'wmc' => array('reindex')
-);
+$allowedFunctions = ['wms' => ['reindex', 'monitor'], 'wfs' => ['reindex'], 'dataset' => ['reindex'], 'wmc' => ['reindex']];
 
-$functionThatNeedIdList = array('monitor');
+$functionThatNeedIdList = ['monitor'];
 
 //check for allowedFunction
 if (!in_array($maintenanceFunction, $allowedFunctions[$resourceType])) {
@@ -104,13 +99,13 @@ if (in_array($maintenanceFunction, $functionThatNeedIdList) && !isset($resourceI
 
 $json = new Mapbender_JSON();
 
-$resultObj = array();
+$resultObj = [];
 switch ($maintenanceFunction) {
 	case 'reindex':
 		//$result = $touObject->check($ajaxResponse->getParameter("serviceType"),$ajaxResponse->getParameter("serviceId"));
 		//$e = new mb_exception($ajaxResponse->getParameter("resourceType"));
 		//$e = new mb_exception("resourceType from POST: ".$resourceType);
-		$sql = file_get_contents(dirname(__FILE__)."/../../resources/db/materialize_".$resourceType."_view.sql"); 
+		$sql = file_get_contents(__DIR__."/../../resources/db/materialize_".$resourceType."_view.sql"); 
 		//$ajaxResponse->setResult($sql); //1 or 0
 		//$ajaxResponse->setMessage("cool");
 		//$ajaxResponse->setSuccess(true);
@@ -134,12 +129,12 @@ switch ($maintenanceFunction) {
 		//$e = new mb_exception("found resource ids: ".$resourceIds);
 		$admin = new administration();
 		$timeLimit = 5;
-		$time_array = array();
+		$time_array = [];
 		$time_array[$userId] = strval(time());
 		//sleep(1);
 		$time = $time_array[$userId];
 		
-		$resultObj = monitorWMSResources(explode(',',$resourceIds), $userId, $admin, $time, $timeLimit);
+		$resultObj = monitorWMSResources(explode(',',(string) $resourceIds), $userId, $admin, $time, $timeLimit);
 		
 		/*$serviceType = $ajaxResponse->getParameter("serviceType");
 		$serviceId = $ajaxResponse->getParameter("serviceId");
@@ -192,8 +187,8 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 			"wms_version, wms_getcapabilities, wms_getmap FROM wms " . 
 			"WHERE wms_id = $1";
 		//$e = new mb_exception('wms_id: '.$wmsIdList[0]);
-		$v = array($wmsIdList[$k]);
-		$t = array('i');
+		$v = [$wmsIdList[$k]];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$someArray = db_fetch_array($res);
 		$url = $someArray['wms_upload_url'];
@@ -223,17 +218,8 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 				"status, status_comment, timestamp_begin, timestamp_end, " . 
 				"upload_url, updated)";
 		$sql .= "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
-		$v = array(
-			$time,
-			$wmsIdList[$k],
-			"-2",
-			"Monitoring is still in progress...", 
-			time(),
-			"0",
-			$url,
-			"0"
-		);
-		$t = array('s', 'i', 's', 's', 's', 's', 's', 's');
+		$v = [$time, $wmsIdList[$k], "-2", "Monitoring is still in progress...", time(), "0", $url, "0"];
+		$t = ['s', 'i', 's', 's', 's', 's', 's', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		// Decode orig capabilities out of db cause they are converted before 
 		// saving them while upload
@@ -251,13 +237,13 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 		fwrite($report,"<wms_id>".$wmsIdList[$k]."</wms_id>".$lb);
 		fwrite($report,"<upload_id>".$time."</upload_id>".$lb);
 		fwrite($report,"<getcapbegin></getcapbegin>".$lb);
-		fwrite($report,"<getcapurl>".urlencode($url)."</getcapurl>".$lb);
-		fwrite($report,"<getcapdoclocal>".urlencode($capDoc)."</getcapdoclocal>".$lb);
+		fwrite($report,"<getcapurl>".urlencode((string) $url)."</getcapurl>".$lb);
+		fwrite($report,"<getcapdoclocal>".urlencode((string) $capDoc)."</getcapdoclocal>".$lb);
 		fwrite($report,"<getcapdocremote></getcapdocremote>".$lb);
 		fwrite($report,"<getcapdiff></getcapdiff>".$lb);
 		fwrite($report,"<getcapend></getcapend>".$lb);
 		fwrite($report,"<getcapduration></getcapduration>".$lb);
-		fwrite($report,"<getmapurl>".urlencode($getMapUrl)."</getmapurl>".$lb);
+		fwrite($report,"<getmapurl>".urlencode((string) $getMapUrl)."</getmapurl>".$lb);
 		fwrite($report,"<status>-2</status>".$lb);
 		fwrite($report,"<image></image>".$lb);
 		fwrite($report,"<comment>Monitoring in progress...</comment>".$lb);
@@ -272,8 +258,8 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 	// wait until all monitoring processes are finished
 	//echo "please wait " . $timeLimit . " seconds for the monitoring to finish...$br";
 	sleep($timeLimit);
-	$problemOWS = array();//define array with id's of problematic wms
-	$commentProblemOWS = array();
+	$problemOWS = [];//define array with id's of problematic wms
+	$commentProblemOWS = [];
 	//get the old upload_id from the monitoring to identify it in the database
 	//$time = $time_array[$userId];	
 	//read sequencialy all user owned xml files from tmp and update the 
@@ -286,7 +272,7 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 		$status_comment = getTagOutOfXML($monitorFile,"comment");
 		$cap_diff = getTagOutOfXML($monitorFile,"getcapdiff");
 		$image = getTagOutOfXML($monitorFile,"image");
-		$map_url = rawurldecode(getTagOutOfXML($monitorFile,"getmapurl"));
+		$map_url = rawurldecode((string) getTagOutOfXML($monitorFile,"getmapurl"));
 		$timestamp_begin = getTagOutOfXML($monitorFile,"getcapbegin");
 		$timestamp_end = getTagOutOfXML($monitorFile,"getcapend");
 		$sql = "UPDATE mb_monitor SET updated = $1, status = $2, " . 
@@ -301,19 +287,8 @@ function monitorWMSResources($wmsIdList, $userId, $admin, $time, $timeLimit) {
 			array_push($problemOWS,$wmsIdList[$k]);
 			array_push($commentProblemOWS,$status_comment);
 		} 
-		$v = array(
-			'0', 
-			intval($status), 
-			intval($image), 
-			$status_comment, 
-			(string)intval($timestamp_end), 
-			$map_url, 
-			(string)intval($timestamp_begin), 
-			$cap_diff,
-			(string)$time, 
-			$wmsIdList[$k]
-		);
-		$t = array('s', 'i', 'i', 's', 's', 's', 's', 's','s','s');
+		$v = ['0', intval($status), intval($image), $status_comment, (string)intval($timestamp_end), $map_url, (string)intval($timestamp_begin), $cap_diff, (string)$time, $wmsIdList[$k]];
+		$t = ['s', 'i', 'i', 's', 's', 's', 's', 's', 's', 's'];
 		$res = db_prep_query($sql,$v,$t);
 	}
 	$resultObj['success'] = true;

@@ -26,8 +26,8 @@
 
 
 
-include_once(dirname(__FILE__)."/classes/StyledLayerDescriptor.php");
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+include_once(__DIR__."/classes/StyledLayerDescriptor.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 /**
  * Parses a given filter expression and creates the object structure.
@@ -43,15 +43,15 @@ function parseFilter($data)
 	
 	
 	$filter;
-	$parent = array();
-	$objects = array();
+	$parent = [];
+	$objects = [];
 	$parentactual = 0;
 	
 	for ($i=0; $i<count($vals); $i++)
 	{
 		$element = $vals[$i];
 		$tag = $element["tag"];
-		$tagname=strtoupper($tag);
+		$tagname=strtoupper((string) $tag);
 		switch($tagname)
 		{
 			case "FILTER":

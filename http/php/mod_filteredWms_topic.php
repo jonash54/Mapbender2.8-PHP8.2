@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__) . "/../php/mb_validatePermission.php");
+require_once(__DIR__ . "/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -28,7 +28,7 @@ foreach ($postvars as $value) {
    ${$value} = $_POST[$value];
 }
 
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -92,14 +92,14 @@ if($insert){
 		for($i=0; $i<count($selected_topic); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * FROM wms_md_topic_category WHERE fkey_wms_id = $1 and fkey_md_topic_category_id = $2";
-			$v = array($selected_wms,$selected_topic[$i]);
-			$t = array('i','i');
+			$v = [$selected_wms, $selected_topic[$i]];
+			$t = ['i', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO wms_md_topic_category (fkey_wms_id, fkey_md_topic_category_id) VALUES($1, $2)";
-				$v = array($selected_wms,$selected_topic[$i]);
-				$t = array('i','i');
+				$v = [$selected_wms, $selected_topic[$i]];
+				$t = ['i', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -109,8 +109,8 @@ if($remove){
 	if(count($remove_topic)>0){
 		for($i=0; $i<count($remove_topic); $i++){
 			$sql_remove = "DELETE FROM wms_md_topic_category WHERE fkey_md_topic_category_id = $1 and fkey_wms_id = $2";
-			$v = array($remove_topic[$i],$selected_wms);
-			$t = array('i','s');
+			$v = [$remove_topic[$i], $selected_wms];
+			$t = ['i', 's'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -121,9 +121,9 @@ $sql_wms_topic = "SELECT t.md_topic_category_id, t.md_topic_category_code_".$lan
 $sql_wms_topic .= "FROM wms_md_topic_category as w, md_topic_category as t WHERE w.fkey_wms_id = $1 AND w.fkey_md_topic_category_id = t.md_topic_category_id ";
 $sql_wms_topic .= "ORDER BY t.md_topic_category_code_".$language_suffix;
 
-if(!$selected_wms){$v = array($own_wms_id_array[0]);}
-if($selected_wms){$v = array($selected_wms);}
-$t = array('s');
+if(!$selected_wms){$v = [$own_wms_id_array[0]];}
+if($selected_wms){$v = [$selected_wms];}
+$t = ['s'];
 $res_wms_topic = db_prep_query($sql_wms_topic,$v,$t);
 $cnt_wms_topic=0;;
 while($row = db_fetch_array($res_wms_topic)){

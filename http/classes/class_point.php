@@ -17,16 +17,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * A Mapbender_point is a 2- or 3-dimensional point with an EPSG. 
  */
-class Mapbender_point {
-	var $x;
-	var $y;
-	var $z;
-	var $epsg;
+class Mapbender_point implements \Stringable {
+	public $x;
+	public $y;
+	public $z;
+	public $epsg;
 	
 	/**
 	 * @constructor
@@ -161,8 +161,8 @@ class Mapbender_point {
 	 */
 	function transform($toEpsg) {
 		if(SYS_DBTYPE=='pgsql'){
-			$currentEpsg = preg_replace("/EPSG:/", "", $this->epsg);
-			$targetEpsg = preg_replace("/EPSG:/", "", $toEpsg);
+			$currentEpsg = preg_replace("/EPSG:/", "", (string) $this->epsg);
+			$targetEpsg = preg_replace("/EPSG:/", "", (string) $toEpsg);
 			//get EPSG:4326 extents for which $this->epsg are defined
 			$geometryUnchanged = true;
 			if (defined("SRS_ARRAY") && SRS_ARRAY !== "" ) {
@@ -170,11 +170,11 @@ class Mapbender_point {
 				if ($toEpsg == "4326") {
 					//do nothing - every crs can be projected to latlon without any problems!
 				} else {
-					$posTargetEpsgBbox = array_search($targetEpsg,explode(",",SRS_ARRAY));
+					$posTargetEpsgBbox = array_search($targetEpsg,explode(",",(string) SRS_ARRAY));
 					if ($posTargetEpsgBbox !== false) {
 						//check if bboxes are defined for special epsg SRS_ARRAY_MAX_EXTENTS
 						if (defined("SRS_ARRAY_MAX_EXTENTS") && SRS_ARRAY_MAX_EXTENTS !== "" ) {
-							$bboxArray = explode("|",SRS_ARRAY_MAX_EXTENTS);
+							$bboxArray = explode("|",(string) SRS_ARRAY_MAX_EXTENTS);
 							$wgs84BboxTargetEpsg = explode(",",$bboxArray[$posTargetEpsgBbox]);
 							//compare point values with bboxes and adopt them if needed
 							//$e = new mb_exception("class_point: bbox compare started before transforming!!!");
@@ -246,7 +246,7 @@ class Mapbender_point {
 		
 	}
 	
-	function __toString() {
+	function __toString(): string {
 		return (string) "(" . $this->x . "," . $this->y . "," . $this->z . "," . $this->epsg . ")";
 	}
 }

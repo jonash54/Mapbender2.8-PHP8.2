@@ -33,7 +33,7 @@ class TextSymbolizer extends Rule
 	 *
 	 * @var object
 	 */
-	var $label = "";
+	public $label = "";
 	
 	/**
 	 * The Font object from the xml-scheme.
@@ -41,7 +41,7 @@ class TextSymbolizer extends Rule
 	 * @see Font
 	 * @var object
 	 */
-	var $font = "";
+	public $font = "";
 	
 	/**
 	 * The Labelplacement object from the xml-scheme.
@@ -49,27 +49,27 @@ class TextSymbolizer extends Rule
 	 * @see LabelPlacement
 	 * @var object
 	 */
-	var $labelplacement = "";
+	public $labelplacement = "";
 	
 	//Halo is not supported by Mapserver
-	var $halo = "";
+	public $halo = "";
 	
 	//Fill is not supported by Mapserver - only solid color
-	var $fill = "";
+	public $fill = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	
-	function TextSymbolizer()
+	function __construct()
 	{
 		//$this->label = new ParameterValue();
 		//$this->labelplacement = new LabelPlacement();
@@ -115,7 +115,7 @@ class TextSymbolizer extends Rule
 		$temp .= $offset."    TextSymbolizer<br>\n";
 		$temp .= $offset."    <input type=\"hidden\" name=\"".$id."\" value=\"textsymbolizer\">\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", $id);
 		$number = $number[count($number)-1];
 		
 		$temp .= $offset."<a class='edit' href=\"sld_function_handler.php?function=deletesymbolizer&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";

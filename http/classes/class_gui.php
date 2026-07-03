@@ -17,31 +17,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_element.php");
-require_once(dirname(__FILE__)."/../classes/class_RPCEndpoint.php");
-require_once(dirname(__FILE__)."/../classes/class_cache.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_element.php");
+require_once(__DIR__."/../classes/class_RPCEndpoint.php");
+require_once(__DIR__."/../classes/class_cache.php");
 
 /**
  * GUI is a set of GUI elements and services. 
  */
 class gui implements RPCObject{
 
-	var $id;
-    var $name = "";
-    var $description = "";
-    var $public = 1;
-	var $elementArray = array();
+	public $name = "";
+    public $description = "";
+    public $public = 1;
+	public $elementArray = [];
     
     static $displayName = "Gui";
     static $internalName = "gui";
 	
-	public function __construct ($guiId) {
-        $this->id = $guiId;
-		if (func_num_args() == 1) {
-			$id = func_get_arg(0);
-			if ($this->guiExists($id))	{
-				$this->id = $id;
+	public function __construct (public $id) {
+        if (func_num_args() == 1) {
+			$this->id = func_get_arg(0);
+			if ($this->guiExists($this->id))	{
+				$this->id = $this->id;
 				$this->elementArray = $this->selectElements();
 			}
             //FIXME: is this a good compromise between the two constructors?
@@ -59,12 +57,7 @@ class gui implements RPCObject{
     * @return Assoc Array containing the fields to send to the user
     */
     public function getFields() {
-        $result = array(
-                            "name" => $this->name,
-							"description" => $this->description, 
-                            "public" => $this->public
-
-        );
+        $result = ["name" => $this->name, "description" => $this->description, "public" => $this->public];
 		return $result;
 	}
 
@@ -88,7 +81,7 @@ class gui implements RPCObject{
 			$insert .= $element->toSql();
 		}
 		$insert = preg_replace("/,,/",",NULL,",$insert);
-		$insert = preg_replace("/, ,/", ",NULL,",$insert);	
+		$insert = preg_replace("/, ,/", ",NULL,",(string) $insert);	
 		return $insert;	
 	}
 
@@ -97,8 +90,8 @@ class gui implements RPCObject{
 	    
         //NOTE: gui_id, is not autocrated in the database
 		$sql_gui_create = "INSERT INTO gui (gui_id,gui_name) VALUES ($1,$2);";
-		$v = array($this->name,$this->name);
-		$t = array("s","s");
+		$v = [$this->name, $this->name];
+		$t = ["s", "s"];
 	
 		db_begin();
 		
@@ -121,7 +114,7 @@ class gui implements RPCObject{
 			try {
 				db_rollback();
 			}
-			catch(Exception $E)
+			catch(Exception)
 			{
 				$newE = new Exception("Could not set inital values of new gui");
 				throw $newE;
@@ -139,10 +132,10 @@ class gui implements RPCObject{
 	*/
 	public function change($changes) {
         //FIXME: validate input
-		$this->name = isset($changes->name) ? $changes->name : $this->name;
-		$this->description = isset($changes->description) ? $changes->description : $this->description;
-		$this->id = isset($changes->id) ? $changes->id : $this->id;
-		$this->public = isset($changes->public) ? $changes->public : $this->public;
+		$this->name = $changes->name ?? $this->name;
+		$this->description = $changes->description ?? $this->description;
+		$this->id = $changes->id ?? $this->id;
+		$this->public = $changes->public ?? $this->public;
 
         return true;
 	}
@@ -156,12 +149,9 @@ class gui implements RPCObject{
 			"WHERE gui_id = $4;";
 
 
-			$v = array($this->name,
-									$this->description,
-									$this->public,
-									$this->id);
+			$v = [$this->name, $this->description, $this->public, $this->id];
 
-			$t = array("s", "s", "i", "s");
+			$t = ["s", "s", "i", "s"];
 
 			$update_result = db_prep_query($sql_update,$v,$t);
 			if(!$update_result)
@@ -180,8 +170,8 @@ class gui implements RPCObject{
     
 	public function load() {
 		$sql_gui = "SELECT * FROM gui WHERE gui_id = $1; ";
-		$v = array($this->id);
-		$t = array("s");
+		$v = [$this->id];
+		$t = ["s"];
 		$res_gui = db_prep_query($sql_gui,$v,$t);
 		if($row = db_fetch_array($res_gui)){
 
@@ -201,7 +191,7 @@ class gui implements RPCObject{
     */
     public static function getList($filter) {
     //FIXME: optimize
-      $guis = Array();
+      $guis = [];
       $sql_guilist = "SELECT gui_id FROM gui ORDER BY gui_name";
       $res_guis = db_query($sql_guilist);
 
@@ -244,8 +234,8 @@ class gui implements RPCObject{
 	public function addWfs ($aWfs) {
 		$sql ="INSERT INTO gui_wfs (fkey_gui_id, fkey_wfs_id)";
 		$sql .= "VALUES ($1, $2);";
-		$v = array($this->id, $aWfs->id);
-		$t = array("s", "i");
+		$v = [$this->id, $aWfs->id];
+		$t = ["s", "i"];
 		$res = db_prep_query($sql, $v, $t);
 
 		if (!$res) {
@@ -268,15 +258,15 @@ class gui implements RPCObject{
 		} else {*/
 			$sql = "SELECT e_id FROM gui_element WHERE fkey_gui_id = $1 " . 
 				"ORDER BY e_pos";
-			$v = array($this->id);
-			$t = array('s');
+			$v = [$this->id];
+			$t = ['s'];
 			$res = db_prep_query($sql,$v,$t);
-			$elementArray = array();
+			$elementArray = [];
 			while ($row = db_fetch_array($res)) {
 				array_push($elementArray, $row[0]);
 			}
 
-			$this->elementArray = array();
+			$this->elementArray = [];
 			for ($i = 0; $i < count($elementArray); $i++) {
 				$currentElement = new Element();
 				$currentElement->select($elementArray[$i], $this->id);
@@ -297,7 +287,7 @@ class gui implements RPCObject{
 	}
 
 	public function getJavaScriptModules () {
-		$jsArray = array();
+		$jsArray = [];
 		for ($i = 0; $i < count($this->elementArray); $i++) {
 			$currentElement = $this->elementArray[$i];
 			array_merge($jsArray, $currentElement->getJavaScriptModules());			
@@ -313,8 +303,8 @@ class gui implements RPCObject{
  	 */
  	public function guiExists ($gui_id){
 		$sql = "SELECT * FROM gui WHERE gui_id = $1";
-		$v = array($gui_id);
-		$t = array('s');
+		$v = [$gui_id];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -333,57 +323,57 @@ class gui implements RPCObject{
 	public function deleteGui ($guiId) {
 		$guiList = $guiId;
 
-		$sql = array();
-		$v = array();			
-		$t = array();
+		$sql = [];
+		$v = [];			
+		$t = [];
 
 		array_push($sql, "BEGIN");
-		array_push($v, array());
-		array_push($t, array());
+		array_push($v, []);
+		array_push($t, []);
 		
 		array_push($sql, "DELETE FROM gui WHERE gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_element WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_element_vars WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_layer WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_mb_group WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_mb_user WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_treegde WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_wfs WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
     array_push($sql, "DELETE FROM gui_wfs_conf WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "DELETE FROM gui_wms WHERE fkey_gui_id = $1");
-		array_push($v, array($guiList));
-		array_push($t, array('s'));
+		array_push($v, [$guiList]);
+		array_push($t, ['s']);
 
 		array_push($sql, "COMMIT");
-		array_push($v, array());
-		array_push($t, array());
+		array_push($v, []);
+		array_push($t, []);
 
 		// execute all SQLs
 		for ($i = 0; $i < count($sql); $i++) {
@@ -425,75 +415,75 @@ class gui implements RPCObject{
 		$guiList = $guiId;
 		if (!$this->guiExists($newGuiName)) {
 			
-			$sql = array();
-			$v = array();			
-			$t = array();
+			$sql = [];
+			$v = [];			
+			$t = [];
 						
 			array_push($sql, "BEGIN");
-			array_push($v, array());
-			array_push($t, array());
+			array_push($v, []);
+			array_push($t, []);
 
 			array_push($sql, "INSERT INTO gui (gui_id, gui_name, gui_description, gui_public) SELECT $1, $2, gui_description, gui_public FROM gui WHERE gui_id = $3;");
-			array_push($v, array ($newGuiName, $newGuiName, $guiList));
-			array_push($t, array ("s", "s", "s"));
+			array_push($v, [$newGuiName, $newGuiName, $guiList]);
+			array_push($t, ["s", "s", "s"]);
 
 			array_push($sql, "INSERT INTO gui_gui_category (fkey_gui_id, fkey_gui_category_id) SELECT $1, fkey_gui_category_id FROM gui_gui_category WHERE fkey_gui_id = $2;");
-			array_push($v, array ( $newGuiName, $guiList));
-			array_push($t, array ("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 			
 			array_push($sql, "INSERT INTO gui_element (fkey_gui_id, e_id, e_pos, e_public, e_comment, e_title, e_element, e_src, e_attributes, e_left, e_top, e_width, e_height, e_z_index, e_more_styles, e_content, e_closetag, e_js_file, e_mb_mod, e_target, e_requires, e_url) SELECT $1, e_id, e_pos, e_public, e_comment, e_title, e_element, e_src, e_attributes, e_left, e_top, e_width, e_height, e_z_index, e_more_styles, e_content, e_closetag, e_js_file, e_mb_mod, e_target, e_requires, e_url FROM gui_element WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 
 			array_push($sql, "INSERT INTO gui_element_vars (fkey_gui_id, fkey_e_id, var_name, var_value, context, var_type) SELECT $1, fkey_e_id, var_name, var_value, context, var_type FROM gui_element_vars WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 
 			array_push($sql, "INSERT INTO gui_layer (fkey_gui_id, fkey_layer_id, gui_layer_wms_id, gui_layer_status, gui_layer_selectable, gui_layer_visible, gui_layer_queryable, gui_layer_querylayer, gui_layer_minscale, gui_layer_maxscale, gui_layer_priority, gui_layer_style, gui_layer_wfs_featuretype,gui_layer_title) SELECT $1, fkey_layer_id, gui_layer_wms_id, gui_layer_status, gui_layer_selectable, gui_layer_visible, gui_layer_queryable, gui_layer_querylayer, gui_layer_minscale, gui_layer_maxscale, gui_layer_priority, gui_layer_style, gui_layer_wfs_featuretype,gui_layer_title FROM gui_layer WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 
 			array_push($sql, "INSERT INTO sld_user_layer (fkey_mb_user_id,fkey_layer_id,fkey_gui_id,sld_xml,use_sld) SELECT fkey_mb_user_id,fkey_layer_id, $1,sld_xml,use_sld FROM sld_user_layer  WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 			
 			if ($withUsers == true) {
 				/* group of original gui is copied as well */
 				array_push($sql, "INSERT INTO gui_mb_group (fkey_gui_id, fkey_mb_group_id, mb_group_type) SELECT $1, fkey_mb_group_id, mb_group_type FROM gui_mb_group WHERE fkey_gui_id = $2;");
-				array_push($v, array($newGuiName, $guiList));
-				array_push($t, array("s", "s"));
+				array_push($v, [$newGuiName, $guiList]);
+				array_push($t, ["s", "s"]);
 
 				/* users of original gui are copied as well */
 				array_push($sql, "INSERT INTO gui_mb_user (fkey_gui_id, fkey_mb_user_id, mb_user_type) SELECT $1, fkey_mb_user_id, mb_user_type FROM gui_mb_user WHERE fkey_gui_id = $2;");
-				array_push($v, array($newGuiName, $guiList));
-				array_push($t, array("s", "s"));
+				array_push($v, [$newGuiName, $guiList]);
+				array_push($t, ["s", "s"]);
 			}
 			else {
 				// users of original gui are not copied, the current user is set as owner 
 				array_push($sql, "INSERT INTO gui_mb_user (fkey_gui_id, fkey_mb_user_id, mb_user_type) VALUES ($1, $2, 'owner')");
-				array_push($v, array($newGuiName, Mapbender::session()->get("mb_user_id")));
-				array_push($t, array('s', 'i'));
+				array_push($v, [$newGuiName, Mapbender::session()->get("mb_user_id")]);
+				array_push($t, ['s', 'i']);
 			}
 			array_push($sql, "INSERT INTO gui_treegde (fkey_gui_id, fkey_layer_id, id, lft, rgt, my_layer_title, layer, wms_id) SELECT $1, fkey_layer_id, id, lft, rgt, my_layer_title, layer, wms_id FROM gui_treegde WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 
 			array_push($sql, "INSERT INTO gui_wfs (fkey_gui_id, fkey_wfs_id) SELECT $1, fkey_wfs_id FROM gui_wfs WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 			
 			array_push($sql, "INSERT INTO gui_wfs_conf (fkey_gui_id, fkey_wfs_conf_id) SELECT $1, fkey_wfs_conf_id FROM gui_wfs_conf WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 
 
 			array_push($sql, "INSERT INTO gui_wms (fkey_gui_id, fkey_wms_id, gui_wms_position, gui_wms_mapformat, gui_wms_featureinfoformat, gui_wms_exceptionformat, gui_wms_epsg, gui_wms_visible) SELECT $1, fkey_wms_id, gui_wms_position, gui_wms_mapformat, gui_wms_featureinfoformat, gui_wms_exceptionformat, gui_wms_epsg, gui_wms_visible FROM gui_wms WHERE fkey_gui_id = $2;");
-			array_push($v, array($newGuiName, $guiList));
-			array_push($t, array("s", "s"));
+			array_push($v, [$newGuiName, $guiList]);
+			array_push($t, ["s", "s"]);
 			
 			array_push($sql, "COMMIT");
-			array_push($v, array());
-			array_push($t, array());
+			array_push($v, []);
+			array_push($t, []);
 
 			// execute all SQLs
 			for ($i = 0; $i < count($sql); $i++) {
@@ -515,7 +505,7 @@ class gui implements RPCObject{
 	}
 
 	private function elementsToHtml () {
-		$bodyStringArray = array();
+		$bodyStringArray = [];
 		$elementString = "";
 		for ($i = 0; $i < count($this->elementArray); $i++) {
 			$currentElement = $this->elementArray[$i];

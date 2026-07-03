@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 /**
  * Establishes a connection to a given URL (and loads the content).
  * Supports HTTP (GET and POST), cURL and socket connections.
@@ -26,7 +26,7 @@ require_once(dirname(__FILE__)."/../../core/globalSettings.php");
  */
 class connector {
 
-	var $file;
+	public $file;
 	private $connectionType;
 	public  $timeOut = 20;
 	private $executionTimeOut = 0; //set max execution time in ms e.g. for a download process 
@@ -71,15 +71,15 @@ class connector {
 		//an internet connection. It can be that some requests are done thru this class to the urls of
 		//HTTP_AUTH_PROXY or OWSPROXY. If some of those are part of the url they must be exchanged with 127.0.0.1 - 			//which hopefully should work.
 		$testMatch = $url;
-		$localTmpFolder = 'file://'.str_replace('classes',ltrim(TMPDIR,'\.\./'),dirname(__FILE__)).'/';
+		$localTmpFolder = 'file://'.str_replace('classes',ltrim(TMPDIR,'\.\./'),__DIR__).'/';
 		$pattern = '/^http:|https:|'.str_replace('/','\/',$localTmpFolder).'/';
 		//$e = new mb_exception('file://'.str_replace('classes',ltrim(TMPDIR,'../'),dirname(__FILE__)).'/');
- 		if (!preg_match($pattern,$testMatch)){
+ 		if (!preg_match($pattern,(string) $testMatch)){
 			$e = new mb_exception('classes/class_connector.php: Access to resource not allowed!');
 			return false;
 		}
 		//TODO: check if http is ok for all
-		$posPROXY = strpos($url,OWSPROXY);
+		$posPROXY = strpos((string) $url,(string) OWSPROXY);
 		//$e = new mb_exception('class_connector: old url: '.$url);
  		if($posPROXY !== false && OWSPROXY_USE_LOCALHOST == true){
 
@@ -144,7 +144,7 @@ class connector {
 				break;
 
 			case "httpVersion":
-				if (in_array($value, array("1.0", "1.1"))) {
+				if (in_array($value, ["1.0", "1.1"])) {
 					$this->httpVersion = $value;
 				}
 				else {
@@ -153,7 +153,7 @@ class connector {
 				break;
 
 			case "httpType":
-				if (in_array(mb_strtoupper($value), array("POST", "GET"))) {
+				if (in_array(mb_strtoupper((string) $value), ["POST", "GET"])) {
 					$this->httpType = $value;
 				}
 				else {
@@ -198,7 +198,7 @@ class connector {
 	}
 
 	private function isValidConnectionType ($value) {
-		if (in_array(mb_strtoupper($value), array("HTTP", "CURL", "SOCKET"))) {
+		if (in_array(mb_strtoupper((string) $value), ["HTTP", "CURL", "SOCKET"])) {
 			return true;
 		}
 		else {
@@ -208,9 +208,9 @@ class connector {
 	}
 
 	private function isValidHttpContentType ($value) {
-		$validHttpContentTypeArray = array("XML","TEXT/XML","APPLICATION/XML","MULTIPART/FORM-DATA");
-		if (in_array(mb_strtoupper($value), $validHttpContentTypeArray)) {
-			switch (mb_strtoupper($value)) {
+		$validHttpContentTypeArray = ["XML", "TEXT/XML", "APPLICATION/XML", "MULTIPART/FORM-DATA"];
+		if (in_array(mb_strtoupper((string) $value), $validHttpContentTypeArray)) {
+			switch (mb_strtoupper((string) $value)) {
 				case "XML":
 					$this->httpContentType = "application/xml";
 					break;
@@ -225,7 +225,7 @@ class connector {
 
 	private function getCURL($url){
 		//urls should begin with http ;-)
-		$url=ltrim($url);
+		$url=ltrim((string) $url);
 		$url=Str_replace(" ","+",$url); //to have no problems with image/png; mode=24bit!
 		$url=str_replace(";","%3B",$url);
 		if (func_num_args() == 2) {
@@ -303,16 +303,10 @@ class connector {
 
 		//if httpType is POST, set CURLOPT_POST and CURLOPT_POSTFIELDS
 		//and set a usefull http header
-		if(strtoupper($this->httpType) == 'POST'){
-			$headers = array(
-					"POST ".$path." HTTP/1.1",
-            			 	"Content-type: ".$this->httpContentType."; charset=".CHARSET,
-           				"Cache-Control: no-cache",
-	           		 	"Pragma: no-cache",
-	           		 	"Content-length: ".strlen($this->httpPostData)
-			);
+		if(strtoupper((string) $this->httpType) == 'POST'){
+			$headers = ["POST ".$path." HTTP/1.1", "Content-type: ".$this->httpContentType."; charset=".CHARSET, "Cache-Control: no-cache", "Pragma: no-cache", "Content-length: ".strlen((string) $this->httpPostData)];
 			$e = new mb_notice("connector: CURL POST: ".$this->httpPostData);
-			$e = new mb_notice("connector: CURL POST length: ".strlen($this->httpPostData));
+			$e = new mb_notice("connector: CURL POST length: ".strlen((string) $this->httpPostData));
 
 			if ($this->curlSendCustomHeaders) {
 				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -327,17 +321,17 @@ class connector {
 		}
 		$useragent=CONNECTION_USERAGENT;
 		//Build own headers for GET Requests - maybe needful?
-		if(strtoupper($this->httpType) == 'GET'){
+		if(strtoupper((string) $this->httpType) == 'GET'){
 			if ($this->externalHeaders !== "") {
 				$headers = $this->externalHeaders;
 			} else {
-				$headers = array(
-						"GET ".$path." HTTP/1.1",
-						"User-Agent: ".$useragent,
-           					//"Host: ".$host.":".$port,
-	           		 		"Accept: */*",
-						"Proxy-Connection: Keep-Alive"
-				);
+				$headers = [
+        "GET ".$path." HTTP/1.1",
+        "User-Agent: ".$useragent,
+        //"Host: ".$host.":".$port,
+        "Accept: */*",
+        "Proxy-Connection: Keep-Alive",
+    ];
 			}
 		        if ($headers != 'empty') {
 		            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -402,7 +396,7 @@ class connector {
 		else {
 			$errno = 0;
 			$errstr = "";
-			$urlComponentArray = parse_url($url);
+			$urlComponentArray = parse_url((string) $url);
 			$scheme = $urlComponentArray["scheme"];
 			$host = $urlComponentArray["host"];
 			$port = $urlComponentArray["port"];
@@ -437,7 +431,7 @@ class connector {
 				$postStr .= $postContentType;
 		    	fputs($fp, $postContentType);
 		    }
-			$postContentLength = "Content-length: " . strlen($this->httpPostData) . "\r\n";
+			$postContentLength = "Content-length: " . strlen((string) $this->httpPostData) . "\r\n";
 			$postStr .= $postContentLength;
 		    fputs($fp, $postContentLength);
 
@@ -446,7 +440,7 @@ class connector {
 		    fputs($fp, $postClose);
 
 		    $postStr .= $this->httpPostData;
-			fputs($fp, $this->httpPostData);
+			fputs($fp, (string) $this->httpPostData);
 
 			//new mb_notice("connector.http.postData: ".$this->httpPostData);
 
@@ -455,7 +449,7 @@ class connector {
 			while (!feof($fp)) {
 		    	$content = fgets($fp,4096);
 //		    	if( strpos($content, '<?xml') === 0){
-		    	if( strpos($content, '<') === 0){
+		    	if( str_starts_with($content, '<')){
 		    		$xmlstr = true;
 		    	}
 		    	if($xmlstr == true){

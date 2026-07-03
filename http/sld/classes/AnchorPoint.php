@@ -30,26 +30,26 @@ class AnchorPoint
 	 * Allowed values are between 0 and 1.
 	 * @var float
 	 */
-	var $anchorpointx = "";
+	public $anchorpointx = "";
 	
 	/**
 	 * The anchorpointy attribute from the xml-scheme.
 	 * Allowed values are between 0 and 1.
 	 * @var float
 	 */
-	var $anchorpointy = "";
+	public $anchorpointy = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects

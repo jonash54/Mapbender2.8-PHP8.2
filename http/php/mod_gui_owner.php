@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="gui_owner";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*
  * @security_patch irv done
  */
@@ -134,7 +134,7 @@ $cnt_group = 0;
 $cnt_gui_user = 0;
 $cnt_gui_group = 0;
 $exists = false;
-$gui_id_array = array();
+$gui_id_array = [];
 
 /*handle remove, update and insert**************************************************************************************/
 if($insert){
@@ -142,19 +142,19 @@ if($insert){
 		for($i=0; $i<count($selected_user); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from gui_mb_user where fkey_gui_id = $1 and fkey_mb_user_id = $2";
-			$v = array($selected_gui,$selected_user[$i]);
-			$t = array('s','i');
+			$v = [$selected_gui, $selected_user[$i]];
+			$t = ['s', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO gui_mb_user(fkey_gui_id, fkey_mb_user_id) VALUES($1, $2)";
-				$v = array($selected_gui,$selected_user[$i]);
-				$t = array('s','i');
+				$v = [$selected_gui, $selected_user[$i]];
+				$t = ['s', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 			$sql_set_owner = "UPDATE gui_mb_user SET mb_user_type = 'owner' WHERE fkey_gui_id = $1 AND fkey_mb_user_id = $2";
-			$v = array($selected_gui,$selected_user[$i]);
-			$t = array('s','i');
+			$v = [$selected_gui, $selected_user[$i]];
+			$t = ['s', 'i'];
 			$res_set_owner = db_prep_query($sql_set_owner,$v,$t);
 		}
 	}
@@ -164,8 +164,8 @@ if($remove){
 	if(count($remove_user)>0){
 		for($i=0; $i<count($remove_user); $i++){
 			$sql_remove = "UPDATE gui_mb_user SET mb_user_type = '' WHERE fkey_gui_id = $1 AND fkey_mb_user_id = $2";
-			$v = array($selected_gui,$remove_user[$i]);
-			$t = array('s','i');
+			$v = [$selected_gui, $remove_user[$i]];
+			$t = ['s', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -173,12 +173,12 @@ if($remove){
 
 
 /*get own guis  ********************************************************************************************/
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
 if (count($ownguis)>0){
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql_gui = "SELECT * FROM gui WHERE gui_id IN (";
 	for($i=0; $i<count($ownguis); $i++){
 		if($i>0){ $sql_gui .= ",";}
@@ -209,9 +209,9 @@ $sql_gui_mb_user = "SELECT mb_user.mb_user_id, mb_user.mb_user_name, mb_user.mb_
 $sql_gui_mb_user .= "INNER JOIN mb_user ON gui_mb_user.fkey_mb_user_id = mb_user.mb_user_id ";
 $sql_gui_mb_user .= "WHERE gui_mb_user.fkey_gui_id = $1";
 $sql_gui_mb_user .= " AND gui_mb_user.mb_user_type = 'owner' ORDER BY mb_user.mb_user_name";
-if(!$selected_gui){$v = array($gui_id_array[0]);}
-if($selected_gui){$v = array($selected_gui);}
-$t = array('s');
+if(!$selected_gui){$v = [$gui_id_array[0]];}
+if($selected_gui){$v = [$selected_gui];}
+$t = ['s'];
 $res_gui_mb_user = db_prep_query($sql_gui_mb_user,$v,$t);
 while($row = db_fetch_array($res_gui_mb_user)){
 	$user_id_gui[$cnt_gui_user] = $row["mb_user_id"];

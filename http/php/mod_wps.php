@@ -1,14 +1,14 @@
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 
 switch($ajaxResponse->getMethod())
 {
 	case "createWPSRequest":
-		$templatefilePath = realpath(dirname(__FILE__)."/../../resources/wps_template.xml");
+		$templatefilePath = realpath(__DIR__."/../../resources/wps_template.xml");
 		$parameters = $ajaxResponse->getParameter('attributes');
 		try{
 			$result = createWPSRequest($parameters,$templatefilePath);
@@ -35,28 +35,28 @@ function createWPSRequest($parameters,$templatefilePath)
 {
 	// check and give parameters default values
 	// need this collection to be subscriptable
-	$parray['interpolationMethod'] = isset($parameters->interpolationMethod) ? $parameters->interpolationMethod : "automatic";
-	$parray['calculationTime'] = isset($parameters->calculationTime) ? $parameters->calculationTime : "120000";
-	$parray['predictionTypes'] = isset($parameters->predictionTypes) ? $parameters->predictionTypes : "Mean";
-	$parray['propabilityLimit'] = isset($parameters->propabilityLimit) ? $parameters->propabilityLimit : "35i.4";
-	$parray['featureCollectionURL'] = isset($parameters->featureCollectionURL) ? $parameters->featureCollectionURL : ""; //FIXME:
-	$parray['wfsURL'] = isset($parameters->wfsURL) ? $parameters->wfsURL : ""; //FIXME
-	$parray['featureType'] = isset($parameters->featureType) ? $parameters->featureType : ""; //FIXME
-	$parray['time'] = isset($parameters->time) ? $parameters->time : date("c") ; //default to current time
-	$parray['wpsURL'] = isset($parameters->wpsURL) ? $parameters->wpsURL : "";
-	$parray['outlierDetection'] = isset($parameters->outlierDetection) ? $parameters->outlierDetection : "true";
-	$parray['clipping'] = isset($parameters->clipping) ? $parameters->clipping : "true";
-	$parray['colorschema'] = isset($parameters->colorschema) ? $parameters->colorschema : "";
-	$parray['imageFormat'] = isset($parameters->imageFormat) ? $parameters->imageFormat : "image/jpeg";
-	$parray['bboxSRS'] = isset($parameters->bboxSRS) ? $parameters->bboxSRS : "";
-	$parray['bbox'] = isset($parameters->bbox) ? $parameters->bbox : "";
-	$parray['width'] = isset($parameters->width) ? $parameters->width : "";
-	$parray['height'] = isset($parameters->height) ? $parameters->height : "";
+	$parray['interpolationMethod'] = $parameters->interpolationMethod ?? "automatic";
+	$parray['calculationTime'] = $parameters->calculationTime ?? "120000";
+	$parray['predictionTypes'] = $parameters->predictionTypes ?? "Mean";
+	$parray['propabilityLimit'] = $parameters->propabilityLimit ?? "35i.4";
+	$parray['featureCollectionURL'] = $parameters->featureCollectionURL ?? ""; //FIXME:
+	$parray['wfsURL'] = $parameters->wfsURL ?? ""; //FIXME
+	$parray['featureType'] = $parameters->featureType ?? ""; //FIXME
+	$parray['time'] = $parameters->time ?? date("c") ; //default to current time
+	$parray['wpsURL'] = $parameters->wpsURL ?? "";
+	$parray['outlierDetection'] = $parameters->outlierDetection ?? "true";
+	$parray['clipping'] = $parameters->clipping ?? "true";
+	$parray['colorschema'] = $parameters->colorschema ?? "";
+	$parray['imageFormat'] = $parameters->imageFormat ?? "image/jpeg";
+	$parray['bboxSRS'] = $parameters->bboxSRS ?? "";
+	$parray['bbox'] = $parameters->bbox ?? "";
+	$parray['width'] = $parameters->width ?? "";
+	$parray['height'] = $parameters->height ?? "";
 
 	try {
-		$WMCDoc = DOMDocument::load($templatefilePath);
+		$WMCDoc = (new DOMDocument())->load($templatefilePath);
 	} 
-	catch (Exception $E) {
+	catch (Exception) {
 		new mb_exception("WMC XML is broken.");
 		throw new Exception("Could not load WPS Template XML");
 	}   

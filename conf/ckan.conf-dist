@@ -5,6 +5,15 @@ DEFINE('CKAN_SERVER_PORT','5000');
 DEFINE('CKAN_API_PROTOCOL','http');
 DEFINE('CKAN_API_VERSION',3);
 DEFINE('OPEN_LICENCES','2,3,4,5');
+// PHP 8 fatals on undefined constants. CKAN integration is opt-in; set
+// your CKAN admin API key here (or leave empty if not using CKAN sync).
+if (!defined('API_KEY'))             DEFINE('API_KEY',             '');
+if (!defined('CKAN_USER'))           DEFINE('CKAN_USER',           '');
+if (!defined('CKAN_PASS'))           DEFINE('CKAN_PASS',           '');
+if (!defined('CKAN_GROUP_NAME'))     DEFINE('CKAN_GROUP_NAME',     '');
+if (!defined('CKAN_GROUP_TITLE'))    DEFINE('CKAN_GROUP_TITLE',    '');
+if (!defined('CKAN_GROUP_SYMBOL'))   DEFINE('CKAN_GROUP_SYMBOL',   '');
+if (!defined('CKAN_GROUP_DESCRIPTION')) DEFINE('CKAN_GROUP_DESCRIPTION', '');
 $topicCkanCategoryMap = array(
 	"1" => "farming",
 	"2" => "biota",

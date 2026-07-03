@@ -4,22 +4,22 @@ The module first tries to read the actual mapset from session information, if th
 If no session wmc is found, the module reads the mapset from database default GUI configuration.
 The module also handles the management of initial GET-Parameter: https://mb2wiki.mapbender2.org/GET-Parameter
 */
-require_once dirname(__FILE__)."/../php/mb_validateSession.php";
-require_once dirname(__FILE__)."/../classes/class_wmc.php";
-require_once dirname(__FILE__)."/../classes/class_wmc_factory.php";
-require_once dirname(__FILE__)."/../classes/class_administration.php";
-require_once dirname(__FILE__)."/../../lib/class_GetApi.php";
-require_once(dirname(__FILE__) . "/../classes/class_bbox.php");
-require_once(dirname(__FILE__) . "/../classes/class_gml2.php");
-require_once dirname(__FILE__)."/../classes/class_elementVar.php";
-require_once(dirname(__FILE__) . "/../classes/class_tou.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_owsConstraints.php");
-require_once(dirname(__FILE__)."/../classes/class_cache.php");
-require_once(dirname(__FILE__)."/../classes/class_crs.php");
-require_once(dirname(__FILE__)."/../classes/class_iso19139.php");
-require_once(dirname(__FILE__)."/../classes/class_group.php");
-require_once(dirname(__FILE__)."/../classes/class_geojson_style.php");
+require_once __DIR__."/../php/mb_validateSession.php";
+require_once __DIR__."/../classes/class_wmc.php";
+require_once __DIR__."/../classes/class_wmc_factory.php";
+require_once __DIR__."/../classes/class_administration.php";
+require_once __DIR__."/../../lib/class_GetApi.php";
+require_once(__DIR__ . "/../classes/class_bbox.php");
+require_once(__DIR__ . "/../classes/class_gml2.php");
+require_once __DIR__."/../classes/class_elementVar.php";
+require_once(__DIR__ . "/../classes/class_tou.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_owsConstraints.php");
+require_once(__DIR__."/../classes/class_cache.php");
+require_once(__DIR__."/../classes/class_crs.php");
+require_once(__DIR__."/../classes/class_iso19139.php");
+require_once(__DIR__."/../classes/class_group.php");
+require_once(__DIR__."/../classes/class_geojson_style.php");
 //require_once(dirname(__FILE__)."/../classes/class_wms_factory.php");
 /*check if key param can be found in SESSION, otherwise take it from $_GET
 */
@@ -43,9 +43,9 @@ function logit($text,$filename,$how){
 //https://www.geeksforgeeks.org/how-to-validate-json-in-php/
 function json_validator($data) {
     if (!empty($data)) {
-        @json_decode($data);
+        @json_decode((string) $data);
         if (json_last_error() === JSON_ERROR_NONE) {
-            return json_decode($data);
+            return json_decode((string) $data);
         }
     }
     return false;
@@ -60,7 +60,7 @@ function delTotalFromQuery($paramName, $queryString) {
         $str2exchange = "";
     }
     $queryStringNew = preg_replace('/\b' . $paramName . '\=[^&]+&?/', $str2exchange, $queryString);
-    $queryStringNew = ltrim($queryStringNew, '&');
+    $queryStringNew = ltrim((string) $queryStringNew, '&');
     $queryStringNew = rtrim($queryStringNew, '&');
     return $queryStringNew;
 }
@@ -69,33 +69,9 @@ $admin = new administration();
 /*
 Initial declaration of the return object, that handles some control of the distributed services
 */
-$resultObj = array(
-	"noPermission" => array(
-		"message" => _mb("You as User")." '" .
+$resultObj = ["noPermission" => ["message" => _mb("You as User")." '" .
 			Mapbender::session()->get("mb_user_name") . "' " .
-			_mb("have no authorization to access following layers."),
-		"wms" => array()
-	),
-	"withoutId" => array(
-		"message" => _mb("Following layers come from an unkown origin. There is no information about the links. They may be broken and the underlaying services may not exist anymore!"),
-		"wms" => array(),
-	),
-	"unavailable" => array(
-		"message" => _mb("The last monitoring had problems with the following layers. Maybe the underlying services will not be able to answer the requests for sometime."),
-		"wms" => array()
-	),
-	"invalidId" => array(
-		"message" => _mb("Following layers have been removed from the registry. They may be broken and the underlaying services may not exist anymore!"),
-		"wms" => array()
-	),
-	"wmcTou" => array(
-		"message" => ""
-	),
-	"notAccessable" => array(
-		"message" => _mb("Following WebMapService is not accessable or could not be invoked").":",
-		"wms" => array()
-	),
-);
+			_mb("have no authorization to access following layers."), "wms" => []], "withoutId" => ["message" => _mb("Following layers come from an unkown origin. There is no information about the links. They may be broken and the underlaying services may not exist anymore!"), "wms" => []], "unavailable" => ["message" => _mb("The last monitoring had problems with the following layers. Maybe the underlying services will not be able to answer the requests for sometime."), "wms" => []], "invalidId" => ["message" => _mb("Following layers have been removed from the registry. They may be broken and the underlaying services may not exist anymore!"), "wms" => []], "wmcTou" => ["message" => ""], "notAccessable" => ["message" => _mb("Following WebMapService is not accessable or could not be invoked").":", "wms" => []]];
 /*
 Load WMC from session or application (GUI)
 */
@@ -170,8 +146,8 @@ Check if session WMC module is defined in gui - TODO maybe do this before the ot
 //*********************************************************************************************************
 $e = new mb_notice("javascripts/initWmcObj.php: check if disclaimer should be set");
 $sql = "SELECT COUNT(e_id) AS i FROM gui_element WHERE fkey_gui_id = $1 AND e_id = $2";
-$v = array(Mapbender::session()->get("mb_user_gui"), "sessionWmc");
-$t = array("s", "s");
+$v = [Mapbender::session()->get("mb_user_gui"), "sessionWmc"];
+$t = ["s", "s"];
 $res = db_prep_query($sql, $v, $t);
 $row = db_fetch_assoc($res);
 $isSessionWmcModuleLoaded = intval($row["i"]);
@@ -194,7 +170,7 @@ Look in wmc xml ****************************************************************
 /*
 ************************************************************************************
 */
-$wmcGetApi = WmcFactory::createFromXml($wmc->toXml());
+$wmcGetApi = (new WmcFactory())->createFromXml($wmc->toXml());
 //$e = new mb_exception("javascripts/initWmcObj.php: write initial wmc obj to {TMPDIR}/class_wmc0.json");//
 //json_encode($wmcGetApi);//: ".json_encode($wmcGetApi));
 /*if($h = fopen(TMPDIR . "/tmp_wmc0.json","w")){
@@ -207,27 +183,14 @@ $wmcGetApi = WmcFactory::createFromXml($wmc->toXml());
 //$e = new mb_notice("javascripts/initWmcObj.php: initial wmc doc: ".$wmc->toXml());
 //$e = new mb_exception("javascripts/initWmcObj.php: initial wmc from xml: ".json_encode($wmcGetApi));
 //die();
-$options = array();
+$options = [];
 if (Mapbender::session()->exists("addwms_showWMS")) {
 	$options["show"] = intval(Mapbender::session()->get("addwms_showWMS"));
 }
 if (Mapbender::session()->exists("addwms_zoomToExtent")) {
 	$options["zoom"] = !!Mapbender::session()->get("addwms_zoomToExtent");
 }
-$getParams = array(
-	"WMC" => getConfiguration("WMC"),
-	"WMS" => getConfiguration("WMS"),
-	"DATASETID" => getConfiguration("DATASETID"),
-	"LAYER" => getConfiguration("LAYER"),
-	"FEATURETYPE" => getConfiguration("FEATURETYPE"),
-	"GEORSS"=>getConfiguration("GEORSS"),
-	"KML"=>getConfiguration("KML"),
-	"GEOJSON"=>getConfiguration("GEOJSON"),
-	"GEOJSONZOOM"=>getConfiguration("GEOJSONZOOM"),
-	"GEOJSONZOOMOFFSET"=>getConfiguration("GEOJSONZOOMOFFSET"),
-	"ZOOM"=>getConfiguration("ZOOM"),
-    "NONEDEFAULTWMC"=>getConfiguration("NONEDEFAULTWMC")
-);
+$getParams = ["WMC" => getConfiguration("WMC"), "WMS" => getConfiguration("WMS"), "DATASETID" => getConfiguration("DATASETID"), "LAYER" => getConfiguration("LAYER"), "FEATURETYPE" => getConfiguration("FEATURETYPE"), "GEORSS"=>getConfiguration("GEORSS"), "KML"=>getConfiguration("KML"), "GEOJSON"=>getConfiguration("GEOJSON"), "GEOJSONZOOM"=>getConfiguration("GEOJSONZOOM"), "GEOJSONZOOMOFFSET"=>getConfiguration("GEOJSONZOOMOFFSET"), "ZOOM"=>getConfiguration("ZOOM"), "NONEDEFAULTWMC"=>getConfiguration("NONEDEFAULTWMC")];
 $getApi = new GetApi($getParams);
 /*
 WMC ID
@@ -239,7 +202,7 @@ $noneDefaultWmc = $getApi->getNoneDefaultWmc();
 if (is_numeric($noneDefaultWmc)) {
     //some noneDefaultWmc is set - this has presedence for standard wmc!
     try {
-        $wmcGetApi = WmcFactory::createFromDb($noneDefaultWmc);
+        $wmcGetApi = (new WmcFactory())->createFromDb($noneDefaultWmc);
         // update urls from wmc with urls from database if id is given
         //$e = new mb_exception("javascripts/initWmcObj.php: wmc->updateUrlsFromDb");
         $updatedWMC = $wmcGetApi->updateUrlsFromDb();
@@ -262,7 +225,7 @@ if (is_numeric($noneDefaultWmc)) {
     	foreach ($inputWmcArray as $input) {
     	// Just make it work for a single Wmc
     		try {
-    			$wmcGetApi = WmcFactory::createFromDb($input["id"]);
+    			$wmcGetApi = (new WmcFactory())->createFromDb($input["id"]);
     			// update urls from wmc with urls from database if id is given
     			//$e = new mb_exception("javascripts/initWmcObj.php: wmc->updateUrlsFromDb");
     			$updatedWMC = $wmcGetApi->updateUrlsFromDb();
@@ -272,7 +235,7 @@ if (is_numeric($noneDefaultWmc)) {
     			// increment load count
     			$wmcGetApi->incrementWmcLoadCount();
     		}
-    		catch (Exception $e) {
+    		catch (Exception) {
     			new mb_exception("javascripts/initWmcObj.php: Failed to load WMC from DB via ID. Keeping original WMC.");
     		}
     	}
@@ -292,9 +255,9 @@ if ($getParams['WMS']) {
 	else {
 		$inputWmsArray = mbw_split(",",$getParams['WMS']);
 	}
-	$wmsArray = array();
-	$singleAssocArray = array();
-	$multipleAssocArray = array();
+	$wmsArray = [];
+	$singleAssocArray = [];
+	$multipleAssocArray = [];
 	foreach ($inputWmsArray as $key=>$val) {
 		if (is_array($val)) {
 			foreach ($val as $attr=>$value) {
@@ -324,8 +287,8 @@ if ($getParams['WMS']) {
 				$options['zoom'] = $multipleAssocArray['zoom'] === "1" ?
 					true : false;
 				$wmcGetApi->mergeWmsArray($wmsArray, $options);
-				$wmsArray = array();
-				$multipleAssocArray = array();
+				$wmsArray = [];
+				$multipleAssocArray = [];
 			} else {
 //$e = new mb_exception("javascripts/initWmcObj.php: wms with problem: ".$multipleAssocArray['url']);
 				$resultObj["notAccessable"]["wms"] = array_merge(
@@ -350,7 +313,7 @@ if ($getParams['WMS']) {
 				    if (!filter_var($val, FILTER_VALIDATE_URL) === false) {
 				        //sanitize url
 				        //del all wms params from url
-				        foreach (array('service','SERVICE','version','VERSION','request','REQUEST') as $paramName) {
+				        foreach (['service', 'SERVICE', 'version', 'VERSION', 'request', 'REQUEST'] as $paramName) {
 				            $val = delTotalFromQuery($paramName, $val);
 				        }
 				        $val .= "&REQUEST=GetCapabilities&VERSION=1.3.0&SERVICE=wms";
@@ -391,7 +354,7 @@ if ($getParams['WMS']) {
 						        $e = new mb_exception("javascripts/initWmcObj.php: DATASETID: " . str_replace('\/', '/', urldecode($getParams['DATASETID'])));
 						        $e = new mb_exception("javascripts/initWmcObj.php: DATASETID urlencoded: " . urldecode($getParams['DATASETID']));
 						        */
-						        if ($identifier->identifier == str_replace('\/', '/', urldecode($getParams['DATASETID']))) {
+						        if ($identifier->identifier == str_replace('\/', '/', urldecode((string) $getParams['DATASETID']))) {
 						            $e = new mb_exception("javascripts/initWmcObj.php: DATASETID found zoom to extent!");
     								foreach ($layerObj->layer_epsg as $subLayerExtent){
     									if ($subLayerExtent["epsg"] == "EPSG:4326") {
@@ -431,11 +394,11 @@ if ($getParams['WMS']) {
 					$myfile = fopen(TMPDIR . "/wmc_after.xml", "w") or die("Unable to open file!");
 					fwrite($myfile, $wmc_new);
 					fclose($myfile);*/
-					$wmsArray = array();
-					$multipleAssocArray = array();
+					$wmsArray = [];
+					$multipleAssocArray = [];
 				} else {
 //$e = new mb_exception("javascripts/initWmcObj.php: wms with problem: message: ".(string)$val." - ".$resultOfWmsParsing['message']);
-					$resultObj["notAccessable"]["wms"][] = htmlentities($val)." - ("._mb('Notice')."</b>: ".$resultOfWmsParsing['message'].")";
+					$resultObj["notAccessable"]["wms"][] = htmlentities((string) $val)." - ("._mb('Notice')."</b>: ".$resultOfWmsParsing['message'].")";
 				}
 			}
 			else {
@@ -458,8 +421,8 @@ if ($getParams['WMS']) {
 		$options['zoom'] = $singleAssocArray['zoom'] === "1" ? true : false;
 
 		$wmcGetApi->mergeWmsArray($wmsArray, $options);
-		$wmsArray = array();
-		$singleAssocArray = array();
+		$wmsArray = [];
+		$singleAssocArray = [];
 	}
 	// get WMS by URL
 	elseif (array_key_exists('url', $singleAssocArray)) {
@@ -475,8 +438,8 @@ if ($getParams['WMS']) {
 				true : false;
 		}
 		$wmcGetApi->mergeWmsArray($wmsArray, $options);
-		$wmsArray = array();
-		$singleAssocArray = array();
+		$wmsArray = [];
+		$singleAssocArray = [];
 	}
 }
 /*
@@ -501,16 +464,13 @@ if ($inputLayerArray) {
 				//$e = new mb_exception("javascripts/initWmcObj.php: wms obj: " . json_encode($wms));
 			}
 		}
-		catch (AccessDeniedException $e) {
-			$resultObj["noPermission"]["wms"][] = array(
-				"title" => $admin->getLayerTitleByLayerId($input["id"]),
-				"id" => $input["id"]
-			);
+		catch (AccessDeniedException) {
+			$resultObj["noPermission"]["wms"][] = ["title" => $admin->getLayerTitleByLayerId($input["id"]), "id" => $input["id"]];
 		}
 //		$time_elapsed_secs_read_layer = microtime(true) - $start_layer;
 //		$e = new mb_exception('javascripts/mod_initWmcObj.php: time for read single layer: ' . $time_elapsed_secs_read_layer);
 		if (is_a($wms, "wms")) {
-			$options = array();
+			$options = [];
 			if ($input["visible"]) {
 			// this is a hack for the time being:
 			// make WMS visible if it has less than 10000 layers
@@ -520,15 +480,15 @@ if ($inputLayerArray) {
 				$options["querylayer"] = $input["querylayer"];
 			}
 			//$start = microtime(true);
-			$wmcGetApi->mergeWmsArray(array($wms), $options);
+			$wmcGetApi->mergeWmsArray([$wms], $options);
 			//$time_elapsed_secs = microtime(true) - $start;
 			//$e = new mb_exception('javascripts/mod_initWmcObj.php: time for mergeWmsArray: ' . $time_elapsed_secs);
-			
+
 			// do not use "zoom" attribute of mergeWmsArray,
 			// as this would zoom to the entre WMS.
 			// Here we set extent to the layer extent only.
 			if ($input["zoom"]) {
-				$bboxArray = array();
+				$bboxArray = [];
 				try {
 					$layer = $wms->getLayerById(intval($input["id"]));
 					for ($i = 0; $i < count($layer->layer_epsg); $i++) {
@@ -539,7 +499,7 @@ if ($inputLayerArray) {
 //					$e = new mb_exception("javascripts/initWmcObj.php: bbox array obj: " . json_encode($bboxArray));
 					$wmcGetApi->mainMap->mergeExtent($bboxArray);
 				}
-				catch (Exception $e) {
+				catch (Exception) {
 
 				}
 			}
@@ -557,14 +517,14 @@ FEATURETYPE
 $e = new mb_notice("javascripts/initWmcObj.php: Check FEATURETYPE API");
 $inputFeaturetypeArray = $getApi->getFeaturetypes();
 if ($inputFeaturetypeArray) {
-	$wfsConfIds = array();
+	$wfsConfIds = [];
 	foreach ($inputFeaturetypeArray as $input) {
 		array_push($wfsConfIds, $input["id"]);
 	}
 	$wmcGetApi->generalExtensionArray['WFSCONFIDSTRING'] = implode(",", array_unique(array_merge(
 		$wmcGetApi->generalExtensionArray['WFSCONFIDSTRING'] ?
-		explode(",", $wmcGetApi->generalExtensionArray['WFSCONFIDSTRING']) :
-		array(),
+		explode(",", (string) $wmcGetApi->generalExtensionArray['WFSCONFIDSTRING']) :
+		[],
 		$wfsConfIds
 	)));
 }
@@ -603,13 +563,13 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 	unset($wmcGetApi->generalExtensionArray['kmlOrder']);
 	unset($wmcGetApi->generalExtensionArray['KMLORDER']);
 	unset($wmcGetApi->generalExtensionArray['KMLS']);
-	$kmlOrder = array();
+	$kmlOrder = [];
 	$i = 0;
 	foreach ($inputGeojsonArray as $inputGeojson) {
 		//$e = new mb_exception($inputGeojson);
 		// load json files from distributed locations
 		// check if url directly geojson is given
-		if ($admin->validateUrl(urldecode($inputGeojson))) {
+		if ($admin->validateUrl(urldecode((string) $inputGeojson))) {
 			//$e = new mb_exception("javascripts/initWmcObj.php: GEOJSON parameter will be interpreted as url - try to resolve external json!");
 			// TODO: here there may exists firewall problems which cut the request part after the first ampersand!!!!
 			//$e = new mb_exception("javascripts/initWmcObj.php: found url ".urldecode($inputGeojson));
@@ -632,7 +592,7 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 		} else {
 			$e = new mb_notice("javascripts/initWmcObj.php: GEOJSON parameter will be interpreted as string!");
 			//$geojson = json_decode(urldecode($inputGeojson));
-			$geojson = json_validator(urldecode($inputGeojson));
+			$geojson = json_validator(urldecode((string) $inputGeojson));
 			if ($geojson !== false) {
 			    $someGeojsonGiven = true;
 			    //$e = new mb_exception("javascripts/initWmcObj.php: GEOJSON is valid");
@@ -649,7 +609,7 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 		        case "Feature":
 		            $dummyCollection = new stdClass();
 		            $dummyCollection->type = "FeatureCollection";
-		            $dummyCollection->features = array();
+		            $dummyCollection->features = [];
 		            //add feature to dummy collection
 		            $dummyCollection->features[] = $geojson;
 		            $geojson = $dummyCollection;
@@ -668,7 +628,7 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 		        //add default style and title/description tags if they are not given as json properties
 		        $geojsonStyle = new Geojson_style();
 		        $styledGeojson = $geojsonStyle->addDefaultStyles(json_encode($geojson));
-		        $geojson = json_decode($styledGeojson);
+		        $geojson = json_decode((string) $styledGeojson);
 		        //add default title for geojson collection, if not given 
 			    if (!empty($geojson->title)) {
 					//Ticket 8549: Changing default title of geojson collection
@@ -684,7 +644,7 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 				//Ticket 8549: In the context of compatibility changes in geojson fileuploads,
 				//this logic was fixed to allow for multiple polygons in a geojson file.
 				//but also deletes the old multipolygon features
-				$indexArrayToDeleteMultiPolygons = array();
+				$indexArrayToDeleteMultiPolygons = [];
 				foreach ($kmls->{$geojsonTitle}->data->features as $idx => $feature) {
 					//$e = new mb_exception("javascripts/initWmcObj.php: GEOJSON TYPE : ".$feature->geometry->type);
 					//explode multipolygons to polygon before further processing, because we don't support multi geometries at this time
@@ -713,8 +673,8 @@ if(is_array($inputGeojsonArray) && count($inputGeojsonArray) > 0 && !empty($inpu
 				$kmls->{$geojsonTitle}->data->features = array_values($kmls->{$geojsonTitle}->data->features);
 
 			    if ($zoomToExtent == 'true') {
-				    $latitudes = array();
-				    $longitudes = array();
+				    $latitudes = [];
+				    $longitudes = [];
 				    foreach($kmls->{$geojsonTitle}->data->features as $feature) {
 				        $e = new mb_notice("javascripts/initWmcObj.php: GEOJSON TYPE : ".$feature->geometry->type);   
 					    switch ($feature->geometry->type) {
@@ -832,7 +792,7 @@ if (true) {
             $applicationMetadata->fileIdentifier = $applicationMetadataResult->uuid;
             $applicationMetadata->title = $applicationMetadataResult->title;
             $applicationMetadata->abstract = $applicationMetadataResult->abstract;
-            $applicationMetadata->organization = array();
+            $applicationMetadata->organization = [];
 	        $applicationMetadata->organization['logo_path'] = $group->logo_path;
 	        $applicationMetadata->organization['title'] = $group->title;
 	        $applicationMetadata->organization['name'] = $group->name;
@@ -912,15 +872,11 @@ $currentUser = new User();
 // remove all WMS with no permission
 $e = new mb_notice("javascripts/initWmcObj.php: get wms without permission");
 $deniedIdsArray = $wmcGetApi->getWmsWithoutPermission($currentUser);
-$deniedIdsTitles = array();
-$deniedIdsIndices = array();
+$deniedIdsTitles = [];
+$deniedIdsIndices = [];
 foreach ($deniedIdsArray as $i) {
 	if ($i["id"] !== 0) {
-		$deniedIdsTitles[]= array(
-			"id" => $i["id"],
-			"index" => $i["index"],
-			"title" => $i["title"]
-		);
+		$deniedIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 		$deniedIdsIndices[]= $i["index"];
 	}
 }
@@ -934,13 +890,9 @@ $e = new mb_notice("javascripts/initWmcObj.php: wms without permission removed f
 // find WMS without ID
 $e = new mb_notice("javascripts/initWmcObj.php: find wms without id");
 $withoutIdsArray = $wmcGetApi->getWmsWithoutId();
-$withoutIdsTitles = array();
+$withoutIdsTitles = [];
 foreach ($withoutIdsArray as $i) {
-	$withoutIdsTitles[]= array(
-		"id" => $i["id"],
-		"index" => $i["index"],
-		"title" => $i["title"]
-	);
+	$withoutIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 }
 $resultObj["withoutId"]["wms"] = array_merge(
 	$resultObj["withoutId"]["wms"],
@@ -950,13 +902,9 @@ $e = new mb_notice("javascripts/initWmcObj.php: wms without id list generated");
 // find orphaned WMS
 $e = new mb_notice("javascripts/initWmcObj.php: find invalid wms");
 $invalidIdsArray = $wmcGetApi->getInvalidWms();
-$invalidIdsTitles = array();
+$invalidIdsTitles = [];
 foreach ($invalidIdsArray as $i) {
-	$invalidIdsTitles[]= array(
-		"id" => $i["id"],
-		"index" => $i["index"],
-		"title" => $i["title"]
-	);
+	$invalidIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 }
 $resultObj["invalidId"]["wms"] = array_merge(
 	$resultObj["invalidId"]["wms"],
@@ -967,13 +915,9 @@ $e = new mb_notice("javascripts/initWmcObj.php: invalid wms list generated");
 $e = new mb_notice("javascripts/initWmcObj.php: find problematic wms - which had problems in last monitoring");
 //$unavailableIdsArray = $wmcGetApi->getUnavailableWms($currentUser);
 $unavailableIdsArray = $wmcGetApi->getAllUnavailableWms();
-$unavailableIdsTitles = array();
+$unavailableIdsTitles = [];
 foreach ($unavailableIdsArray as $i) {
-	$unavailableIdsTitles[]= array(
-		"id" => $i["id"],
-		"index" => $i["index"],
-		"title" => $i["title"]
-	);
+	$unavailableIdsTitles[]= ["id" => $i["id"], "index" => $i["index"], "title" => $i["title"]];
 }
 $resultObj["unavailable"]["wms"] = array_merge(
 	$resultObj["unavailable"]["wms"],
@@ -1072,15 +1016,15 @@ if ($gml_string) {
 			//
 			if ($currentEpsg !== '4326') {
 				$sql = "SELECT st_box(st_transform(st_geomfromgml($1),$2::INT)) AS geom";
-				$v = array($multiPolygonGml, $currentEpsg);
-				$t = array('s', 'i');
+				$v = [$multiPolygonGml, $currentEpsg];
+				$t = ['s', 'i'];
 				$res = db_prep_query($sql,$v,$t);
 				db_fetch_row($res);
 				$bbox = db_result($res, 0, 'geom');
 			} else {
 				$sql = "SELECT st_box(st_geomfromgml($1)) AS geom";
-				$v = array($multiPolygonGml);
-				$t = array('s');
+				$v = [$multiPolygonGml];
+				$t = ['s'];
 				$res = db_prep_query($sql,$v,$t);
 				db_fetch_row($res);
 				$bbox = db_result($res, 0, 'geom');
@@ -1128,7 +1072,7 @@ if (count($zoom) == 3) {
     //add zoom[2] to x and y and set bbox
     //calculate new extent from scale -  
     //
-    $point = array($zoom[0], $zoom[1]);
+    $point = [$zoom[0], $zoom[1]];
     $scale = $zoom[2];
     $newExtent = $wmcGetApi->mainMap->getBboxFromPoiScale($point, $scale);
     //Problem: TODO setExtent does not work properly for geographic EPSGs!!! test line 519 - if a point geometry is given by geojson 
@@ -1157,9 +1101,9 @@ if (count($zoom) == 4 || count($zoom) == 5) {
 		
 	} else {
 		//check if zoom with scale and epsg is requested 
-		if (strpos(strtolower($zoom[3]), "epsg") === 0  && is_numeric($zoom[0]) && is_numeric($zoom[1]) && is_numeric($zoom[2])) {
+		if (str_starts_with(strtolower((string) $zoom[3]), "epsg")  && is_numeric($zoom[0]) && is_numeric($zoom[1]) && is_numeric($zoom[2])) {
 			$e = new mb_notice("javascripts/initWmcObject.php: SRS found in zoom parameter: ".$zoom[3]);
-			$point = array($zoom[0], $zoom[1]);
+			$point = [$zoom[0], $zoom[1]];
 			$scale = $zoom[2];
 			$newExtent = $wmcGetApi->mainMap->getBboxFromPoiScale($point, $scale, $zoom[3]);
 			$bbox = new Mapbender_bbox(
@@ -1213,7 +1157,7 @@ if (
 //*******************************************************
 	$output = $wmcGetApi->wmsToJavaScript();
 	//$e = new mb_notice("javascripts/initWmcObj.php: javascript mapset: ".implode(",",$output));
-	$wmcJs = $wmcGetApi->toJavaScript(array());//old way - why give an empty array?
+	$wmcJs = $wmcGetApi->toJavaScript([]);//old way - why give an empty array?
 	$wmcJs = implode(";\n", $wmcJs);
 //$e = new mb_exception($wmcJs);
 //$e = new mb_exception("initWmcObj.php: after wmcJs!****************************");
@@ -1234,7 +1178,7 @@ JS;
 	//$output = $wmc->wmsToJavaScript();
 	//$wmcJs = $wmc->toJavaScript(array());
 	$output = $wmcGetApi->wmsToJavaScript();
-	$wmcJs = $wmcGetApi->toJavaScript(array());
+	$wmcJs = $wmcGetApi->toJavaScript([]);
 	$wmcJs = implode(";\n",$wmcJs);
 	//$extentJs = $wmc->extentToJavaScript();
 	$extentJs = $wmcGetApi->extentToJavaScript();

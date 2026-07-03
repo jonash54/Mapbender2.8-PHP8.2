@@ -2,16 +2,16 @@
 header("Content-type: application/json");
 
 function endsWith( $haystack, $needle ) {
-    $length = strlen( $needle );
+    $length = strlen( (string) $needle );
     if( !$length ) {
         return true;
     }
-    return substr( $haystack, -$length ) === $needle;
+    return substr( (string) $haystack, -$length ) === $needle;
 }
 
 function startsWith( $haystack, $needle ) {
-    $length = strlen( $needle );
-    return substr( $haystack, 0, $length ) === $needle;
+    $length = strlen( (string) $needle );
+    return substr( (string) $haystack, 0, $length ) === $needle;
 }
 
 $cacheObjectJson = json_encode(apcu_cache_info());
@@ -20,7 +20,8 @@ $cacheObject = json_decode($cacheObjectJson);
 
 $memoryUsageMapbender = 0;
 
-$mapbenderCaches->variables = array();
+$mapbenderCaches = new stdClass();
+$mapbenderCaches->variables = [];
 
 foreach ($cacheObject->cache_list as $cacheEntry) {
     if ( startsWith($cacheEntry->info, "mapbender:") ) {

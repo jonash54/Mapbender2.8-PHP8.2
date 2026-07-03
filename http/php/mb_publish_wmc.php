@@ -5,7 +5,7 @@
  * @author    Raphael.Syed <raphael.syed@WhereGroup.com> http://WhereGroup.com
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 // require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
 /**
  * unpublish the the given wmc
@@ -18,8 +18,8 @@ $dataLicense = $_POST['license'];
 
 if ($dataMode === 'getLicenseMode') {
     $sql = 'SELECT symbollink,description,isopen FROM termsofuse WHERE name = $1';
-    $v = array($dataLicense);
-    $t = array("s");
+    $v = [$dataLicense];
+    $t = ["s"];
     header('Content-Type: application/json');
     $res = db_prep_query($sql, $v, $t);
     while ($row = db_fetch_array($res)) {
@@ -28,8 +28,8 @@ if ($dataMode === 'getLicenseMode') {
 } else if ($dataMode === 'saveLicenseMode') {
     // #1 Update wmc_local_data_public
     $sql =  'UPDATE mb_user_wmc mb  SET wmc_local_data_public = 1, wmc_local_data_fkey_termsofuse_id = t.termsofuse_id from termsofuse t WHERE mb.wmc_serial_id = $1 AND mb.fkey_user_id = $2 AND t.name = $3';
-    $v = array($wmc_serial_id,$user_id,$dataLicense);
-    $t = array("s","i","s");
+    $v = [$wmc_serial_id, $user_id, $dataLicense];
+    $t = ["s", "i", "s"];
     header('Content-Type: application/json');
     $res = db_prep_query($sql, $v, $t);
 
@@ -37,10 +37,10 @@ if ($dataMode === 'getLicenseMode') {
 
 } else if ($dataMode === 'getAllLicencesMode') {
     $openData_only  = $_POST['openData_only'];
-    $resultArray = array();
+    $resultArray = [];
     $sql = 'SELECT name FROM termsofuse where isopen = $1';
-    $v = array($openData_only);
-    $t = array("c");
+    $v = [$openData_only];
+    $t = ["c"];
     $res = db_prep_query($sql, $v, $t);
     header('Content-Type: application/json');
     //echo db_fetch_array($res);

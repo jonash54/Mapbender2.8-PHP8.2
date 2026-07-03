@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require(__DIR__."/../classes/class_wfs_conf.php");
 ?>
 <html>
 <head>
@@ -55,7 +55,7 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
   	return true;
   }
 </script>
-    
+
 </head>
 <body>
 Gazetteer Configuration<br>
@@ -75,8 +75,8 @@ $aWFS->getallwfs();
 if(isset($_REQUEST["save"])){
 	$sql = "UPDATE gui_layer SET gui_layer_wfs_featuretype = $1 ";
 	$sql .= "WHERE fkey_gui_id = $2 AND fkey_layer_id = $3";
-	$v = array($_REQUEST["myWFS"], $_REQUEST["gui"], $_REQUEST["layer"]);
-	$t = array("s", "s", "i");
+	$v = [$_REQUEST["myWFS"], $_REQUEST["gui"], $_REQUEST["layer"]];
+	$t = ["s", "s", "i"];
 	$res = db_prep_query($sql, $v, $t);
 	echo "layer is connected with: ".$_REQUEST["myWFS"];
 	die();
@@ -109,7 +109,7 @@ echo "";
 /* select featuretype */
 
 if(isset($_REQUEST["wfs"])){
-	
+
 	for($i=0; $i<count($aWFS->wfs_id);$i++){
 		if($aWFS->wfs_id[$i] == $_REQUEST["wfs"]){
 			echo "<table>";
@@ -124,7 +124,7 @@ if(isset($_REQUEST["wfs"])){
 			$str_request = $aWFS->wfs_getfeature[$i]."&REQUEST=getFeature&VERSION=".$aWFS->wfs_version[$i]."&SERVICE=WFS";
 		}
 	}
-	
+
 	$aWFS->getfeatures($_REQUEST["wfs"]);
 	echo "<table>";
 	for($i=0; $i<count($aWFS->features->featuretype_id); $i++){

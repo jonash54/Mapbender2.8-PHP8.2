@@ -29,20 +29,20 @@ class Rule extends FeatureTypeStyle
 	 * The name attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $name = "";
+	public $name = "";
 	
 	/**
 	 * The title attribute from the xml-scheme.
 	 * @var string
 	 */
-	var $title = "";
+	public $title = "";
 	
 	/**
 	 * The LegendGraphic element from the xml-scheme.
 	 * @see LegendGraphic
 	 * @var object
 	 */
-	var $legendgraphic = "";
+	public $legendgraphic = "";
 	
 	/**
 	 * The complete filter expression.
@@ -55,37 +55,37 @@ class Rule extends FeatureTypeStyle
 	 * @see sld_filter_classes.php
 	 * @var string
 	 */
-	var $filter = "";
+	public $filter = "";
 	
 	/**
 	 * The miscaledenominator attribute from the xml-scheme.
 	 * @var int
 	 */
-	var $minscaledenominator = "";
+	public $minscaledenominator = "";
 	
 	/**
 	 * The maxscaledenominator attribute from the xml-scheme.
 	 * @var int
 	 */
-	var $maxscaledenominator = "";
+	public $maxscaledenominator = "";
 	
 	/**
 	 * Array containing the different symbolizers for this rule.
 	 * @var array
 	 */
-	var $symbolizers = array();
+	public $symbolizers = [];
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -135,7 +135,7 @@ class Rule extends FeatureTypeStyle
 			$temp .= $offset."    <input type=\"hidden\" name=\"".$id."\" value=\"rule\">\n";
 			$temp .= $offset."   </td>\n";
 			
-			$number = split("_", $id);
+			$number = preg_split("#_#m", $id);
 			$number = $number[count($number)-1];
 			
 			$temp .= $offset."   <td>\n";

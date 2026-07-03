@@ -31,22 +31,22 @@ class LineSymbolizer extends Rule
 	 * @see Stroke
 	 * @var object
 	 */
-	var $stroke = "";
+	public $stroke = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	
-	function LineSymbolizer()
+	function __construct()
 	{
 		//$this->stroke = new Stroke();
 	}
@@ -85,7 +85,7 @@ class LineSymbolizer extends Rule
 		$temp .= $offset."   LineSymbolizer<br>\n";
 		$temp .= $offset."   <input type=\"hidden\" name=\"".$id."\" value=\"linesymbolizer\">\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", $id);
 		$number = $number[count($number)-1];
 		
 		$temp .= $offset."   <a class='edit' href=\"sld_function_handler.php?function=deletesymbolizer&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";

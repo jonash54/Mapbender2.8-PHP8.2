@@ -1,5 +1,5 @@
 <?php
-	$uiPath = dirname(__FILE__) . '/' . 
+	$uiPath = __DIR__ . '/' . 
 		"../extensions/jquery-ui-1.7.2.custom/development-bundle/ui/";
 
 	include '../include/dyn_php.php';

@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="filteredGroup_Gui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -70,7 +70,7 @@ function validate(wert){
 <body>
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 
 $fieldHeight = 20;
 
@@ -80,7 +80,7 @@ $cnt_group = 0;
 $cnt_gui_group = 0;
 $cnt_gui_group = 0;
 $exists = false;
-$gui_id_array = array();
+$gui_id_array = [];
 
 $logged_user_name = Mapbender::session()->get("mb_user_name");
 $logged_user_id = Mapbender::session()->get("mb_user_id");
@@ -94,14 +94,14 @@ if($insert){
 				$selected_group == "NULL";
 			}
 			$sql_insert = "SELECT * from gui_mb_group where fkey_mb_group_id = $1 and fkey_gui_id = $2 ";
-			$v = array($selected_group,$selected_gui[$i]);
-			$t = array('i','s');
+			$v = [$selected_group, $selected_gui[$i]];
+			$t = ['i', 's'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO gui_mb_group(fkey_mb_group_id, fkey_gui_id) VALUES($1, $2)";
-				$v = array($selected_group,$selected_gui[$i]);
-				$t = array('i','s');
+				$v = [$selected_group, $selected_gui[$i]];
+				$t = ['i', 's'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -111,8 +111,8 @@ if($remove){
 	if(count($remove_gui)>0){
 		for($i=0; $i<count($remove_gui); $i++){
 			$sql_remove = "DELETE FROM gui_mb_group WHERE fkey_gui_id = $1 and fkey_mb_group_id = $2";
-			$v = array($remove_gui[$i],$selected_group);
-			$t = array('s','i');
+			$v = [$remove_gui[$i], $selected_group];
+			$t = ['s', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -130,8 +130,8 @@ while($row = db_fetch_array($res_gui)){
 
 /*get owner group **********************************************************************************************/
 $sql_group = "SELECT * FROM mb_group WHERE mb_group_owner = $1 ORDER BY mb_group_name";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 $res_group = db_prep_query($sql_group,$v,$t);
 while($row = db_fetch_array($res_group)){
 	$group_id[$cnt_group] = $row["mb_group_id"];
@@ -149,17 +149,17 @@ $sql_group_mb_gui .= " ORDER BY gui.gui_name";
 
 if(!$selected_group){
 	if($group_id[0] > 0)
-		$v = array($group_id[0]);
+		$v = [$group_id[0]];
 	else
-		$v = array("NULL");
+		$v = ["NULL"];
 }
 if($selected_group){
 	if($selected_group >= 0)
-		$v = array($selected_group);
+		$v = [$selected_group];
 	else
-		$v = array("NULL");
+		$v = ["NULL"];
 }
-$t = array('i');
+$t = ['i'];
 
 $res_group_mb_gui = db_prep_query($sql_group_mb_gui,$v,$t);
 while($row = db_fetch_array($res_group_mb_gui)){

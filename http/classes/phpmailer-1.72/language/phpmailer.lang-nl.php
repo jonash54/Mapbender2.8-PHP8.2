@@ -4,7 +4,7 @@
  * Dutch Version
  */
 
-$PHPMAILER_LANG = array();
+$PHPMAILER_LANG = [];
 
 $PHPMAILER_LANG["provide_address"] = 'U moet op zijn minst één ontvanger ' .
                                      'opgeven';

@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * A Placemark consists of a geometry of type {@link KMLPoint}, {@link KMLPolygon}, 
@@ -25,18 +25,18 @@ require_once(dirname(__FILE__)."/../../core/globalSettings.php");
  * 
  * @package KML
  */
-class KMLPlacemark {
+class KMLPlacemark implements \Stringable {
 	/**
-	 * @param	KMLGeometry	$aGeometry 
-	 */
-	public function __construct ($aGeometry) {
-		$this->geometry = $aGeometry;
-	}
+  * @param KMLGeometry $geometry
+  */
+ public function __construct(private $geometry)
+ {
+ }
 	
 	/**
 	 * @return	string	a string representation of the object, currently geoJSON.
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		return $this->toGeoJSON();
 	}
 
@@ -44,7 +44,7 @@ class KMLPlacemark {
 	 * @param 	mixed 	$key	The key of the property.
 	 * @param	mixed	$value	The value of the property.
 	 */
-	public function setProperty ($key, $value) {
+	public function setProperty (mixed $key, mixed $value) {
 		// TODO: keys are unique, may be not intended in KML OWS5
 		$this->properties[$key] = $value;
 	}
@@ -116,8 +116,6 @@ class KMLPlacemark {
 	public function transform($targetEpsg){
 	    $this->geometry->transform($targetEpsg);
 	}
-
-	private $geometry;
-	private $properties = array();
+	private $properties = [];
 }
 ?>

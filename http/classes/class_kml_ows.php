@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_point.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_point.php");
 
-require_once(dirname(__FILE__)."/../classes/class_kml_geometry.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_placemark.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_parser_ows.php");
+require_once(__DIR__."/../classes/class_kml_geometry.php");
+require_once(__DIR__."/../classes/class_kml_placemark.php");
+require_once(__DIR__."/../classes/class_kml_parser_ows.php");
 
 
 /**
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../classes/class_kml_parser_ows.php");
  *
  * @package KML
  */
-class KML {
+class KML implements \Stringable {
 
 	//
 	//
@@ -77,7 +77,7 @@ class KML {
 
 		for ($i = 0; $i < count($this->placemarkArray); $i++) {
 			$currentPlacemark = $this->placemarkArray[$i];
-			$e = new mb_notice("now: " . $i . " of " . (count($this->placemarkArray)-1) . " (is a " . get_class($currentPlacemark) . ")");
+			$e = new mb_notice("now: " . $i . " of " . (count($this->placemarkArray)-1) . " (is a " . $currentPlacemark::class . ")");
 
 			switch ($currentPlacemark->getGeometryType()) {
 				case "KMLLine" :
@@ -183,7 +183,7 @@ class KML {
 	/**
 	 * @return string the KML document.
 	 */
-	public function __toString() {
+	public function __toString(): string {
 		//read configuration for geojson simple style from conf folder - to handle style information from geojson if available
 		$geoJsonStyleInfo = $this->getGeoJsonSimpleStyleInfo();
 		if (!$this->kml) {
@@ -196,22 +196,22 @@ class KML {
 			$e_document = $doc->createElement("Document");
 			$e_kml->appendChild($e_document);
 			$doc->appendChild($e_kml);
-			$styleHashArray = array();
-			$styleArray = array();
-			$placemarkArray = array();
+			$styleHashArray = [];
+			$styleArray = [];
+			$placemarkArray = [];
 			//attach placemarks
 			$e = new mb_notice("to string: #placemarks: " . count($this->placemarkArray));
 			for ($i = 0; $i < count($this->placemarkArray); $i++) {
 				$currentPlacemark = $this->placemarkArray[$i];
 
-				$e = new mb_notice("now: " . $i . " of " . (count($this->placemarkArray)-1) . " (is a " . get_class($currentPlacemark) . ")");
+				$e = new mb_notice("now: " . $i . " of " . (count($this->placemarkArray)-1) . " (is a " . $currentPlacemark::class . ")");
 
 				$pl_instructions = $currentPlacemark->getProperty("instruction");
-				$pl_name_array = array();
+				$pl_name_array = [];
 				$pl_name = false;
 				$pl_description = false;
 				if ($pl_instructions != null) {
-					$pl_name_array = explode("|", $pl_instructions);
+					$pl_name_array = explode("|", (string) $pl_instructions);
 				}
 
 				switch ($currentPlacemark->getGeometryType()) {
@@ -276,7 +276,7 @@ class KML {
 				}
 				//read out attribute information
 				//initial geojson style handling
-				$currentPropertiesSimpleStyle = array();
+				$currentPropertiesSimpleStyle = [];
 				foreach($currentProperties as $key => $value){
 					$e_Data = $doc->createElement("Data");
 					$e_value = $doc->createElement("value");
@@ -320,20 +320,12 @@ class KML {
 							$e_href = $doc->createElement("href");
 							
 							$makiUrl = "https://raw.githubusercontent.com/mapbox/maki/master/icons/";
-							switch($currentPropertiesSimpleStyle['marker-size']) {
-								case "medium":
-									$symbol = $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg";
-									break;
-								case "small":
-									$symbol = $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg";
-									break;
-								case "large":
-									$symbol = $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg";
-									break;
-								default :
-									$symbol = $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg";
-									break;
-							}
+							$symbol = match ($currentPropertiesSimpleStyle['marker-size']) {
+           "medium" => $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg",
+           "small" => $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg",
+           "large" => $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg",
+           default => $makiUrl.$currentPropertiesSimpleStyle['marker-symbol']."-15.svg",
+       };
 							//test for marker-size as integer - map it to discrete values
 							$sizeInt = (integer)$currentPropertiesSimpleStyle['marker-size'];
 							if (is_int($sizeInt) && $sizeInt > 0) {
@@ -351,7 +343,7 @@ class KML {
 							$symbolUrl .= "marker-size=".$currentPropertiesSimpleStyle['marker-size']."&";
 							$symbolUrl .= "marker-color=".$currentPropertiesSimpleStyle['marker-color'];
 							//with mod_rewrite
-							$symbolUrl = MAPBENDER_PATH."/../icons/maki/".ltrim($currentPropertiesSimpleStyle['marker-color'],'#')."/".$currentPropertiesSimpleStyle['marker-size']."/".$currentPropertiesSimpleStyle['marker-symbol'].".png";
+							$symbolUrl = MAPBENDER_PATH."/../icons/maki/".ltrim((string) $currentPropertiesSimpleStyle['marker-color'],'#')."/".$currentPropertiesSimpleStyle['marker-size']."/".$currentPropertiesSimpleStyle['marker-symbol'].".png";
 
 							$e_hrefText = $doc->createTextNode($symbolUrl);
 							$e_href->appendChild($e_hrefText);
@@ -511,7 +503,7 @@ class KML {
 			}
 			$this->kml = $doc->saveXML();
 		}
-		return $this->kml;
+		return (string) $this->kml;
 	}
 
 	/**
@@ -637,8 +629,8 @@ class KML {
 	}
 	private function updateInDb($kmlDoc, $kmlId) {
 		$sql = "UPDATE gui_kml SET kml_doc = $1 WHERE kml_id = $2";
-		$v = array($kmlDoc, $kmlId);
-		$t = array("s", "i");
+		$v = [$kmlDoc, $kmlId];
+		$t = ["s", "i"];
 		$result = db_prep_query($sql, $v, $t);
 		if (!$result) {
 			$e = new mb_exception("class_kml: kml update failed! " . db_error());
@@ -670,7 +662,7 @@ class KML {
 				$geometryArray = $geometryObj->geometries;
 			}
 			else if ($geometryType == "Point" || $geometryType == "LineString" || $geometryType == "Polygon") {
-				$geometryArray = array($geometryObj);
+				$geometryArray = [$geometryObj];
 			}
 			else {
 				$e = new mb_exception("class_kml: Invalid geometry type " . $geometryType);
@@ -735,8 +727,8 @@ class KML {
 			$sql .= "(fkey_mb_user_id, fkey_gui_id, kml_doc, kml_name, kml_description, kml_timestamp) ";
 			$sql .= "VALUES ";
 			$sql .= "($1, $2, $3, $4, $5, $6)";
-			$v = array (Mapbender::session()->get("mb_user_id"), Mapbender::session()->get("mb_user_gui"), $this->kml, "name", "description", time());
-			$t = array ("i", "s", "s", "s", "s", "s");
+			$v = [Mapbender::session()->get("mb_user_id"), Mapbender::session()->get("mb_user_gui"), $this->kml, "name", "description", time()];
+			$t = ["i", "s", "s", "s", "s", "s"];
 			$res = db_prep_query($sql, $v, $t);
 			if (!$res) {
 				$e = new mb_exception("class_kml.php: storeInDb: failed to store KML in database: " . db_error());
@@ -767,8 +759,8 @@ class KML {
 #		$t = array("i", "i", "s");
 
 		$sql = "SELECT kml_doc FROM gui_kml WHERE kml_id = $1 LIMIT 1";
-		$v = array($kmlId);
-		$t = array("i");
+		$v = [$kmlId];
+		$t = ["i"];
 
 		$result = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($result);
@@ -786,9 +778,9 @@ class KML {
 	 * @return string the tag name without its namespace.
 	 */
 	private function sepNameSpace($s){
-		$c = mb_strpos($s, ":");
+		$c = mb_strpos((string) $s, ":");
 		if ($c > 0) {
-			$s = mb_substr($s, $c+1);
+			$s = mb_substr((string) $s, $c+1);
 		}
 		return $s;
 	}
@@ -799,7 +791,7 @@ class KML {
 
 		foreach ($childNodes as $childNode) {
 			$name = $childNode->nodeName;
-			if ( in_array($name, array("Point","LineString","Polygon"))) {
+			if ( in_array($name, ["Point", "LineString", "Polygon"])) {
 				$returnValue = $this->updateGeometry($childNode, $geometryArray[$cnt]);
 				if (!$returnValue) {
 					return false;
@@ -829,11 +821,11 @@ class KML {
 			$gmlNode = $currentNode_SimpleXML->{"exterior"}->{"LinearRing"}->{"posList"};
 			$kmlNode = $currentNode_SimpleXML->{"outerBoundaryIs"}->{"LinearRing"}->{"coordinates"};
 			if ($gmlNode && $gmlNode->asXML()) {
-				$currentNode_SimpleXML->{"exterior"}->{"LinearRing"}->{"posList"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", $json->encode($geometry->coordinates)));
+				$currentNode_SimpleXML->{"exterior"}->{"LinearRing"}->{"posList"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", (string) $json->encode($geometry->coordinates)));
 			}
 			// KML 2.2
 			else if ($kmlNode && $kmlNode->asXML()) {
-				$currentNode_SimpleXML->{"outerBoundaryIs"}->{"LinearRing"}->{"coordinates"} = preg_replace("/\],/", " ", preg_replace("/\][^,]|\[/", "", $json->encode($geometry->coordinates)));
+				$currentNode_SimpleXML->{"outerBoundaryIs"}->{"LinearRing"}->{"coordinates"} = preg_replace("/\],/", " ", preg_replace("/\][^,]|\[/", "", (string) $json->encode($geometry->coordinates)));
 			}
 		}
 		elseif ($currentTypeXml == "POINT") {
@@ -842,11 +834,11 @@ class KML {
 
 			// GML 3
 			if ($gmlNode && $gmlNode->asXML()) {
-				$currentNode_SimpleXML->{"pos"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", $json->encode($geometry->coordinates)));
+				$currentNode_SimpleXML->{"pos"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", (string) $json->encode($geometry->coordinates)));
 			}
 			// KML 2.2
 			else if ($kmlNode && $kmlNode->asXML()) {
-				$currentNode_SimpleXML->{"coordinates"} = preg_replace("/\[|\]/", "", $json->encode($geometry->coordinates));
+				$currentNode_SimpleXML->{"coordinates"} = preg_replace("/\[|\]/", "", (string) $json->encode($geometry->coordinates));
 			}
 		}
 		elseif ($currentTypeXml == "LINESTRING") {
@@ -855,11 +847,11 @@ class KML {
 
 			// GML 3
 			if ($gmlNode && $gmlNode->asXML()) {
-				$currentNode_SimpleXML->{"posList"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", $json->encode($geometry->coordinates)));
+				$currentNode_SimpleXML->{"posList"} = preg_replace("/,/", " ", preg_replace("/\[|\]/", "", (string) $json->encode($geometry->coordinates)));
 			}
 			// KML 2.2
 			else if ($kmlNode && $kmlNode->asXML()) {
-				$currentNode_SimpleXML->{"coordinates"} = preg_replace("/\[|\]/", "", $json->encode($geometry->coordinates));
+				$currentNode_SimpleXML->{"coordinates"} = preg_replace("/\[|\]/", "", (string) $json->encode($geometry->coordinates));
 			}
 		}
 		return true;
@@ -918,6 +910,6 @@ class KML {
 	/**
 	 * An array of {@link KMLPlacemark}
 	 */
-	private $placemarkArray = array();
+	private $placemarkArray = [];
 }
 ?>

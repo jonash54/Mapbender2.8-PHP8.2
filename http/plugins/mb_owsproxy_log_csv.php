@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 
 $LIMIT_INT = OWS_LOG_EXPORT_LIMIT;
 
@@ -13,7 +13,7 @@ if(isset($_REQUEST['userGuiId'])) {
         $result = db_prep_query(
             "SELECT fkey_gui_id FROM gui_mb_user WHERE fkey_mb_user_id = $1", 
             $id, 
-            array('i'));        
+            ['i']);        
     }
 
     $html .= "<table>";
@@ -44,10 +44,10 @@ if($_REQUEST['action'] == "getForm"){
             break;	
     }
     $mb_user_id = $_SESSION['mb_user_id'];
-   	$v = array($mb_user_id);
-   	$t = array('i');
-   	$users = array();
-   	$services = array();
+   	$v = [$mb_user_id];
+   	$t = ['i'];
+   	$users = [];
+   	$services = [];
    	/*$sql = "SELECT DISTINCT u.mb_user_id, w.wms_id,w.wms_title,u.mb_user_name"
    			." FROM mb_proxy_log AS m INNER JOIN wms AS w ON"
    			." (m.fkey_wms_id = w.wms_id AND w.wms_owner=$1)"
@@ -174,24 +174,24 @@ if($_REQUEST['action'] == "getForm"){
         <div id="result"></div></div>
     </fieldset>';
             
-    $jsonOutput = array("form"=>$form,"error"=>"","message"=>"");
+    $jsonOutput = ["form"=>$form, "error"=>"", "message"=>""];
     if(count($users) == 0 || count($services) == 0){
         $jsonOutput["message"] = "In der OwsProxy-Tabelle ist kein Datensatz vorhanden. Keine Abfrage ist möglich.";
     }
     header("ContentType: application/json");
     die(json_encode($jsonOutput));
 } else {
-    require_once dirname(__FILE__) . "/../classes/class_owsproxy_log.php";
-    $function = isset($_REQUEST['function']) ? $_REQUEST['function'] : null;#getServiceLogs,deleteServiceLogs,listServiceLogs
-    $listType = isset($_REQUEST['listType']) ? $_REQUEST['listType'] : null;#service,user
+    require_once __DIR__ . "/../classes/class_owsproxy_log.php";
+    $function = $_REQUEST['function'] ?? null;#getServiceLogs,deleteServiceLogs,listServiceLogs
+    $listType = $_REQUEST['listType'] ?? null;#service,user
 
-    $serviceType = isset($_REQUEST['serviceType']) ? $_REQUEST['serviceType'] : null;#wms, wfs
+    $serviceType = $_REQUEST['serviceType'] ?? null;#wms, wfs
 
-    $userId = isset($_REQUEST['userId']) ? $_REQUEST['userId'] : null;#XXX
-    $serviceId = isset($_REQUEST['serviceId']) ? $_REQUEST['serviceId'] : null;# XXX
-    $timeFrom = isset($_REQUEST['timeFrom']) ? $_REQUEST['timeFrom'] : null;#
-    $timeTo = isset($_REQUEST['timeTo']) ? $_REQUEST['timeTo'] : null;#
-    $withContactData = isset($_REQUEST['withContactData']) ? $_REQUEST['withContactData'] : null;# 1,
+    $userId = $_REQUEST['userId'] ?? null;#XXX
+    $serviceId = $_REQUEST['serviceId'] ?? null;# XXX
+    $timeFrom = $_REQUEST['timeFrom'] ?? null;#
+    $timeTo = $_REQUEST['timeTo'] ?? null;#
+    $withContactData = $_REQUEST['withContactData'] ?? null;# 1,
 
     if ($serviceType === null) {
 	$e = new mb_exception("Parameter serviceType is missing!");

@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
@@ -60,8 +60,8 @@ include '../include/dyn_css.php';
 <?php
 echo '<script type="text/javascript">';
 $sql = "SELECT * FROM gui_element WHERE e_id = 'WMS_preferences' AND fkey_gui_id = $1";
-$v = array(Mapbender::session()->get("mb_user_gui"));
-$t = array("s");
+$v = [Mapbender::session()->get("mb_user_gui")];
+$t = ["s"];
 $res = db_prep_query($sql, $v, $t);
 $cnt = 0;
 $vis = "";
@@ -72,14 +72,14 @@ while($row = db_fetch_array($res)){
    $cnt++;
 }
 if($cnt > 1){ echo "alert('WMS_preferences: ID not unique!');";}
-$e_target = explode(",", $e_target);
+$e_target = explode(",", (string) $e_target);
 echo "var mod_WMSpreferences_target1 = '".trim($e_target[0])."';";
 echo "var mod_WMSpreferences_target2 = '".trim($e_target[1])."';";
 echo "</script>";
 
 $sql_visible = "SELECT * FROM gui_wms WHERE fkey_gui_id = $1";
-$v = array(Mapbender::session()->get("mb_user_gui"));
-$t = array("s"); 
+$v = [Mapbender::session()->get("mb_user_gui")];
+$t = ["s"]; 
 $res_visible = db_prep_query($sql_visible, $v, $t); 
 $cnt_visible = 0; 
 

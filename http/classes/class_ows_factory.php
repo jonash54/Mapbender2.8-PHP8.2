@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 /**
  * This abstract class is the superclass of all factories
@@ -53,7 +53,7 @@ abstract class OwsFactory {
 	 * @param $string String
 	 */
 	final protected function stripEndlineAndCarriageReturn ($string) {
-		return preg_replace("/\n/", "", preg_replace("/\r/", " ", $string));
+		return preg_replace("/\n/", "", preg_replace("/\r/", " ", (string) $string));
 	}
 	
 	/**
@@ -63,7 +63,7 @@ abstract class OwsFactory {
 	 * @return String
 	 */
 	final protected function createId () {
-		return "id_" . substr(md5(rand()),0,6);
+		return "id_" . substr(md5(random_int(0, mt_getrandmax())),0,6);
 	}
 	
 	/**
@@ -75,9 +75,9 @@ abstract class OwsFactory {
 	 * @param $s String
 	 */
 	final protected function sepNameSpace($s) {
-		$c = strpos($s, ":"); 
+		$c = strpos((string) $s, ":"); 
 		if ($c > 0) {
-			return substr($s, $c + 1);
+			return substr((string) $s, $c + 1);
 		}
 		return $s;
 	}
@@ -91,9 +91,9 @@ abstract class OwsFactory {
 	 * @param $s String
 	 */
 	final protected function getNameSpace($s) {
-		$c = strpos($s, ":"); 
+		$c = strpos((string) $s, ":"); 
 		if ($c > 0) {
-			return substr($s, 0, $c);
+			return substr((string) $s, 0, $c);
 		}
 		return $s;
 	}

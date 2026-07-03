@@ -19,11 +19,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //Script for pulling all download options for one or more metadataset which are identified by their fileidentifier
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_Uuid.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_Uuid.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
 global $configObject;
-if (file_exists(dirname(__FILE__)."/../../conf/linkedDataProxy.json")) {
+if (file_exists(__DIR__."/../../conf/linkedDataProxy.json")) {
      $configObject = json_decode(file_get_contents("../../conf/linkedDataProxy.json"));
 }
 
@@ -33,7 +33,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }
@@ -69,7 +69,7 @@ if (isset($_REQUEST["outputFormat"]) & $_REQUEST["outputFormat"] != "") {
 }
 
 function checkUrlInDatalink($url, $datalinkIds) {
-	$sql = "SELECT datalink_id FROM datalink WHERE datalink_id in (".explode(",",$datalinkIds).") AND datalink_url = ".urldecode($url);
+	$sql = "SELECT datalink_id FROM datalink WHERE datalink_id in (".explode(",",(string) $datalinkIds).") AND datalink_url = ".urldecode((string) $url);
 	$res = db_query($sql);
 	//$row = db_fetch_assoc($res)
 	$e = new mb_exception("num rows: ".db_numrows($res));
@@ -90,8 +90,8 @@ if (isset($_REQUEST['ID']) & $_REQUEST['ID'] != "") {
 	$testMatch = $_REQUEST["ID"];
 	//$uuid = new Uuid($testMatch);
 	//$isUuid = $uuid->isValid();
-	$idList = explode(',',$_REQUEST['ID']);
-	for ($i = 0; $i < count($idList); $i++) {
+	$idList = explode(',',(string) $_REQUEST['ID']);
+	for ($i = 0; $i < count($idList ?? []); $i++) {
 		$testMatch = $idList[$i];
 		$uuid = new Uuid($testMatch);
 		$isUuid = $uuid->isValid();
@@ -113,7 +113,7 @@ $mapbenderServerUrl = $mapbenderPathArray['scheme']."://".$mapbenderPathArray['h
 
 function getDownloadOptions($idList, $webPath=false, $mapbenderServerUrl=false) {
 	global $configObject;
-	$mapbenderPathArray = parse_url($webPath);
+	$mapbenderPathArray = parse_url((string) $webPath);
 	$mapbenderServerUrl = $mapbenderPathArray['scheme']."://".$mapbenderPathArray['host'];
 	//define query to pull all download options - actually only the inspire download services (atom feeds, ogc api features, directwfs)
 	
@@ -206,9 +206,9 @@ SQL;
 	//initialize array for result
 	
 	//$downloadOptions = new stdClass();
-	for ($i = 0; $i < count($idList); $i++) {
-		$v = array($idList[$i]);
-		$t = array('s');
+	for ($i = 0; $i < count($idList ?? []); $i++) {
+		$v = [$idList[$i]];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		//problem, $res don't give back false if it was not successful!
 		//push rows into associative array
@@ -306,7 +306,7 @@ die();*/
 				break;
 				case "rest":
 					$downloadOptions->{$idList[$i]}->option[$j]->type = "ogcapifeatures";
-				
+
 					$downloadOptions->{$idList[$i]}->option[$j]->serviceId = $row['service_id'];
 					$downloadOptions->{$idList[$i]}->option[$j]->serviceUuid = $row['service_uuid']; //wfs_uuid
 					$downloadOptions->{$idList[$i]}->option[$j]->resourceId = $row['resource_id'];
@@ -344,7 +344,7 @@ die();*/
 				break;
 				case "metadata":
 					if (isset($row['datalink_text'] ) || $row['datalink_text'] != '') {
-						$downloadLinks = json_decode($row['datalink_text']);
+						$downloadLinks = json_decode((string) $row['datalink_text']);
 						$downloadOptions->{$idList[$i]}->option[$j]->type = "downloadlink";
 						//parse json and add some more info?
 						//$downloadLinks = json_decode($row['datalink_text']);
@@ -399,15 +399,15 @@ die();*/
 				         ]
 				         }
 				         */
-				        if (json_decode($row['datalink_text'])) {
-				            $distributions = json_decode($row['datalink_text']);
-				            $simpleDistributions = array();
+				        if (json_decode((string) $row['datalink_text'])) {
+				            $distributions = json_decode((string) $row['datalink_text']);
+				            $simpleDistributions = [];
 				            //$e = new mb_exception("php/mod_getDownloadOptions.php: distributions: " .  json_encode($distributions));
 				            foreach ($distributions->{'dcat:Distribution'} as $dcatDistribution) {
 				                if ($dcatDistribution->{'dcat:accessService'}->{'dct:hasPart'}) {
 				                    //$e = new mb_exception("some remotelist link is available");
 				                    $mandatoryFieldsAvailable = true;
-				                    $mandatoryFields = array('dcterms:format', 'gdirp:epsgCode', 'dcterms:title', 'dcterms:description');
+				                    $mandatoryFields = ['dcterms:format', 'gdirp:epsgCode', 'dcterms:title', 'dcterms:description'];
 				                    foreach ($mandatoryFields as $serviceAttribute) {
 				                        //$e = new mb_exception("php/mod_inspireDownloadFeed.php: check: " . $serviceAttribute . " - value found: " . $dcatDistribution->{$serviceAttribute});
 				                        if (!$dcatDistribution->{$serviceAttribute}) {
@@ -427,7 +427,7 @@ die();*/
 				                // generate an array of simple other distributions 
 				                } else {
 				                    $mandatoryFieldsAvailable = true;
-				                    $mandatoryFields = array('dcat:accessUrl', 'dcterms:title');
+				                    $mandatoryFields = ['dcat:accessUrl', 'dcterms:title'];
 				                    foreach ($mandatoryFields as $serviceAttribute) {
 				                        //$e = new mb_exception("php/mod_inspireDownloadFeed.php: check: " . $serviceAttribute . " - value found: " . $dcatDistribution->{$serviceAttribute});
 				                        if (!$dcatDistribution->{$serviceAttribute}) {
@@ -438,7 +438,7 @@ die();*/
 				                    if ($mandatoryFieldsAvailable == false) {
 				                        $e = new mb_exception("php/mod_getDownloadOptions.php: some mandatory attribute is not given for distribution in further_links_json");
 				                    }
-				                    $distribution = array();
+				                    $distribution = [];
 				                    $distribution['dcterms:title'] = $dcatDistribution->{'dcterms:title'};
 				                    $distribution['dcat:accessUrl'] = $dcatDistribution->{'dcat:accessUrl'};
 				                    $simpleDistributions[] = $distribution;
@@ -451,9 +451,9 @@ die();*/
 				        if ($linkListFound && $mandatoryFieldsAvailable) {
     				        $downloadOptions->{$idList[$i]}->option[$j]->type = "remotelist";
     				        $downloadOptions->{$idList[$i]}->option[$j]->link = $webPath."php/mod_inspireDownloadFeed.php?id=".$idList[$i]."&type=SERVICE&generateFrom=remotelist";;
-    				        
+
     				        $downloadOptions->{$idList[$i]}->option[$j]->serviceUuid = md5($downloadOptions->{$idList[$i]}->option[$j]->link);
-    				        
+
     				        $downloadOptions->{$idList[$i]}->option[$j]->format = $atomFeedFormat;
     				        $downloadOptions->{$idList[$i]}->option[$j]->serviceType = "download";
     				        $downloadOptions->{$idList[$i]}->option[$j]->serviceSubType = "ATOM";
@@ -476,7 +476,7 @@ die();*/
 				            $downloadOptions->{$idList[$i]}->option[$j]->accessUrl = $distribution['dcat:accessUrl'];
 				            $downloadOptions->{$idList[$i]}->option[$j]->htmlLink = $webPath."php/mod_exportIso19139.php?url=".urlencode($webPath."php/mod_dataISOMetadata.php?id=".$idList[$i]."&outputFormat=iso19139");
 				            $downloadOptions->{$idList[$i]}->option[$j]->accessClient = $distribution['dcat:accessUrl'];
-				            $downloadOptions->{$idList[$i]}->option[$j]->serviceUuid = md5($distribution['dcat:accessUrl']);
+				            $downloadOptions->{$idList[$i]}->option[$j]->serviceUuid = md5((string) $distribution['dcat:accessUrl']);
 				            $downloadOptions->{$idList[$i]}->option[$j]->serviceTitle = $distribution['dcterms:title'];
 				            //new in 2024
 				            $downloadOptions->{$idList[$i]}->option[$j]->licenseId = $row['tou_name'];
@@ -494,7 +494,7 @@ die();*/
 					//2025 - add originalGetCapabilitiesUrl if security proxy is not enabled to enhance DCAT interface for open hessen
 
 				    $downloadOptions->{$idList[$i]}->option[$j]->type = "directwfs";
-				    
+
 				    $downloadOptions->{$idList[$i]}->option[$j]->serviceId = $row['service_id'];
 				    $downloadOptions->{$idList[$i]}->option[$j]->serviceUuid = $row['service_uuid'];
 				    $downloadOptions->{$idList[$i]}->option[$j]->resourceId = $row['resource_id'];
@@ -519,7 +519,7 @@ die();*/
 				    $downloadOptions->{$idList[$i]}->option[$j]->isopen = $row['tou_isopen'];
 				    $downloadOptions->{$idList[$i]}->option[$j]->licenseInternalId = $row['tou_id'];
 				    $downloadOptions->{$idList[$i]}->option[$j]->licenseSourceNote = $row['license_source_note'];
-				    
+
 				    $downloadOptions->{$idList[$i]}->title = $row['title'];
 				    $downloadOptions->{$idList[$i]}->uuid = $idList[$i];
 				    break;	
@@ -540,14 +540,14 @@ die();*/
 	return $result;
 }
 
-$downloadOptions = getDownloadOptions($idList, $mapbenderPath, $mapbenderServerUrl);
+$downloadOptions = getDownloadOptions($idList);
 
 if ($downloadOptions != "null" && $outputFormat == "json") {
 	header('Content-Type: application/json; charset='.CHARSET);
 	echo $downloadOptions;
 }
 if ($downloadOptions != "null" && $outputFormat == "html") {
-	$options = json_decode($downloadOptions);
+	$options = json_decode((string) $downloadOptions);
 	$header = '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.$languageCode.'">';
 	$header .= '<body>';
 	$header .= '<head>' . 

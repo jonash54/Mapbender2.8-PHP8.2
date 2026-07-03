@@ -1,12 +1,12 @@
 <?php
-require_once (dirname ( __FILE__ ) . "/../../core/globalSettings.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_cache.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_universal_wfs_factory.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_gml_3_factory.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_owsConstraints.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_connector.php"); // for resolving external @context content
-require_once (dirname ( __FILE__ ) . "/../classes/class_user.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_ogr.php");
+require_once (__DIR__ . "/../../core/globalSettings.php");
+require_once (__DIR__ . "/../classes/class_cache.php");
+require_once (__DIR__ . "/../classes/class_universal_wfs_factory.php");
+require_once (__DIR__ . "/../classes/class_gml_3_factory.php");
+require_once (__DIR__ . "/../classes/class_owsConstraints.php");
+require_once (__DIR__ . "/../classes/class_connector.php"); // for resolving external @context content
+require_once (__DIR__ . "/../classes/class_user.php");
+require_once (__DIR__ . "/../classes/class_ogr.php");
 global $rewritePath;
 global $behindRewrite;
 global $linkedDataProxyUrl;
@@ -27,7 +27,7 @@ global $useGdal;
  * OpenID Connect Discovery
  * 
  */
-if (file_exists ( dirname ( __FILE__ ) . "/../../conf/linkedDataProxy.json" )) {
+if (file_exists ( __DIR__ . "/../../conf/linkedDataProxy.json" )) {
 	$configObject = json_decode ( file_get_contents ( "../../conf/linkedDataProxy.json" ) );
 }
 if (isset ( $configObject ) && isset ( $configObject->memory_limit ) && $configObject->memory_limit != "") {
@@ -54,15 +54,7 @@ if (isset ( $configObject ) && isset ( $configObject->default_pages ) && $config
 if (isset ( $configObject ) && isset ( $configObject->allowed_limits ) && is_array ( $configObject->allowed_limits )) {
 	$allowedLimits = $configObject->allowed_limits;
 } else {
-	$allowedLimits = array (
-			"1",
-			"5",
-			"10",
-			"20",
-			"50",
-			"100",
-			"200" 
-	);
+	$allowedLimits = ["1", "5", "10", "20", "50", "100", "200"];
 }
 if (isset ( $configObject ) && isset ( $configObject->initial_bbox ) && is_array ( $configObject->initial_bbox ) && count ( $configObject->initial_bbox ) == 4) {
 	$minxFC = $configObject->initial_bbox [0];
@@ -93,7 +85,7 @@ if (isset ( $configObject ) && isset ( $configObject->open_data_filter ) && $con
 if (isset ( $configObject ) && isset ( $configObject->exclude_wfs_ids ) && $configObject->exclude_wfs_ids != "") {
     $excludeWfsIds = $configObject->exclude_wfs_ids;
 } else {
-    $excludeWfsIds = array();
+    $excludeWfsIds = [];
 }
 if (isset ( $configObject ) && isset ( $configObject->use_gdal ) && $configObject->use_gdal == true) {
     $useGdal = true;
@@ -107,14 +99,7 @@ if (isset ( $configObject ) && isset ( $configObject->cors_header ) && $configOb
 }
 //TODO problem with single features ! 
 // textual data:
-$textualDataArray = array (
-		"title",
-		"description",
-		"datasource_url",
-		"legal_notice_link",
-		"privacy_notice_link",
-		"map_position" 
-);
+$textualDataArray = ["title", "description", "datasource_url", "legal_notice_link", "privacy_notice_link", "map_position"];
 
 $title = "Open Spatial Data served by Mapbender WFS 3.0 Proxy";
 $description = "Description of the instance of Mapbender WFS 3.0 Proxy";
@@ -151,16 +136,16 @@ $page = 0;
 $f = "html";
 // overwrite outputFormat for special headers:
 // try to read out first entry!
-$acceptHeaderArray = array();
+$acceptHeaderArray = [];
 
-if (strpos ( $_SERVER ["HTTP_ACCEPT"], ";" ) != false) {
-	$formatPartOfAcceptHeader = explode ( ';', $_SERVER ["HTTP_ACCEPT"] );
+if (str_contains ( (string) $_SERVER ["HTTP_ACCEPT"], ";" )) {
+	$formatPartOfAcceptHeader = explode ( ';', (string) $_SERVER ["HTTP_ACCEPT"] );
 	$formatPartOfAcceptHeader = $formatPartOfAcceptHeader [0];
 } else {
 	$formatPartOfAcceptHeader = $_SERVER ["HTTP_ACCEPT"];
 }
-if (strpos ( $formatPartOfAcceptHeader, "," ) != false) {
-	$formatPartOfAcceptHeader = explode ( ',', $formatPartOfAcceptHeader );
+if (str_contains ( (string) $formatPartOfAcceptHeader, "," )) {
+	$formatPartOfAcceptHeader = explode ( ',', (string) $formatPartOfAcceptHeader );
 	foreach ($formatPartOfAcceptHeader as $acceptedFormat) {
 		$acceptHeaderArray[] = trim($acceptedFormat);
 	}
@@ -169,30 +154,15 @@ if (strpos ( $formatPartOfAcceptHeader, "," ) != false) {
 }
 // $e = new mb_exception("php/mod_linkedDataProxy.php: first found format: ".$formatPartOfAcceptHeader);
 // TODO: check all given formats in header an choose the right one 
-$acceptedHeaderFormatArray = array();
+$acceptedHeaderFormatArray = [];
 foreach ($acceptHeaderArray as $acceptHeaderFomat) {
-	if (in_array ( $acceptHeaderFomat, array (
-			"application/xml",
-			"text/xml",
-			"text/xml; subtype=gml/3.1.1",
-			"text/xml; subtype=gml/3.2",
-			"text/xml; subtype=gml/2.1.2",
-			"text/xml; subtype=gml/3.2.1"
-	) )) {
+	if (in_array ( $acceptHeaderFomat, ["application/xml", "text/xml", "text/xml; subtype=gml/3.1.1", "text/xml; subtype=gml/3.2", "text/xml; subtype=gml/2.1.2", "text/xml; subtype=gml/3.2.1"] )) {
 		$acceptedHeaderFormatArray[] = "xml";
 	}
-	if (in_array ( $acceptHeaderFomat, array (
-			"application/geo+json",
-			"application/openapi+json;version=3.0",
-			"application/json",
-			"application/json; subtype=geojsontext/xml",
-			"text/json"
-	) )) {
+	if (in_array ( $acceptHeaderFomat, ["application/geo+json", "application/openapi+json;version=3.0", "application/json", "application/json; subtype=geojsontext/xml", "text/json"] )) {
 		$acceptedHeaderFormatArray[] = "json";
 	}
-	if (in_array ( $acceptHeaderFomat, array (
-			"text/html"
-	) )) {
+	if (in_array ( $acceptHeaderFomat, ["text/html"] )) {
 		$acceptedHeaderFormatArray[] = "html";
 	}
 }
@@ -218,23 +188,9 @@ $nativeJson = false;
 $outputFormat = "text/xml";
 $outputFormat = "text/xml; subtype=gml/3.1.1";
 // outputFormat whitelist
-$allowedOutputFormats = array (
-		"text/xml; subtype=gml/3.1.1",
-		"text/xml; subtype=gml/3.2",
-		"text/xml; subtype=gml/2.1.2",
-		"text/xml; subtype=gml/3.2.1",
-		"SHAPEZIP",
-		"application/json; subtype=geojson",
-		"application/openapi+json;version=3.0",
-		"text/csv",
-		"application/zip" 
-);
+$allowedOutputFormats = ["text/xml; subtype=gml/3.1.1", "text/xml; subtype=gml/3.2", "text/xml; subtype=gml/2.1.2", "text/xml; subtype=gml/3.2.1", "SHAPEZIP", "application/json; subtype=geojson", "application/openapi+json;version=3.0", "text/csv", "application/zip"];
 // outputFormat for pages - parameter f=...
-$allowedFormats = array (
-		"html",
-		"xml",
-		"json" 
-);
+$allowedFormats = ["html", "xml", "json"];
 //
 $newline = " ";
 
@@ -246,7 +202,7 @@ function gdalCountFeatures($features, $format, $layername){
 
 //Checks for problems that are not necessarily causing an error but returning wrong results when using GDAL
 function checkValidForGDAL($xmlString){
-	$xml = simplexml_load_string($xmlString);
+	$xml = simplexml_load_string((string) $xmlString);
 	if($xml){
 		if ($xml->getName() !== 'FeatureCollection') {
 			return false;
@@ -340,8 +296,8 @@ function calculateBboxFromGeojsonFcObject($geojsonList) {
         $geojsonBbox [$geojsonIndex]->miny = $minyF;
         $geojsonBbox [$geojsonIndex]->maxx = $maxxF;
         $geojsonBbox [$geojsonIndex]->maxy = $maxyF;*/
-        $bboxFc = array($minxFC, $minyFC, $maxxFC, $maxyFC);
-        
+        $bboxFc = [$minxFC, $minyFC, $maxxFC, $maxyFC];
+
         //return array("bbxFc"=>$bboxFc, "bbxArray"=>);
         return $bboxFc;
         // $e = new mb_exception("bbox featurecollection: minxFC:".$minxFC." minyFC:".$minyFC." maxxFC:".$maxxFC." maxyFC:".$maxyFC."");
@@ -351,15 +307,15 @@ function calculateBboxFromGeojsonFcObject($geojsonList) {
 // for digest authentication
 // function to get relevant user information from mb db
 function getUserInfo($mbUsername, $mbEmail) {
-	$result = array();
-	if (preg_match('#[@]#', $mbEmail)) {
+	$result = [];
+	if (preg_match('#[@]#', (string) $mbEmail)) {
 		$sql = "SELECT mb_user_id, mb_user_digest, mb_user_password, password FROM mb_user where mb_user_name = $1 AND mb_user_email = $2";
-		$v = array($mbUsername, $mbEmail);
-		$t = array("s", "s");
+		$v = [$mbUsername, $mbEmail];
+		$t = ["s", "s"];
 	} else {
 		$sql = "SELECT mb_user_id, mb_user_aldigest As mb_user_digest, mb_user_password, password FROM mb_user where mb_user_name = $1";
-		$v = array($mbUsername);
-		$t = array("s");
+		$v = [$mbUsername];
+		$t = ["s"];
 	}
 	$res = db_prep_query($sql, $v, $t);
 	if (!($row = db_fetch_array($res))) {
@@ -374,12 +330,12 @@ function getUserInfo($mbUsername, $mbEmail) {
 }
 function http_digest_parse($txt) {
 	// protect against missing data
-	$needed_parts = array('nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop' => 1, 'username' => 1, 'uri' => 1, 'response' => 1);
-	$data = array();
+	$needed_parts = ['nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop' => 1, 'username' => 1, 'uri' => 1, 'response' => 1];
+	$data = [];
 	$keys = implode('|', array_keys($needed_parts));
-	preg_match_all('@(' . $keys . ')=(?:([\'"])([^\2]+?)\2|([^\s,]+))@', $txt, $matches, PREG_SET_ORDER);
+	preg_match_all('@(' . $keys . ')=(?:([\'"])([^\2]+?)\2|([^\s,]+))@', (string) $txt, $matches, PREG_SET_ORDER);
 	foreach ($matches as $m) {
-		$data[$m[1]] = $m[3] ? $m[3] : $m[4];
+		$data[$m[1]] = $m[3] ?: $m[4];
 		unset($needed_parts[$m[1]]);
 	}
 	return $needed_parts ? false : $data;
@@ -390,7 +346,7 @@ function getNonce() {
 	return md5(date('Y-m-d H:i', $time) . ':' . $_SERVER['REMOTE_ADDR'] . ':' . NONCEKEY);
 }
 function microtime_float() {
-	list ( $usec, $sec ) = explode ( " ", microtime () );
+	[$usec, $sec] = explode ( " ", microtime () );
 	return (( float ) $usec + ( float ) $sec);
 }
 // outputFormatter for attribute values - urls, ...
@@ -401,7 +357,7 @@ function string2html($string) {
 	return $string;
 }
 function delTotalFromQuery($paramName, $url) {
-	$query = explode ( "?", $url );
+	$query = explode ( "?", (string) $url );
 	parse_str ( $query [1], $vars );
 	if (is_array ( $paramName )) {
 		foreach ( $paramName as $param ) {
@@ -424,25 +380,25 @@ function getJsonSchemaObject($feature) {
 		// cache schema resolving!
 		if ($cache->isActive) {
 			// $e = new mb_exception("php/mod_linkedDataProxy.php - cache is active!");
-			if ($cache->cachedVariableExists ( md5 ( $url ) ) == false) {
+			if ($cache->cachedVariableExists ( md5 ( (string) $url ) ) == false) {
 				$schemaContextConnector = new Connector ();
 				$file = $schemaContextConnector->load ( $url );
-				$returnObject->schema = json_decode ( $file );
+				$returnObject->schema = json_decode ( (string) $file );
 				if ($returnObject->schema == false) {
 					$returnObject->success = false;
 				} else {
 					$returnObject->success = true;
-					$cache->cachedVariableAdd ( md5 ( $url ), $returnObject );
+					$cache->cachedVariableAdd ( md5 ( (string) $url ), $returnObject );
 				}
 			} else {
 				// $e = new mb_exception("php/mod_linkedDataProxy.php - read json-schema from cache!");
-				$returnObject = $cache->cachedVariableFetch ( md5 ( $url ) );
+				$returnObject = $cache->cachedVariableFetch ( md5 ( (string) $url ) );
 			}
 		} else {
 			//$e = new mb_exception ( "php/mod_linkedDataProxy.php - cache is inactive" );
 			$schemaContextConnector = new Connector ();
 			$file = $schemaContextConnector->load ( $url );
-			$returnObject->schema = json_decode ( $file );
+			$returnObject->schema = json_decode ( (string) $file );
 			if ($returnObject->schema == false) {
 				$returnObject->success = false;
 			} else {
@@ -456,9 +412,9 @@ function getJsonSchemaObject($feature) {
 	}
 }
 function mapFeatureKeys($featureList, $schemaObject) {
-	$featureListNew = array();
+	$featureListNew = [];
 	foreach ( $featureList as $feature ) {
-		$featureNew = array();
+		$featureNew = [];
 		foreach ( $feature->properties as $key => $value ) {
 			if (isset ( $schemaObject->properties->{$key}->title )) {
 				$attributeTitle = $schemaObject->properties->{$key}->title;
@@ -485,7 +441,7 @@ function getJsonLdObject($feature) {
 	    if (filter_var($url, FILTER_VALIDATE_URL) !== false) {
 	        $schemaContextConnector = new Connector ();
 	        $file = $schemaContextConnector->load ( $url );
-	        $returnObject->schema = json_decode ( $file );
+	        $returnObject->schema = json_decode ( (string) $file );
 	        if ($returnObject->schema == false) {
 	            $returnObject->success = false;
 	        } else {
@@ -493,7 +449,7 @@ function getJsonLdObject($feature) {
 	        }
 	        $returnObject->url = $url;
 	    } else {
-	        $returnObject->schema = json_decode ( $url );
+	        $returnObject->schema = json_decode ( (string) $url );
 	        if ($returnObject->schema == false) {
 	            $returnObject->success = false;
 	        } else {
@@ -507,7 +463,7 @@ function getJsonLdObject($feature) {
 	}
 }
 function getOpenApi3JsonComponentTemplate() {
-	$openApi3JsonComponent = <<<JSON
+	$openApi3JsonComponent = <<<JSON_WRAP
 {  "components" : {
     "schemas" : {
       "exception" : {
@@ -832,7 +788,7 @@ function getOpenApi3JsonComponentTemplate() {
       "time" : {
         "name" : "time",
         "in" : "query",
-        "description" : "Either a date-time or a period string that adheres to RFC 3339. Examples:  * A date-time: 2018-02-12T23:20:50Z * A period: 2018-02-12T00:00:00Z/2018-03-18T12:31:12Z or \"2018-02-12T00:00:00Z/P1M6DT12H31M12S  Only features that have a temporal property that intersects the value of `time` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.",
+        "description" : "Either a date-time or a period string that adheres to RFC 3339. Examples:  * A date-time: 2018-02-12T23:20:50Z * A period: 2018-02-12T00:00:00Z/2018-03-18T12:31:12Z or \\"2018-02-12T00:00:00Z/P1M6DT12H31M12S  Only features that have a temporal property that intersects the value of `time` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.",
         "required" : false,
         "style" : "form",
         "explode" : false,
@@ -843,7 +799,7 @@ function getOpenApi3JsonComponentTemplate() {
       "resultType" : {
         "name" : "resultType",
         "in" : "query",
-        "description" : "This service will respond to a query in one of two ways (excluding an exception response). It may either generate a complete response document containing resources that satisfy the operation or it may simply generate an empty response container that indicates the count of the total number of resources that the operation would return. Which of these two responses is generated is determined by the value of the optional resultType parameter. The allowed values for this parameter are results and hits. If the value of the resultType parameter is set to \"results\", the server will generate a complete response document containing resources that satisfy the operation. If the value of the resultType attribute is set to hits, the server will generate an empty response document containing no resource instances. Default = results.",
+        "description" : "This service will respond to a query in one of two ways (excluding an exception response). It may either generate a complete response document containing resources that satisfy the operation or it may simply generate an empty response container that indicates the count of the total number of resources that the operation would return. Which of these two responses is generated is determined by the value of the optional resultType parameter. The allowed values for this parameter are results and hits. If the value of the resultType parameter is set to \\"results\\", the server will generate a complete response document containing resources that satisfy the operation. If the value of the resultType attribute is set to hits, the server will generate an empty response document containing no resource instances. Default = results.",
         "required" : false,
         "style" : "form",
         "explode" : false,
@@ -880,7 +836,7 @@ function getOpenApi3JsonComponentTemplate() {
     }
   }
 }
-JSON;
+JSON_WRAP;
 	return $openApi3JsonComponent;
 }
 
@@ -897,26 +853,20 @@ function get2Rest($requestString) {
 	if ($behindRewrite == true) {
 		$e = new mb_notice ( "php/mod_linkedDataProxy.php function get2Rest string to exchange: " . $requestString );
 		// get query part:
-		if (strpos ( $requestString, "?" ) !== false) {
-			$queryPartArray = explode ( "?", $requestString );
+		if (str_contains ( (string) $requestString, "?" )) {
+			$queryPartArray = explode ( "?", (string) $requestString );
 			$queryString = $queryPartArray [1];
 		} else {
 			$queryString = $requestString;
 		}
 		$e = new mb_notice ( "php/mod_linkedDataProxy.php function get2Rest found query: " . $queryString );
 		// map queryString to rest url
-		parse_str ( $queryString, $requestArray );
+		parse_str ( (string) $queryString, $requestArray );
 		$e = new mb_notice ( "php/mod_linkedDataProxy.php function get2Rest array of get parameters: " . json_encode ( $requestArray ) );
 		// initialize new api path
 		$apiPath = ''; // would be relative
 		               // parts of api to extract from query
-		$apiParams = array (
-				"wfsid",
-				"collections",
-				"collection",
-				"items",
-				"item" 
-		);
+		$apiParams = ["wfsid", "collections", "collection", "items", "item"];
 		// build path from params
 		if (isset ( $requestArray ['wfsid'] ) && $requestArray ['wfsid'] != "") {
 			$apiPath .= "/" . $requestArray ['wfsid'] . "";
@@ -973,8 +923,8 @@ function get2Rest($requestString) {
 if (isset ( $_REQUEST ["api"] ) && $_REQUEST ["api"] != "") {
 	$e = new mb_notice ( "php/mod_linkedDataProxy.php try to read GET parameters from api: " . $_REQUEST ["api"] );
 	// first get whole request "api" divide it by ? to distinguish query parameters from rest uris
-	if (strpos ( $_REQUEST ["api"], "?" ) !== false) {
-		$pathArray = explode ( '?', $_REQUEST ["api"] );
+	if (str_contains ( (string) $_REQUEST ["api"], "?" )) {
+		$pathArray = explode ( '?', (string) $_REQUEST ["api"] );
 		$restPath = $pathArray [0];
 		$queryString = $pathArray [1];
 		// TODO foreach $queryString object generate one $_REQUEST[] variable - if allowed!!!!! - make a lookup table
@@ -982,9 +932,9 @@ if (isset ( $_REQUEST ["api"] ) && $_REQUEST ["api"] != "") {
 		$restPath = $_REQUEST ["api"];
 	}
 	// parse api - split by / - template: {wfsid}/collection/{collectionId}/items/{itemId}
-	$requestParams = explode ( "/", $restPath );
+	$requestParams = explode ( "/", (string) $restPath );
 	// array to store the request params from rest api - merge them afterward to get right request_uri!
-	$apiParamsArray = array ();
+	$apiParamsArray = [];
 	switch (count ( $requestParams )) {
 		case "1" :
 			$_REQUEST ["wfsid"] = $requestParams [0];
@@ -1048,7 +998,7 @@ if (isset ( $_REQUEST ["wfsid"] ) & $_REQUEST ["wfsid"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["wfsid"];
 	$pattern = '/^[\d,]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>wfsid</b> is not valid (integer or cs integer list).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter wfsid is not valid (integer or cs integer list)");
@@ -1061,7 +1011,7 @@ if (isset ( $_REQUEST ["fid"] ) & $_REQUEST ["fid"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["fid"];
 	$pattern = '/^[0-9a-zA-Z\.\-_:]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>fid</b> is not valid.<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter fid is not valid ");
@@ -1074,7 +1024,7 @@ if (isset ( $_REQUEST ["p"] ) & $_REQUEST ["p"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["p"];
 	$pattern = '/^[\d]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>p</b> is not valid (integer).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter p is not valid ");
@@ -1099,7 +1049,7 @@ if (isset ( $_REQUEST ["offset"] ) & $_REQUEST ["offset"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["offset"];
 	$pattern = '/^[\d]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>offset</b> is not valid (integer).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter offset is not valid ");
@@ -1113,7 +1063,7 @@ if (isset ( $_REQUEST ["collection"] ) & $_REQUEST ["collection"] != "") {
 	$testMatch = $_REQUEST ["collection"];
 	$pattern = '/^[0-9a-zA-Z\.\-
 _:]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>collection</b> is not valid (ogc resource name or id).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter collection is not valid ");
@@ -1125,10 +1075,7 @@ _:]*$/';
 if (isset ( $_REQUEST ["collections"] ) & $_REQUEST ["collections"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["collections"];
-	if (! in_array ( $testMatch, array (
-			"all",
-			"api" 
-	) )) {
+	if (! in_array ( $testMatch, ["all", "api"] )) {
 		echo 'Parameter <b>collections</b> is not valid (maybe all or api).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter collections is not valid ");
 		die ();
@@ -1139,9 +1086,7 @@ if (isset ( $_REQUEST ["collections"] ) & $_REQUEST ["collections"] != "") {
 if (isset ( $_REQUEST ["items"] ) & $_REQUEST ["items"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["items"];
-	if (! in_array ( $testMatch, array (
-			"all" 
-	) )) {
+	if (! in_array ( $testMatch, ["all"] )) {
 		echo 'Parameter <b>items</b> is not valid (maybe all).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter items is not valid ");
 		die ();
@@ -1153,7 +1098,7 @@ if (isset ( $_REQUEST ["item"] ) & $_REQUEST ["item"] != "") {
 	// reg expr
 	$testMatch = $_REQUEST ["item"];
 	$pattern = '/^[0-9a-zA-Z\.\-_:]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Parameter <b>item</b> is not valid (/^[0-9a-zA-Z\.\-_:]*$/).<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter item is not valid ");
@@ -1194,7 +1139,7 @@ if (isset ( $_REQUEST ["bbox"] ) & $_REQUEST ["bbox"] != "") {
 	$testMatch = $_REQUEST ["bbox"];
 	// $pattern = '/^[-\d,]*$/';
 	$pattern = '/^[-+]?([0-9]*\.[0-9]+|[0-9]+)*$/';
-	$testMatchArray = explode ( ',', $testMatch );
+	$testMatchArray = explode ( ',', (string) $testMatch );
 	if (count ( $testMatchArray ) != 4) {
 		echo 'Parameter <b>bbox</b> has a wrong amount of entries.<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter bbox has a wrong amount of entries");
@@ -1244,14 +1189,8 @@ if (isset ( $_REQUEST ["bbox"] ) & $_REQUEST ["bbox"] != "") {
 if (isset ( $_REQUEST ["nativeJson"] ) & $_REQUEST ["nativeJson"] != "") {
 	// validate to csv integer list
 	$testMatch = $_REQUEST ["nativeJson"];
-	if (! in_array ( $testMatch, array (
-			"true",
-			"false" 
-	) )) {
-		echo 'Parameter <b>nativeJson</b> is not valid - must be one of: ' . implode ( ',', array (
-				"true",
-				"false" 
-		) ) . '<br/>';
+	if (! in_array ( $testMatch, ["true", "false"] )) {
+		echo 'Parameter <b>nativeJson</b> is not valid - must be one of: ' . implode ( ',', ["true", "false"] ) . '<br/>';
 		$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter nativeJson has a wrong value");
 		die ();
 	}
@@ -1277,8 +1216,8 @@ $e = new mb_notice ( "php/linkedDataProxy.php: Mapping to GET Parameters: " . $w
 $_SERVER ['REQUEST_URI'] = delTotalFromQuery ( "api", $_SERVER ['REQUEST_URI'] );
 // add all other parameters
 if (isset ( $_REQUEST ['api'] ) && $_REQUEST ['api'] != "") {
-	if (strpos ( $_SERVER ['REQUEST_URI'], "?" ) !== false) {
-		$requestUriArray = explode ( "?", $_SERVER ['REQUEST_URI'] );
+	if (str_contains ( (string) $_SERVER ['REQUEST_URI'], "?" )) {
+		$requestUriArray = explode ( "?", (string) $_SERVER ['REQUEST_URI'] );
 		$_SERVER ['REQUEST_URI'] = $requestUriArray [0] . "?" . $wholeQuery;
 	} else {
 		$_SERVER ['REQUEST_URI'] = $wholeQuery;
@@ -1310,11 +1249,11 @@ $sql = "SELECT * FROM (SELECT wfs_id, wfs_version, wfs_abstract, wfs_title, wfs_
 if (count($excludeWfsIds) >= 1) {
     $sql .= " AND wfs_id NOT IN (".implode(",", $excludeWfsIds).")";
 }
-$v = array ();
-$t = array ();
+$v = [];
+$t = [];
 $res = db_prep_query ( $sql, $v, $t );
 $i = 0;
-$openWfsIds = array();
+$openWfsIds = [];
 while ( $row = db_fetch_array ( $res ) ) {
 	$openWfsIds[] = $row ['wfs_id'];
 	$i ++;
@@ -1324,7 +1263,7 @@ unset($i);
 //check if special wfs was choosen
 if (! isset ( $wfsid ) || $wfsid == "") {
 	// list all public available wfs which are classified as opendata!
-	$returnObject->service = array ();
+	$returnObject->service = [];
 	if ($restrictToOpenData == true) {
 	    $sql = "SELECT * FROM (SELECT wfs_id, wfs_version, wfs_abstract, wfs_title, wfs_owsproxy, fkey_termsofuse_id, wfs_getcapabilities, providername, fees FROM wfs INNER JOIN wfs_termsofuse ON wfs_id = fkey_wfs_id) AS wfs_tou INNER JOIN termsofuse ON fkey_termsofuse_id = termsofuse_id WHERE isopen = 1";
 	    if (count($excludeWfsIds) >= 1) {
@@ -1336,8 +1275,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 	        $sql .= " WHERE wfs_id NOT IN (".implode(",", $excludeWfsIds).")";
 	    }
 	}
-	$v = array ();
-	$t = array ();
+	$v = [];
+	$t = [];
 	$res = db_prep_query ( $sql, $v, $t );
 	$i = 0;
 	while ( $row = db_fetch_array ( $res ) ) {
@@ -1375,8 +1314,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 		// check authorization - see http_auth/http/index.php
 		// check if security proxy is activated
 		$sql = "SELECT wfs_owsproxy FROM wfs WHERE wfs_id = $1";
-		$v = array ($wfsid);
-		$t = array ('i');
+		$v = [$wfsid];
+		$t = ['i'];
 		$res = db_prep_query ( $sql, $v, $t );
 		while ( $row = db_fetch_array ( $res ) ) {
 			if (isset($row['wfs_owsproxy']) && $row['wfs_owsproxy'] != "") {
@@ -1405,7 +1344,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							header ( 'WWW-Authenticate: Digest realm="' . REALM . '",qop="auth",nonce="' . getNonce () . '",opaque="' . md5 ( REALM ) . '"' );
 							$e = new mb_exception("php/mod_linkedDataProxy.php: Login cancelled by user!");
 							die ( 'Login cancelled by user!' );
-							
+
 						}
 						// read out the header in an array
 						$requestHeaderArray = http_digest_parse ( $_SERVER ['PHP_AUTH_DIGEST'] );
@@ -1417,7 +1356,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							die ();
 						}
 						// get mb_username and email out of http_auth username string
-						$userIdentification = explode ( ';', $requestHeaderArray ['username'] );
+						$userIdentification = explode ( ';', (string) $requestHeaderArray ['username'] );
 						$mbUsername = $userIdentification [0];
 						$mbEmail = $userIdentification [1]; // not given in all circumstances
 						$userInformation = getUserInfo ( $mbUsername, $mbEmail );
@@ -1471,7 +1410,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							die ( 'Authentication failed - sorry, you have to authenticate once more!' );
 						} else {
 							// get mb_username and email out of http_auth username string
-							$userIdentification = explode ( ';', $_SERVER ['PHP_AUTH_USER'] );
+							$userIdentification = explode ( ';', (string) $_SERVER ['PHP_AUTH_USER'] );
 							$mbUsername = $userIdentification [0];
 							$mbEmail = $userIdentification [1]; // not given in all circumstances
 							$userInformation = getUserInfo ( $mbUsername, $mbEmail );
@@ -1495,7 +1434,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							    $e = new mb_exception("php/mod_linkedDataProxy.php: User with name: " . $mbUsername . " and email: " . $mbEmail . " has no password which is stored in a secure way. - Please login at the portal to generate one!");
 								die ( 'User with name: ' . $mbUsername . ' and email: ' . $mbEmail . ' has no password which is stored in a secure way. - Please login at the portal to generate one!' );
 							}
-							if (password_verify ( $_SERVER ['PHP_AUTH_PW'], $userInformation [3] )) {
+							if (password_verify ( (string) $_SERVER ['PHP_AUTH_PW'], (string) $userInformation [3] )) {
 								$userId = $userInformation [0];
 							} else {
 								$userId = $userInformation [0];
@@ -1604,13 +1543,11 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				$apiDescriptionJson->tags [1]->name = "Features";
 				$apiDescriptionJson->tags [1]->description = "Access to data (features).";
 				// path / ****************************************************************
-				$apiDescriptionJson->paths->{'/'}->get->tags = array (
-						"Capabilities" 
-				);
+				$apiDescriptionJson->paths->{'/'}->get->tags = ["Capabilities"];
 				$apiDescriptionJson->paths->{'/'}->get->summary = "landing page of this API";
 				$apiDescriptionJson->paths->{'/'}->get->description = "The landing page provides links to the API definition, the Conformance statements and the metadata about the feature data in this dataset.";
 				$apiDescriptionJson->paths->{'/'}->get->operationId = "getLandingPage";
-				$apiDescriptionJson->paths->{'/'}->get->parameters = array ();
+				$apiDescriptionJson->paths->{'/'}->get->parameters = [];
 				
 				$apiDescriptionJson->paths->{'/'}->get->responses->{'200'}->description = "links to the API capabilities and the feature collections shared by this API.";
 				$apiDescriptionJson->paths->{'/'}->get->responses->{'200'}->content->{'application/json'}->schema->{'$ref'} = "#/components/schemas/root";
@@ -1620,12 +1557,10 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				$apiDescriptionJson->paths->{'/'}->get->responses->{'default'}->content->{'text/html'}->schema->{'type'} = "string";
 				// path / ****************************************************************
 				// path /api ****************************************************************
-				$apiDescriptionJson->paths->{'/api'}->get->tags = array (
-						"Capabilities" 
-				);
+				$apiDescriptionJson->paths->{'/api'}->get->tags = ["Capabilities"];
 				$apiDescriptionJson->paths->{'/api'}->get->summary = "the API description - this document";
 				$apiDescriptionJson->paths->{'/api'}->get->operationId = "getApiDescription";
-				$apiDescriptionJson->paths->{'/api'}->get->parameters = array ();
+				$apiDescriptionJson->paths->{'/api'}->get->parameters = [];
 				
 				$apiDescriptionJson->paths->{'/api'}->get->responses->{'200'}->description = "The formal documentation of this API according to the OpenAPI specification, version 3.0. I.e., this document.";
 				$apiDescriptionJson->paths->{'/api'}->get->responses->{'200'}->content->{'application/openapi+json;version=3.0'}->schema->type = "object";
@@ -1635,13 +1570,11 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				$apiDescriptionJson->paths->{'/api'}->get->responses->{'default'}->content->{'text/html'}->schema->{'type'} = "string";
 				// path /api ****************************************************************
 				// path /conformance ****************************************************************
-				$apiDescriptionJson->paths->{'/conformance'}->get->tags = array (
-						"Capabilities" 
-				);
+				$apiDescriptionJson->paths->{'/conformance'}->get->tags = ["Capabilities"];
 				$apiDescriptionJson->paths->{'/conformance'}->get->summary = "information about standards that this API conforms to";
 				$apiDescriptionJson->paths->{'/conformance'}->get->description = "list all requirements classes specified in a standard (e.g., WFS 3.0 Part 1: Core) that the server conforms to";
 				$apiDescriptionJson->paths->{'/conformance'}->get->operationId = "getRequirementsClasses";
-				$apiDescriptionJson->paths->{'/conformance'}->get->parameters = array ();
+				$apiDescriptionJson->paths->{'/conformance'}->get->parameters = [];
 				
 				$apiDescriptionJson->paths->{'/conformance'}->get->responses->{'200'}->description = "the URIs of all requirements classes supported by the server";
 				$apiDescriptionJson->paths->{'/conformance'}->get->responses->{'200'}->content->{'application/json'}->schema->{'$ref'} = "#/components/schemas/req-classes";
@@ -1649,12 +1582,10 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				$apiDescriptionJson->paths->{'/conformance'}->get->responses->{'default'}->content->{'application/json'}->schema->{'$ref'} = "#/components/schemas/exception";
 				// path /conformance ****************************************************************
 				// path /collections ****************************************************************
-				$apiDescriptionJson->paths->{'/collections'}->get->tags = array (
-						"Capabilities" 
-				);
+				$apiDescriptionJson->paths->{'/collections'}->get->tags = ["Capabilities"];
 				$apiDescriptionJson->paths->{'/collections'}->get->summary = "describe the feature collections in the dataset";
 				$apiDescriptionJson->paths->{'/collections'}->get->operationId = "describeCollections";
-				$apiDescriptionJson->paths->{'/collections'}->get->parameters = array ();
+				$apiDescriptionJson->paths->{'/collections'}->get->parameters = [];
 				
 				$apiDescriptionJson->paths->{'/collections'}->get->responses->{'200'}->description = "Metadata about the feature collections shared by this API.";
 				$apiDescriptionJson->paths->{'/collections'}->get->responses->{'200'}->content->{'application/json'}->schema->{'$ref'} = "#/components/schemas/content";
@@ -1670,14 +1601,12 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				foreach ( $wfs->featureTypeArray as $featureType ) {
 					// path /collections ****************************************************************
 					$featuretypePathPart = '/collections/' . $featureType->name;
-					
-					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = array (
-							"Capabilities" 
-					);
+
+					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = ["Capabilities"];
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->summary = "describe the " . $featureType->title . " feature collection";
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->operationId = "describeCollection" . $featureType->name;
-					$apiDescriptionJson->paths->{$featuretypePathPart}->get->parameters = array ();
-					
+					$apiDescriptionJson->paths->{$featuretypePathPart}->get->parameters = [];
+
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->responses->{'200'}->description = "Metadata about the collection shared by this API.";
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->responses->{'200'}->content->{'application/geo+json'}->schema->{'$ref'} = "#/components/schemas/collectionInfo";
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->responses->{'200'}->content->{'text/html'}->schema->type = "string";
@@ -1686,21 +1615,12 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->responses->{'default'}->content->{'text/html'}->schema->{'type'} = "string";
 					// items *************************************************************************
 					$featuretypePathPart = '/collections/' . $featureType->name . '/items';
-					
-					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = array (
-							"Features" 
-					);
+
+					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = ["Features"];
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->summary = "retrieve features of " . $featureType->title . " feature collection";
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->operationId = "getFeatures" . $featureType->name;
 					// possible query filters:
-					$queryParams = array (
-							"f",
-							"limit",
-							"offset",
-							"bbox",
-							"resultType",
-							"properties" 
-					);
+					$queryParams = ["f", "limit", "offset", "bbox", "resultType", "properties"];
 					// TODO: crs, bbox-crs, maxAllowableOffset
 					foreach ( $queryParams as $param ) {
 						$apiDescriptionJson->paths->{$featuretypePathPart}->get->parameters []->{'$ref'} = "#/components/parameters/" . $param;
@@ -1715,18 +1635,12 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					// items *************************************************************************
 					// {items}/{featureId} *************************************************************************
 					$featuretypePathPart = '/collections/' . $featureType->name . '/items/{featureId}';
-					
-					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = array (
-							"Features" 
-					);
+
+					$apiDescriptionJson->paths->{$featuretypePathPart}->get->tags = ["Features"];
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->summary = "retrieve a " . $featureType->title;
 					$apiDescriptionJson->paths->{$featuretypePathPart}->get->operationId = "getFeature" . $featureType->name;
 					// possible query filters:
-					$queryParams = array (
-							"featureId",
-							"f",
-							"properties" 
-					);
+					$queryParams = ["featureId", "f", "properties"];
 					// TODO: crs, maxAllowableOffset
 					foreach ( $queryParams as $param ) {
 						$apiDescriptionJson->paths->{$featuretypePathPart}->get->parameters []->{'$ref'} = "#/components/parameters/" . $param;
@@ -1744,7 +1658,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					// TODO: remove not used elements
 				}
 				
-				$jsonTemplate = json_decode ( getOpenApi3JsonComponentTemplate () );
+				$jsonTemplate = json_decode ( (string) getOpenApi3JsonComponentTemplate () );
 				
 				$apiDescriptionJson->components = $jsonTemplate->components;
 				/*
@@ -1807,16 +1721,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				 *
 				 * $apiDescriptionJson->components->parameters->
 				 */
-				$paramArray = array (
-						"f",
-						"limit",
-						"offset",
-						"bbox",
-						"resultType",
-						"featureId",
-						"limitList",
-						"properties" 
-				); // TODO: relations, resolve, offsetList, crs, bbox-crs, maxAllowedOffset
+				$paramArray = ["f", "limit", "offset", "bbox", "resultType", "featureId", "limitList", "properties"]; // TODO: relations, resolve, offsetList, crs, bbox-crs, maxAllowedOffset
 				                                                                                                           // first draft - set only json based api description and give it back
 				header ( "Content-type: application/openapi+json;version=3.0" );
 				if ($corsHeader != false) {
@@ -1826,9 +1731,9 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				die ();
 			}
 			//
-			$returnObject->links = array ();
-			$returnObject->crs = array ();
-			$returnObject->collections = array ();
+			$returnObject->links = [];
+			$returnObject->crs = [];
+			$returnObject->collections = [];
 			$returnObject->links [0]->rel = "self";
 			$returnObject->links [0]->type = "application/json";
 			$returnObject->links [0]->title = "this document";
@@ -1862,13 +1767,13 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 			// ************************************************************************************************************************************
 			// collection / featuretype list
 			// ************************************************************************************************************************************
-			$collectionArray = array ();
+			$collectionArray = [];
 			$collectionCount = 0;
 			foreach ( $wfs->featureTypeArray as $featureType ) {
 				$returnObject->collections [$collectionCount]->name = $featureType->name;
 				$returnObject->collections [$collectionCount]->title = $featureType->title;
 				$returnObject->collections [$collectionCount]->description = $featureType->description;
-				$returnObject->collections [$collectionCount]->extent->spatial = array ();
+				$returnObject->collections [$collectionCount]->extent->spatial = [];
 				$returnObject->collections [$collectionCount]->links [0]->rel = "item";
 				$returnObject->collections [$collectionCount]->links [0]->type = "application/json";
 				$returnObject->collections [$collectionCount]->links [0]->title = $featureType->title . " as GeoJSON";
@@ -1884,8 +1789,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				//$e = new mb_exception("featuretype id: " . $featureType->id);
 				$sql = "SELECT uuid FROM mb_metadata WHERE metadata_id in (SELECT fkey_metadata_id FROM ows_relation_metadata WHERE fkey_featuretype_id = $1)";
 				//$sql = "SELECT wfs.wfs_version FROM wfs_featuretype INNER JOIN wfs ON wfs_featuretype.fkey_wfs_id = wfs.wfs_id WHERE wfs_featuretype.featuretype_id = $1";
-				$v = array($featureType->id);
-				$t = array('i');
+				$v = [$featureType->id];
+				$t = ['i'];
 				$res = db_prep_query($sql,$v,$t);
 				if (!$res) {
 					//$e = new mb_exception("No coupled dataset metadata found for featuretype with id:".$featureType->id);
@@ -1903,7 +1808,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					}
 				}
 				// TODO
-				$returnObject->collections [$collectionCount]->extent->crs = array ();
+				$returnObject->collections [$collectionCount]->extent->crs = [];
 				$collectionCount ++;
 			}
 		} else {
@@ -1928,10 +1833,10 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					$ftElementArray = $featureType->elementArray; // consists of name and type
 					                                              // get allowed attributes for filtering
 					//$e = new mb_exception("php/mod_linkedDataProxy.php: ftElementArray: ".json_encode($ftElementArray));
-					$ftAllowedAttributesArray = array ();
+					$ftAllowedAttributesArray = [];
 					foreach ( $ftElementArray as $ftElement ) {
 						// $e = new mb_exception($ftElement->name ." - " .$ftElement->type);
-					    if (in_array((string)$ftElement->type, array("string", "xsd:string", "int", "xsd:decimal", "decimal"))) {
+					    if (in_array((string)$ftElement->type, ["string", "xsd:string", "int", "xsd:decimal", "decimal"])) {
 							$ftAllowedAttributesArray [] = $ftElement->name;
 						}
 					}
@@ -1945,8 +1850,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 				$myFeatureType = $wfs->findFeatureTypeByName ( $ftName );
 				$geomColumnName = $wfs->findGeomColumnNameByFeaturetypeId ( $myFeatureType->id );
 				// check all allowed attributes to may be set by GET param
-				$stringFilterArray = array ();
-				$stringFilterActive = array ();
+				$stringFilterArray = [];
+				$stringFilterActive = [];
 				$stringFilterIndex = 0;
 				// $e = new mb_exception("test: count: ".count($ftAllowedAttributesArray));
 				foreach ( $ftAllowedAttributesArray as $ftAllowedAttribute ) {
@@ -1955,7 +1860,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						// $e = new mb_exception("found param:".$ftAllowedAttribute.": ".$_REQUEST[$ftAllowedAttribute]);
 						$testMatch = $_REQUEST [$ftAllowedAttribute];
 						$pattern = '/^[0-9a-zA-Z\.\-_:*]*$/';
-						if (! preg_match ( $pattern, $testMatch )) {
+						if (! preg_match ( $pattern, (string) $testMatch )) {
 							echo 'Parameter <b>' . $ftAllowedAttribute . '</b> is not valid (allowed string).<br/>';
 							$e = new mb_exception("php/mod_linkedDataProxy.php: Parameter " . $ftAllowedAttribute . " is not valid (allowed string)");
 							die ();
@@ -1973,15 +1878,15 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					$returnObject->name = $myFeatureType->name;
 					$returnObject->title = $myFeatureType->title;
 					$returnObject->description = $myFeatureType->abstract;
-					
+
 					$returnObject->extent->spatial = $myFeatureType->latLonBboxArray;
-					$returnObject->extent->temporal = array ();
-					$returnObject->links = array ();
+					$returnObject->extent->temporal = [];
+					$returnObject->links = [];
 					$returnObject->links [0]->rel = "item";
 					$returnObject->links [0]->type = "application/geo+json";
 					$returnObject->links [0]->title = $myFeatureType->title . " as GeoJSON";
 					$returnObject->links [0]->href = get2Rest ( $_SERVER ['REQUEST_URI'] . "&collection=" . $featureType->name . "&items=all&f=json" );
-					
+
 					// TODO: items in other formats, self, alternate
 					if ($items == "all") { // show items in list!
 					                       // reinitialize object!
@@ -1996,10 +1901,10 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						$returnObject->id = $ftName;
 						$returnObject->description = $myFeatureType->summary;
 						$returnObject->extent->spatial = $myFeatureType->latLonBboxArray;
-						$returnObject->extent->temporal = array ();
-						
+						$returnObject->extent->temporal = [];
+
 						$returnObject->type = "FeatureCollection";
-						$returnObject->links = array ();
+						$returnObject->links = [];
 						$returnObject->links [0]->rel = "self";
 						$returnObject->links [0]->type = "application/geo+json";
 						$returnObject->links [0]->title = "this document";
@@ -2036,7 +1941,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							 */
 							// TODO allow combination of different text filters!!!! - Not all wfs support this ?
 							if (false) {
-								if (strpos ( $stringFilterArray [0]->elementFilter, "*" ) !== false) {
+								if (str_contains ( $stringFilterArray [0]->elementFilter, "*" )) {
 									$textFilter .= '<fes:PropertyIsLike wildCard="*" singleChar="." escapeChar="\">';
 									$textFilter .= '<fes:ValueReference>' . $stringFilterArray [0]->elementName . '</fes:ValueReference>';
 									$textFilter .= '<fes:Literal>' . $stringFilterArray [0]->elementFilter . '</fes:Literal>';
@@ -2048,11 +1953,11 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 									$textFilter .= '</fes:PropertyIsEqualTo>';
 								}
 							} else {
-								$textFilterArray = array ();
+								$textFilterArray = [];
 								$textFilterIndex = 0;
 								$textFilterArray [$textFilterIndex] = "";
 								foreach ( $stringFilterArray as $stringFilter ) {
-									if (strpos ( $stringFilter->elementFilter, "*" ) !== false) {
+									if (str_contains ( $stringFilter->elementFilter, "*" )) {
 										$textFilterArray [$textFilterIndex] .= '<fes:PropertyIsLike wildCard="*" singleChar="." escapeChar="\">';
 										$textFilterArray [$textFilterIndex] .= '<fes:ValueReference>' . $stringFilter->elementName . '</fes:ValueReference>';
 										$textFilterArray [$textFilterIndex] .= '<fes:Literal>' . $stringFilter->elementFilter . '</fes:Literal>';
@@ -2092,12 +1997,12 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						 */
 						if ($cache->isActive) {
 							// if (false) {
-							if ($cache->cachedVariableExists ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( $filter ) ) ) == false) {
+							if ($cache->cachedVariableExists ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( (string) $filter ) ) ) == false) {
 								$numberOfObjects = $wfs->countFeatures ( $collection, $filter, "EPSG:4326", "2.0.0", false, $wfs_http_method );
-								$cache->cachedVariableAdd ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( $filter ) ), $numberOfObjects );
+								$cache->cachedVariableAdd ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( (string) $filter ) ), $numberOfObjects );
 							} else {
 								// $e = new mb_exception("read count from cache!");
-								$numberOfObjects = $cache->cachedVariableFetch ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( $filter ) ) );
+								$numberOfObjects = $cache->cachedVariableFetch ( md5 ( "count_" . $wfsid . "_" . $collection . "_" . md5 ( (string) $filter ) ) );
 							}
 							// $e = new mb_notice("http/classes/class_crs.php - store crs info to cache!");
 							// return true;
@@ -2111,15 +2016,15 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						if ($numberOfObjects == 0 || $numberOfObjects == false) {
 							$returnObject->success = false;
 							$returnObject->message = "No results found or an error occured - see server logs - please try it again! Use the back button!";
-							$returnObject->features = array();
+							$returnObject->features = [];
 							$e = new mb_exception("php/mod_linkedDataProxy.php: Feature count was not successful - nothing returned!");
-							
+
 							if ($f == "json") {
 							     header ( "application/json" );
 							     echo json_encode ( $returnObject );
 							     die ();
 							}
-							
+
 						}
 						// $e = new mb_exception("number of objects: ".$numberOfObjects);
 						// request first object and metadata
@@ -2164,16 +2069,16 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						// $returnObject->links[1]->href = $_SERVER['REQUEST_URI']."&p=".($page + 1);
 						$returnObject->links [2]->href = get2Rest ( $_SERVER ['REQUEST_URI'] . "&offset=" . $lastOffset . "&limit=" . $limit );
 						// number of hits per page? - how to get it from geojson result?
-						if (in_array ( 'application/json; subtype=geojson', explode ( ',', $ftOutputFormats ) ) && $nativeJson == true) {
+						if (in_array ( 'application/json; subtype=geojson', explode ( ',', (string) $ftOutputFormats ) ) && $nativeJson == true) {
 							// if (false) {
 							$features = $wfs->getFeaturePaging ( $ftName, $filter, "EPSG:4326", null, null, $limit, $startIndex, "2.0.0", 'application/json; subtype=geojson', $wfs_http_method );
 							$gmlFeatureCache = $features;
-							$geojsonList = json_decode ( $features );
+							$geojsonList = json_decode ( (string) $features );
 							// native json from wfs may not have bbox and gml_id attribute !!!!!!!!!
 							// bbox has to be calculated from result!
 							// $e = new mb_exception("features from wfs: " . $features);
 							// $e = new mb_exception("bbox feature from wfs: " . json_encode($geojsonList->bbox));
-							$geojsonBbox = array ();
+							$geojsonBbox = [];
 							$geojsonIndex = 0;
 							$minxFC = 90;
 							$minyFC = 180;
@@ -2289,7 +2194,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						} else { //when native geojson is not requested - gml is used 
 						    $wfsVersion = $wfs->getVersion();
 						    $e = new mb_notice("php/mod_linkedDataProxy.php: wfs version for getfeature: " . $wfsVersion);
-						    
+
 							$timeBeforeWfsRequest = microtime(true);
 						    //$e = new mb_exception("php/mod_linkedDataProxy.php: supported output formats: ".json_encode($ftOutputFormats));
 							$features = $wfs->getFeaturePaging ( $ftName, $filter, "EPSG:4326", null, null, $limit, $startIndex, "2.0.0", false, $wfs_http_method );
@@ -2304,9 +2209,9 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							    //$e = new mb_exception("php/mod_linkedDataProxy.php: use gdal");
 							    $geojson = gdalGml2geojson($features);
 							    //$e = new mb_exception("php/mod_linkedDataProxy.php: feature count: " . gdalCountFeatures($features, 'GML', $ftName));
-							    
+
 							    if ($geojson != false) {
-    							    $geojsonList = json_decode($geojson);
+    							    $geojsonList = json_decode((string) $geojson);
     							    /*
     							     *https://datatracker.ietf.org/doc/html/rfc7946:  The coordinate reference system for all GeoJSON coordinates is a
                                        geographic coordinate reference system, using the World Geodetic
@@ -2333,7 +2238,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
     							    $minyFC = $geojsonList->bbox[0];
     							    $maxxFC = $geojsonList->bbox[3];
     							    $maxyFC = $geojsonList->bbox[2];
-    							    $geojsonBbox = array ();
+    							    $geojsonBbox = [];
     							    $geojsonBboxIndex = 0;
     							    foreach ($geojsonList->features as $feature) {
     							        $geojsonBbox[$geojsonBboxIndex]->minx = $feature->bbox[1];
@@ -2369,8 +2274,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
     							// $e = new mb_exception("geojson from mb class: ".json_encode($gml3Object));
     							$geojsonList = new stdClass ();
     							$geojsonList->type = "FeatureCollection";
-    							$geojsonList->features = array ();
-    							$geojsonBbox = array ();
+    							$geojsonList->features = [];
+    							$geojsonBbox = [];
     							$geojsonIndex = 0;
     							$minxFC = 90;
     							$minyFC = 180;
@@ -2416,8 +2321,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
     									$maxyFC = $geojsonBbox [$geojsonIndex]->maxy;
     								}
     								// get geomtype
-    								$geomType = json_decode ( $mbFeature->toGeoJSON () )->geometry->type;
-    								$geojsonList->features [] = json_decode ( $mbFeature->toGeoJSON () );
+    								$geomType = json_decode ( (string) $mbFeature->toGeoJSON () )->geometry->type;
+    								$geojsonList->features [] = json_decode ( (string) $mbFeature->toGeoJSON () );
     								// free memory
     								unset ( $gml3Object->featureCollection->featureArray [$geojsonIndex] );
     								$geojsonIndex ++;
@@ -2455,7 +2360,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 							$geoJsonVariable .= "var feature_" . $geomType . "=" . json_encode ( $geojsonList ) . ";";
 							$geoJsonVariable .= $newline . "</script>" . $newline;
 						}
-						
+
 						$usedProxyTime = microtime_float () - $proxyStartTime;
 						$returnObject->numberMatched = $numberOfObjects;
 						$returnObject->numberReturned = $geojsonIndex;
@@ -2480,7 +2385,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						// *****************************************************************************
 						$returnObject->features = $geojsonList->features;
 					}
-					
+
 					// $e = new mb_exception("wfsid: ".$wfsid." - collection: ".$collection." - item: ".$item);
 				} else {
 					// $e = new mb_exception("wfsid: ".$wfsid." - collection: ".$collection." - item: ".$item);
@@ -2488,11 +2393,11 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					// item part!!!
 					// ************************************************************************************************************************************
 					// $e = new mb_exception("wfsid: ".$wfsid." - collection: ".$collection." - item: ".$item);
-					if (in_array ( 'application/json; subtype=geojson', explode ( ',', $ftOutputFormats ) ) && $nativeJson == true) {
+					if (in_array ( 'application/json; subtype=geojson', explode ( ',', (string) $ftOutputFormats ) ) && $nativeJson == true) {
 						$features = $wfs->getFeatureById ( $collection, 'application/json; subtype=geojson', $item, "2.0.0", "EPSG:4326" );
 						$gmlFeatureCache = $features;
-						$geojsonList = json_decode ( $features );
-						$geojsonBbox = array ();
+						$geojsonList = json_decode ( (string) $features );
+						$geojsonBbox = [];
 						$geojsonIndex = 0;
 						$minxFC = 90;
 						$minyFC = 180;
@@ -2618,7 +2523,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 					        }   
 					        $geojson = gdalGml2geojson($features);
 					        if ($geojson !== false) {
-    					        $geojsonList = json_decode($geojson);							    
+    					        $geojsonList = json_decode((string) $geojson);							    
     					        //extract bbox from geojson
     					        //$geojsonBbox = $geojsonList->bbox;
     					        $geojsonBbox[0] = $geojsonList->bbox;
@@ -2652,8 +2557,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
     						//$e = new mb_exception("after creation of object!");
     						$geojsonList = new stdClass ();
     						$geojsonList->type = "FeatureCollection";
-    						$geojsonList->features = array ();
-    						$geojsonBbox = array ();
+    						$geojsonList->features = [];
+    						$geojsonBbox = [];
     						$geojsonIndex = 0;
     						$minxFC = 90;
     						$minyFC = 180;
@@ -2690,8 +2595,8 @@ if (! isset ( $wfsid ) || $wfsid == "") {
     								$maxyFC = $geojsonBbox [$geojsonIndex]->maxy;
     							}
     							// get geomtype
-    							$geomType = json_decode ( $mbFeature->toGeoJSON () )->geometry->type;
-    							$geojsonList->features [] = json_decode ( $mbFeature->toGeoJSON () );
+    							$geomType = json_decode ( (string) $mbFeature->toGeoJSON () )->geometry->type;
+    							$geojsonList->features [] = json_decode ( (string) $mbFeature->toGeoJSON () );
     							$geojsonIndex ++;
     						}
     						$e = new mb_exception("php/mod_linkedDataProxy.php: memory usage with parsing gml3 by mapbender: ".memory_get_usage() / 1000000);
@@ -2742,7 +2647,7 @@ if (! isset ( $wfsid ) || $wfsid == "") {
 						    $geojsonListLdNew->{'@context'} = $resolveJsonLd->schema;
 						    $geojsonListLdNew->{'@type'} = "object_type";
 						    foreach ($resolveJsonLd->schema as $key => $value) {
-						        if (!in_array($key, array('schema', 'object_type'))) {
+						        if (!in_array($key, ['schema', 'object_type'])) {
 						            $geojsonListLdNew->{$key} = $geojsonListLd->{$key};
 						        }
 						    }
@@ -2917,7 +2822,7 @@ switch ($f) {
 		/*
 		$js2 .= "	var map = L.map('map').setView([50, 7.44], 7);";
 		$js2 .= "	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?";
-		$js2 .= "access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {";
+		$js2 .= "access_token=YOUR_MAPBOX_ACCESS_TOKEN', {";
 		$js2 .= "		maxZoom: 18,";
 		$js2 .= "		attribution: 'Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, ' +";
 		$js2 .= "			'<a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, ' +";
@@ -2988,72 +2893,19 @@ switch ($f) {
 			$html .= '</ol>';
 		} else {
 			if (! isset ( $collection ) || $collections == 'all') {
-				$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array (
-						"f",
-						"wfsid",
-						"nativeJson" 
-				), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
+				$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( ["f", "wfsid", "nativeJson"], $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
 				$html .= '<li class="breadcrumb-item active">' . $returnObject->title . '</li>' . $newline;
 				$html .= '</ol>';
 			} else {
 				if (! isset ( $item ) || $items == 'all') {
-					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array_merge ( array (
-							"f",
-							"wfsid",
-							"collection",
-							"collections",
-							"item",
-							"items",
-							"limit",
-							"offset",
-							"bbox",
-							"nativeJson" 
-					), $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
-					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array_merge ( array (
-							"f",
-							"collection",
-							"collections",
-							"item",
-							"items",
-							"limit",
-							"offset",
-							"bbox",
-							"nativeJson" 
-					), $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">' . $returnObject->serviceTitle . '</a></li>' . $newline;
+					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( array_merge ( ["f", "wfsid", "collection", "collections", "item", "items", "limit", "offset", "bbox", "nativeJson"], $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
+					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( array_merge ( ["f", "collection", "collections", "item", "items", "limit", "offset", "bbox", "nativeJson"], $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">' . $returnObject->serviceTitle . '</a></li>' . $newline;
 					$html .= '<li class="breadcrumb-item active">' . $returnObject->collectionTitle . '</li>' . $newline;
 					$html .= '</ol>';
 				} else {
-					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array_merge ( array (
-							"f",
-							"wfsid",
-							"collection",
-							"collections",
-							"item",
-							"items",
-							"limit",
-							"offset",
-							"bbox",
-							"nativeJson" 
-					), $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
-					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array_merge ( array (
-							"f",
-							"collection",
-							"collections",
-							"item",
-							"items",
-							"limit",
-							"offset",
-							"bbox",
-							"nativeJson" 
-					), $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">' . $returnObject->serviceTitle . '</a></li>' . $newline;
-					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( array_merge ( array (
-							"f",
-							"item",
-							"limit",
-							"offset",
-							"bbox",
-							"nativeJson" 
-					), $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) . '&items=all' ) . '">' . $returnObject->collectionTitle . '</a></li>' . $newline;
+					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( array_merge ( ["f", "wfsid", "collection", "collections", "item", "items", "limit", "offset", "bbox", "nativeJson"], $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">Datasets</a></li>' . $newline; // TODO - use base uri
+					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( array_merge ( ["f", "collection", "collections", "item", "items", "limit", "offset", "bbox", "nativeJson"], $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) ) . '">' . $returnObject->serviceTitle . '</a></li>' . $newline;
+					$html .= '<li class="breadcrumb-item"><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( array_merge ( ["f", "item", "limit", "offset", "bbox", "nativeJson"], $stringFilterActive ), $_SERVER ['REQUEST_URI'] ), '?' ) . '&items=all' ) . '">' . $returnObject->collectionTitle . '</a></li>' . $newline;
 					$html .= '<li class="breadcrumb-item active">' . $returnObject->id . '</li>' . $newline;
 					$html .= '</ol>';
 				}
@@ -3061,22 +2913,22 @@ switch ($f) {
 			// other formats ! for collection, item, ...
 			// if (!isset($item)) {
 			$html .= '<ul class="list-separated m-0 p-0 text-muted">' . $newline;
-			$html .= '    <li><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=json' ) . '" target="_blank">GeoJSON</a></li>' . $newline;
+			$html .= '    <li><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=json' ) . '" target="_blank">GeoJSON</a></li>' . $newline;
 			if (isset ( $collection ) || $collections == 'all') {
-				$html .= '    <li><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=xml' ) . '" target="_blank">GML</a></li>' . $newline;
+				$html .= '    <li><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=xml' ) . '" target="_blank">GML</a></li>' . $newline;
 				//Ticket #8549: Allowing to directly load the geojson in mapclient and by that pusblishing encoded json url 
 				if ($collections != 'all' && (
 					(defined('MAPVIEWER_FEATURE_LIMIT') && $limit <= MAPVIEWER_FEATURE_LIMIT) ||
 					(!defined('MAPVIEWER_FEATURE_LIMIT') && $limit <= 200)
 				)){
-					$urlJSON = get2Rest ( rtrim ( delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=json' );
+					$urlJSON = get2Rest ( rtrim ( (string) delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=json' );
 					//Encoded urlJson
-					$urlJSONEncoded = urlencode ( $urlJSON );
+					$urlJSONEncoded = urlencode ( (string) $urlJSON );
 					// Add map icon with link to /mapbender/frames/index.php?GEOJSON=...
 					$html .= '    <li style="display:inline;"><a href="#" onclick="window.open(\'//' . $_SERVER['HTTP_HOST'] . '/mapbender/frames/index.php?lang=de&gui_id='.(defined('PUBLIC_USER_DEFAULT_GUI') ? PUBLIC_USER_DEFAULT_GUI : 'Geoportal-SL-2020').'&GEOJSON=' . $urlJSONEncoded . '\', \'_blank\');return false;" title="' . _mb("Open in Mapclient") . '"><i alt="Map" style="width:1em;display:inline-block;vertical-align:middle;cursor:pointer;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free v5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M560.02 32c-1.96 0-3.98.37-5.96 1.16L384.01 96H384L212 35.28A64.252 64.252 0 0 0 191.76 32c-6.69 0-13.37 1.05-19.81 3.14L20.12 87.95A32.006 32.006 0 0 0 0 117.66v346.32C0 473.17 7.53 480 15.99 480c1.96 0 3.97-.37 5.96-1.16L192 416l172 60.71a63.98 63.98 0 0 0 40.05.15l151.83-52.81A31.996 31.996 0 0 0 576 394.34V48.02c0-9.19-7.53-16.02-15.98-16.02zM224 90.42l128 45.19v285.97l-128-45.19V90.42zM48 418.05V129.07l128-44.53v286.2l-.64.23L48 418.05zm480-35.13l-128 44.53V141.26l.64-.24L528 93.95v288.97z"/></svg></i></a></li>' . $newline;
 				}
 				} else {
-				$html .= '    <li><a href="' . get2Rest ( rtrim ( delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=xml' ) . '" target="_blank">XML</a></li>' . $newline;
+				$html .= '    <li><a href="' . get2Rest ( rtrim ( (string) delTotalFromQuery ( "f", $_SERVER ['REQUEST_URI'] ), '?' ) . '&f=xml' ) . '" target="_blank">XML</a></li>' . $newline;
 			}
 			$html .= '</ul> ' . $newline;
 			// }
@@ -3109,7 +2961,7 @@ switch ($f) {
 			foreach ( $returnObject->service as $service ) {
 				$html .= '            <li itemprop="dataset" itemscope itemtype="http://schema.org/Dataset">' . $newline;
 				$html .= '                <h2>' . $newline;
-				$html .= '                    <a itemprop="url" href="' . get2Rest ( rtrim ( $_SERVER ['REQUEST_URI'], '?' ) . '?wfsid=' . $service->id ) . '">' . $newline;
+				$html .= '                    <a itemprop="url" href="' . get2Rest ( rtrim ( (string) $_SERVER ['REQUEST_URI'], '?' ) . '?wfsid=' . $service->id ) . '">' . $newline;
 				$html .= '                        <span itemprop="name">' . $service->title . ' (WFS ' . $service->version . ')</span>' . $newline;
 				$html .= '                    </a>' . $newline;
 				$html .= '                </h2>' . $newline;
@@ -3201,7 +3053,7 @@ switch ($f) {
 			} else {
 				// collection is selected - show items
 				// if (!isset($item) || $items == 'all') { //new for items and itemlists!
-				
+
 				$html .= '<div class="container py-4">' . $newline;
 				if (! isset ( $item ) || $items == "all") {
 					$html .= '    <div>' . $newline;
@@ -3235,7 +3087,7 @@ switch ($f) {
 					// bbox filter part from ldproxy
 					$html .= '<div id="filter_div" class="collapse">' . $newline;
 					// nativeJson Filter - to use if some memory error occur -
-					if (in_array ( 'application/json; subtype=geojson', explode ( ',', $ftOutputFormats ) )) {
+					if (in_array ( 'application/json; subtype=geojson', explode ( ',', (string) $ftOutputFormats ) )) {
 						$html .= '    <form class="">' . $newline;
 						$html .= '        <p class="text-muted text-uppercase" title="Use nativeJson if errors occur - it may also be faster, but the objects don\'t have persistent IDs!">' . _mb ( 'Serverside format' ) . '</p>' . $newline;
 						$html .= '		    <div class="col-md-2">' . $newline;
@@ -3305,7 +3157,7 @@ switch ($f) {
 									$ftAllowedAttributeTitle = $ftAllowedAttribute;
 									$ftAllowedAttributeDescription = $ftAllowedAttribute;
 								}
-								
+
 							} else {
 								$ftAllowedAttributeTitle = $ftAllowedAttribute;
 								$ftAllowedAttributeDescription = $ftAllowedAttribute;
@@ -3402,17 +3254,13 @@ switch ($f) {
 					// calculate current page number from offset
 					//
 					$page = floor ( $offset / $limit );
-					$nav .= '                    <li class="page-item"><a class="page-link" href="' . delTotalFromQuery ( array (
-							'offset' 
-					), $nextItemsHtmlUrl ) . '&offset=0">' . _mb ( "first page" ) . '</a></li>' . $newline;
+					$nav .= '                    <li class="page-item"><a class="page-link" href="' . delTotalFromQuery ( ['offset'], $nextItemsHtmlUrl ) . '&offset=0">' . _mb ( "first page" ) . '</a></li>' . $newline;
 					if ($offset > 0) {
 						$nav .= '                    <li class="page-item">';
 					} else {
 						$nav .= '                    <li class="page-item disabled">';
 					}
-					$nav .= '<a class="page-link" href="' . delTotalFromQuery ( array (
-							'offset' 
-					), $nextItemsHtmlUrl ) . '&offset=' . ($offset - $limit) . '">‹</a></li>' . $newline;
+					$nav .= '<a class="page-link" href="' . delTotalFromQuery ( ['offset'], $nextItemsHtmlUrl ) . '&offset=' . ($offset - $limit) . '">‹</a></li>' . $newline;
 					$nav .= '                    <li class="page-item active"><a class="page-link" href="">' . ($page + 1) . ' (' . ($numberOfPages) . ')</a></li>' . $newline;
 					// only activate next when page < numberOfPages
 					if ($page < ($numberOfPages - 1)) {
@@ -3436,15 +3284,10 @@ switch ($f) {
 					    } else {
 					        $gmlId = $feature->id;
 					    }
-					    
+
 						$html .= '                <li>' . $newline;
 						$html .= '                    <div>' . $newline;
-						$html .= '                        <h4 class="mt-3 mb-1"><a href="' . get2Rest ( delTotalFromQuery ( array (
-								'items',
-								'offset',
-								'limit',
-								'bbox' 
-						), $_SERVER ['REQUEST_URI'] ) . '&item=' . $gmlId ) . '" target="_blank"><span>' . $gmlId . '</span></a></h4><a href=""  onclick="zoomToExtent(' . $geojsonBbox [$objIndex]->minx . "," . $geojsonBbox [$objIndex]->miny . "," . $geojsonBbox [$objIndex]->maxx . "," . $geojsonBbox [$objIndex]->maxy . ');return false;">' . _mb ( 'zoom to' ) . '</a>' . $newline;
+						$html .= '                        <h4 class="mt-3 mb-1"><a href="' . get2Rest ( delTotalFromQuery ( ['items', 'offset', 'limit', 'bbox'], $_SERVER ['REQUEST_URI'] ) . '&item=' . $gmlId ) . '" target="_blank"><span>' . $gmlId . '</span></a></h4><a href=""  onclick="zoomToExtent(' . $geojsonBbox [$objIndex]->minx . "," . $geojsonBbox [$objIndex]->miny . "," . $geojsonBbox [$objIndex]->maxx . "," . $geojsonBbox [$objIndex]->maxy . ');return false;">' . _mb ( 'zoom to' ) . '</a>' . $newline;
 						$html .= '                        <span class="d-none" itemprop="sameAs">https://www.ldproxy.nrw.de/topographie/collections/ax_bergbaubetrieb/items/DENWAT01D000CcF0</span>' . $newline;
 						// foreach attribute
 						foreach ( $feature->properties as $key => $value ) {
@@ -3459,7 +3302,7 @@ switch ($f) {
 								$attributeDescription = $attributeTitle;
 							}
 							// inject semantic context if ldObject given
-							
+
 							$html .= '                        <div class="row my-1">' . $newline;
 							$html .= '                            <div class="col-md-6 font-weight-bold text-truncate" title="' . $attributeDescription . '">' . $attributeTitle . '</div>' . $newline;
 							// semantic annotations
@@ -3511,10 +3354,10 @@ switch ($f) {
 					$html .= '                    <div">' . $newline;
 					$html .= '                        <h1>' . $gmlId . '</h1>' . $newline;
 					$html .= '                        <span class="d-none">' . $_SERVER ['REQUEST_URI'] . '</span>' . $newline;
-					
+
 					// foreach attribute
 					foreach ( $feature->properties as $key => $value ) {
-						
+
 						if (isset($schemaObject) && isset ( $schemaObject->properties->{$key}->title )) {
 							$attributeTitle = $schemaObject->properties->{$key}->title;
 						} else {
@@ -3605,7 +3448,7 @@ switch ($f) {
 				/*
 				$js2 .= "	var map = L.map('map').setView([50, 7.44], 7);";
 				$js2 .= "	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?";
-				$js2 .= "access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {";
+				$js2 .= "access_token=YOUR_MAPBOX_ACCESS_TOKEN', {";
 				$js2 .= "		maxZoom: 18,";
 				$js2 .= "		attribution: 'Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, ' +";
 				$js2 .= "			'<a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, ' +";
@@ -3624,12 +3467,12 @@ switch ($f) {
 					$html .= '        <div id="map"></div>  ' . $newline;
 				}
 				$html .= "<!-- add special function that require map after the mapframe div -->" . $newline;
-				
+
 				$html .= $js2;
 				$html .= "<!-- add geojson object -->" . $newline;
 				$html .= $geoJsonVariable;
 				$html .= '<!-- functions to render vectors and extent managing -->' . $newline;
-				
+
 				$js3 = "    <script>" . $newline;
 				$js3 .= "	function onEachFeature(feature, layer) {";
 				//$js3 .= "	//alert('on each feature');";

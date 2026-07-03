@@ -19,7 +19,7 @@
 
 $e_id="filteredUser_filteredGroup";
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -142,14 +142,14 @@ if($insert){
 		for($i=0; $i<count($selected_group); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from mb_user_mb_group where fkey_mb_user_id = $1 and fkey_mb_group_id = $2 AND (mb_user_mb_group_type = 1 or mb_user_mb_group_type IS NULL) ";
-			$v = array($selected_user,$selected_group[$i]);
-			$t = array('i','i');
+			$v = [$selected_user, $selected_group[$i]];
+			$t = ['i', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO mb_user_mb_group(fkey_mb_user_id, fkey_mb_group_id) VALUES($1, $2)";
-				$v = array($selected_user,$selected_group[$i]);
-				$t = array('i','i');
+				$v = [$selected_user, $selected_group[$i]];
+				$t = ['i', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -159,8 +159,8 @@ if($remove){
 	if(count($remove_group)>0){
 		for($i=0; $i<count($remove_group); $i++){
 			$sql_remove = "DELETE FROM mb_user_mb_group WHERE fkey_mb_group_id = $1 and fkey_mb_user_id = $2 AND fkey_mb_group_id = $3 AND (mb_user_mb_group_type = 1 or mb_user_mb_group_type IS NULL)";
-			$v = array($remove_group[$i],$selected_user,$remove_group[$i]);
-			$t = array('i','i','i');
+			$v = [$remove_group[$i], $selected_user, $remove_group[$i]];
+			$t = ['i', 'i', 'i'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -168,8 +168,8 @@ if($remove){
 
 /*get owner groups  *******************************************************************************/
 $sql_group = "SELECT * FROM mb_group WHERE mb_group_owner = $1 ORDER BY mb_group_name";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 
 $res_group = db_prep_query($sql_group,$v,$t);
 while($row = db_fetch_array($res_group)){
@@ -181,8 +181,8 @@ while($row = db_fetch_array($res_group)){
 /*get owner user **********************************************************************************/
 
 $sql_user = "SELECT * FROM mb_user WHERE mb_user_owner = $1 ORDER BY mb_user_name";
-$v = array($logged_user_id);
-$t = array('i');
+$v = [$logged_user_id];
+$t = ['i'];
 $res_user = db_prep_query($sql_user,$v,$t);
 while($row = db_fetch_array($res_user)){
 	$user_id[$cnt_user] = $row["mb_user_id"];
@@ -196,9 +196,9 @@ if (count($user_id) == 0 AND count($group_id) == 0){ die("There is no group or u
 $sql_user_mb_group = "SELECT mb_group.mb_group_id, mb_group.mb_group_name, mb_user_mb_group.fkey_mb_user_id FROM mb_user_mb_group ";
 $sql_user_mb_group .= "INNER JOIN mb_group ON mb_user_mb_group.fkey_mb_group_id = mb_group.mb_group_id ";
 $sql_user_mb_group .= "WHERE mb_user_mb_group.fkey_mb_user_id = $1 AND (mb_user_mb_group.mb_user_mb_group_type = 1 or mb_user_mb_group.mb_user_mb_group_type IS NULL) ";
-if(!$selected_user){$v = array($user_id[0]);}
-if($selected_user){$v = array($selected_user);}
-$t = array('i');
+if(!$selected_user){$v = [$user_id[0]];}
+if($selected_user){$v = [$selected_user];}
+$t = ['i'];
 $sql_user_mb_group .= " AND mb_group.mb_group_owner = $2 ";
 array_push($v,$logged_user_id);
 array_push($t,'i');

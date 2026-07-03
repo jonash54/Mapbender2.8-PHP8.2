@@ -17,12 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 echo "var mod_key_map = '".$e_target[0]."';";
 
 $sql = "SELECT e_id,e_element FROM gui_element WHERE (e_element = 'body' or e_element = 'iframe') AND fkey_gui_id = $1 AND e_public = 1";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 $cnt = 0;
 while($row = db_fetch_array($res)){

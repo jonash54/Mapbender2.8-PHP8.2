@@ -13,8 +13,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
 $user = new User();
 $admin = new administration();
 $userId = $user->id;
@@ -28,15 +28,15 @@ if (isset($_REQUEST["confFileName"]) & $_REQUEST["confFileName"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["confFileName"];
 	$pattern = '/^mobilemap[0-9]$/';
-	if (!preg_match($pattern,$testMatch)){ 
+	if (!preg_match($pattern,(string) $testMatch)){ 
 		echo 'Parameter <b>confFileName</b> is not valid - mobilemap{int}!.<br/>'; 
 		die(); 		
 	}
 	$confFileName = $testMatch;
 	$testMatch = NULL;
 	//check if file exists:
-	if (file_exists(dirname(__FILE__) . "/../../conf/".$confFileName.".conf")) {
-		require_once(dirname(__FILE__) . "/../../conf/".$confFileName.".conf");
+	if (file_exists(__DIR__ . "/../../conf/".$confFileName.".conf")) {
+		require_once(__DIR__ . "/../../conf/".$confFileName.".conf");
 	} else {
 		echo 'Requested mobilemap conf file <b>confFileName</b> does not exist - please create one in mapbender/conf/ directory!<br/>'; 
 		die(); 	
@@ -54,7 +54,7 @@ if(!isset($_GET["wmc_id"])){
 }
 
 function _e ($str) {
-	return htmlentities($str, ENT_QUOTES, CHARSET);
+	return htmlentities((string) $str, ENT_QUOTES, CHARSET);
 }
 
 if (!$userId) {
@@ -67,7 +67,7 @@ if (isset($_REQUEST["wmc_id"]) & $_REQUEST["wmc_id"] != "") {
 	if ($testMatch == "current") {
 	} else { 
 		$pattern = '/^[0-9_]*$/';
-		if (!preg_match($pattern,$testMatch)){ 
+		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo 'Parameter <b>wmc_id</b> is not valid - no csv integer list!.<br/>'; 
 			die(); 		
 		}
@@ -97,7 +97,7 @@ if (isset($_REQUEST["epsg"]) & $_REQUEST["epsg"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["epsg"];
 	$pattern = '/^[0-9]*$/';
-	if (!preg_match($pattern,$testMatch)){ 
+	if (!preg_match($pattern,(string) $testMatch)){ 
 		echo 'epsg: <b>epsg</b> is not valid.<br/>'; 
 		die(); 		
 	}
@@ -112,7 +112,7 @@ if (isset($_REQUEST["epsg"]) & $_REQUEST["epsg"] != "") {
 //Validate parameters for zooming to special extent
 if(isset($_REQUEST["mb_myBBOX"]) && $_REQUEST["mb_myBBOX"] != ""){
 	//Check for numerical values for BBOX
-	$array_bbox = explode(',',$_REQUEST["mb_myBBOX"]);
+	$array_bbox = explode(',',(string) $_REQUEST["mb_myBBOX"]);
 	if ((is_numeric($array_bbox[0])) and (is_numeric($array_bbox[1])) and (is_numeric($array_bbox[2])) and (is_numeric($array_bbox[3])) ) {
 		$mb_myBBOX = $_REQUEST["mb_myBBOX"];
 		if(isset($_REQUEST["mb_myBBOXEpsg"])){
@@ -141,12 +141,12 @@ if(isset($_REQUEST["mb_myBBOX"]) && $_REQUEST["mb_myBBOX"] != ""){
 //use wms id because the layers can be pulled dynamically
 //example from conf file:
 //$backgroundWms = array(1906,1382,1819);
-$backgroundLayer = array();
+$backgroundLayer = [];
 
 if (isset($backgroundWms) && is_array($backgroundWms)) {
 	//get list of layers for this wms
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT layer_id FROM layer WHERE fkey_wms_id in ( ";
 	for($i=0; $i<count($backgroundWms);$i++){
 		if($i > 0){$sql .= ",";}
@@ -196,7 +196,7 @@ function transform ($x, $y, $oldEPSG, $newEPSG) {
 		$resMiny = pg_query($con,$sqlMiny);
 		$miny = floatval(pg_fetch_result($resMiny,0,"miny"));
 	}
-	return array("x" => $minx, "y" => $miny);	
+	return ["x" => $minx, "y" => $miny];	
 }
 
 //Function to create an OpenLayers Javascript from a mapbender wmc document
@@ -219,8 +219,8 @@ function createJsonFromWmc($wmcId, $crs){
 	if ($wmcId !== "current") {
 #$e = new mb_exception("wmc_id: ".$wmcId);
 		$sql = "SELECT wmc_title, wmc_serial_id, wmc, wmc_timestamp, abstract, srs, minx, miny, maxx, maxy, srs, wmc_has_local_data, wmc_local_data_public from mb_user_wmc WHERE wmc_serial_id = $1;";
-		$v = array($wmcId);
-		$t = array('i');
+		$v = [$wmcId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		$row = db_fetch_assoc($res);
 		$typeOfSerialId = gettype($row['wmc_serial_id']);
@@ -241,7 +241,7 @@ function createJsonFromWmc($wmcId, $crs){
     		    //$row['minx'],$row['miny'],$row['maxx'],$row['maxy'],$row['srs'],$row['wmc_serial_id'],$row['wmc_title'],$row['wmc_timestamp'],$row['wmc_local_data_public'],$row['wmc_has_local_data'],$row['wmc'];
 //$e = new mb_exception(json_encode($myWmc->mainMap));
 	//parse wmc
-	$xmlWmc = simplexml_load_string($wmcDocSession, "SimpleXMLElement", LIBXML_NOBLANKS);
+	$xmlWmc = simplexml_load_string((string) $wmcDocSession, "SimpleXMLElement", LIBXML_NOBLANKS);
 //$e = new mb_exception($wmcDocSession);
 //$test = $xmlWmc->General->BoundingBox[0]['SRS'];
 //$e = new mb_exception($test);
@@ -263,7 +263,7 @@ $row['wmc_timestamp'] = time();
 //check local data:
 //  Decode from JSON to array
 foreach ($myWmc->generalExtensionArray as $key => &$value) {
-    $value = json_decode($value, true);
+    $value = json_decode((string) $value, true);
 }
 // create and numerically indexed array
 $kmls = array_values($myWmc->generalExtensionArray["KMLS"]);
@@ -285,15 +285,15 @@ $row['wmc'] = $wmcDocSession;
 	
 	//transform coords if needed
 	//crs for client
-	$requestedEPSG = preg_replace("/EPSG:/","", $crs);
+	$requestedEPSG = preg_replace("/EPSG:/","", (string) $crs);
 	//crs from wmc
-	$wmcEPSG = preg_replace("/EPSG:/","", $row['srs']);
+	$wmcEPSG = preg_replace("/EPSG:/","", (string) $row['srs']);
 	//overwrite wmc information with external given if own bbox is requested
 	if (isset($mb_myBBOXEpsg) && isset($mb_myBBOX)) {
 		$e = new mb_notice("php/mod_exportWmc2JsonV2.php: user given extent information found");
 		//transform user defined bbox into bbox for mobile client
 		$wmcEPSG = $mb_myBBOXEpsg;
-		$bbox = explode(',',$mb_myBBOX);
+		$bbox = explode(',',(string) $mb_myBBOX);
 		//use given bbox instead that from database
 		$row['minx'] = $bbox[0];
 		$row['miny'] = $bbox[1];
@@ -331,7 +331,7 @@ $row['wmc'] = $wmcDocSession;
 	$wmcObject->backGroundLayer[1]->format = "image/jpeg";*/
 
 	if (isset($initBackGroundLayer)) {
-		$wmcObject->backGroundLayer = array();
+		$wmcObject->backGroundLayer = [];
 		foreach($initBackGroundLayer as $singleBackgroundLayer) {
 			$wmcObject->backGroundLayer[] = $singleBackgroundLayer;
 		}
@@ -358,7 +358,7 @@ $row['wmc'] = $wmcDocSession;
 	$wmcObject->wmc->crs = $row['srs'];
 	$wmcObject->wmc->bbox = $row['minx'].",".$row['miny'].",".$row['maxx'].",".$row['maxy'];
 	//parse wmc
-	$xml = simplexml_load_string($row['wmc'], "SimpleXMLElement", LIBXML_NOBLANKS);
+	$xml = simplexml_load_string((string) $row['wmc'], "SimpleXMLElement", LIBXML_NOBLANKS);
 	$layerArray = $xml->LayerList->Layer;
 	//initialize layer
 	$layerCount = 0;
@@ -388,7 +388,7 @@ $row['wmc'] = $wmcDocSession;
 		//use only layer which are not hidden and no root layer and support the requested SRS
 		if ($withHierarchy == true) {
 			if (in_array($crs, $layerSRS)) {
-				if (!isset($layerId) || $layerId == '') {
+				if (!isset($layerId) || $layerId == 0) {
 					$wmcObject->layerList[$layerCount]->internal = false; 
 					$wmcObject->layerList[$layerCount]->layerName = (string)$layerArray[$i]->Name;
 					$wmcObject->layerList[$layerCount]->opacity = (integer)$mbExtensions->gui_wms_opacity;
@@ -432,7 +432,7 @@ $row['wmc'] = $wmcDocSession;
 			}
 		} else {
 			if ($layerParent != '' && in_array($crs, $layerSRS)) {
-				if (!isset($layerId) || $layerId == '') {
+				if (!isset($layerId) || $layerId == 0) {
 					$wmcObject->layerList[$layerCount]->internal = false; 
 					$wmcObject->layerList[$layerCount]->layerName = (string)$layerArray[$i]->Name;
 					$wmcObject->layerList[$layerCount]->opacity = (integer)$mbExtensions->gui_wms_opacity;

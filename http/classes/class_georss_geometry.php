@@ -18,15 +18,15 @@
 
 #TODO:Check if the following line is enough:
 #require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml2.php");
+require_once(__DIR__."/../../conf/mapbender.conf");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml2.php");
 
 class geoRSS {
-	var $doc;
-	var $importItems = array("title","link","description");
-	var $targetEPSG;
+	public $doc;
+	public $importItems = ["title", "link", "description"];
+	public $targetEPSG;
 	function parseFile($req){
 		#$data = implode("",file($req));
 		$x = new connector($req);
@@ -52,7 +52,7 @@ class geoRSS {
 	}
 
 	function removeWhiteSpace ($string) {
-		return preg_replace("/\>(\s)+\</", "><", trim($string));
+		return preg_replace("/\>(\s)+\</", "><", trim((string) $string));
 	}
 	
 	function toGeoJSON () {
@@ -91,9 +91,11 @@ class geoRSS {
 }
 
 class geoRSSItem extends Feature{
-	var $targetEPSG;
+	public $targetEPSG;
 	#$this->targetEPSG='4326';
-	public function parse($domNode, $importItems) {
+	// $importItems given a default so the signature stays LSP-compatible
+	// with Feature::parse($domNode) — PHP 8 enforces this strictly.
+	public function parse($domNode, $importItems = []) {
 		$currentSibling = $domNode->firstChild;
 		
 		while ($currentSibling) {
@@ -188,9 +190,9 @@ class geoRSSItem extends Feature{
 }
 
 class geoRSSPoint extends GMLPoint{
-	var $targetEPSG;
+	public $targetEPSG;
 	public function parsePoint($domNode){
-		list($y, $x) = explode(" ", $domNode->nodeValue);
+		[$y, $x] = explode(" ", $domNode->nodeValue);
 		if ($this->targetEPSG != '4326') {
 			$tCoords = transform($x, $y,'4326', $this->targetEPSG);
 			$x = $tCoords["x"];
@@ -204,7 +206,7 @@ class geoRSSPoint extends GMLPoint{
 }
 
 class geoPoint extends GMLPoint{
-	var $targetEPSG;
+	public $targetEPSG;
 	public function parsePoint($domNode){
 		$currentSibling = $domNode->firstChild;
 		while ($currentSibling) {			
@@ -221,7 +223,7 @@ class geoPoint extends GMLPoint{
 	}
 	public function parseLat($node){
 		if(!$this->point)
-			$this->point=array();
+			$this->point=[];
 		if ($this->targetEPSG != '4326') {
 			$tCoords = transform(0, $node->nodeValue,'4326', $this->targetEPSG);
 			
@@ -234,7 +236,7 @@ class geoPoint extends GMLPoint{
 	}
 	public function parseLong($node){
 		if(!$this->point)
-			$this->point=array();
+			$this->point=[];
 		if ($this->targetEPSG != '4326') {
 			$tCoords = transform($node->nodeValue, 0, '4326', $this->targetEPSG);
 			
@@ -250,7 +252,7 @@ class geoPoint extends GMLPoint{
 
 
 class geoRSSLine extends GMLLine{
-	var $targetEPSG;
+	public $targetEPSG;
 	public function parseLine ($domNode) {
 		$cnt = 0;
 		$y = 0;
@@ -264,7 +266,7 @@ class geoRSSLine extends GMLLine{
 }
 
 class geoRSSPolygon extends GMLPolygon{
-	var $targetEPSG;
+	public $targetEPSG;
 	public function parsePolygon ($georssPolygon) {
 		if (gettype($georssPolygon) == 'object') {
 			//polygon is given as dom node
@@ -273,7 +275,7 @@ class geoRSSPolygon extends GMLPolygon{
 			$coordArray = explode(' ',$betterPolygon);
 		} else {
 			//polygon is given as string
-			$betterPolygon = preg_replace('/\s+/', ' ',$georssPolygon);
+			$betterPolygon = preg_replace('/\s+/', ' ',(string) $georssPolygon);
 			$coordArray = explode(' ',$betterPolygon);
 		}
 		$countCoordPairs = count($coordArray) / 2;
@@ -285,15 +287,15 @@ class geoRSSPolygon extends GMLPolygon{
 }
 
 class geoRSSBox extends GMLPolygon{
-	var $targetEPSG;
+	public $targetEPSG;
 	public function parseBox ($domNode) {
 			////in georss lat/lon is given, in geojson lon lat will be used http://www.georss.org/simple http://www.geojson.org/geojson-spec.html#coordinate-reference-system-objects
 		if (gettype($domNode) == 'object') {
 			//polygon is given as dom node
-			list($y1,$x1,$y2,$x2) = explode(' ',$domNode->nodeValue);
+			[$y1, $x1, $y2, $x2] = explode(' ',$domNode->nodeValue);
 		} else {
 			//bbox is given as string
-			list($y1,$x1,$y2,$x2) = explode(' ',$domNode);
+			[$y1, $x1, $y2, $x2] = explode(' ',(string) $domNode);
 			
 		}
 		
@@ -351,6 +353,6 @@ function transform ($x, $y, $oldEPSG, $newEPSG) {
         $resMiny = pg_query($con,$sqlMiny);
         $miny = floatval(pg_fetch_result($resMiny,0,"miny"));
     }
-    return array("x" => $minx, "y" => $miny);
+    return ["x" => $minx, "y" => $miny];
 }
 ?>

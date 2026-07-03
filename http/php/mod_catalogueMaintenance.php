@@ -17,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //require_once(dirname(__FILE__)."/../../core/globalSettings.php");
 //$e_id="reindexWMS";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 //require_once(dirname(__FILE__)."/../../core/globalSettings.php");
 //validate parameter values
@@ -45,7 +45,7 @@ if (isset($_REQUEST["resourceIds"]) & $_REQUEST["resourceIds"] != "") {
 	//validate to csv integer list
 	$testMatch = $_REQUEST["resourceIds"];
 	$pattern = '/^[\d,]*$/';		
- 	if (!preg_match($pattern,$testMatch)){ 
+ 	if (!preg_match($pattern,(string) $testMatch)){ 
 		//echo 'resourceIds: <b>'.$testMatch.'</b> is not valid.<br/>'; 
 		echo 'Parameter <b>resourceIds</b> is not valid (integer or cs integer list).<br/>'; 
 		die(); 		
@@ -54,14 +54,9 @@ if (isset($_REQUEST["resourceIds"]) & $_REQUEST["resourceIds"] != "") {
 	$testMatch = NULL;
 }
 
-$allowedFunctions = array(
-	'wms' => array('reindex','monitor'),
-	'wfs' => array('reindex'),
-	'dataset' => array('reindex'),
-	'wmc' => array('reindex')
-);
+$allowedFunctions = ['wms' => ['reindex', 'monitor'], 'wfs' => ['reindex'], 'dataset' => ['reindex'], 'wmc' => ['reindex']];
 
-$functionThatNeedIdList = array('monitor');
+$functionThatNeedIdList = ['monitor'];
 
 //check for allowedFunction
 if (!in_array($maintenanceFunction, $allowedFunctions[$resourceType])) {
@@ -138,7 +133,7 @@ if ($maintenanceFunction == 'reindex') {
 
 switch ($maintenanceFunction) {
 	case "reindex":
-		$sql = file_get_contents(dirname(__FILE__)."/../../resources/db/materialize_".$resourceType."_view.sql"); 
+		$sql = file_get_contents(__DIR__."/../../resources/db/materialize_".$resourceType."_view.sql"); 
 	break;
 }
 ?>
@@ -210,7 +205,7 @@ function callServer(resourceType,maintenanceFunction,resourceIds,id) {
         		$form .= "<label for=\"resource_id_list\">"._mb("Resource Ids").":</label><br>";
        	 		$form .= "<input name=\"resource_id_list\" id=\"resource_id_list\" class=\"required\"";
 			if (isset($resourceIds)) {
-				$form .= " value=\"".htmlspecialchars($resourceIds)."\"";
+				$form .= " value=\"".htmlspecialchars((string) $resourceIds)."\"";
 			} else {
 				$form .= " value=\"\"/>";
 			}

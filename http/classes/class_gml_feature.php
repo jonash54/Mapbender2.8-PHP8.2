@@ -17,22 +17,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_point.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_multipoint.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_line.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_multiline.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_polygon.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_multipolygon.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_point.php");
+require_once(__DIR__."/../classes/class_gml_multipoint.php");
+require_once(__DIR__."/../classes/class_gml_line.php");
+require_once(__DIR__."/../classes/class_gml_multiline.php");
+require_once(__DIR__."/../classes/class_gml_polygon.php");
+require_once(__DIR__."/../classes/class_gml_multipolygon.php");
 
 
 class Feature {
 
-	var $type = "Feature";
-	var $fid;
-	var $geometry = false;
-	var $properties = array();
+	public $type = "Feature";
+	public $fid;
+	public $geometry = false;
+	public $properties = [];
 	
 	public function __construct() {
 	}
@@ -58,12 +58,12 @@ class Feature {
 		}
 
 		
-		$prop = array();
+		$prop = [];
 		
 		$str .= ", \"properties\": ";
 		$cnt = 0;
 		foreach ($this->properties as $key => $value) {
-				$prop[$key] = preg_replace('/\r\n|\r|\n/', '\\n', $value);
+				$prop[$key] = preg_replace('/\r\n|\r|\n/', '\\n', (string) $value);
 				$cnt ++;
 		}
 

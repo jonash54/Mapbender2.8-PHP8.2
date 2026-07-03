@@ -17,21 +17,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 ob_start();
 
-require_once(dirname(__FILE__)."/../include/dyn_php.php");
+require_once(__DIR__."/../include/dyn_php.php");
 
 ignore_user_abort();
 
 if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', time()-42000, '/');
+    setcookie(session_name(), '', ['expires' => time()-42000, 'path' => '/']);
 }
 
 session_destroy();
 
-$dir = preg_replace("/\\\/","/", dirname($_SERVER['SCRIPT_NAME']));
+$dir = preg_replace("/\\\/","/", dirname((string) $_SERVER['SCRIPT_NAME']));
 
 if ($_GET['L'] == "en") {
 	$logout_location = "/portal/en/logout.html";
@@ -44,7 +44,7 @@ if (isset($logout_location) && $logout_location != ''){
 	header("Location: ".$logout_location);     
 }
 else {
-	if (is_file(dirname($_SERVER['SCRIPT_NAME'])."/login.php")) {
+	if (is_file(dirname((string) $_SERVER['SCRIPT_NAME'])."/login.php")) {
 		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
 			header("Location: https://".$_SERVER['HTTP_HOST'].$dir."/login.php");      
 		}
@@ -54,10 +54,10 @@ else {
 	}
 	else {
 		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
-			header("Location: https://".$_SERVER['HTTP_HOST'].preg_replace("/\/php/","/frames",$dir)."/login.php");
+			header("Location: https://".$_SERVER['HTTP_HOST'].preg_replace("/\/php/","/frames",(string) $dir)."/login.php");
 		}
 		else {
-			header("Location: http://".$_SERVER['HTTP_HOST'].preg_replace("/\/php/","/frames",$dir)."/login.php");
+			header("Location: http://".$_SERVER['HTTP_HOST'].preg_replace("/\/php/","/frames",(string) $dir)."/login.php");
 		}
 	}
 }

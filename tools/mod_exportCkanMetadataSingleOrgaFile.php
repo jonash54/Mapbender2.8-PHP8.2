@@ -1,7 +1,7 @@
 <?php
 //should be invoked from cli!
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_connector.php");
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_connector.php");
 
 //example: php mod_exportCkanMetadataSingleOrgaFile.php orgaId=1
 
@@ -36,7 +36,7 @@ $metadataDir = str_replace("../../", "../", METADATA_DIR);
 $resultJson = $connector->load($generatorUrl);
 
 if($h = fopen($metadataDir . "/" . $fileName, "w")){
-    if(!fwrite($h, $resultJson)){
+    if(!fwrite($h, (string) $resultJson)){
         echo "Could not write result file to " . $metadataDir . "/" . $fileName;
     }
     fclose($h);

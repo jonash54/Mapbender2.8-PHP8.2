@@ -1,7 +1,7 @@
 <?php
 //server component to pull statistics FROM geoportal catalogue
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 $orderBy = 'rank';
 if (isset($_REQUEST["orderBy"]) & $_REQUEST["orderBy"] != "") {
 	$testMatch = $_REQUEST["orderBy"];	
@@ -60,27 +60,19 @@ SELECT 0 AS dataset_count, 0 AS featuretype_count, 0 AS layer_count, COUNT(wmc_s
 ) AS resources GROUP BY mb_group_id ) AS published_resources INNER JOIN mb_group on published_resources.mb_group_id = mb_group.mb_group_id WHERE mb_group.searchable = true
 SQL;
 
-switch ($orderBy) {
-	case "rank":
-		$sql .= " ORDER BY all_resources DESC";
-		break;
-	case "id":	
-		$sql .= " ORDER BY mb_group_id ASC";
-		break;
-	case "title":	
-		$sql .= " ORDER BY mb_group_name ASC";
-		break;
-	default: 
-		$sql .= " ORDER BY mb_group_name ASC";
-		break;
-}
+match ($orderBy) {
+    "rank" => $sql .= " ORDER BY all_resources DESC",
+    "id" => $sql .= " ORDER BY mb_group_id ASC",
+    "title" => $sql .= " ORDER BY mb_group_name ASC",
+    default => $sql .= " ORDER BY mb_group_name ASC",
+};
 
 //...
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $res = db_prep_query($sql, $v, $t);
 $jsonOutput = new stdClass();
-$jsonOutput->organizations = array();
+$jsonOutput->organizations = [];
 $numberOfOrgas = 0;
 while($row = db_fetch_array($res)){
 	$jsonOutput->organizations[$numberOfOrgas]->{'id'} = $row['mb_group_id'];

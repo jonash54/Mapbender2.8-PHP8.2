@@ -6,11 +6,11 @@
  */
 
 //import classes
-require_once(dirname(__FILE__) . "/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
+require_once(__DIR__ . "/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
 //require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_Uuid.php");
-require_once(dirname(__FILE__)."/../classes/class_kml_ows.php");
+require_once(__DIR__."/../classes/class_Uuid.php");
+require_once(__DIR__."/../classes/class_kml_ows.php");
 /**
  * publish the choosed data
  */
@@ -36,7 +36,7 @@ if (isset($_REQUEST["wmc_id"]) & $_REQUEST["wmc_id"] != "") {
 	if ($testMatch == "current") {
 	} else { 
 		$pattern = '/^[0-9_]*$/';
-		if (!preg_match($pattern,$testMatch)){ 
+		if (!preg_match($pattern,(string) $testMatch)){ 
 			echo 'Parameter <b>wmc_id</b> is not valid - no csv integer list!.<br/>'; 
 			die(); 		
 		}
@@ -83,13 +83,13 @@ $fileUuid = new Uuid();
 $file = "myDataCollection-".$fileUuid.".".$outputFormat;
 
 if (isset($kmls[0]["data"]['@context'])) {
-    $file = rawurldecode($kmls[0]["data"]['@context']['title'])."-".$fileUuid.'.'.$outputFormat;
+    $file = rawurldecode((string) $kmls[0]["data"]['@context']['title'])."-".$fileUuid.'.'.$outputFormat;
 }
 
 if (sizeof($kmls) > 1) {
     // create a file for each featureCollection and push them in a zip
     if ($outputFormat == 'kml') {
-	$geoJson = array(); 
+	$geoJson = []; 
 	$fileCounter = 1;
 	foreach ($kmls as $key => $value) {
  		 $geoJson[] = $kmls[$fileCounter-1]["data"];
@@ -206,7 +206,7 @@ function kml_to_gpx($u)
         $gpx_time->appendChild($gpx_time_text);
 
         // placemarks
-        $names = array();
+        $names = [];
         foreach ($dom_kml->getElementsByTagName('Placemark') as $placemark) {
             // var_dump('sdafsdaf');
             foreach ($placemark->getElementsByTagName('name') as $name) {
@@ -409,7 +409,7 @@ function createFile($outputFormat, $geoJson, $fileUuid, $numberOfKmls)
 	//$e = new mb_exception("test kml export");
 	$mergedKml = new Kml();
 	if ($numberOfKmls > 1) {
-		$kmlArray = array();
+		$kmlArray = [];
 		foreach ($geoJson as $collection) {
 			$kmlObj = new Kml();
 			//$e = new mb_exception(json_encode($collection));

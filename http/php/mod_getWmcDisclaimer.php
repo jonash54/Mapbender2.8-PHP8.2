@@ -1,9 +1,9 @@
-<?php require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once dirname(__FILE__) . "/../classes/class_wmc_factory.php";
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_owsConstraints.php");
+<?php require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once __DIR__ . "/../classes/class_wmc_factory.php";
+require_once(__DIR__ . "/../classes/class_user.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_owsConstraints.php");
 
 //following is needed cause sometimes the service is invoked as a localhost service and then no userId is known but the userId in the session is needed for class_wmc to read from database!!! TODO: check if needed in this class.
 $userId = Mapbender::session()->get("mb_user_id");
@@ -30,7 +30,7 @@ if (isset($_REQUEST["id"]) & $_REQUEST["id"] != "") {
 		//validate to integer 
 		$testMatch = $_REQUEST["id"];
 		$pattern = '/^[\d]*$/';		
-	 	if (!preg_match($pattern,$testMatch)){ 
+	 	if (!preg_match($pattern,(string) $testMatch)){ 
 			echo 'id is not valid.<br/>'; 
 			die(); 		
 	 	}
@@ -76,7 +76,7 @@ $sessionLang = Mapbender::session()->get("mb_lang");
 if (isset($sessionLang) && ($sessionLang!='')) {
 	$e = new mb_notice("mod_showMetadata.php: language found in session: ".$sessionLang);
 	$language = $sessionLang;
-	$langCode = explode("_", $language);
+	$langCode = explode("_", (string) $language);
 	$langCode = $langCode[0]; # Hopefully de or s.th. else
 	$languageCode = $langCode; #overwrite the GET Parameter with the SESSION information
 }

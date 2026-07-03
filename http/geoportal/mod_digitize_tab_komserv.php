@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../php/mb_validateSession.php");
 
 $e_target = $_GET["e_target"];
 ?>
@@ -296,7 +296,7 @@ var registerAnotherFunction = function () {
 
 <?php
 echo "var mod_digitize_target = '".$e_target."';";
-$digitizeConfFilenameAndPath = dirname(__FILE__) . "/../../conf/" . $digitize_conf_filename;
+$digitizeConfFilenameAndPath = __DIR__ . "/../../conf/" . $digitize_conf_filename;
 if ($digitize_conf_filename && file_exists($digitizeConfFilenameAndPath)) {
 	/*
 	 * @security_patch finc done

@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 /*  
  * @security_patch irv open 
  */ 
 security_patch_log(__FILE__,__LINE__); 
 extract($_GET, EXTR_OVERWRITE);extract($_POST, EXTR_OVERWRITE);
-include(dirname(__FILE__).'/../include/dyn_js.php');
+include(__DIR__.'/../include/dyn_js.php');
 
 echo "var mod_target = '".$e_target[0]."';";
 ?>

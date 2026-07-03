@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_user.php");
 
 $editApplicationId = $_REQUEST["editApplicationId"];
 
@@ -164,8 +164,8 @@ $sql = "SELECT fkey_gui_id,e_id,e_pos,e_public,e_comment,gettext($1, e_title) as
 $sql .= "e_src,e_attributes,e_left,e_top,e_width,e_height,e_z_index,e_more_styles,";
 $sql .= "e_content,e_closetag,e_js_file,e_mb_mod,e_target,e_requires,e_url FROM gui_element WHERE ";
 $sql .= "e_public = 1 AND fkey_gui_id = $2 ORDER BY e_pos";
-$v = array(Mapbender::session()->get("mb_lang"), $editApplicationId);
-$t = array('s', 's');
+$v = [Mapbender::session()->get("mb_lang"), $editApplicationId];
+$t = ['s', 's'];
 $res = db_prep_query($sql,$v,$t);
 $i = 0;
 while(db_fetch_row($res)){
@@ -222,8 +222,8 @@ while(db_fetch_row($res)){
 			}
 			if(db_result($res,$i,"e_src") != "" && db_result($res,$i,"e_closetag") != "iframe" ){
 				if(db_result($res,$i,"e_closetag") == "iframe" && db_result($res,$i,"e_id") != 'loadData'){
-		      		echo " src = '".preg_replace($pattern,$replacement,db_result($res,$i,"e_src"));
-						if(mb_strpos(db_result($res,$i,"e_src"), "?")) {
+		      		echo " src = '".preg_replace($pattern,$replacement,(string) db_result($res,$i,"e_src"));
+						if(mb_strpos((string) db_result($res,$i,"e_src"), "?")) {
 							echo "&";
 						}
 						else {
@@ -234,7 +234,7 @@ while(db_fetch_row($res)){
 							"&" . $urlParameters . "'";
 				}
 				else{
-					echo " src = '".preg_replace($pattern,$replacement,db_result($res,$i,"e_src"))."'";
+					echo " src = '".preg_replace($pattern,$replacement,(string) db_result($res,$i,"e_src"))."'";
 				}
 			}
 			echo "' >";

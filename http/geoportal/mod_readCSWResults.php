@@ -1,9 +1,8 @@
-
 <?php
 //
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 //require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
-require_once(dirname(__FILE__)."/../classes/class_connector.php"); 
+require_once(__DIR__."/../classes/class_connector.php"); 
 //Script to read Results from CSW 2.0.2 Interfaces from mapbender geoportal
 //example requests:
 //GetRecords with textfilter
@@ -101,7 +100,7 @@ if (!$from_cli){
 
 //extract query string - explode by +
 $queryString  = $_REQUEST["q"];
-$queryStringParts = explode("+",$queryString);
+$queryStringParts = explode("+",(string) $queryString);
 
 //$e = new mb_exception($queryString);
 //extract single elements into variables
@@ -154,37 +153,23 @@ if (isset($x1) && isset($x2) && isset($y1) && isset($y2) && isset($coord)) {
 </ogc:Intersects>*/
 	$existsSpatialFilter = true;
 	//$spatialFilter = "<BBOX>";
-	switch ($coord) {
-		case "intersect":
-			$spatialFilter .= "<ogc:BBOX>";
-		break;
-		case "inside":
-			$spatialFilter .= "<ogc:Within>";
-		break;
-		case "outside":
-			$spatialFilter .= "<ogc:Disjoint>";
-		break;
-		default:
-			$spatialFilter .= "<ogc:BBOX>";
-	}
+	match ($coord) {
+     "intersect" => $spatialFilter .= "<ogc:BBOX>",
+     "inside" => $spatialFilter .= "<ogc:Within>",
+     "outside" => $spatialFilter .= "<ogc:Disjoint>",
+     default => $spatialFilter .= "<ogc:BBOX>",
+ };
 	$spatialFilter .= "<ogc:PropertyName>BoundingBox</ogc:PropertyName>";
 	$spatialFilter .= "<gml:Envelope>";
 	$spatialFilter .= "<gml:lowerCorner>".$x1." ".$y1."</gml:lowerCorner>";
 	$spatialFilter .= "<gml:upperCorner>".$x2." ".$y2."</gml:upperCorner>";
 	$spatialFilter .= "</gml:Envelope>";
-	switch ($coord) {
-		case "intersect":
-			$spatialFilter .= "</ogc:BBOX>";
-		break;
-		case "inside":
-			$spatialFilter .= "</ogc:Within>";
-		break;
-		case "outside":
-			$spatialFilter .= "</ogc:Disjoint>";
-		break;
-		default:
-			$spatialFilter .= "/<ogc:BBOX>";
-	}
+	match ($coord) {
+     "intersect" => $spatialFilter .= "</ogc:BBOX>",
+     "inside" => $spatialFilter .= "</ogc:Within>",
+     "outside" => $spatialFilter .= "</ogc:Disjoint>",
+     default => $spatialFilter .= "/<ogc:BBOX>",
+ };
 	//$spatialFilter .= "</BBOX>";
 
 
@@ -205,7 +190,7 @@ $res_csw = db_query($sql_csw);
 #initialize count of search interfaces
 $cnt_csw = 0;
 #initialize result array
-$csw_list=array(array());
+$csw_list=[[]];
 #fill result array
 while($row_csw = db_fetch_array($res_csw)){
 	$csw_list[$cnt_csw]['id'] = $row_csw["csw_id"];
@@ -247,14 +232,14 @@ while($row_csw = db_fetch_array($res_csw)){
 		
 	}
 	$e = new mb_notice("<br>getrecords param type: ".$csw_list[$cnt_csw]['getrecordsurl_param_name']."<br>");
-	$csw_list[$cnt_csw] ['getrecordsurl'] = rtrim($csw_list[$cnt_csw] ['getrecordsurl'], "?");
+	$csw_list[$cnt_csw] ['getrecordsurl'] = rtrim((string) $csw_list[$cnt_csw] ['getrecordsurl'], "?");
 	$e = new mb_notice("mod_readCSWResults.php: getrecordsurl: ".$csw_list[$cnt_csw]['getrecordsurl']);
 	$sql_grbi = "select param_value from cat_op_conf where fk_cat_id = $1 and param_type = 'getrecordbyid' and param_name='get'";
 	$res_grbi = db_prep_query($sql_grbi, $v, $t);
         $row_grbi = db_fetch_array($res_grbi);
 	$csw_list[$cnt_csw] ['getrecordbyidurl'] = $row_grbi['param_value'];
 	//Delete question marks from end of url
-	$csw_list[$cnt_csw] ['getrecordbyidurl'] = rtrim($csw_list[$cnt_csw] ['getrecordbyidurl'], "?");
+	$csw_list[$cnt_csw] ['getrecordbyidurl'] = rtrim((string) $csw_list[$cnt_csw] ['getrecordbyidurl'], "?");
 	$e = new mb_notice("mod_readCSWResults.php: getrecordbyidurl: ".$csw_list[$cnt_csw]['getrecordbyidurl']);
 	$csw_list[$cnt_csw] ['h'] = $row_csw["csw_h"];
 	$csw_list[$cnt_csw] ['p'] = $row_csw["csw_p"];
@@ -301,7 +286,7 @@ echo "\nFile to open: ".$resdir."/".$cli_id."_os.xml\n";
 		for ($i_c = 0; $i_c < count($csw_list); $i_c++) {
 			$content = $csw_list[$i_c] ['name'];
 			fwrite($os_catalogs_file_handle,"<opensearchinterface>");
-			fwrite($os_catalogs_file_handle,$content);
+			fwrite($os_catalogs_file_handle,(string) $content);
 			fwrite($os_catalogs_file_handle,"</opensearchinterface>\n");
 		}
 		fwrite($os_catalogs_file_handle,"</interfaces>\n");
@@ -332,7 +317,7 @@ for ($i_si = $start_cat; $i_si < $end_cat ; $i_si++) {
 	$openSearchWrapperDetail="mod_readCSWResultsDetail.php";
 	//define the right request for the page
 	//calculate the startindex for the requested pagenumber
- 	$startIndex = ((real)$csw_list[$i_si] ["h"]*((integer)$request_p - 1)) + 1;
+ 	$startIndex = ((float) $csw_list[$i_si] ["h"]*((integer)$request_p - 1)) + 1;
 	//$number_of_pages=ceil((real)$n_results/(real)$csw_list[$i_si] ['h']);
 	$getRecords = '<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"';
 	$getRecords .= '            xmlns:gmd="http://www.isotc211.org/2005/gmd"';
@@ -360,7 +345,7 @@ for ($i_si = $start_cat; $i_si < $end_cat ; $i_si++) {
 		$getRecords .= '          <ogc:Literal>%'.$queryText.'%</ogc:Literal>';
 		$getRecords .= '          </ogc:PropertyIsLike>';
 	}
-	$type = trim($csw_list[$i_si]['hierachylevel']);
+	$type = trim((string) $csw_list[$i_si]['hierachylevel']);
 	switch ($type) {
     		case ($type=='dataset' || $type=='series' || $type=='service' || $type=='nonGeographicDataset' || $type=='application'):
 
@@ -492,7 +477,7 @@ $e = new mb_notice($getRecords);
 		logit( "Number of Results in Catalogue ".$i_si.": ".$n_results."\n");
 	}
 	//calculate number of needed pages to show all results:
-	$number_of_pages=ceil((real)$n_results/(real)$csw_list[$i_si] ['h']);
+	$number_of_pages=ceil((float) $n_results/(float) $csw_list[$i_si] ['h']);
 	
 	#do some debugging output
 	#var_dump($openSearchXml);
@@ -530,7 +515,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 	if($os_catalogs_file_handle = fopen($resdir."/".$cli_id."_os".$catalog_number."_".$request_p.".xml","w")){
 		fwrite($os_catalogs_file_handle,"<resultlist>\n");
 		#logit("<resultlist>\n");
-		fwrite($os_catalogs_file_handle,"<querystring>".urlencode($queryString)."</querystring>\n");
+		fwrite($os_catalogs_file_handle,"<querystring>".urlencode((string) $queryString)."</querystring>\n");
 		#logit("<querystring>".urlencode($queryText)."</querystring>\n");
 		fwrite($os_catalogs_file_handle,"<totalresults>".$n_results."</totalresults>\n");
 		#logit("<totalresults>".$n_results."</totalresults>\n");
@@ -663,7 +648,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 
 			$isViewService = false;	
 			$accessUrl = $accessUrl[0];
-			$typeOfServiceUpper = strtoupper($typeOfService);
+			$typeOfServiceUpper = strtoupper((string) $typeOfService);
 			echo "<br>accessUrl: ".$accessUrl."<br>";
 			echo "<br>typeOfService:*".$typeOfServiceUpper."*<br>";
 			echo "<br>typeOfRecord:*".$typeOfRecord."*<br>";
@@ -678,7 +663,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 			}
 			
 			//check for view service type
-			if ($typeOfServiceUpper == 'WMS' || $typeOfServiceUpper == 'VIEW'  || strpos($typeOfServiceUpper,'WMS') !== false) {
+			if ($typeOfServiceUpper == 'WMS' || $typeOfServiceUpper == 'VIEW'  || str_contains($typeOfServiceUpper,'WMS')) {
 				$isViewService = true;	
 				echo "view service identified<br>";
 			}
@@ -748,7 +733,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 				#if a wms resource is found, the url will be in the list
 				if (isset($accessUrl) && $isViewService && $accessUrl != ''){	
 					fwrite($os_catalogs_file_handle,"<wmsaccessUrl>");
-					fwrite($os_catalogs_file_handle, urlencode($accessUrl));
+					fwrite($os_catalogs_file_handle, urlencode((string) $accessUrl));
 					fwrite($os_catalogs_file_handle,"</wmsaccessUrl>\n");
 					fwrite($os_catalogs_file_handle,"<mbaddurl>");
 					fwrite($os_catalogs_file_handle,"testurl");
@@ -758,7 +743,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 				}
 				//if ($typeOfRecord =='application' || $typeOfRecord =='dataset'){
 					fwrite($os_catalogs_file_handle,"<accessUrl>");
-					fwrite($os_catalogs_file_handle, urlencode($accessUrl));
+					fwrite($os_catalogs_file_handle, urlencode((string) $accessUrl));
 					fwrite($os_catalogs_file_handle,"</accessUrl>\n");
 				/*} else {
 					fwrite($os_catalogs_file_handle,"<accessUrl>");
@@ -766,7 +751,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 				}*/
 				if (isset($graphicURL) && $graphicURL != '' && isValidURL($graphicURL)){
 					fwrite($os_catalogs_file_handle,"<graphicUrl>");
-					fwrite($os_catalogs_file_handle, urlencode($graphicURL));
+					fwrite($os_catalogs_file_handle, urlencode((string) $graphicURL));
 					fwrite($os_catalogs_file_handle,"</graphicUrl>\n");
 				} else {
 					fwrite($os_catalogs_file_handle,"<graphicUrl>");
@@ -801,31 +786,25 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 
 function correctWmsUrl($wms_url) {
 	//check if last sign is ? or & or none of them
-	$lastChar = substr($wms_url,-1);
+	$lastChar = substr((string) $wms_url,-1);
 	//check if getcapabilities is set as a parameter
 	$findme = "getcapabilities";
-	$posGetCap = strpos(strtolower($wms_url), $findme);
+	$posGetCap = strpos(strtolower((string) $wms_url), $findme);
 	if ($posGetCap === false) {
-		$posGetAmp = strpos(strtolower($wms_url), "?");
+		$posGetAmp = strpos(strtolower((string) $wms_url), "?");
 		if ($posGetAmp === false) {
 			$wms_url .= "?REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
 		} else {
-			switch ($lastChar) {
-				case "?":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				case "&":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				default:
-					$wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-			 }
+			match ($lastChar) {
+       "?" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       "&" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       default => $wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+   };
 		}
 	} else {
 		//check if version is defined
 		$findme1 = "version=";
-		$posVersion = strpos(strtolower($wms_url), $findme1);
+		$posVersion = strpos(strtolower((string) $wms_url), $findme1);
 		if ($posVersion === false) {
 			$wms_url .= "&VERSION=1.1.1";
 		} else {
@@ -844,7 +823,7 @@ return $wms_url;
 }
 
 function isValidURL($url) {
-	return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
+	return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', (string) $url);
 }
 
 

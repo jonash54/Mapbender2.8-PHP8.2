@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../classes/class_wfs.php");
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
 
 $e_id="deleteWFS";
 $gui_id = Mapbender::session()->get("mb_user_gui");
@@ -171,9 +171,9 @@ echo "<select class='wfsList' size='20' name='wfsList'  onchange='sel();'>";
 
 while($row1 = db_fetch_array($res_wfs)){
 	
-	$wfs_conf_gui=array();
+	$wfs_conf_gui=[];
 	//$wfs_conf_gui_single=array();	
-	$wfs_conf_id=array();
+	$wfs_conf_id=[];
 
 	//get wfs_conf information by wfs_id
 	$sql_wfs_conf = "SELECT  wfs_conf_id, wfs_conf_abstract from wfs_conf where fkey_wfs_id=".$row1["wfs_id"]."";

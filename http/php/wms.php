@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //http://localhost/mapbender_trunk/php/wms.php?layer_id=21018&INSPIRE=1&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=wms&withChilds=1
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_layer_monitor.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_layer_monitor.php");
+require_once(__DIR__."/../classes/class_administration.php");
 //
 $admin = new administration();
 //
@@ -31,7 +31,7 @@ foreach($_GET as $key => $val) {
 
 $requestType = $_GET["REQUEST"];
 $version = $_GET["VERSION"];
-$service = strtoupper($_GET["SERVICE"]);
+$service = strtoupper((string) $_GET["SERVICE"]);
 $layerId = $_GET["LAYER_ID"];
 $updateSequence = intval($_GET["UPDATESEQUENCE"]);
 $inspire = $_GET["INSPIRE"];
@@ -150,8 +150,8 @@ if (!isset($layerId) || !is_numeric($layerId)) {
 //
 $wms_sql = "SELECT * FROM wms AS w, layer AS l " . 
 	"where l.layer_id = $1 AND l.fkey_wms_id = w.wms_id LIMIT 1";
-$v = array($layerId);
-$t = array("i");
+$v = [$layerId];
+$t = ["i"];
 $res_wms_sql = db_prep_query($wms_sql, $v, $t);
 $wms_row = db_fetch_array($res_wms_sql);
 
@@ -211,8 +211,8 @@ foreach ($metadataNameSpaceArray as $metadataNameSpace) {
 //Get Geometry Type if featuretype info was requested
 if ($resource == 'featuretype') {
 	$getTypeSql = "SELECT element_id, element_type from wfs_element WHERE fkey_featuretype_id = $1 AND element_type LIKE '%PropertyType';";
-	$vgetType = array($resourceMetadata['contentid']);
-	$tgetType = array('i');
+	$vgetType = [$resourceMetadata['contentid']];
+	$tgetType = ['i'];
 	$resGetType = db_prep_query($getTypeSql,$vgetType,$tgetType);
 	$featuretypeElements = db_fetch_array($resGetType);
 	$resourceMetadata['featuretype_geomType'] = $featuretypeElements['element_type'];
@@ -552,8 +552,8 @@ $getCapabilities = $request->appendChild($getCapabilities);
 
 #Creating the "Format" node 
 $wms_format_sql ="SELECT data_format FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'capability'";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 $res_wms_format_sql = db_prep_query($wms_format_sql, $v, $t);
 while ($wms_format_row = db_fetch_array($res_wms_format_sql)) {
     $format = $doc->createElement("Format");
@@ -638,8 +638,8 @@ $getMap = $request->appendChild($getMap);
 
 #Creatig the "Format" node 
 $wms_format_sql ="SELECT data_format FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'map'";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 $res_wms_format_sql = db_prep_query($wms_format_sql, $v, $t);
 
 while ($wms_format_row = db_fetch_array($res_wms_format_sql)) {
@@ -691,8 +691,8 @@ $getFeatureInfo = $request->appendChild($getFeatureInfo);
 
 #Creatig the "Format" node 
 $wms_format_sql ="SELECT data_format FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'featureinfo'";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 $res_wms_format_sql = db_prep_query($wms_format_sql, $v, $t);
 while ($wms_format_row = db_fetch_array($res_wms_format_sql))
 {
@@ -743,8 +743,8 @@ $exception = $capability->appendChild($exception);
 
 #Creatig the "Format" node 
 $wms_format_sql ="SELECT data_format FROM wms_format WHERE fkey_wms_id = $1 AND data_type = 'exception'";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 $res_wms_format_sql = db_prep_query($wms_format_sql, $v, $t);
 while ($wms_format_row = db_fetch_array($res_wms_format_sql)) {
     $format = $doc->createElement("Format");
@@ -817,8 +817,8 @@ if ($inspire) {
 ################################################################
 #Querying layer table for root layer information!
 $layer_sql = "SELECT * FROM layer WHERE layer.fkey_wms_id = $1 AND layer.layer_parent = ''";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 
 $res_layer_sql = db_prep_query($layer_sql, $v, $t);
 $layer_row = db_fetch_array($res_layer_sql);
@@ -863,8 +863,8 @@ $keyword_sql = "SELECT DISTINCT keyword FROM keyword, layer_keyword, layer " .
 	"WHERE keyword.keyword_id = layer_keyword.fkey_keyword_id " . 
 	"AND layer_keyword.fkey_layer_id = layer.layer_id " . 
 	"AND layer.fkey_wms_id = $1";
-$v = array($wms_row['wms_id']);
-$t = array("i");
+$v = [$wms_row['wms_id']];
+$t = ["i"];
 $res_keyword_sql = db_prep_query($keyword_sql, $v, $t);
 
 #Creating list of keyword nodes
@@ -881,7 +881,7 @@ while ($keyword_sql = db_fetch_array($res_keyword_sql))
     }
     
     #Creating the "Keyword" node
-	if (trim($keyword_sql['keyword']) <> "" AND $keyword_sql['keyword'] <> NULL) {
+	if (trim((string) $keyword_sql['keyword']) <> "" AND $keyword_sql['keyword'] <> NULL) {
     		$keyword_dom = $doc->createElement("Keyword");
     		$keyword_dom = $keywordList->appendChild($keyword_dom); 
     		$keyword_domText = $doc->createTextNode($keyword_sql['keyword']);
@@ -894,8 +894,8 @@ $epsg_sql = "SELECT layer_epsg.epsg, layer_epsg.minx, layer_epsg.miny, " .
 	"layer_epsg.maxy, layer_epsg.maxx " . 
 	"FROM layer_epsg WHERE layer_epsg.fkey_layer_id = $1";
 	
-$v = array($layer_row['layer_id']);
-$t = array("i");
+$v = [$layer_row['layer_id']];
+$t = ["i"];
 $res_espg_sql = db_prep_query($epsg_sql, $v, $t);
 $res_espg_sql1 = $res_espg_sql;
 $latLonBoundingBoxCreated = false;
@@ -1053,7 +1053,7 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
         	#Creating the "Keyword" node
         	$keyword_dom = $doc->createElement("Keyword");
         	$keyword_dom = $keywordList->appendChild($keyword_dom);
-		if (trim($keyword_sql['keyword']) <> "" AND $keyword_sql['keyword'] <> NULL) {
+		if (trim((string) $keyword_sql['keyword']) <> "" AND $keyword_sql['keyword'] <> NULL) {
 			$keyword = $keyword_sql['keyword'];
 		} else {
 			$keyword = _mb('Empty keyword was given, please add a keyword to your layer ressource.');
@@ -1067,7 +1067,7 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 			//" OR fkey_layer_id = " . $layer_row['layer_id'];
 	$res_layer_srs_sql = db_query($layer_srs_sql);
 	//store srs into array
-	$origLayerEpsg = array();
+	$origLayerEpsg = [];
 	while ($layer_srs_row = db_fetch_array($res_layer_srs_sql)) {
 		//Creating SRS node
 		$srs = $doc->createElement("SRS");
@@ -1080,8 +1080,8 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 	//build tree
 	$parent_layer_srs_sql = "SELECT layer_id, layer_pos, layer_parent FROM layer WHERE fkey_wms_id = $1";
 	
-	$vPL = array($wmsRow['wms_id']);
-	$tPL = array('i');
+	$vPL = [$wmsRow['wms_id']];
+	$tPL = ['i'];
 	$resPL = db_prep_query($parent_layer_srs_sql, $vPL, $tPL);
 	while ($layerTree = db_fetch_array($resPL)) {
 		$layerTreeArray['layer_id'][] = $layerTree['layer_id'];
@@ -1089,7 +1089,7 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 		$layerTreeArray['layer_parent'][] = $layerTree['layer_parent'];
 	}
 	$rootLayerFound = false;
-	$layerStructure = array();
+	$layerStructure = [];
 	$searchLayerId = $layerRow['layer_id'];
 	
 	//$layerStructure[] = $searchLayerId;
@@ -1183,7 +1183,7 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 	$layer_dimension_sql = "SELECT * FROM layer_dimension " . "WHERE fkey_layer_id = " . $layerRow ['layer_id'];
 	$res_layer_dimension_sql = db_query ( $layer_dimension_sql );
 	// store dimension into array
-	$layerDimension = array ();
+	$layerDimension = [];
 	while ( $layer_dimension_row = db_fetch_array ( $res_layer_dimension_sql ) ) {
 		if ($layer_dimension_row ['name'] == "time" && $layer_dimension_row ['units'] == "ISO8601") {
 			// create entry
@@ -1198,7 +1198,7 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 			if ($layer_dimension_row ['default'] != '') {
 				$extent->setAttribute ( 'default', $layer_dimension_row ['default'] );
 			}
-				
+
 			if ($layer_dimension_row ['extent'] != '') {
 				$dimensionText = $doc->createTextNode ( $layer_dimension_row ['extent'] );
 				$extent->appendChild ( $dimensionText );
@@ -1213,17 +1213,11 @@ function createLayerElement ($doc, $wmsId, $layerRow, $wmsRow, $AuthorityName, $
 		}
 	}
 	//switch wms version
-	switch ($wmsRow['wms_version']) {
-		case "1.1.1":
-			$metadataUrlType = "TC211";
-			break;
-		case "1.3.0":
-			$metadataUrlType = "ISO19115:2003";
-			break;
-		default :
-			$metadataUrlType = "TC211";
-			break;	
-	}
+	$metadataUrlType = match ($wmsRow['wms_version']) {
+     "1.1.1" => "TC211",
+     "1.3.0" => "ISO19115:2003",
+     default => "TC211",
+ };
 	//
 	//Creating Metadata and Identifier nodes
 	//read out all metadata entries for specific layer
@@ -1239,10 +1233,10 @@ SQL;
 	//$e = new mb_exception("wms.php: layerid: ".$layerRow['layer_id']);
 	$i = 0;
 	$res_metadata = db_query($sql);
-	$namespaceArray = array();
-	$AuthorityURLArray = array();
-	$IdentifierArray = array();
-	$metadataURLArray = array();
+	$namespaceArray = [];
+	$AuthorityURLArray = [];
+	$IdentifierArray = [];
+	$metadataURLArray = [];
 	while ($row_metadata = db_fetch_array($res_metadata)) {
 		$respOrga = $admin->getOrgaInfoFromRegistry('metadata', $row_metadata['metadata_id'], $wmsRow['wms_owner']);
 		$metadataArray['datasetid_codespace'] = $row_metadata["datasetid_codespace"];
@@ -1444,7 +1438,7 @@ SQL;
 				$onlineResource->setAttribute("xlink:href", $wmsRow['wms_getlegendurl']."version=1.1.1&service=WMS&request=GetLegendGraphic&layer=".$layerRow['layer_name']."&format=image/png");
 			} else {
 				//other stupid check - TODO: make it better
-				if (strpos($row_style['legendurl'], "http:") === false) {
+				if (!str_contains((string) $row_style['legendurl'], "http:")) {
 					$onlineResource->setAttribute("xlink:href", $wmsRow['wms_getlegendurl'].$row_style['legendurl']);
 				} else {
 					$onlineResource->setAttribute("xlink:href", $row_style['legendurl']);
@@ -1476,8 +1470,8 @@ SQL;
 
 function createLayerTree($parent, $withChilds, $layerId, &$layer, $wmsId, $doc, $wms_row, $mapbenderMetadataUrlUrl) {
 	$sub_layer_sql = "SELECT * FROM layer WHERE fkey_wms_id = $1 AND layer_parent = $2 ORDER BY layer_pos";
-	$v = array($wmsId, $parent);
-	$t = array("i","s");
+	$v = [$wmsId, $parent];
+	$t = ["i", "s"];
 	if (!$withChilds) {	
 		$sub_layer_sql .= " AND layer_id = $2";
 		array_push($v, $layerId);
@@ -1495,8 +1489,8 @@ function createLayerTree($parent, $withChilds, $layerId, &$layer, $wmsId, $doc, 
 
 //get layer_pos for requested layer id before beginning with tree creation
 $layerSql = "SELECT * FROM layer WHERE layer_id = $1";
-$v = array($layerId);
-$t = array("i");
+$v = [$layerId];
+$t = ["i"];
 $res_layer = db_prep_query($layerSql, $v, $t);
 $row = db_fetch_array($res_layer);
 $layerPos = $row['layer_pos'];

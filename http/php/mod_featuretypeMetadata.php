@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 function display_text($string) {
-    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     $string = preg_replace("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     $string = preg_replace("\n", "<br>", $string);
     return $string;
@@ -52,8 +52,8 @@ function display_text($string) {
 	#$wfs_conf_id = 1;
 	
 	$sql_id = "SELECT fkey_wfs_id, fkey_featuretype_id FROM wfs_conf WHERE wfs_conf_id = $1";
-	$v_id = array($wfs_conf_id);
-	$t_id = array('i');
+	$v_id = [$wfs_conf_id];
+	$t_id = ['i'];
 	$res_id = db_prep_query($sql_id,$v_id,$t_id);
 	$row_id = db_fetch_array($res_id);
 	$wfs_id = $row_id['fkey_wfs_id'];
@@ -64,8 +64,8 @@ function display_text($string) {
 	$sql_geom .= "FROM wfs_element AS a, wfs_conf AS b, wfs_conf_element AS c ";
 	$sql_geom .= "WHERE a.fkey_featuretype_id = b.fkey_featuretype_id AND b.wfs_conf_id = $1 ";
 	$sql_geom .= "AND b.wfs_conf_id = c.fkey_wfs_conf_id AND c.f_geom = 1 AND c.f_id = a.element_id";
-	$v_geom = array($wfs_conf_id);
-	$t_geom = array('i');
+	$v_geom = [$wfs_conf_id];
+	$t_geom = ['i'];
 	$res_geom = db_prep_query($sql_geom, $v_geom, $t_geom);
 	$row_geom = db_fetch_array($res_geom);
 	$geomType = $row_geom['geom_type'];
@@ -77,16 +77,16 @@ function display_text($string) {
 	$sql .= "wfs.country, wfs.postalcode, wfs.voice, wfs.facsimile, ";
 	$sql .= "wfs.electronicmailaddress, wfs.wfs_getcapabilities ";
 	$sql .= "FROM wfs, wfs_featuretype ft WHERE wfs.wfs_id = $1 AND ft.featuretype_id = $2 AND wfs.wfs_id = ft.fkey_wfs_id LIMIT 1";
-	$v = array($wfs_id,$featuretype_id);
-	$t = array('i','i');
+	$v = [$wfs_id, $featuretype_id];
+	$t = ['i', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	echo db_error();
-	$wfs = array();
+	$wfs = [];
 	$row = db_fetch_array($res);
 	
 	$sql_dep = "SELECT mb_group_name FROM mb_group AS a, mb_user AS b, mb_user_mb_group AS c WHERE b.mb_user_id = $1  AND b.mb_user_id = c.fkey_mb_user_id AND c.fkey_mb_group_id = a.mb_group_id AND b.mb_user_department = a.mb_group_description LIMIT 1";
-	$v_dep = array($row['wfs_owner']);
-	$t_dep = array('i');
+	$v_dep = [$row['wfs_owner']];
+	$t_dep = ['i'];
 	$res_dep = db_prep_query($sql_dep, $v_dep, $t_dep);
 	$row_dep = db_fetch_array($res_dep);
 	
@@ -126,7 +126,7 @@ function display_text($string) {
 
 	$keys = array_keys($featuretype);
 	for ($j=0; $j<count($featuretype); $j++) {
-		echo $t_a . utf8_encode($keys[$j]) . $t_b . display_text($featuretype[$keys[$j]]) . $t_c;
+		echo $t_a . mb_convert_encoding($keys[$j], 'UTF-8', 'ISO-8859-1') . $t_b . display_text($featuretype[$keys[$j]]) . $t_c;
 	}
 	
 	echo "</td></tr></table>\n";

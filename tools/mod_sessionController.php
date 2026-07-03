@@ -7,9 +7,9 @@
  * to use this script adopt your php.ini to know the memcached storage!!!
  * 
  */
-require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
-require_once(dirname(__FILE__)."/../http/classes/class_mb_warning.php");
-require_once(dirname(__FILE__)."/../http/classes/class_mb_notice.php");
+require_once(__DIR__."/../http/classes/class_mb_exception.php");
+require_once(__DIR__."/../http/classes/class_mb_warning.php");
+require_once(__DIR__."/../http/classes/class_mb_notice.php");
 //parse arguments
 $arguments = $argv;
 array_shift($arguments);
@@ -25,7 +25,7 @@ foreach($arguments as $value) {
 //***************************************************************
 //read values
 $sessionId = $real_arguments['sessionId'];
-if (!in_array($real_arguments['method'], array("exists", "get", "delete"))) {
+if (!in_array($real_arguments['method'], ["exists", "get", "delete"])) {
     echo "No allowed method given as param (method=exists/get/delete) - no success!";
     die();
 } else {

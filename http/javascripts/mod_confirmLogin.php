@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-include_once dirname(__FILE__) . "/../../conf/mapbender.conf";
+include_once __DIR__ . "/../../conf/mapbender.conf";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -33,14 +33,14 @@ if (!is_numeric($userId)) {
 
 $userName = $_GET["user_name"];
 $pattern = "/[a-z0-9_-]/i";
-if (!preg_match($pattern, $userName)) {
+if (!preg_match($pattern, (string) $userName)) {
 	echo "User Name not valid!";
 	die;
 }
 
 $userTicket = $_GET["user_ticket"];
 $pattern = "/[a-z0-9]{30}/i";
-if (!preg_match($pattern, $userTicket)) {
+if (!preg_match($pattern, (string) $userTicket)) {
 	echo "User Ticket not valid!";
 	die;
 }
@@ -57,8 +57,8 @@ body{
 <script type="text/javascript">
 <?php 
 echo "var userId = ".$_REQUEST['user_id'].";\n";
-echo "var userName = '".htmlentities($userName, ENT_QUOTES, CHARSET)."';\n";
-echo "var userTicket = '".htmlentities($userTicket, ENT_QUOTES, CHARSET)."';\n";
+echo "var userName = '".htmlentities((string) $userName, ENT_QUOTES, CHARSET)."';\n";
+echo "var userTicket = '".htmlentities((string) $userTicket, ENT_QUOTES, CHARSET)."';\n";
 ?>
 
 /*

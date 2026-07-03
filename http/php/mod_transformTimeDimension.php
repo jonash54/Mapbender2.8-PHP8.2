@@ -20,7 +20,7 @@
 # Module to transform the wms time dimension extent element into a json configuration for an javascript timeline plugin via ajax calls
 # See http://visjs.org/examples/timeline/dataHandling/loadExternalData.html
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 $objDateTime = new DateTime('NOW');
 $maxEntries = 200;
 $maxConcurrentEntries = 10;
@@ -31,7 +31,7 @@ $kindOfExtent = "singleValue"; //interval, discreteValues, intervalWithDuration
 $extent = $objDateTime->format($objDateTime::ATOM);
 //http://stackoverflow.com/questions/21686539/regular-expression-for-full-iso-8601-date-syntax
 //http://stackoverflow.com/questions/12756159/regex-and-iso8601-formated-datetime
-function abort($message) {
+function abort($message): never {
 	$result->result->error = false;
 	$result->result->message = $message;
 	header('Content-Type: application/json');
@@ -42,7 +42,7 @@ $iso8601Pattern = '/^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d
 $singleYearPattern = '/^\d{4}$/';
 
 if (isset($_REQUEST["default"]) & $_REQUEST["default"] != "") {
-	$testMatch = urldecode($_REQUEST["default"]);
+	$testMatch = urldecode((string) $_REQUEST["default"]);
 	if (!preg_match($iso8601Pattern,$testMatch) && $testMatch !== 'current'){
 		abort("The value for the default parameter is not a valid iso8601 dateTime string or has the value 'current'."); 	
  	}
@@ -50,7 +50,7 @@ if (isset($_REQUEST["default"]) & $_REQUEST["default"] != "") {
 }
 
 if (isset($_REQUEST["operation"]) & $_REQUEST["operation"] != "") {
-	$testMatch = urldecode($_REQUEST["operation"]);
+	$testMatch = urldecode((string) $_REQUEST["operation"]);
 	if (!$testMatch == 'snapToGrid' && !$testMatch == 'configureTimeline'){ 
 		echo 'Parameter <b>operation</b> is not valid (snapToGrid,configureTimeline).<br/>'; 
 		die(); 		
@@ -59,7 +59,7 @@ if (isset($_REQUEST["operation"]) & $_REQUEST["operation"] != "") {
 }	
 
 if (isset($_REQUEST["userValue"]) & $_REQUEST["userValue"] != "") {
-	$testMatch = urldecode($_REQUEST["userValue"]);
+	$testMatch = urldecode((string) $_REQUEST["userValue"]);
 	if (!preg_match($iso8601Pattern,$testMatch)){
 		abort("The value for the userValue parameter is not a valid iso8601 dateTime string."); 	
  	}
@@ -67,9 +67,9 @@ if (isset($_REQUEST["userValue"]) & $_REQUEST["userValue"] != "") {
 }	
 
 if (isset($_REQUEST["extent"]) & $_REQUEST["extent"] != "") {
-	$testMatch = urldecode($_REQUEST["extent"]);
+	$testMatch = urldecode((string) $_REQUEST["extent"]);
 	//search for comma
-	if (strpos($testMatch,',') !== false) {
+	if (str_contains($testMatch,',')) {
 		//found single discrete values
 		$singleValues = explode(',',$testMatch);
 		//test format of each value 
@@ -79,7 +79,7 @@ if (isset($_REQUEST["extent"]) & $_REQUEST["extent"] != "") {
  			}
 		}
 		$kindOfExtent = "discreteValues";
-	} elseif (strpos($testMatch,'/') !== false) {
+	} elseif (str_contains($testMatch,'/')) {
 		//found interval with duration
 		//extract values
 		if (count(explode('/',$testMatch)) !== 3 ) {
@@ -146,7 +146,7 @@ function quicksearch($element, $searchArray) {
 }
 
 function getNearestValue($userValue, $discreteValues) {
-	$discreteDateTimes = array();
+	$discreteDateTimes = [];
 	$numberOfValues = count($discreteValues);
 	$userValueDateTime = new DateTime($userValue);
 
@@ -187,8 +187,12 @@ function interval2Seconds($duration) {
 	return $seconds;
 }
 
-//Variable for result object
-$result->data = array();
+//Variable for result object — PHP 8 needs all stdClass containers pre-built.
+$result = new stdClass();
+$result->data = [new stdClass()];
+$result->result = new stdClass();
+$result->options = new stdClass();
+$result->options->editable = new stdClass();
 //define default timezone:
 date_default_timezone_set('UTC');
 //what do we need further for timeline:
@@ -196,9 +200,9 @@ $fullYearExtent = false;
 //min, max, if point is slideable, if some point is already selected -> userValue
 if ($operation == 'snapToGrid') {
 	//check for discrete values - if they exists - call a function to find next value - like quicksearch
-	if (strpos($extent,'/') === false) { //no intervall found in extent
+	if (!str_contains($extent,'/')) { //no intervall found in extent
 		$discreteValues = explode(',',$extent);
-		if (preg_match($singleYearPattern,$interval[0])) {
+		if (preg_match($singleYearPattern,(string) $interval[0])) {
 			$fullYearExtent = true;
 		}
 		//ordered??? - define discrete values to be ordered !!	
@@ -305,6 +309,7 @@ if ($operation == 'snapToGrid') {
 				$result->data[0]->start = $startTime->format('c');
 				for ($i=1; $i < $numberOfDiscreteValues+1; $i++) {
 					$time = $startTime->add($duration);
+					$result->data[$i] = new stdClass();
 					$result->data[$i]->id = $i;
 					if ($fullYearExtent == true) {
 						$result->data[$i]->content = $time->format('Y');
@@ -353,6 +358,7 @@ if ($operation == 'snapToGrid') {
 			} else {
 				$extentArray = explode(',',$extent);
 				for ($i=0; $i < count($extentArray); $i++) {
+					$result->data[$i] = new stdClass();
 					$result->data[$i]->id = $i;
 					$result->data[$i]->content = $extentArray[$i];
 					$result->data[$i]->start = $extentArray[$i];

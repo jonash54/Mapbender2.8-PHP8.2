@@ -1,8 +1,8 @@
 <?php
-	require_once(dirname(__FILE__) . "/../php/mb_validateSession.php");
+	require_once(__DIR__ . "/../php/mb_validateSession.php");
 	
 	$id = $_GET["id"];
-	if (!preg_match("/[a-zA-Z0-9-_]+/", $id)) {
+	if (!preg_match("/[a-zA-Z0-9-_]+/", (string) $id)) {
    		$message = "cancelled";
 	}
 	else {
@@ -17,9 +17,9 @@
 		if (defined("UPLOAD_DIR")) {
 			$uploadDir = UPLOAD_DIR;
 		}
-		$allowedFileTypes = array();
+		$allowedFileTypes = [];
 		if (defined("UPLOAD_WHITELIST_FILE_TYPES")) {
-			$allowedFileTypes = explode(",", UPLOAD_WHITELIST_FILE_TYPES);
+			$allowedFileTypes = explode(",", (string) UPLOAD_WHITELIST_FILE_TYPES);
 		}
 
 		// check if file type is valid
@@ -27,16 +27,16 @@
 			$cancel = true;
 			$message = _mb("Files with this extension are not allowed. Must be %s.", implode(", ", $allowedFileTypes));
 //			$message = _mb("Dateien in diesem Format werden nicht unterstützt, wählen Sie eines der folgenden Bildformate: %s.", implode(", ", $allowedFileTypes));
-			if(preg_match("/\.$item\$/i", $clientFilename)) {
+			if(preg_match("/\.$item\$/i", (string) $clientFilename)) {
 				$cancel = false;
 				break;
 			}
 		}
 		
-		$disallowedFileTypes = array("PHP", "PHP3", "PHP4", "PHTML", "PHP5", "PHP6");
+		$disallowedFileTypes = ["PHP", "PHP3", "PHP4", "PHTML", "PHP5", "PHP6"];
 		if (defined("UPLOAD_BLACKLIST_FILE_TYPES")) {
 			$disallowedFileTypes = array_merge(
-				explode(",", UPLOAD_BLACKLIST_FILE_TYPES), 
+				explode(",", (string) UPLOAD_BLACKLIST_FILE_TYPES), 
 				$disallowedFileTypes
 			);
 		}
@@ -44,7 +44,7 @@
 		
 		// check if file type is valid
 		foreach ($disallowedFileTypes as $item) {
-			if(preg_match("/\.$item\$/i", $clientFilename)) {
+			if(preg_match("/\.$item\$/i", (string) $clientFilename)) {
 				$cancel = true;
 			$message = _mb("Files with extension %s are not allowed. Must be %s.", $item, implode(", ", $allowedFileTypes));
 //			$message = _mb("Dateien in dem Format %s werden nicht unterstützt, wählen Sie eines der folgenden Bildformate: %s.", $item, implode(", ", $allowedFileTypes));
@@ -64,9 +64,9 @@
 		}
 		
 		$extension = "";
-		$pos = strrpos($clientFilename, ".");
+		$pos = strrpos((string) $clientFilename, ".");
 		if ($pos !== false) {
-			$extension = substr($clientFilename, $pos);
+			$extension = substr((string) $clientFilename, $pos);
 		}
 		$serverFilename .= $extension;
 		$serverFullFilename = $uploadDir . "/" . $serverFilename;

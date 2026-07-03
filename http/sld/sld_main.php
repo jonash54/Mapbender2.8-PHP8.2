@@ -26,8 +26,8 @@
  * @author Markus Krzyzanowski
  */
 
-require_once(dirname(__FILE__)."/sld_config.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/sld_config.php");
+require_once(__DIR__."/../classes/class_wfs_conf.php");
 $classWfsConf = new wfs_conf();
 
 //read custom sld for this user&wms&layer&gui from the db instead using sld.xml
@@ -57,19 +57,19 @@ else
 {
 	//Try to read sld from the DB
 	$sql = "SELECT * FROM sld_user_layer WHERE fkey_gui_id = $1 AND fkey_layer_id = $2 AND fkey_mb_user_id = $3";
-	$v = array($_SESSION["sld_gui_id"], $layer_id, $mb_user_id);
-	$t = array('s', 'i', 'i');
+	$v = [$_SESSION["sld_gui_id"], $layer_id, $mb_user_id];
+	$t = ['s', 'i', 'i'];
 	$res = db_prep_query($sql,$v,$t);
 	if (!$res || db_numrows($res)== 0)
 	{
 		//No user specific sld found in DB -> get it from the mapserver
-		$file = $mapfileUrl."SERVICE=WMS&VERSION=1.1.1&REQUEST=GetStyles&LAYERS=".urlencode($layer_name);
+		$file = $mapfileUrl."SERVICE=WMS&VERSION=1.1.1&REQUEST=GetStyles&LAYERS=".urlencode((string) $layer_name);
 		$data = readSld($file);
 		$data = char_encode($data);
 		//write the sld to the DB
 		$sql = "INSERT INTO sld_user_layer(fkey_mb_user_id, fkey_layer_id, sld_xml, use_sld, fkey_gui_id) VALUES ($1, $2, $3, 0, $4);";
-		$v = array($mb_user_id, $layer_id, $data, $_SESSION["sld_gui_id"]);
-		$t = array('i', 'i', 's', 's');
+		$v = [$mb_user_id, $layer_id, $data, $_SESSION["sld_gui_id"]];
+		$t = ['i', 'i', 's', 's'];
 		$res = @db_prep_query($sql,$v,$t);
 		//Use the new sld
 	}
@@ -163,7 +163,7 @@ echo "  <td class='line_left2 line_right2' colspan='2'>\n";
 
 ## - Map with SLD
 //Added rand(...) to force a reload of the image because the url should be different
-echo "   <img src=\"".$previewMapUrl."&WIDTH=320&HEIGHT=240&sld=".urlencode($sld_url)."&".rand(0,10000)."\" border=\"0\" width=\"320\" height=\"240\">";
+echo "   <img src=\"".$previewMapUrl."&WIDTH=320&HEIGHT=240&sld=".urlencode($sld_url)."&".random_int(0,10000)."\" border=\"0\" width=\"320\" height=\"240\">";
 echo "  </td>\n";
 
 echo "  <td>\n";
@@ -194,7 +194,7 @@ echo " <tr>\n";
 echo "  <td class='line_left2 line_down2 line_right2' colspan='2'>\n";
 echo "   &nbsp;\n";
 ## - Legend with SLD
-echo "   <img src=\"".$mapfileUrl."VERSION=1.1.0&REQUEST=GetLegendGraphic&SERVICE=WMS&LAYER=".urlencode($layer_name)."&FORMAT=image/png&sld=".urlencode($sld_url)."&".rand(0,10000)."\">\n";
+echo "   <img src=\"".$mapfileUrl."VERSION=1.1.0&REQUEST=GetLegendGraphic&SERVICE=WMS&LAYER=".urlencode((string) $layer_name)."&FORMAT=image/png&sld=".urlencode($sld_url)."&".random_int(0,10000)."\">\n";
 echo "  </td>\n";
 echo "   &nbsp;\n";
 echo "  <td>\n";
@@ -203,7 +203,7 @@ echo "  </td>\n";
 echo "  <td class='line_left2 line_down2 line_right2' colspan='2'>\n";
 echo "   &nbsp;\n";
 ## - Legend without SLD
-echo "   <img src=\"".$mapfileUrl."VERSION=1.1.0&REQUEST=GetLegendGraphic&SERVICE=WMS&LAYER=".urlencode($layer_name)."&FORMAT=image/png\">";
+echo "   <img src=\"".$mapfileUrl."VERSION=1.1.0&REQUEST=GetLegendGraphic&SERVICE=WMS&LAYER=".urlencode((string) $layer_name)."&FORMAT=image/png\">";
 echo "  </td>\n";
 echo " </tr>\n";
 echo "</table>\n";

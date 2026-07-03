@@ -1,4 +1,8 @@
-
+<?php
+if (!defined('LOG_JS') || !defined('LOG_LEVEL') || !defined('LOG_LEVEL_LIST')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
+?>
 <!-- TODO: Need my header! -->
 <html>
 <head>

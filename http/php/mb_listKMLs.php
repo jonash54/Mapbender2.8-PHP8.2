@@ -16,10 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
-require_once(dirname(__FILE__) . "/../classes/class_connector.php");
-require_once(dirname(__FILE__) . "/../classes/class_kml_ows.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
+require_once(__DIR__ . "/../classes/class_connector.php");
+require_once(__DIR__ . "/../classes/class_kml_ows.php");
 
 $gui_id = Mapbender::session()->get("mb_user_gui");
 $user_id = Mapbender::session()->get("mb_user_id");
@@ -53,8 +53,8 @@ function mb_listKMLs($kmlIdArray, $form_target){
 	$display .= "<table width='90%' style='font-family: Arial, Helvetica, sans-serif;font-size : 12px;color: #808080;' border='1' cellpadding='3' rules='rows'><tr style='background-color:#F0F0F0;' width='80px'><td ><b>KML name</b></td><td><b>last update</b></td><td colspan=5></td></tr>";
 
 	if (count($kmlIdArray) > 0) {
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 
 		$kmlIdList = "";
 		for ($i = 0; $i < count($kmlIdArray); $i++){
@@ -68,7 +68,7 @@ function mb_listKMLs($kmlIdArray, $form_target){
 		$sql_list_kmls = "SELECT DISTINCT kml_id, kml_title, kml_timestamp FROM mb_user_kml ";
 		$sql_list_kmls .= "WHERE kml_id IN (" . $kmlIdList . ") ";
 		$sql_list_kmls .= "ORDER BY kml_timestamp DESC";
-		
+
 		$res_list_kmls = db_prep_query($sql_list_kmls, $v, $t);
 		while($row = db_fetch_array($res_list_kmls)){
 			$this_id = $row["kml_id"];
@@ -90,14 +90,14 @@ function mb_listKMLs($kmlIdArray, $form_target){
 		$display .= "<tr><td>There are no KMLs availiable</td></tr>";
 	}	
 	$display .= "</table>";
-	   
+
 	return $display;
 }
 
 function getTarget($gui_id) {
 	$sql = "SELECT e_requires, e_target FROM gui_element WHERE e_id = 'loadkml' AND fkey_gui_id = $1";
-	$v = array($gui_id);
-	$t = array("s");
+	$v = [$gui_id];
+	$t = ["s"];
 	$res = db_prep_query($sql, $v, $t);
 	$cnt = 0;
 	while($row = db_fetch_array($res)){ 
@@ -109,7 +109,7 @@ function getTarget($gui_id) {
 		$e = new mb_exception("listKMLs: e_id 'loadkml' not unique in GUI '" . $gui_id . "'!");
 	}
 
-	$targetArray = explode(",", $e_target);
+	$targetArray = explode(",", (string) $e_target);
 	if (in_array('mapframe1', $targetArray)) {
 		return 'mapframe1';
 	}
@@ -144,7 +144,7 @@ if (!empty($delKmlId)) {
 elseif ($clientFilename) {
 	$serverFilename = "../tmp/kml" . time() . ".xml";
 	copy($clientFilename, $serverFilename);
-	
+
 	$kmlDoc = loadFile($serverFilename);
 	$kmlObj = new KML();
 	if ($kmlObj->parseKml($kmlDoc)) {
@@ -216,7 +216,7 @@ function setGeoJson ($geoJSON) {
 /*
 // load a KML from list
 echo mb_listKMLs($kmlIdArray, $form_target);
-		
+
 if ($kmlId && in_array($kmlId, $kmlIdArray)){
 	if ($action == "delete") {
 		echo "<script language='javascript'>";

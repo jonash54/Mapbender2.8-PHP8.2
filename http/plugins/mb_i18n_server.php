@@ -7,8 +7,8 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
  
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__) . "/../classes/class_locale.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__ . "/../classes/class_locale.php");
 
 // translates all string values in a tree It can find
 function translateTree($tree) {
@@ -38,10 +38,7 @@ switch ($ajaxResponse->getMethod()) {
         $translated_obj = translateTree($msg_obj);
 		
         $ajaxResponse->setSuccess(true);
-		$ajaxResponse->setResult(array(
-			"data" => $translated_obj,
-			"locale" => $localeObj->name
-		));
+		$ajaxResponse->setResult(["data" => $translated_obj, "locale" => $localeObj->name]);
 		break;
 	default :
 		$ajaxResponse->setSuccess(false);

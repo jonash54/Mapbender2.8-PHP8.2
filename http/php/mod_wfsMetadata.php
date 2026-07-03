@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
 
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 
 function display_text($string) {
-    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", $string);   
+    $string = preg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]", "<a href=\"\\0\" target=_blank>\\0</a>", (string) $string);   
     $string = preg_replace("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([0-9a-z](-?[0-9a-z])*\.)+[a-z]{2}([zmuvtg]|fo|me)?$", "<a href=\"mailto:\\0\" target=_blank>\\0</a>", $string);   
     $string = preg_replace("\n", "<br>", $string);
     return $string;
@@ -63,15 +63,15 @@ function display_text($string) {
 	#$wfs_id = 1;
 	
 	$sql_id = "SELECT * FROM wfs WHERE wfs_id = $1";
-	$v_id = array($wfs_id);
-	$t_id = array('i');
+	$v_id = [$wfs_id];
+	$t_id = ['i'];
 	$res_wfs = db_prep_query($sql_id,$v_id,$t_id);
 	$row_wfs = db_fetch_array($res_wfs);
-	$wfs = array();
+	$wfs = [];
 	
 	$sql_dep = "SELECT mb_group_name FROM mb_group AS a, mb_user AS b, mb_user_mb_group AS c WHERE b.mb_user_id = $1  AND b.mb_user_id = c.fkey_mb_user_id AND c.fkey_mb_group_id = a.mb_group_id AND b.mb_user_department = a.mb_group_description LIMIT 1";
-	$v_dep = array($row_wfs['wfs_owner']);
-	$t_dep = array('i');
+	$v_dep = [$row_wfs['wfs_owner']];
+	$t_dep = ['i'];
 	$res_dep = db_prep_query($sql_dep, $v_dep, $t_dep);
 	$row_dep = db_fetch_array($res_dep);
 	$wfs['WFS ID'] = $row_wfs['wfs_id'];
@@ -109,7 +109,7 @@ function display_text($string) {
 
 	$keys = array_keys($wfs);
 	for ($j=0; $j<count($wfs); $j++) {
-		echo $t_a . utf8_encode($keys[$j]) . $t_b . display_text($wfs[$keys[$j]]) . $t_c;
+		echo $t_a . mb_convert_encoding($keys[$j], 'UTF-8', 'ISO-8859-1') . $t_b . display_text($wfs[$keys[$j]]) . $t_c;
 	}
 	
 	echo "</td></tr></table>\n";

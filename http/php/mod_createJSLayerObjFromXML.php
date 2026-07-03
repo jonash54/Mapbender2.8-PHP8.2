@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_wms.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_wms.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $capabilitiesURL = $_REQUEST['caps'];
 $layerName = $_REQUEST['layerName'];
@@ -55,10 +55,10 @@ if (!$mywms->wms_status) {
 }*/
 else {
 	if ($noHtml) {
-		$output .= $mywms->createJsLayerObjFromWMS(false, $layerName);
+		$output .= $mywms->createJsLayerObjFromWMS($layerName, false);
 	}
 	else {
-		$output .= $mywms->createJsLayerObjFromWMS(true, $layerName);
+		$output .= $mywms->createJsLayerObjFromWMS($layerName, true);
 	}
 }
 

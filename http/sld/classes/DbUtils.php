@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../../conf/mapbender.conf");
+require_once(__DIR__."/../../../conf/mapbender.conf");
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 
@@ -38,8 +38,8 @@ class DbUtils
      */
 	function getLayerIdFromLayerName($wms_id, $layer_name) {
 		$sql = "SELECT * FROM layer WHERE fkey_wms_id = $1 AND layer_name = $2";
-		$v = array($wms_id, $layer_name);
-		$t = array('i', 's');
+		$v = [$wms_id, $layer_name];
+		$t = ['i', 's'];
 		$res = db_prep_query($sql,$v,$t);
 		if ( db_fetch_row($res, 0) ) {
 			return db_result($res, 0, "layer_id");
@@ -57,8 +57,8 @@ class DbUtils
      */
 	function getLayerWfsConfId($gui_id, $layer_id) {
 		$sql = "SELECT gui_layer_wfs_featuretype FROM gui_layer WHERE fkey_gui_id = $1 AND fkey_layer_id = $2";
-		$v = array($gui_id, $layer_id);
-		$t = array('s', 'i');
+		$v = [$gui_id, $layer_id];
+		$t = ['s', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		if ( db_fetch_row($res, 0) ) {
 			return db_result($res, 0, "gui_layer_wfs_featuretype");
@@ -75,8 +75,8 @@ class DbUtils
      */
 	function getWfsConfFeatureTypeId($wfs_conf_id) {
 		$sql = "SELECT fkey_featuretype_id FROM wfs_conf WHERE wfs_conf_id = $1";
-		$v = array($wfs_conf_id);
-		$t = array('i');
+		$v = [$wfs_conf_id];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
 		if ( db_fetch_row($res, 0) ) {
 			return db_result($res, 0, "fkey_featuretype_id");
@@ -100,11 +100,11 @@ class DbUtils
 		$sql .= "from gui_wms w, layer l, layer_epsg e ";
 		$sql .= "where l.fkey_wms_id=w.fkey_wms_id and e.fkey_layer_id=l.layer_id and e.epsg=w.gui_wms_epsg and ";
 		$sql .= "l.layer_parent = '' and w.fkey_gui_id = $1 and w.gui_wms_position=0";
-		$v = array($gui_id);
-		$t = array('s');
+		$v = [$gui_id];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		if ( $res ) {
-			$row = db_fetch_array($res, 0); 
+			$row = db_fetch_array($res); 
 			$previewMapSrs .= "&SRS=".$row["srs"]."&BBOX=".$row["minx"].",".$row["miny"].",".$row["maxx"].",".$row["maxy"];
 		} else {
 			return false;
@@ -114,12 +114,12 @@ class DbUtils
 		$sql .= "from gui_wms w, gui_layer l, wms, layer ";
 		$sql .= "where w.fkey_gui_id=l.fkey_gui_id and wms.wms_id = w.fkey_wms_id and l.fkey_layer_id = layer.layer_id and ";
 		$sql .= "w.fkey_gui_id=$1 and l.fkey_layer_id=$2 and wms.wms_id = $3";
-		$v = array($gui_id, $layer_id, $wms_id);
-		$t = array('s', 'i', 'i');
+		$v = [$gui_id, $layer_id, $wms_id];
+		$t = ['s', 'i', 'i'];
 		$res = db_prep_query($sql,$v,$t);
 		$previewMapUrl = "";
 		if ( $res ) {
-			$row = db_fetch_array($res, 0); 
+			$row = db_fetch_array($res); 
 			$previewMapUrl .= $row["mapurl"]."SERVICE=WMS&REQUEST=GetMap&VERSION=".$row["version"];
 			$previewMapUrl .= "&LAYERS=".$row["layer_name"]."&STYLES=";
 			$previewMapUrl .= $previewMapSrs;

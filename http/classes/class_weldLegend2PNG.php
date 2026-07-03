@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-require_once(dirname(__FILE__)."/class_stripRequest.php");
-require_once(dirname(__FILE__)."/class_mb_exception.php");
+require_once(__DIR__."/class_stripRequest.php");
+require_once(__DIR__."/class_mb_exception.php");
 
 /**
  * Class used to weld different images (coming from various maprequests) together.
@@ -46,7 +46,7 @@ class weldMaps2PNG{
 			$e = new mb_exception("weldMaps2PNG: no maprequests delivered");
 		}
 		// getting the array of urls
-		$url = explode("___", $urls);
+		$url = explode("___", (string) $urls);
 		// make url parameters accessible
 		$obj1 = new stripRequest($url[0]);
 		$width = $obj1->get("width");
@@ -80,7 +80,7 @@ class weldMaps2PNG{
 		imagepng($image,$filename);
 		imagedestroy($image);
 	}
-        
+
         /**
         * Old constructor to keep PHP downward compatibility
         */
@@ -102,13 +102,13 @@ class weldMaps2PNG{
 		 * @todo handle as reg-exp?
 		 * @todo instanciate $im as false or null?
 		 */
-		if(mb_strtolower($f) == 'image/png' || mb_strtolower($f) == 'png'){
+		if(mb_strtolower((string) $f) == 'image/png' || mb_strtolower((string) $f) == 'png'){
 			$im = @ImageCreateFromPNG($imgurl);
 		}
-		if(mb_strtolower($f) == 'image/jpeg' || mb_strtolower($f) == 'jpeg'){
+		if(mb_strtolower((string) $f) == 'image/jpeg' || mb_strtolower((string) $f) == 'jpeg'){
 			$im = @ImageCreateFromJPEG($imgurl);
 		}
-		if(mb_strtolower($f) == 'image/gif' || mb_strtolower($f) == 'gif'){
+		if(mb_strtolower((string) $f) == 'image/gif' || mb_strtolower((string) $f) == 'gif'){
 			$im = @ImageCreateFromGIF($imgurl);
 		}
 		if(!$im){
@@ -118,7 +118,7 @@ class weldMaps2PNG{
 		// return the temporary image
 		return $im;
 	}
-        
+
 } // eof class weldMaps2PNG
 
 ?>

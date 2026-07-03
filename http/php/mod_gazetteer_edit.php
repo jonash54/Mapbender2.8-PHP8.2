@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <html>
 <head>
@@ -41,20 +41,20 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
   	return true;
   }
 </script>
-    
+
 </head>
 <body>
 Gazetteer Configuration<br>
 <form method='POST' onsubmit='return validate()'>
 <a href="mod_gazetteer_conf.php">new</a><br>
-  
+
 <?php
 /* save gazetteer properties */
 $con = db_connect($DBSERVER,$OWNER,$PW);
 db_select_db($DB,$con);
 
 if(isset($_REQUEST["save"])){
-	
+
 	$sql = "UPDATE gazetteer SET ";
 	$sql .= "gazetteer_abstract = $1, ";
 	$sql .= "g_label = $2, ";
@@ -66,8 +66,8 @@ if(isset($_REQUEST["save"])){
 	$sql .= "g_res_style = $8, ";
 	$sql .= "g_use_wzgraphics = $9 ";
 	$sql .= "WHERE gazetteer_id = $10;";
-	$v = array($_REQUEST["gazetteer_abstract"], $_REQUEST["g_label"], $_REQUEST["g_label_id"], $_REQUEST["g_button"], $_REQUEST["g_button_id"], $_REQUEST["g_style"], $_REQUEST["g_buffer"], $_REQUEST["g_res_style"], $_REQUEST["g_use_wzgraphics"], $_REQUEST["gaz"]);
-	$t = array("s", "s", "s", "s", "s", "s", "s", "s", "i", "i");
+	$v = [$_REQUEST["gazetteer_abstract"], $_REQUEST["g_label"], $_REQUEST["g_label_id"], $_REQUEST["g_button"], $_REQUEST["g_button_id"], $_REQUEST["g_style"], $_REQUEST["g_buffer"], $_REQUEST["g_res_style"], $_REQUEST["g_use_wzgraphics"], $_REQUEST["gaz"]];
+	$t = ["s", "s", "s", "s", "s", "s", "s", "s", "i", "i"];
 	$res = db_prep_query($sql, $v, $t);		
 
 	for($i=0; $i<count($_REQUEST["f_id"]); $i++){
@@ -81,8 +81,8 @@ if(isset($_REQUEST["save"])){
 		$sql .= "f_show = $7, ";
 		$sql .= "f_respos = $8 ";
 		$sql .= "WHERE fkey_gazetteer_id = $9 AND f_id = $10;";
-		$v = array($_REQUEST["f_search"][$i], $_REQUEST["f_pos"][$i], $_REQUEST["f_style_id"][$i], $_REQUEST["f_toupper"][$i], $_REQUEST["f_label"][$i], $_REQUEST["f_label_id"][$i], $_REQUEST["f_show"][$i], $_REQUEST["f_respos"][$i], $_REQUEST["gaz"], $_REQUEST["f_id"][$i]);
-		$t = array("s", "s", "s", "s", "s", "s", "s", "s", "i", "i");
+		$v = [$_REQUEST["f_search"][$i], $_REQUEST["f_pos"][$i], $_REQUEST["f_style_id"][$i], $_REQUEST["f_toupper"][$i], $_REQUEST["f_label"][$i], $_REQUEST["f_label_id"][$i], $_REQUEST["f_show"][$i], $_REQUEST["f_respos"][$i], $_REQUEST["gaz"], $_REQUEST["f_id"][$i]];
+		$t = ["s", "s", "s", "s", "s", "s", "s", "s", "i", "i"];
 		$res = db_prep_query($sql, $v, $t);		
 	}		
 }
@@ -114,8 +114,8 @@ echo "</select>";
 /* configure elements */
 if(isset($_REQUEST["gaz"])){
 	$sql = "SELECT * FROM gazetteer WHERE gazetteer_id = $1";
-	$v = array($_REQUEST["gaz"]);
-	$t = array("i");
+	$v = [$_REQUEST["gaz"]];
+	$t = ["i"];
 	$res = db_prep_query($sql, $v, $t);
 	if($row = db_fetch_array($res)){	
 		echo "<table>";
@@ -133,16 +133,16 @@ if(isset($_REQUEST["gaz"])){
 		echo "></td></tr>";
 		echo "</table>";
 	}
-	
+
 	/* set element options */
 	$sql = "SELECT * FROM gazetteer_element ";
 	$sql .= "JOIN wfs_element ON gazetteer_element.f_id = wfs_element.element_id ";
 	$sql .= "WHERE fkey_gazetteer_id = $1";
-	$v = array($_REQUEST["gaz"]);
-	$t = array("i");
+	$v = [$_REQUEST["gaz"]];
+	$t = ["i"];
 	echo $sql;
 	$res = db_prep_query($sql, $v, $t);
-	
+
 	echo "<table border='1'>";
 	echo "<tr>";
 		echo "<td>ID</td>";

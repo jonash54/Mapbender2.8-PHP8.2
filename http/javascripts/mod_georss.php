@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 #require_once(dirname(__FILE__)."/../include/dyn_php.php");
 ?>
 var georssTargetArray = [];
@@ -87,18 +87,18 @@ function loadGeoRSS(url){
 						georssHighlighter.clean();
 						georssUsemap.clean();
 	           		}
-	           		
+
 	           		//Import Geometries
 					geoms = new GeometryArray();
 	           		geoms.importGeoJSON(geoObj);
-	           		
+
 	           		//Zoom to Extent of Geometries
 	           		extent = geoms.getBBox();
 	           		mb_calculateExtent(georssTargetArray[0], extent[0].x, extent[0].y, extent[1].x, extent[1].y);
 	           		extent = enlargeExtent(extent, 10, georssTargetArray[0]);
 	           		mb_calculateExtent(georssTargetArray[0], extent[0].x, extent[0].y, extent[1].x, extent[1].y);
 	           		setMapRequest(georssTargetArray[0]);
-					
+
 					//Add geometries to usemap and georssHighlighter
 					for( var i=0;i<geoms.count();i++){
 						georssHighlighter.add(geoms.get(i),"red");
@@ -106,7 +106,7 @@ function loadGeoRSS(url){
 					}
 					georssHighlighter.paint();
 					georssUsemap.setUsemap();
-						
+
 
 					eventAfterMapRequest.register(function () {
 						georssHighlighter.paint();
@@ -141,16 +141,16 @@ function showGeorssTooltip(e){
 	actGeom = this.geom;
 	if(!actGeom)
 		return;
-	
+
 	actFrame = georssTargetArray[0];
-	
+
 	//Get Mapframe Position
 	x=parseInt(document.getElementById(actFrame).style.left, 10);
 	y=parseInt(document.getElementById(actFrame).style.top, 10);
-	
+
 	x=0;
 	y=0;
-	
+
 	//Hide old Window
 	if(georssWin && georssWin.isVisible()){
 		georssWin.destroy();
@@ -176,7 +176,7 @@ function showGeorssTooltip(e){
 	}
 	html = html + "</tr></table></html>";
 
-	
+
 	//alert(html); 	
 	//Show Modal Popup
 	mb_getMousePos(e,actFrame);

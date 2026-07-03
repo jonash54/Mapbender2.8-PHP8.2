@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-include(dirname(__FILE__)."/../../conf/print.conf");
+require_once(__DIR__."/../php/mb_validateSession.php");
+include(__DIR__."/../../conf/print.conf");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -52,8 +52,8 @@ $mb_module_id = "print1";
 /**********************************/
 
 $sql = "SELECT * from gui_element WHERE fkey_gui_id = '".Mapbender::session()->get("mb_user_gui")."' AND e_id = $1";
-$v = array($mb_module_id);
-$t = array('s');
+$v = [$mb_module_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 
 echo "<script type='text/javascript'>";
@@ -156,7 +156,7 @@ function validate(){
 		window.opener.document.getElementById(mod_print1_target).style.height = document.form1.map_height.value;
 		window.opener.window.frames[mod_print1_target].document.getElementById("maps").style.width = document.form1.map_width.value;
 		window.opener.window.frames[mod_print1_target].document.getElementById("maps").style.height = document.form1.map_height.value;
-      
+
 		window.opener.mb_mapObj[ind].extent = new window.opener.Mapbender.Extent(
 			coord[0],
 			pos[1],

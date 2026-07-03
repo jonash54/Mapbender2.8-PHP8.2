@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/class_connector.php");
-require_once(dirname(__FILE__)."/class_administration.php");
-require_once(dirname(__FILE__)."/class_wfs.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/class_connector.php");
+require_once(__DIR__."/class_administration.php");
+require_once(__DIR__."/class_wfs.php");
 
 class Wfs_2_0 extends Wfs {
 	const VERSION = "2.0.0";
@@ -42,7 +42,7 @@ class Wfs_2_0 extends Wfs {
 		$result->message = "";
 		$result->xml = $xml;
 		
-		$simpleXml = simplexml_load_string($xml);
+		$simpleXml = simplexml_load_string((string) $xml);
 		$simpleXml->registerXPathNamespace('wfs', 'http://www.opengis.net/wfs');
 		$simpleXml->registerXPathNamespace('ogc', 'http://www.opengis.net/ogc');
 		
@@ -50,7 +50,7 @@ class Wfs_2_0 extends Wfs {
 		// get error messages
 		//
 		$nodeArray = $simpleXml->xpath("//wfs:TransactionResults/wfs:Action/wfs:Message");
-		$messageArray = array();
+		$messageArray = [];
 		if ($nodeArray !== false) {
 			foreach ($nodeArray as $node) {
 				$domNode = dom_import_simplexml($node);
@@ -68,7 +68,7 @@ class Wfs_2_0 extends Wfs {
 		// Get transaction results
 		//
 		$nodeArray = $simpleXml->xpath("//wfs:TransactionSummary/*");
-		$messageArray = array();
+		$messageArray = [];
 		if ($nodeArray !== false) {
 			foreach ($nodeArray as $node) {
 				$domNode = dom_import_simplexml($node);

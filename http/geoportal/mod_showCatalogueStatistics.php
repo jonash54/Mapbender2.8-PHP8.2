@@ -1,6 +1,6 @@
 <?php
 //show catalogue statistics
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 $languageCode = "de";
 
 //e.g. tabs and their content

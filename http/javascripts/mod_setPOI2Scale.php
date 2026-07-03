@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 echo "var mod_setPOI2Scale_target = '".$e_target[0]."';";
-include(dirname(__FILE__) . "/../include/dyn_js.php");
+include(__DIR__ . "/../include/dyn_js.php");
 
 ?>
 
@@ -36,7 +36,7 @@ eventAfterLoadWMS.register(function () {
 
 function mod_setPOI2Scale(){
 	var my_target = mod_setPOI2Scale_target.split(",");
-	var myPOI = "<?php echo addslashes(Mapbender::session()->get("mb_myPOI2SCALE")); ?>";
+	var myPOI = "<?php echo addslashes((string) Mapbender::session()->get("mb_myPOI2SCALE")); ?>";
 	if(myPOI && myPOI != ""){
 		var coord = myPOI.split(",");
 		if(coord.length == 2){

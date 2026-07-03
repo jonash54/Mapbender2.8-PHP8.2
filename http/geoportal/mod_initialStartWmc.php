@@ -1,8 +1,8 @@
 <?php
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
 //require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once dirname(__FILE__) . "/../extensions/phpqrcode/phpqrcode.php";
+require_once __DIR__ . "/../extensions/phpqrcode/phpqrcode.php";
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 $languageCode = 'de';
@@ -25,7 +25,7 @@ if (isset($_REQUEST["outputFormat"]) & $_REQUEST["outputFormat"] != "") {
 if (isset($_REQUEST["maxObjects"]) & $_REQUEST["maxObjects"] != "") {
 	$testMatch = $_REQUEST["maxObjects"];	
  	$pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 echo '<b>maxObjects</b> is not valid.<br/>';
                 die();
         }	
@@ -39,7 +39,7 @@ if (isset($_REQUEST["maxObjects"]) & $_REQUEST["maxObjects"] != "") {
 if (isset($_REQUEST["maxAge"]) & $_REQUEST["maxAge"] != "") {
 	$testMatch = $_REQUEST["maxAge"];	
  	$pattern = '/^[0-9]*$/';  
-        if (!preg_match($pattern,$testMatch)){
+        if (!preg_match($pattern,(string) $testMatch)){
                 echo '<b>maxAge</b> is not valid.<br/>';
                 die();
         }	
@@ -101,10 +101,10 @@ $sql .= "SELECT search_wmc_view.wmc_serial_id,search_wmc_view.wmc_title,search_w
 $sql .= " CASE WHEN (wmc_timestamp  > (extract(epoch from now())- ((86400) * $2))) THEN wmc_timestamp ELSE 0 END as timestamp,search_wmc_view.load_count ";
 $sql .= " from search_wmc_view  order by timestamp desc, load_count desc LIMIT $1";
 
-$v = array($maxObjects,$maxAge);
-$t = array('i','i');
+$v = [$maxObjects, $maxAge];
+$t = ['i', 'i'];
 $res = db_prep_query($sql,$v,$t);
-$initialWmc = array();
+$initialWmc = [];
 $i = 0;
 while($row = db_fetch_array($res)){
 	//$mobileUrl = $row['wmc_serial_id'];
@@ -127,7 +127,7 @@ while($row = db_fetch_array($res)){
 			$mobileQrImageUrl = "";
 		}
 	}
-	$initialWmc[$i] = array('id'  =>$row['wmc_serial_id'], 'title' =>$row['wmc_title'], 'abstract' =>$row['wmc_abstract'],'loadUrl'=>'http://'.$hostName.$pathToLoadScript.$row['wmc_serial_id'],'metadataUrl'=>'http://'.$hostName.$pathToMetadata."languageCode=".$languageCode."&resource=wmc&id=".$row['wmc_serial_id'], 'previewUrl'=>'http://'.$hostName.$pathToPreview."resource=wmc&id=".$row['wmc_serial_id'],'timestamp' => $row['timestamp'],'loadCount' => $row['load_count'], 'mobileUrl' => $mobileUrl, 'mobileQrImageUrl' => $mobileQrImageUrl);
+	$initialWmc[$i] = ['id'  =>$row['wmc_serial_id'], 'title' =>$row['wmc_title'], 'abstract' =>$row['wmc_abstract'], 'loadUrl'=>'http://'.$hostName.$pathToLoadScript.$row['wmc_serial_id'], 'metadataUrl'=>'http://'.$hostName.$pathToMetadata."languageCode=".$languageCode."&resource=wmc&id=".$row['wmc_serial_id'], 'previewUrl'=>'http://'.$hostName.$pathToPreview."resource=wmc&id=".$row['wmc_serial_id'], 'timestamp' => $row['timestamp'], 'loadCount' => $row['load_count'], 'mobileUrl' => $mobileUrl, 'mobileQrImageUrl' => $mobileQrImageUrl];
 	//generate qr images
 	
 	$i++;
@@ -151,7 +151,7 @@ if ($outputFormat == 'html'){
 }
 if ($outputFormat == 'json'){
 	$wmcJSON = new stdClass;
-	$wmcJSON->initialWmcDocs = array();
+	$wmcJSON->initialWmcDocs = [];
 	for($i=0; $i<count($initialWmc);$i++){
     		$wmcJSON->initialWmcDocs[$i]->id = $initialWmc[$i]['id'];
 		$wmcJSON->initialWmcDocs[$i]->title = $initialWmc[$i]['title'];

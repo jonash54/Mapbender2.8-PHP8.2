@@ -5,37 +5,37 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_elementVar.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_elementVar.php";
 
 define("ELEMENT_PATTERN", "/sessionID/");
 
-class Element {
+class Element implements \Stringable {
 	
-	var $guiId;
-	var $id;
-	var $pos;
-	var $isPublic;
-	var $comment;
-	var $title;
-	var $element;
-	var $src;
-	var $attributes;
-	var $left;
-	var $top;
-	var $width;
-	var $height;
-	var $zIndex;
-	var $moreStyles;
-	var $content;
-	var $closeTag;
-	var $jsFile;
-	var $mbMod;
-	var $target;
-	var $requires;
-	var $helpUrl;
-	var $isBodyAndUsesSplashScreen = false;
-	var $elementVars = array();
+	public $guiId;
+	public $id;
+	public $pos;
+	public $isPublic;
+	public $comment;
+	public $title;
+	public $element;
+	public $src;
+	public $attributes;
+	public $left;
+	public $top;
+	public $width;
+	public $height;
+	public $zIndex;
+	public $moreStyles;
+	public $content;
+	public $closeTag;
+	public $jsFile;
+	public $mbMod;
+	public $target;
+	public $requires;
+	public $helpUrl;
+	public $isBodyAndUsesSplashScreen = false;
+	public $elementVars = [];
 	
 	public function __contruct() {
 		
@@ -48,8 +48,8 @@ class Element {
 				"e_content, e_closetag, e_js_file, e_mb_mod, e_target, " .
 				"e_requires, e_url FROM gui_element WHERE e_id = $2 AND " .
 				"fkey_gui_id = $3 LIMIT 1";
-		$v = array (Mapbender::session()->get("mb_lang"), $id, $applicationId);
-		$t = array ("s", "s", "s");
+		$v = [Mapbender::session()->get("mb_lang"), $id, $applicationId];
+		$t = ["s", "s", "s"];
 		$res = db_prep_query($sql, $v, $t);
 		$row = db_fetch_array($res);
 		if ($row) {
@@ -77,8 +77,8 @@ class Element {
 			$this->helpUrl = $row["e_url"];
 
 			$sql = "SELECT var_name FROM gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2;";
-			$v = array($applicationId, $id);
-			$t = array("s", "s");
+			$v = [$applicationId, $id];
+			$t = ["s", "s"];
 			$res = db_prep_query($sql, $v, $t);
 
 			while ($row = db_fetch_assoc($res)) {
@@ -90,8 +90,8 @@ class Element {
 		return false;		
 	}
 	
-	public function __toString () {
-		return $this->toHtml();
+	public function __toString (): string {
+		return (string) $this->toHtml();
 	}
 	
 	public function toSql () {
@@ -129,11 +129,11 @@ class Element {
 	}
 	
 	public function getJavaScriptModules () {
-		$jsArray = array();
+		$jsArray = [];
 		if ($this->mbMod != "") {
-			$moduleArray = explode(",", $this->mbMod);
+			$moduleArray = explode(",", (string) $this->mbMod);
 			for ($i = 0; $i < count($moduleArray); $i++) {
-				$currentFile = dirname(__FILE__) . "/../javascripts/" . trim($moduleArray[$i]);
+				$currentFile = __DIR__ . "/../javascripts/" . trim($moduleArray[$i]);
 				if (file_exists($currentFile)) {
 					array_push($jsArray, $currentFile);
 				}
@@ -147,9 +147,9 @@ class Element {
 	
 	public function toHtmlArray () {
 		if ($this->isPublic) {
-			return array($this->getHtmlOpenTag(), $this->getHtmlContent(), $this->getHtmlCloseTag());	
+			return [$this->getHtmlOpenTag(), $this->getHtmlContent(), $this->getHtmlCloseTag()];	
 		}
-		return array("", "", "");
+		return ["", "", ""];
 	}
 	
 	public function toHtml () {
@@ -173,36 +173,23 @@ class Element {
 			// id and name
 			$openTag .= "id='" . $this->id . "' ";
 			
-			$validTags = array(
-				"form",
-				"iframe",
-				"img",
-				"applet",
-				"button",
-				"frame",
-				"input",
-				"map",
-				"object",
-				"param",
-				"select",
-				"textarea"
-			);
+			$validTags = ["form", "iframe", "img", "applet", "button", "frame", "input", "map", "object", "param", "select", "textarea"];
 			if (in_array($this->element, $validTags)) {
-				$openTag .= "name='" . htmlentities($this->id, ENT_QUOTES, CHARSET) . "' ";
+				$openTag .= "name='" . htmlentities((string) $this->id, ENT_QUOTES, CHARSET) . "' ";
 			}
 			
 			// attributes
 			if ($this->attributes) {
-				$openTag .= stripslashes($this->replaceSessionStringByUrlParameters($this->attributes)) . " ";
+				$openTag .= stripslashes((string) $this->replaceSessionStringByUrlParameters($this->attributes)) . " ";
 			}
 			
-			if ($this->element === "img" && !preg_match("/alt( )*=/", $this->attributes)) {
-				$openTag .= "alt='" . htmlentities($this->title, ENT_QUOTES, CHARSET) . "' ";
+			if ($this->element === "img" && !preg_match("/alt( )*=/", (string) $this->attributes)) {
+				$openTag .= "alt='" . htmlentities((string) $this->title, ENT_QUOTES, CHARSET) . "' ";
 			}
 			
 			// title
 			if ($this->title) {
-				$openTag .= "title='" . htmlentities($this->title, ENT_QUOTES, CHARSET) . "' ";
+				$openTag .= "title='" . htmlentities((string) $this->title, ENT_QUOTES, CHARSET) . "' ";
 			}
 			else {
 				// add a title for iframes
@@ -214,13 +201,13 @@ class Element {
 			// src
 			if ($this->src) {
    				$openTag .= "src = '" . $this->replaceSessionStringByUrlParameters(
-					htmlentities($this->src, ENT_QUOTES, CHARSET)
+					htmlentities((string) $this->src, ENT_QUOTES, CHARSET)
 				);
 
 				// for iframes which are not "loadData", 
 				// add additional parameters
 				if ($this->closeTag == "iframe" && $this->id != "loadData") {
-					if(mb_strpos($this->src, "?")) {
+					if(mb_strpos((string) $this->src, "?")) {
 						$openTag .= "&amp;";
 					}
 					else {
@@ -262,16 +249,16 @@ class Element {
 			if ($this->element == "body") {
 				$e_id = "body";
 				$gui_id = $this->guiId;
-				include(dirname(__FILE__)."/../include/dyn_php.php");
+				include(__DIR__."/../include/dyn_php.php");
 				
 				$splashScreen = "";
 				if (isset($use_load_message) AND $use_load_message != 'false') {
 					$this->isBodyAndUsesSplashScreen = true;
 					if (isset($htmlWhileLoading) && $htmlWhileLoading != '') {
 						$splashScreen .= $htmlWhileLoading; 
-					} elseif (isset($includeWhileLoading) && $includeWhileLoading != '' && file_exists(dirname(__FILE__)."/".$includeWhileLoading)) { 
+					} elseif (isset($includeWhileLoading) && $includeWhileLoading != '' && file_exists(__DIR__."/".$includeWhileLoading)) { 
 						ob_start();
-						include(dirname(__FILE__)."/".$includeWhileLoading);
+						include(__DIR__."/".$includeWhileLoading);
 						$splashScreen .= ob_get_contents();
 						ob_end_clean();
 					}
@@ -294,7 +281,7 @@ class Element {
 	private function getHtmlContent () {
 		$htmlContent = "";
 		if ($this->content != "" && $this->element) {
-			$htmlContent .= stripslashes($this->content);
+			$htmlContent .= stripslashes((string) $this->content);
 		}
 		return $htmlContent;
 	}
@@ -306,7 +293,7 @@ class Element {
 		if ($this->closeTag != "") {
 			return "</" . $this->closeTag . ">";
 		} else {
-			if(in_array($this->element, array( "area", "base","br","col","hr","img","input","link","meta","param"))){
+			if(in_array($this->element, ["area", "base", "br", "col", "hr", "img", "input", "link", "meta", "param"])){
 				return  "";
 			}else{
 				return "</". $this->element . ">";
@@ -328,7 +315,7 @@ class Element {
 	
 	private function replaceSessionStringByUrlParameters ($string) {
 		$urlParameters = $this->getUrlParameters();
-		return preg_replace(ELEMENT_PATTERN, $urlParameters, $string);
+		return preg_replace(ELEMENT_PATTERN, (string) $urlParameters, (string) $string);
 	}
 	
 }

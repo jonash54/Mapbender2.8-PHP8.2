@@ -5,8 +5,8 @@
 
 
 #***things to be done first (globals, ...)
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../../conf/geoportal.conf");
 #require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
 #require_once(dirname(__FILE__)."/../../conf/geoportal.conf");
 $resdir = RESULT_DIR;
@@ -14,7 +14,7 @@ echo $resdir;
 $con = db_connect(DBSERVER,OWNER,PW);
 db_select_db(DB,$con);
 function logit($text){
-	 	if($h = fopen(dirname(__FILE__)."/../tmp/opensearch_log.txt","a")){
+	 	if($h = fopen(__DIR__."/../tmp/opensearch_log.txt","a")){
 					$content = $text .chr(13).chr(10);
 					if(!fwrite($h,$content)){
 						#exit;
@@ -23,7 +23,7 @@ function logit($text){
 				}	 	
 	 }
 #require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php"); 
+require_once(__DIR__."/../classes/class_connector.php"); 
 #***
 #test if script was requested over http or from cli
 #if it came from cli, use output to tmp folder - > typo3 would find it and will show it in template, there should be an identifier from the gaz.php script which controls the different search moduls
@@ -93,7 +93,7 @@ $res_os = db_query($sql_os);
 #initialize count of search interfaces
 $cnt_os = 0;
 #initialize result array
-$os_list=array(array());
+$os_list=[[]];
 #fill result array
 while($row_os = db_fetch_array($res_os)){
 	$os_list[$cnt_os] ['id']= $row_os["os_id"];
@@ -146,7 +146,7 @@ echo "\nFile to open: ".$resdir."/".$cli_id."_os.xml\n";
 		for ($i_c = 0; $i_c < count($os_list); $i_c++) {
 			$content = $os_list[$i_c] ['name'];
 			fwrite($os_catalogs_file_handle,"<opensearchinterface>");
-			fwrite($os_catalogs_file_handle,$content);
+			fwrite($os_catalogs_file_handle,(string) $content);
 			fwrite($os_catalogs_file_handle,"</opensearchinterface>\n");
 		}
 		fwrite($os_catalogs_file_handle,"</interfaces>\n");
@@ -201,7 +201,7 @@ for ($i_si = $start_cat; $i_si < $end_cat ; $i_si++) {
 	#**************to be done!************************************
 	#$e = new mb_exception('external xml : '.$openSearchResult);
 	#parse result to simplexml 		
-	$openSearchXml=simplexml_load_string($openSearchResult);
+	$openSearchXml=simplexml_load_string((string) $openSearchResult);
 	#read out array with docids and plugids
 	#read out number of results - there are two ways: with namespaces and without!:
 	$n_results=$openSearchXml->channel->totalResults;
@@ -218,7 +218,7 @@ for ($i_si = $start_cat; $i_si < $end_cat ; $i_si++) {
 		logit( "Number of Results in Catalogue ".$i_si.": ".$n_results."\n");
 	}
 	#calculate number of needed pages to show all results:
-	$number_of_pages=ceil((real)$n_results/(real)$os_list[$i_si] ['h']);
+	$number_of_pages=ceil((float) $n_results/(float) $os_list[$i_si] ['h']);
 	
 	#do some debugging output
 	#var_dump($openSearchXml);
@@ -257,7 +257,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 	if($os_catalogs_file_handle = fopen($resdir."/".$cli_id."_os".$catalog_number."_".$request_p.".xml","w")){
 		fwrite($os_catalogs_file_handle,"<resultlist>\n");
 		#logit("<resultlist>\n");
-		fwrite($os_catalogs_file_handle,"<querystring>".urlencode($_REQUEST["q"])."</querystring>\n");
+		fwrite($os_catalogs_file_handle,"<querystring>".urlencode((string) $_REQUEST["q"])."</querystring>\n");
 		#logit("<querystring>".urlencode($_REQUEST["q"])."</querystring>\n");
 		fwrite($os_catalogs_file_handle,"<totalresults>".$n_results."</totalresults>\n");
 		#logit("<totalresults>".$n_results."</totalresults>\n");
@@ -301,7 +301,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 					$wms_url = $openSearchXml->channel->item[$i]->{'wms-url'};
 					#adopt wms url to 1.3.0 - REQUEST has no VERSION set - set this to 1.1.1
 					$wms_url = correctWmsUrl($wms_url);
-					$wms_url = urlencode($wms_url);
+					$wms_url = urlencode((string) $wms_url);
 				}
 				$source = $openSearchXml->channel->item[$i]->source;
 			}
@@ -315,7 +315,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 					$wms_url = $ingridElements->{'wms-url'};
 					#adopt wms url to 1.3.0 - REQUEST has no VERSION set - set this to 1.1.1
 					$wms_url = correctWmsUrl($wms_url);
-					$wms_url = urlencode($wms_url);
+					$wms_url = urlencode((string) $wms_url);
 				}
 				$georssElements=$openSearchXml->channel->item[$i]->children('http://www.georss.org/georss');
 				if (isset($georssElements->{'box'})) {
@@ -376,7 +376,7 @@ if ($from_cli) { #do these things if the request was done from the commandline -
 				#if a wms resource is found, the url will be in the list
 				if (isset($wms_url)){	
 					fwrite($os_catalogs_file_handle,"<wmscapurl>");
-					fwrite($os_catalogs_file_handle,$wms_url);
+					fwrite($os_catalogs_file_handle,(string) $wms_url);
 					fwrite($os_catalogs_file_handle,"</wmscapurl>\n");
 					fwrite($os_catalogs_file_handle,"<mbaddurl>");
 					fwrite($os_catalogs_file_handle,"testurl");
@@ -439,8 +439,8 @@ if (!$from_cli) {
 			echo("<a href=\"".$link."\">Originäre Metadaten<a><br>");
 			#if a wms resource is found, the url will be in the list
 			if (isset($wms_url)){
-				echo(" <a href=\"".urldecode($wms_url)."\">WMS GetCapabilities<a><br>");
-				
+				echo(" <a href=\"".urldecode((string) $wms_url)."\">WMS GetCapabilities<a><br>");
+
 			}
 			echo("");
 			echo("<b>Alternative Formate:</b><br><a href=\"".$openSearchWrapperDetail."?osid=".$os_list[$i_si] ['id']."&plugid=".$plugid."&docid=".$docid."&mdtype=iso19139\" onclick='window.open(this.href,\"Details ISO19139\",\"width=500,height=600,left=100,top=200,scrollbars=yes ,dependent=yes\"); return false' target=\"_blank\"><img border=\"0\" src=\"img/iso19139.png\" alt=\"ISO19139\"></a><a href=\"".$openSearchWrapperDetail."?osid=".$os_list[$i_si] ['id']."&plugid=".$plugid."&docid=".$docid."&mdtype=inspire\" onclick='window.open(this.href,\"Details INSPIRE\",\"width=500,height=600,left=100,top=200,scrollbars=yes ,dependent=yes\"); return false' target=\"_blank\"><img border=\"0\" alt=\"INSPIRE\" src=\"img/inspire_tr_36.png\"></a><br><br>");
@@ -455,31 +455,25 @@ if (!$from_cli) {
 }
 function correctWmsUrl($wms_url) {
 	//check if last sign is ? or & or none of them
-	$lastChar = substr($wms_url,-1);
+	$lastChar = substr((string) $wms_url,-1);
 	//check if getcapabilities is set as a parameter
 	$findme = "getcapabilities";
-	$posGetCap = strpos(strtolower($wms_url), $findme);
+	$posGetCap = strpos(strtolower((string) $wms_url), $findme);
 	if ($posGetCap === false) {
-		$posGetAmp = strpos(strtolower($wms_url), "?");
+		$posGetAmp = strpos(strtolower((string) $wms_url), "?");
 		if ($posGetAmp === false) {
 			$wms_url .= "?REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
 		} else {
-			switch ($lastChar) {
-				case "?":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				case "&":
-					$wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-				default:
-					$wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS";
-				break;
-			 }
+			match ($lastChar) {
+       "?" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       "&" => $wms_url .= "REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+       default => $wms_url .= "&REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+   };
 		}
 	} else {
 		//check if version is defined
 		$findme1 = "version=";
-		$posVersion = strpos(strtolower($wms_url), $findme1);
+		$posVersion = strpos(strtolower((string) $wms_url), $findme1);
 		if ($posVersion === false) {
 			$wms_url .= "&VERSION=1.1.1";
 		} else {

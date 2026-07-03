@@ -17,14 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_gml_geometry.php");
-require_once(dirname(__FILE__)."/../classes/class_bbox.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_gml_geometry.php");
+require_once(__DIR__."/../classes/class_bbox.php");
 
 class GMLPoint extends GmlGeometry {
 
-	var $point;
+	public $point;
 
 	public function __construct() {
 		
@@ -32,7 +32,7 @@ class GMLPoint extends GmlGeometry {
 
 	public function setPoint ($x, $y) {
 #		echo "x: " . $x . " y: " . $y . "\n";
-		$this->point = array("x" => $x, "y" => $y);
+		$this->point = ["x" => $x, "y" => $y];
 	}
 	
 	public function toGml2 () {

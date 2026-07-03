@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require(dirname(__FILE__)."/../classes/class_wfs_conf.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require(__DIR__."/../classes/class_wfs_conf.php");
 
 $resultObj['result'] = '';
 $resultObj['success'] = false;
@@ -39,7 +39,7 @@ echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">'
   		font-size : 12px;
   		color: #808080
   	}
-  	
+
   	-->
 </style>
 
@@ -120,7 +120,7 @@ if (count($aWFS->wfs_id) == 0) {
 function toImage($text) {
 	$angle = 90;
 	if (extension_loaded("gd2")) {
-		return "<img src='../php/createImageFromText.php?text=" . urlencode($text) . "&angle=" . $angle . "'>";
+		return "<img src='../php/createImageFromText.php?text=" . urlencode((string) $text) . "&angle=" . $angle . "'>";
 	}
 	return $text;
 }
@@ -143,22 +143,11 @@ if(isset($_POST["save"])){
 			$sql .= "'0'";
 		}
         $sql .= "); ";
-        
-		$v = array(
-			$_POST["wfs_conf_abstract"], 
-			$_POST["wfs"], 
-			$_POST["featuretype"], 
-			$_POST["g_label"], 
-			$_POST["g_label_id"], 
-			$_POST["g_button"], 
-			$_POST["g_button_id"], 
-			$_POST["g_style"], 
-			$_POST["g_buffer"], 
-			$_POST["g_res_style"]
-		);
-		$t = array("s", "s", "s", "s", "s", "s", "s", "s", "s", "s");
+
+		$v = [$_POST["wfs_conf_abstract"], $_POST["wfs"], $_POST["featuretype"], $_POST["g_label"], $_POST["g_label_id"], $_POST["g_button"], $_POST["g_button_id"], $_POST["g_style"], $_POST["g_buffer"], $_POST["g_res_style"]];
+		$t = ["s", "s", "s", "s", "s", "s", "s", "s", "s", "s"];
         $res = db_prep_query($sql, $v, $t);
-        
+
         $wfsID = db_insert_id($con,'wfs_conf','wfs_conf_id');
 
         for ($i = 0; $i < $_POST["num"]; $i++){
@@ -208,18 +197,18 @@ if(isset($_POST["save"])){
                 $sql .= ",$11,$12";
  				$sql .= "); ";
 
-				$v = array($wfsID, $_POST["f_id".$i], $_POST["f_pos".$i], $_POST["f_min_input".$i], $_POST["f_style_id".$i], $_POST["f_label".$i], $_POST["f_label_id".$i], $_POST["f_respos".$i], $_POST["f_form_element_html".$i], $_POST["f_auth_varname".$i], $_POST["f_detailpos".$i], $_POST["f_operator".$i]);
-				$t = array("i", "s", "s", "i", "s", "s", "s", "i", "s", "s", "i", "s");
+				$v = [$wfsID, $_POST["f_id".$i], $_POST["f_pos".$i], $_POST["f_min_input".$i], $_POST["f_style_id".$i], $_POST["f_label".$i], $_POST["f_label_id".$i], $_POST["f_respos".$i], $_POST["f_form_element_html".$i], $_POST["f_auth_varname".$i], $_POST["f_detailpos".$i], $_POST["f_operator".$i]];
+				$t = ["i", "s", "s", "i", "s", "s", "s", "i", "s", "s", "i", "s"];
                 $res = db_prep_query($sql, $v, $t);
         }
         if (isset($_POST["f_geom"])) {
 	        $sql = "UPDATE wfs_conf_element SET f_geom = 1 ";
 	        $sql .= "WHERE fkey_wfs_conf_id = $1 AND f_id = $2;";
-	        $v = array($wfsID, $_POST["f_geom"]);
-	        $t = array("i", "i");
+	        $v = [$wfsID, $_POST["f_geom"]];
+	        $t = ["i", "i"];
 			$res = db_prep_query($sql, $v, $t);
         }
-		
+
 		echo "<script language='javascript'>";
 		echo "document.location.href = 'mod_wfs_edit.php?gaz=".$wfsID."';";
 		echo "</script>";
@@ -331,7 +320,7 @@ if(isset($_POST["featuretype"])){
                 echo "<td>" . toImage('html') . "</td>";
                 echo "<td>" . toImage('auth') . "</td>";
                 echo "<td>" . toImage('operator') . "</td>";
-                
+
         echo "</tr>";
 
         for($i=0; $i<count($aWFS->elements->element_id); $i++){

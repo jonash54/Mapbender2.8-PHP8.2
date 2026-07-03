@@ -1,12 +1,20 @@
 <?php
+
+// __MB_PHP8_GUARD__ — load Mapbender globals defensively. In PHP 7 these
+// files relied on the implicit "undefined constant -> string" behaviour, but
+// PHP 8 fatals there. Guard prevents the fatal when the file is reached
+// directly (e.g. via include from a stand-alone HTTP entry).
+if (!defined('MB_VERSION_NUMBER') || !function_exists('_mb')) {
+    require_once __DIR__ . '/../../core/globalSettings.php';
+}
 // Display errors for demo
 //@ini_set('error_reporting', E_ALL);
 //@ini_set('display_errors', 'stdout');	
 // Include class_ckanApi.php
-require_once(dirname(__FILE__).'/../classes/class_ckanApi.php');
+require_once(__DIR__.'/../classes/class_ckanApi.php');
 //require_once(dirname(__FILE__).'/../classes/class_ckan.php');
-require_once(dirname(__FILE__).'/../classes/class_connector.php');
-require_once(dirname(__FILE__).'/../../conf/ckan.conf');
+require_once(__DIR__.'/../classes/class_connector.php');
+require_once(__DIR__.'/../../conf/ckan.conf');
 // Create CKAN object
 // Takes optional API key parameter. Required for POST and PUT methods.
 //initial instantiation of api class
@@ -38,6 +46,7 @@ if (!$group) {
 	$ckan->base_url='http://'.SERVER_URL.'/api/';
 	
 	//create new one
+	$newGroup = new stdClass();
 	$newGroup->name = CKAN_GROUP_NAME;
 	$newGroup->title = CKAN_GROUP_TITLE;
 	$newGroup->image_url = CKAN_GROUP_SYMBOL;
@@ -62,12 +71,13 @@ if (defined("CKAN_EXPORT_URL") && CKAN_EXPORT_URL != "") {
 }
 //read ckan objects from source into variable
 $ckanObjectConnector = new connector($mapbenderCkanUrl);
-$ckanObjects = json_decode($ckanObjectConnector->file);
+$ckanObjects = json_decode((string) $ckanObjectConnector->file);
 //build dataset array for source datasets
-foreach ($ckanObjects->result as $dataset) {
+$mbDatasetArray = [];
+foreach ($ckanObjects->result ?? [] as $dataset) {
 	$mbDatasetArray[] =  $dataset->name;
 }
-print "<b>Mapbender datasets:</b><br>"; 
+print "<b>Mapbender datasets:</b><br>";
 if (count($mbDatasetArray) == 0) {
 	$mbDatasetArray = false;
 }
@@ -82,7 +92,7 @@ print "<b>ckan datasets:</b><br>";
 //thru action api
 $ckanDataset = group_get(CKAN_GROUP_NAME);
 //$result = json_decode($resultDataset);
-$ckanDatasetArray = array();
+$ckanDatasetArray = [];
 foreach ($ckanDataset->packages as $dataset) {
 	$ckanDatasetArray[] = $dataset;
 }
@@ -213,7 +223,7 @@ function package_get ($packageName) {
 	try {
 		$ckan = new ckanApi(API_KEY,CKAN_SERVER_IP);
 		$ckan->base_url='http://'.SERVER_URL.'/api/';
-		$idArray = array ('id'=>$packageName);
+		$idArray = ['id'=>$packageName];
 		$resultDataset = $ckan->action_package_show(json_encode($idArray));
 		if ($resultDataset->success) {
 			return $resultDataset->result;
@@ -360,9 +370,9 @@ function get_packages_by_group($groupname) {
 	//by action api
 	$ckan = new ckanApi(API_KEY,CKAN_SERVER_IP);
 	$ckan->base_url='http://'.SERVER_URL.'/api/';
-	$datasetNames = array();
+	$datasetNames = [];
 	try {
-		$groupArray = array ('id'=>$groupname);
+		$groupArray = ['id'=>$groupname];
 		$result = $ckan->action_group_package_show(json_encode($groupArray));
 		if ($result->success) {
 			foreach ($result->result as $dataset) {
@@ -386,7 +396,7 @@ function get_packages_by_group2($groupname) {
 	$e = new mb_exception("testckan: ".SERVER_URL);
 	$ckan->base_url='http://'.SERVER_URL.'/api/rest';
 	$e = new mb_exception("testckan: ".$ckan->base_url);
-	$datasetNames = array();
+	$datasetNames = [];
 	try {
 		$result = $ckan->get_group_by_name($groupname);
 	}
@@ -445,7 +455,7 @@ function package_delete($packageName,$apiVersion) {
 					//TODO: check if api 2 uses dict for group or not!
 					for ($i=0;$i < count($existingPackage->groups);$i++) {
 						//$error = new mb_exception('mod_syncCkan.php: groups['.$i.']->name old:'.$existingPackage->groups[$i]->name);
-						
+
 						$existingPackage->groups[$i] = $existingPackage->groups[$i]->name;
 						//$error = new mb_exception('mod_syncCkan.php: groups['.$i.'] new:'.$existingPackage->groups[$i]);
 					}

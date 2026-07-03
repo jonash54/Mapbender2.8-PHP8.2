@@ -1,7 +1,7 @@
 <?php
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../../conf/gazetteerSQL.conf");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../../conf/gazetteerSQL.conf");
 
 $con = 	pg_connect($connstring);		
 
@@ -21,7 +21,7 @@ else {
 	$limit = 0;
 }
 
-$obj = array();
+$obj = [];
 
 function isLimited($numberOfResults) {
 	if (isset($numberOfResults) && $numberOfResults > 0) {
@@ -39,53 +39,53 @@ function isOverLimit($counter, $numberOfResults, $max) {
 }
 
 if ($command == "getCommunes") {
-	$obj["communes"] = array();
+	$obj["communes"] = [];
 
 	$sql = "SELECT DISTINCT gkz, name FROM public.gemeinden ORDER BY name";
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$res = db_prep_query($sql, $v, $t);
 	while($row = db_fetch_array($res)){
-		$communeId = trim($row["gkz"]);
-		$communeName = trim($row["name"]);
+		$communeId = trim((string) $row["gkz"]);
+		$communeName = trim((string) $row["name"]);
 		$obj["communes"][$communeId] = $communeName;
 	}
 	$obj["limited"] = false;
 }
 else if ($command == "getStreets") {
-	$obj["streets"] = array();
+	$obj["streets"] = [];
 
 	if (!empty($communeId)) {
 		$sql = "SELECT DISTINCT strk_schl, str_name FROM alb.navigation WHERE gkz = $1 ORDER BY str_name";
-		$v = array($communeId);
-		$t = array("i");
+		$v = [$communeId];
+		$t = ["i"];
 	}
 	else {
 		$sql = "SELECT DISTINCT strk_schl, str_name FROM alb.navigation ORDER BY str_name";
-		$v = array();
-		$t = array();
+		$v = [];
+		$t = [];
 	}
 	$res = db_prep_query($sql, $v, $t);
 	while($row = db_fetch_array($res)){
-		$streetId = trim($row["strk_schl"]);
-		$streetName = trim($row["str_name"]);
+		$streetId = trim((string) $row["strk_schl"]);
+		$streetName = trim((string) $row["str_name"]);
 		$obj["streets"][$streetId] = $streetName;
 	}
 	$obj["limited"] = false;
 }
 else if ($command == "getNumbers") {
-	$obj["houseNumbers"] = array();
+	$obj["houseNumbers"] = [];
 	$paramCounter = 0;
 	
 	if (!empty($communeId)) {
 		$sql = "SELECT DISTINCT hnr, hnrzu, rw, hw FROM alb.navigation WHERE gkz = $". ++$paramCount ." AND str_name ILIKE $". ++$paramCount ." ORDER BY hnr, hnrzu";
-		$v = array($communeId, $streetName."%");
-		$t = array("i", "s");
+		$v = [$communeId, $streetName."%"];
+		$t = ["i", "s"];
 	}
 	else {
 		$sql = "SELECT DISTINCT hnr, hnrzu, rw, hw FROM alb.navigation WHERE str_name ILIKE $". ++$paramCount ." ORDER BY hnr, hnrzu";
-		$v = array($streetName."%");
-		$t = array("s");
+		$v = [$streetName."%"];
+		$t = ["s"];
 	}
 
 	if (isLimited($numberOfResults)) {
@@ -103,17 +103,17 @@ else if ($command == "getNumbers") {
 			$houseNumber = trim($row["hnr"] . $row["hnrzu"]);
 			$x = trim(floatval($row["rw"]));
 			$y = trim(floatval($row["hw"]));
-			$obj["houseNumbers"][$houseNumber] = array("x" => $x, "y" => $y);
+			$obj["houseNumbers"][$houseNumber] = ["x" => $x, "y" => $y];
 		}
 	}
 	$obj["limited"] = isOverLimit($counter, $numberOfResults, $numberOfResults);
 }
 else if ($command == "getLandparcelsByOwner") {
-	$obj["landparcels"] = array();
+	$obj["landparcels"] = [];
 
 	$sql = "SELECT DISTINCT eig.e_name, flst.flst_kennz, flst.rechtsw, flst.hochw FROM alb.albflst AS flst JOIN alb.albeig AS eig ON (flst.gemschl = eig.gemschl AND flst.flur = eig.flur AND flst.flstz = eig.flstz AND flst.flstn = eig.flstn) JOIN public.gemarkungen AS gem ON (flst.gemschl = gem.gemschl) WHERE gem.gkz = $1 AND eig.e_name ILIKE $2 ORDER BY flst.flst_kennz";
-	$v = array($communeId, "%".$ownerQueryString."%");
-	$t = array("i", "s");
+	$v = [$communeId, "%".$ownerQueryString."%"];
+	$t = ["i", "s"];
 
 	if (isLimited($numberOfResults)) {
 		$sql .= " LIMIT $3";
@@ -129,19 +129,19 @@ else if ($command == "getLandparcelsByOwner") {
 			$landparcelId = $row["flst_kennz"];
 			$x = trim(floatval($row["rechtsw"]));
 			$y = trim(floatval($row["hochw"]));
-			$owner = trim($row["e_name"]);
-			array_push($obj["landparcels"], array("landparcelId" => $landparcelId, "owner" => $owner, "x" => $x, "y" => $y));
+			$owner = trim((string) $row["e_name"]);
+			array_push($obj["landparcels"], ["landparcelId" => $landparcelId, "owner" => $owner, "x" => $x, "y" => $y]);
 		}
 	}
 	$obj["limited"] = isOverLimit($counter, $numberOfResults, $numberOfResults);
 }
 else if ($command == "getLandparcelsByDistrict") {
-	$obj["landparcels"] = array();
+	$obj["landparcels"] = [];
 	$paramCounter = 0;
 
 	$sql = "SELECT DISTINCT flst_kennz, rechtsw, hochw FROM alb.albflst WHERE gemschl = $" . ++$paramCounter;
-	$v = array($districtId);
-	$t = array("i");
+	$v = [$districtId];
+	$t = ["i"];
 	if (!empty($parcelNumber1)) {
 		$sql .= " AND flur = $" . ++$paramCounter;
 		array_push($v, $parcelNumber1);
@@ -168,22 +168,22 @@ else if ($command == "getLandparcelsByDistrict") {
 			$x = trim(floatval($row["rechtsw"]));
 			$y = trim(floatval($row["hochw"]));
 
-			$obj["landparcels"][$landparcelId] = array("x" => $x, "y" => $y);
+			$obj["landparcels"][$landparcelId] = ["x" => $x, "y" => $y];
 		}
 	}
 	$obj["limited"] = isOverLimit($counter, $numberOfResults, $numberOfResults);
 }
 else if ($command == "getDistricts") {
-	$obj["districts"] = array();
+	$obj["districts"] = [];
 
 	$sql = "SELECT DISTINCT gemschl, name FROM public.gemarkungen WHERE gkz = $1 ORDER BY name";
-	$v = array($communeId);
-	$t = array("i");
+	$v = [$communeId];
+	$t = ["i"];
 	$res = db_prep_query($sql, $v, $t);
 
 	while($row = db_fetch_array($res)){
-		$districtID = trim($row["gemschl"]);
-		$districtName = trim($row["name"]);
+		$districtID = trim((string) $row["gemschl"]);
+		$districtName = trim((string) $row["name"]);
 		$obj["districts"][$districtID] = $districtName;
 	}
 	$obj["limited"] = false;

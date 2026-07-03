@@ -3,14 +3,13 @@
 <head>
 
 <?php
+// PHP 8 fatals on undefined constants; load mapbender.conf first so CHARSET
+// is defined before it's interpolated below.
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once __DIR__ . "/../classes/class_Uuid.php";
+require_once __DIR__ . "/../classes/class_user.php";
 echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">';
-#require_once(dirname(__FILE__)."/../../conf/mapbender.conf");
-#require_once(dirname(__FILE__)."/../classes/class_administration.php");
-#require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once dirname(__FILE__) . "/../classes/class_Uuid.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
 ?>
 
 <title>BPlanID f&uuml;r Verb&auml;nde</title>
@@ -49,8 +48,8 @@ if (isset($_REQUEST["id"])) {
 	#---------------------------
 	$uuid = new Uuid();
 	$sql = "SELECT mb_user_name, mb_user_email FROM mapbender.mb_user WHERE mb_user_id=$1";
-	$v = array($userId);
-	$t = array('i');
+	$v = [$userId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
 	while($row = db_fetch_array($res)) {
 		$mb_user_name=$row['mb_user_name'];
@@ -65,13 +64,13 @@ if (isset($_REQUEST["id"])) {
 	#$e = new mb_exception("mb_user_name: ".$mb_user_name);
 	#$e = new mb_exception("mb_user_email: ".$mb_user_email);
 	
-	$v = array($userId, $uuid, $mb_user_name, $mb_user_email);
-	$t = array('i','s','s','s');
+	$v = [$userId, $uuid, $mb_user_name, $mb_user_email];
+	$t = ['i', 's', 's', 's'];
 	$res = db_prep_query($sql, $v, $t);
 	#---------------------------------------------
 	$sql = "SELECT id FROM bplan_id WHERE uuid = $1";
-	$v = array($uuid);
-	$t = array('s');
+	$v = [$uuid];
+	$t = ['s'];
 	$res = db_prep_query($sql, $v, $t);
 	while($row=db_fetch_array($res)) {
 		$id = $row['id'];

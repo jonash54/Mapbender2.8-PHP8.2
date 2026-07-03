@@ -31,19 +31,19 @@ class FeatureTypeStyle extends UserStyle
 	 * @see Rule
 	 * @var array
 	 */
-	var $rules = array();
+	public $rules = [];
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * Array containing the FeatureTypes attribute names (aka elements), acquired either by a 
@@ -52,7 +52,7 @@ class FeatureTypeStyle extends UserStyle
 	 * @see PropertyIsEqualTo, TextSymbolizer 
 	 * @var array
 	 */
-	var $attrs = array();
+	public $attrs = [];
 	
 	final function setElementArray($name,$array) {
 		$this->attrs[$name] = $array;

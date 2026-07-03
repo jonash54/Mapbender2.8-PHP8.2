@@ -31,22 +31,22 @@ class PointSymbolizer extends Rule
 	 * @see Graphic
 	 * @var object
 	 */
-	var $graphic = "";
+	public $graphic = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	
-	function PointSymbolizer()
+	function __construct()
 	{
 		//$this->graphic = new Graphic();
 	}
@@ -84,7 +84,7 @@ class PointSymbolizer extends Rule
 		$temp .= $offset."   PointSymbolizer<br>\n";
 		$temp .= $offset."   <input type=\"hidden\" name=\"".$id."\" value=\"pointsymbolizer\">\n";
 		
-		$number = split("_", $id);
+		$number = preg_split("#_#m", $id);
 		$number = $number[count($number)-1];
 		
 		$temp .= $offset."   <a class='edit' href=\"sld_function_handler.php?function=deletesymbolizer&id=".$this->parent."&number=".$number."\">l&ouml;schen</a>\n";

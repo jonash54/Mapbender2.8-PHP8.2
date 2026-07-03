@@ -1,6 +1,6 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once(dirname(__FILE__)."/../classes/class_owsContext.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once(__DIR__."/../classes/class_owsContext.php");
 
 //set default request parameters
 $wmcId = null;
@@ -20,7 +20,7 @@ if (isset($_REQUEST["wmcId"]) & $_REQUEST["wmcId"] != "") {
     //validate to csv integer list
     $testMatch = $_REQUEST["wmcId"];
     $pattern = '/^[\d,]*$/';		
-    if (!preg_match($pattern,$testMatch)){ 
+    if (!preg_match($pattern,(string) $testMatch)){ 
         echo 'Parameter <b>wmcId</b> is not a valid integer.<br/>'; 
         die(); 		
     }
@@ -32,7 +32,7 @@ if (isset($_REQUEST["outputFormat"]) & $_REQUEST["outputFormat"] != "") {
     //validate to csv integer list
     $testMatch = $_REQUEST["outputFormat"];
     
-    if (!in_array($testMatch, array("atom", "json"))) {
+    if (!in_array($testMatch, ["atom", "json"])) {
         
         echo 'Parameter <b>outputFormat</b> is not  valid (atom or json).<br/>';
         
@@ -45,8 +45,8 @@ $wmcExists = false;
 if ($wmcId !== null) {
     //try to test if given wmcId is either owned by the current user or public
     $sql = "SELECT wmc_serial_id FROM mb_user_wmc WHERE (wmc_serial_id = $1 AND fkey_user_id = $2) OR (wmc_serial_id = $3 AND wmc_public = 1)";
-    $t = array('i', 'i', 'i');
-    $v = array($wmcId, $userId, $wmcId);
+    $t = ['i', 'i', 'i'];
+    $v = [$wmcId, $userId, $wmcId];
     $res = db_prep_query($sql,$v,$t);
     if (!$res) {
         echo "Error while trying to find wmc in database!";

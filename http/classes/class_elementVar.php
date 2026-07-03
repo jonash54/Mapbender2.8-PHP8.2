@@ -5,22 +5,22 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_RPCEndpoint.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_RPCEndpoint.php");
 
 /**
  * A Mapbender user as described in the table mb_user.
  */
-class ElementVar implements RPCObject{
+class ElementVar implements RPCObject, \Stringable{
 	/**
 	 * @var Integer The User ID
 	 */
-	var $applicationId;
-	var $elementId;
-	var $name;  
-	var $value;
-	var $context;
-	var $type;
+	public $applicationId;
+	public $elementId;
+	public $name;  
+	public $value;
+	public $context;
+	public $type;
 	
 	/**
 	 * Constructor
@@ -47,7 +47,7 @@ class ElementVar implements RPCObject{
 	/**
 	 * @return String the name of this element var
 	 */
-	public function __toString () {
+	public function __toString (): string {
 		return (string) $this->name;	
 	}
 
@@ -56,8 +56,7 @@ class ElementVar implements RPCObject{
     * @return Assoc Array containing the fields to send to the user
     */
     public function getFields() {
-        $result = array(
-        );
+        $result = [];
 		return $result;
 	}
 
@@ -92,8 +91,8 @@ class ElementVar implements RPCObject{
 
 	public function load() {
 		$sql = "SELECT * from gui_element_vars WHERE fkey_gui_id = $1 AND fkey_e_id = $2 AND var_name = $3; ";
-		$v = array($this->applicationId, $this->elementId, $this->name);
-		$t = array("s", "s", "s");
+		$v = [$this->applicationId, $this->elementId, $this->name];
+		$t = ["s", "s", "s"];
 		$res = db_prep_query($sql, $v, $t);
 		try {
 			$row = db_fetch_array($res);
@@ -106,13 +105,13 @@ class ElementVar implements RPCObject{
 				$this->success = false;
 			}
 		}
-		catch (Exception $e) {
+		catch (Exception) {
 			throw new Exception ("no such element var");
 		}
 	}
 
 	public static function getList($filter) {
-      return array();
+      return [];
     }
 
     public static function byName($name) {

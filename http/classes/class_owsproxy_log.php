@@ -5,7 +5,7 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
+require_once(__DIR__."/../../core/globalSettings.php");
 
 class OwsLogCsv {
     private $mb_user_id;
@@ -68,13 +68,13 @@ class OwsLogCsv {
         $owslogcsv->listType = $listType;
         $owslogcsv->function = $function;
         
-        if($withContactData != null && strlen($withContactData) > 0){
+        if($withContactData != null && strlen((string) $withContactData) > 0){
             $owslogcsv->withContactData = $withContactData;
         }
-        $owslogcsv->resultHeader = array();
-        $owslogcsv->resultHeaderDisplay = array();
-        $owslogcsv->resultData = array();
-        $owslogcsv->resultDataDisplay = array();
+        $owslogcsv->resultHeader = [];
+        $owslogcsv->resultHeaderDisplay = [];
+        $owslogcsv->resultData = [];
+        $owslogcsv->resultDataDisplay = [];
         $owslogcsv->resultMessage = "";
         return $owslogcsv;
     }
@@ -97,20 +97,20 @@ class OwsLogCsv {
         if(!empty($this->resultData)) {
             $rowCount = count($this->resultData[0]);
             $maxRows = (count($this->resultData) -1);
-            $offset = array();
-            $data = array();
+            $offset = [];
+            $data = [];
 
             for($i=0;$i<$rowCount;$i++) {
                 if($this->resultHeader[$i] == 'price')
-                    $data[] = array('price', $this->resultData[$maxRows][$i]);
+                    $data[] = ['price', $this->resultData[$maxRows][$i]];
                 else if($this->resultHeader[$i] == 'pixel')
-                    $data[] = array('pixel', $this->resultData[$maxRows][$i]);
+                    $data[] = ['pixel', $this->resultData[$maxRows][$i]];
             }
 
             
         }
 
-        $this->resultHeader = array();
+        $this->resultHeader = [];
         $this->resultData = $data;
     }
 
@@ -147,9 +147,9 @@ class OwsLogCsv {
 					break;
 			}
             }
-            $v = array($this->mb_user_id, $this->timeFrom, $this->timeTo);
+            $v = [$this->mb_user_id, $this->timeFrom, $this->timeTo];
 //            $v = array($this->owsId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t");
+            $t = ['i', "t", "t"];
             $owsIdWhere = "";
             if($this->owsId !== null && intval($this->owsId)> -1){
                 $v[] = $this->owsId;
@@ -229,8 +229,8 @@ class OwsLogCsv {
 		}
             }            
             
-            $v = array($this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array("t", "t", "i");
+            $v = [$this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ["t", "t", "i"];
             
             /* GUI start*/
             if(intval($this->userId) == -1){ // all users
@@ -241,7 +241,7 @@ class OwsLogCsv {
                 $userWhere = " AND m.fkey_mb_user_id = $".count($v);
             }
             $owsIdWhere = "";
-            if($this->owsId !== null && strlen($this->owsId)> 0 && intval($this->owsId)> -1){
+            if($this->owsId !== null && strlen((string) $this->owsId)> 0 && intval($this->owsId)> -1){
                 $v[] = $this->owsId;
                 $t[] = "i";
 		switch ($this->owsType) {
@@ -303,9 +303,9 @@ class OwsLogCsv {
                         .",u.mb_user_street,u.mb_user_housenumber"
                         .",u.mb_user_postal_code,u.mb_user_city";
             }
-            $v = array($this->owsId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
+            $v = [$this->owsId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
 //            $v = array($this->owsId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t", "i");
+            $t = ['i', "t", "t", "i"];
 		switch ($this->owsType) {
 			case "wms":
            			$sql  = "SELECT".$selectColumns
@@ -347,9 +347,9 @@ class OwsLogCsv {
                         .",u.mb_user_city";
                 $join .= " INNER JOIN mb_user AS u  ON (u.mb_user_id = m.fkey_mb_user_id)";
             }
-            $v = array($this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
+            $v = [$this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
 //            $v = array($this->userId, $this->timeFrom, $this->timeTo, 9415);
-            $t = array('i', "t", "t", "i");
+            $t = ['i', "t", "t", "i"];
             $whereOws = "";
 		switch ($this->owsType) {
 			case "wms":
@@ -385,8 +385,8 @@ class OwsLogCsv {
 //            $t = array('i', "t", "t");
 //            $sql = "DELETE FROM mb_proxy_log WHERE fkey_wms_id = $1"
 //                    ." AND proxy_log_timestamp >= $2 AND proxy_log_timestamp <= $3";
-            $v = array($this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array("t", "t", "i");
+            $v = [$this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ["t", "t", "i"];
 		switch ($this->owsType) {
 			case "wms":
            			$sql = "DELETE FROM mb_proxy_log"
@@ -404,7 +404,7 @@ class OwsLogCsv {
 				break;
 		}
             $inOffset = 4;
-    		foreach(explode(",",$this->owsId) as $ows) {
+    		foreach(explode(",",(string) $this->owsId) as $ows) {
     			$v[] = trim($ows);
     			$t[] = "i";
     			$inParams[] = "$".$inOffset;
@@ -438,8 +438,8 @@ class OwsLogCsv {
 //                $v[] = $owsId;
 //                $t[] = 'i';
 //            }
-            $v = array($this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id);
-            $t = array('i', "t", "t", "i");
+            $v = [$this->userId, $this->timeFrom, $this->timeTo, $this->mb_user_id];
+            $t = ['i', "t", "t", "i"];
             $whereOws = "";
             if($this->owsId !== null && $this->owsId != "") {
 		switch ($this->owsType) {
@@ -451,7 +451,7 @@ class OwsLogCsv {
 				break;
 		}
                 $inOffset = 5;
-    			foreach(explode(",",$this->owsId) as $ows) {
+    			foreach(explode(",",(string) $this->owsId) as $ows) {
     				$v[] = trim($ows);
     				$t[] = "i";
     				$inParams[] = "$".$inOffset;
@@ -629,26 +629,19 @@ class OwsLogCsv {
     
     public function getAsArray($function=null) {
     	if($function == "getServiceLogs") {
-    		return array(
-    				"function"=> $this->function,
-    				"header"=> $this->resultHeader,
-    				"headerDisplay"=> $this->resultHeaderDisplay,
-    				//"data" => $this->resultData,
-    				"dataDisplay" => $this->resultDataDisplay,
-    				"message" => $this->resultMessage,
-    				"error" => "",
-    				"limit" => OwsLogCsv::$LIMIT_INT);
+    		return [
+          "function"=> $this->function,
+          "header"=> $this->resultHeader,
+          "headerDisplay"=> $this->resultHeaderDisplay,
+          //"data" => $this->resultData,
+          "dataDisplay" => $this->resultDataDisplay,
+          "message" => $this->resultMessage,
+          "error" => "",
+          "limit" => OwsLogCsv::$LIMIT_INT,
+      ];
     	}
     	else {
-	        return array(
-	            "function"=> $this->function,
-	            "header"=> $this->resultHeader,
-	        	"headerDisplay"=> $this->resultHeaderDisplay,
-	            "data" => $this->resultData,
-	        	"dataDisplay" => $this->resultDataDisplay,
-	            "message" => $this->resultMessage,
-	            "error" => "",
-	            "limit" => OwsLogCsv::$LIMIT_INT);
+	        return ["function"=> $this->function, "header"=> $this->resultHeader, "headerDisplay"=> $this->resultHeaderDisplay, "data" => $this->resultData, "dataDisplay" => $this->resultDataDisplay, "message" => $this->resultMessage, "error" => "", "limit" => OwsLogCsv::$LIMIT_INT];
     	}
     }
 }

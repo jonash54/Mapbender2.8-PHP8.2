@@ -17,11 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
-require_once(dirname(__FILE__)."/../classes/class_mb_exception.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
+require_once(__DIR__."/../classes/class_mb_exception.php");
 
-$buttonObj = array();
+$buttonObj = [];
 
 $sql = "SELECT e_id, gettext($1, e_title) AS e_title FROM gui_element, " . 
 		"(SELECT v.var_value AS current_e_id FROM gui_element AS e, " . 
@@ -31,11 +31,11 @@ $sql = "SELECT e_id, gettext($1, e_title) AS e_title FROM gui_element, " .
 		"AS gui_element_temp WHERE gui_element_temp.current_e_id = e_id ".
 		"AND fkey_gui_id = $3";
 		
-$v = array(Mapbender::session()->get("mb_lang"), Mapbender::session()->get("mb_user_gui"), Mapbender::session()->get("mb_user_gui")); 
-$t = array("s", "s", "s");
+$v = [Mapbender::session()->get("mb_lang"), Mapbender::session()->get("mb_user_gui"), Mapbender::session()->get("mb_user_gui")]; 
+$t = ["s", "s", "s"];
 $res = db_prep_query($sql, $v, $t);
 while ($row = db_fetch_array($res)) {
-	array_push($buttonObj, array("id" => $row["e_id"], "title" => $row["e_title"]));
+	array_push($buttonObj, ["id" => $row["e_id"], "title" => $row["e_title"]]);
 }
 
 $json = new Mapbender_JSON();

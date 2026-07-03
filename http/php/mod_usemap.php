@@ -17,9 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once(dirname(__FILE__)."/../classes/class_gml2.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once(__DIR__."/../classes/class_gml2.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -35,16 +35,16 @@ $url = $ajaxResponse->getParameter('url'); //urldecode($_REQUEST["url"]);
 $g = new gml2();
 $g->parsegml($url);
 
-$um_title = array();
-$um_x = array();
-$um_y = array();
+$um_title = [];
+$um_x = [];
+$um_y = [];
 for($i=0; $i<$g->getMemberCount();$i++) {
-    $um_title[] = utf8_decode($g->getValueBySeparatedKey($i,"name"));
+    $um_title[] = mb_convert_encoding($g->getValueBySeparatedKey($i,"name"), 'ISO-8859-1');
     $um_x[] = $g->getXfromMemberAsString($i,0);
     $um_y[] = $g->getYfromMemberAsString($i,0);
 }
  
-$resultObj = array();
+$resultObj = [];
 $resultObj['um_title'] = $um_title;
 $resultObj['um_x'] = $um_x;
 $resultObj['um_y'] = $um_y;

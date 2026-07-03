@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="delete_filteredGui";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 /*  
  * @security_patch irv done
  */
@@ -26,7 +26,7 @@ require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
 $guiList=$_POST["guiList"];
 $del=$_POST["del"];
 
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 $admin = new administration();
 $ownguis = $admin->getGuisByOwner(Mapbender::session()->get("mb_user_id"),true);
@@ -65,14 +65,14 @@ function validate(){
 ###delete
 if($del){
 $sql = "DELETE FROM gui WHERE gui_id = $1";
-$v = array($guiList);
-$t = array('s');
+$v = [$guiList];
+$t = ['s'];
 $res = db_prep_query($sql,$v,$t);
 }
 ###
 if(count($ownguis)>0){
-	$v = array();
-	$t = array();
+	$v = [];
+	$t = [];
 	$sql = "SELECT * from gui WHERE gui.gui_id IN(";
 	for($i=0; $i<count($ownguis); $i++){
 		if($i>0){ $sql .= ",";}
@@ -105,8 +105,8 @@ if(count($ownguis)>0){
 		echo "<p class = 'wmsList'>";
 		// Show description
 		$sql = "SELECT gui_description FROM gui WHERE gui_id = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		echo "<b>Description:</b><br><br>";
@@ -127,8 +127,8 @@ if(count($ownguis)>0){
 		
 		// Show users
 		$sql = "SELECT mb_user_name FROM mb_user, gui_mb_user WHERE fkey_mb_user_id = mb_user_id AND fkey_gui_id = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		echo "<br><br><b>Users using this GUI</b><br><br>";
@@ -146,8 +146,8 @@ if(count($ownguis)>0){
 	
 		// Show groups
 		$sql = "SELECT mb_group_name FROM mb_group, gui_mb_group WHERE fkey_mb_group_id = mb_group_id AND fkey_gui_id = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		echo "<br><br><b>Groups using this GUI</b><br><br>";
@@ -165,8 +165,8 @@ if(count($ownguis)>0){
 	
 		// Show list of WMS exclusive to this GUI
 		$sql = "SELECT wms_id, wms_title FROM wms, gui_wms WHERE fkey_wms_id = wms_id AND fkey_gui_id = $1";
-		$v = array($guiList);
-		$t = array('s');
+		$v = [$guiList];
+		$t = ['s'];
 		$res = db_prep_query($sql,$v,$t);
 		
 		echo "<br><br><b>List of WMS exclusive to this GUI</b><br><br>";
@@ -180,8 +180,8 @@ if(count($ownguis)>0){
 			
 			// Check how many GUIs use current WMS
 			$sql2 = "SELECT COUNT(fkey_wms_id) FROM gui_wms WHERE fkey_wms_id = $1";
-			$v = array($wmsid);
-			$t = array('i');
+			$v = [$wmsid];
+			$t = ['i'];
 			$res2 = db_prep_query($sql2,$v,$t);
 			
 			// Display if only selected GUI uses current WMS

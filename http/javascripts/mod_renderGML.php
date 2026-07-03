@@ -16,8 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_gml2.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_gml2.php");
 define("GML_HIGHLIGHT_Z_INDEX",1000);
 $gml_string = Mapbender::session()->get("GML");
 if ($gml_string) {
@@ -53,8 +53,8 @@ if ($gml_string) {
 			$e = new mb_notice("javascripts/mod_renderGML.php: currentEpsg: ".$currentEpsg);
 			if ($currentEpsg !== '4326') {
 				$sql = "SELECT st_asgml(st_transform(st_geomfromgml($1),$2::INT),2) AS geom";
-				$v = array($multiPolygonGml, $currentEpsg);
-				$t = array('s', 'i');
+				$v = [$multiPolygonGml, $currentEpsg];
+				$t = ['s', 'i'];
 				$res = db_prep_query($sql,$v,$t);
 				db_fetch_row($res);
 				$multiPolygonGml = db_result($res, 0, 'geom');

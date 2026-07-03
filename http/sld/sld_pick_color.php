@@ -34,7 +34,7 @@
 
 $id = $_REQUEST["id"];
 $color= $_REQUEST["color"];
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 ?>
 <html>
 <head>

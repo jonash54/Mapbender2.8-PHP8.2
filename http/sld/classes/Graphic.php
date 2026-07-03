@@ -32,7 +32,7 @@ class Graphic
 	 * @see Mark
 	 * @var array
 	 */
-	var $externalgraphicsormarks = array();
+	public $externalgraphicsormarks = [];
 	
 	/**
 	 * The opacity element from the xml-scheme.
@@ -41,13 +41,13 @@ class Graphic
 	 *
 	 * @var string
 	 */
-	var $opacity = "";
+	public $opacity = "";
 	
 	/**
 	 * The size element from the xml-scheme.
 	 * @var string
 	 */
-	var $size = "";
+	public $size = "";
 	
 	/**
 	 * The rotation element from the xml-scheme.
@@ -56,19 +56,19 @@ class Graphic
 	 *
 	 * @var int
 	 */
-	var $rotation = "";
+	public $rotation = "";
 	
 	/**
 	 * Index identifying the object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index identifying the object's parent object in the $_SESSION("sld_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects

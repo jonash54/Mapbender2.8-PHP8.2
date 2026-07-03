@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require(dirname(__FILE__)."/../php/mb_validateSession.php");
+require(__DIR__."/../php/mb_validateSession.php");
 
 include '../include/dyn_js.php';
 include '../include/dyn_php.php';
@@ -25,8 +25,8 @@ include '../include/dyn_php.php';
 $con = db_connect($DBSERVER,$OWNER,$PW);
 db_select_db(DB,$con);
 $sql = "SELECT e_target FROM gui_element WHERE e_id = 'gazetteerDOGProfile' AND fkey_gui_id = $1";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
 $cnt = 0;
 while($row = db_fetch_array($res)){

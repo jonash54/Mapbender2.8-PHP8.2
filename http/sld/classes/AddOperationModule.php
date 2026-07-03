@@ -28,22 +28,20 @@
 class AddOperationModule
 {
 	/**
-	 * stores the id of the referring object (the id member field of the object!)
-	 */
-	var $objId = "";
-	/**
-	 * stores the prefix of the referring object's html-form-fields
-	 */
-	var $htmlId = "";
-	
-	/**
 	 * constructor that sets the necessary values ov the member fields
 	 */
-	function AddOperationModule($objId, $htmlId)
-	{
-		$this->objId = $objId;
-		$this->htmlId = $htmlId;
-	}
+	function __construct(
+     /**
+      * stores the id of the referring object (the id member field of the object!)
+      */
+     public $objId,
+     /**
+      * stores the prefix of the referring object's html-form-fields
+      */
+     public $htmlId
+ )
+ {
+ }
 	
 	/**
 	 * creates the html-form-fragment for this object

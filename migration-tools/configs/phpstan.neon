@@ -1,0 +1,34 @@
+parameters:
+    # Level 0 = "the code parses under PHP 8.2". Higher levels surface
+    # legacy patterns (untyped vars, dynamic includes, case-sensitivity)
+    # that pre-date the migration; fixing them is out of scope here.
+    # See migration-tools/reports/phpstan-level1.txt for what level 1
+    # would flag — kept as reference for future tightening.
+    level: 0
+    phpVersion: 80200
+    paths:
+        - /var/www/html/mapbender/core
+        - /var/www/html/mapbender/lib
+        - /var/www/html/mapbender/http
+        - /var/www/html/mapbender/tools
+        - /var/www/html/mapbender/mapserver
+        - /var/www/html/mapbender/owsproxy
+        - /var/www/html/mapbender/owsproxy_api
+        - /var/www/html/mapbender/cors_proxy
+        - /var/www/html/mapbender/http_auth
+    excludePaths:
+        - /var/www/html/mapbender/vendor
+        - /var/www/html/mapbender/tests
+        - /var/www/html/mapbender/docker
+        - /var/www/html/mapbender/migration-tools
+        - /var/www/html/mapbender/resources
+        - /var/www/html/mapbender/http/extensions
+        - /var/www/html/mapbender/http/include/openlayers
+        - /var/www/html/mapbender/http/fpdf
+        - /var/www/html/mapbender/http/print
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Mapbender uses many undefined globals from conf/mapbender.conf;
+        # silencing these at level 1 keeps the report readable.
+        - '#Constant [A-Z_]+ not found#'
+    reportUnmatchedIgnoredErrors: false

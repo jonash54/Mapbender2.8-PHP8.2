@@ -1,8 +1,8 @@
 <?php 
 // should be invoked from cli!
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
+require_once(__DIR__."/../core/globalSettings.php");
 
-require_once(dirname(__FILE__)."/../http/classes/class_syncCkan.php");
+require_once(__DIR__."/../http/classes/class_syncCkan.php");
 
 $syncCkan = new syncCkan();
 // use default admin ckan api key
@@ -14,22 +14,22 @@ $connector = new Connector();
 $remoteCkanUrl = "https://daten.rlp.de";
 
 $jsonResult = $connector->load($remoteCkanUrl . "/api/3/action/group_list");
-$groupArray = array();
-$resultObject = json_decode($jsonResult);
+$groupArray = [];
+$resultObject = json_decode((string) $jsonResult);
 if ($resultObject->success == true) {
     foreach ($resultObject->result as $group_name) {
         echo $group_name . "\n";
         // load remote group information 
         $jsonGroupInfo = $connector->load($remoteCkanUrl . "/api/3/action/group_show?id=" . $group_name);
-        $groupInfoObject = json_decode($jsonGroupInfo);
+        $groupInfoObject = json_decode((string) $jsonGroupInfo);
         // give back useful information to create new group
         // title, display_name, description, image_display_url, name, image_url
-        $extractAttributes = array("title", "display_name", "description", "image_display_url", "name", "image_url");
+        $extractAttributes = ["title", "display_name", "description", "image_display_url", "name", "image_url"];
         // defaults: type:group, approval_status:approved, state:active, is_organization:false
         $newGroupObject = new stdClass();
         foreach ($extractAttributes as $attribute) {
             $newGroupObject->{$attribute} = $groupInfoObject->result->{$attribute};
-            
+
             //echo $attribute . ": " . $groupInfoObject->result->{$attribute} . "\n";
         }
         $groupArray[] = $newGroupObject;
@@ -37,7 +37,7 @@ if ($resultObject->success == true) {
         // check if group already exists - if it does - update it else create new one
         $result = $syncCkan->getRemoteCkanGroup('{"id": "' . $newGroupObject->name . '"}');
         echo "Result for ckan group: " . $result;
-        $resultGroupObject = json_decode($result);
+        $resultGroupObject = json_decode((string) $result);
         if ($resultGroupObject->success == false) {
             $result = $syncCkan->createRemoteCkanGroup($jsonNewGroupObject);
         } else {
@@ -73,9 +73,9 @@ echo json_encode($groupArray) . "\n";
 $url = "https://www.geoportal.rlp.de/mapbender/php/mod_showOpenDataOrganizations.php?showOnlyDatasetMetadata=true";
 
 $openDataOrgsJson = $connector->load($url);
-$openDataOrgs = json_decode($openDataOrgsJson);
+$openDataOrgs = json_decode((string) $openDataOrgsJson);
 foreach($openDataOrgs as $orga) {
-    
+
 }
 // serialId, title, package_count
 

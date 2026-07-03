@@ -16,15 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../conf/mapbender.conf");
-require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
+require_once(__DIR__."/../conf/mapbender.conf");
+require_once(__DIR__."/../http/classes/class_mb_exception.php");
 echo '<meta http-equiv="Content-Type" content="text/html; charset='.CHARSET.'">';	
 ?>
 <title>Test POST/SOAP Communication for CSW/WFS</title>
 </head>
 <?php
 if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onlineresource"] != ''){
-	$arURL = parse_url($_REQUEST["onlineresource"]);
+	$arURL = parse_url((string) $_REQUEST["onlineresource"]);
 	$host = $arURL["host"];
 	$port = $arURL["port"]; 
 	$doSOAP=false;
@@ -36,16 +36,10 @@ if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onliner
 	}
 	$path = $arURL["path"];
 	$method = "POST";
-	$data = stripslashes($_REQUEST["filter"]);
+	$data = stripslashes((string) $_REQUEST["filter"]);
 	$dataXMLObject = new SimpleXMLElement($data);
 	$datanew = $dataXMLObject->asXML();
-	$headers = array(
-            "POST ".$path." HTTP/1.1",
-            "Content-type: text/xml; charset=\"utf-8\"",
-            "Cache-Control: no-cache",
-            "Pragma: no-cache",
-            "Content-length: ".strlen($datanew)
-        ); 
+	$headers = ["POST ".$path." HTTP/1.1", "Content-type: text/xml; charset=\"utf-8\"", "Cache-Control: no-cache", "Pragma: no-cache", "Content-length: ".strlen($datanew)]; 
 	if ($doSOAP) {
 		$soapHead = "<soapenv:Envelope ";
 		$soapHead .= "xmlns:dc=\"http://purl.org/dc/elements/1.1/\" ";
@@ -62,14 +56,7 @@ if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onliner
 		$data = $soapHead.$data.$soapFoot;
 		$dataXMLObject = new SimpleXMLElement($data);
 		$datanew = $dataXMLObject->asXML();
-		$headers = array(
-            		"POST ".$path." HTTP/1.1",
-			"Content-type: application/soap+xml; charset=\"utf-8\"",
-            		"Cache-Control: no-cache",
-            		"Pragma: no-cache",
-            		"SOAPAction: \"run\"",
-            		"Content-length: ".strlen($datanew)
-        	); 
+		$headers = ["POST ".$path." HTTP/1.1", "Content-type: application/soap+xml; charset=\"utf-8\"", "Cache-Control: no-cache", "Pragma: no-cache", "SOAPAction: \"run\"", "Content-length: ".strlen($datanew)]; 
 	}
 	//do curl connection and request 
 	$out = getCURL($_REQUEST["onlineresource"],$datanew,$headers,$doSOAP);
@@ -77,7 +64,7 @@ if(isset($_REQUEST["filter"]) && $_REQUEST["filter"] != "" && $_REQUEST["onliner
 //of class_connector
 function getCURL($url,$data,$headers,$doSOAP){	
 		$ch = curl_init ($url);
-		$arURL = parse_url($url);
+		$arURL = parse_url((string) $url);
 		$host = $arURL["host"];
 		$port = $arURL["port"]; 
 		if($port == ''){
@@ -130,7 +117,7 @@ OnlineResource (Choose the right one out of the Capabilities - SOAP and POST may
 <br>
 Use SOAP <input type='checkbox' id='soap' name='soap' value='true'><br>
 Filter:<br>
-<textarea name='filter' cols='100' rows='15'><?php echo stripslashes($_REQUEST["filter"]); ?></textarea><br>
+<textarea name='filter' cols='100' rows='15'><?php echo stripslashes((string) $_REQUEST["filter"]); ?></textarea><br>
 Filter which is posted (maybe SOAP):<br>
 <textarea name='postfilter' cols='100' rows='15'><?php echo $datanew; ?></textarea><br>
 <input type='submit' value='submit'><br>
@@ -138,7 +125,7 @@ HTTP Headers of sended Request (php array):<br>
 <textarea name='headers' cols='100' rows='5'><?php print_r($headers); ?></textarea><br>
 <br>
 Response:<br>
-<textarea name='response' cols='100' rows='30'><?php echo htmlentities($out); ?></textarea><br>
+<textarea name='response' cols='100' rows='30'><?php echo htmlentities((string) $out); ?></textarea><br>
 </form>
 </body>
 </html>

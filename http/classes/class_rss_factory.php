@@ -5,8 +5,8 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_rss.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_rss.php";
 
 class RssFactory {
 
@@ -50,7 +50,7 @@ class RssFactory {
 	}
 	
 	protected function parseDocument ($url, $rss) {
-		$domxpath = $this->createDomXpathFromUrl($url, $rss);
+		$domxpath = $this->createDomXpathFromUrl($url);
 		if (is_null($domxpath)) {
 			return null;
 		}
@@ -94,7 +94,7 @@ class RssFactory {
 	}
 	
 	protected function parseItems ($url, $rss) {
-		$domxpath = $this->createDomXpathFromUrl($url, $rss);
+		$domxpath = $this->createDomXpathFromUrl($url);
 		if (is_null($domxpath)) {
 			return null;
 		}

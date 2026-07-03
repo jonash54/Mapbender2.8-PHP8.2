@@ -47,19 +47,19 @@ class Filter extends Rule
 	 * @see PropertyIsBetween
 	 * @var array
 	 */
-	var $operations = array();
+	public $operations = [];
 	
 	/**
 	 * Index of this object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $id = "";
+	public $id = "";
 	
 	/**
 	 * Index of this object's parent object in the $_SESSION("sld_filter_objects") array.
 	 * @var int
 	 */
-	var $parent = "";
+	public $parent = "";
 	
 	/**
 	 * creates the xml for this object and its child objects
@@ -105,7 +105,7 @@ class Filter extends Rule
 		$temp .= $offset." </tr>\n";
 		
 		$displayOperationModule = new DisplayOperationModule();
-		$temp .= $displayOperationModule->generateHtmlForm($offset." ", $this->operations, $id);
+		$temp .= $displayOperationModule->generateHtmlForm($this->operations, $id, $offset." ");
 		
 		if (count($this->operations) == 0)
 		{

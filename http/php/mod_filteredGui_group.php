@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $e_id="filteredGui_Group";
-require_once(dirname(__FILE__)."/../php/mb_validatePermission.php");
+require_once(__DIR__."/../php/mb_validatePermission.php");
 
 /*  
  * @security_patch irv done
@@ -69,7 +69,7 @@ function validate(wert){
 <body>
 <?php
 
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 
 $fieldHeight = 20;
 
@@ -78,7 +78,7 @@ $cnt_group = 0;
 $cnt_group = 0;
 $cnt_gui_group = 0;
 $cnt_gui_group = 0;
-$gui_id_array = array();
+$gui_id_array = [];
 
 $logged_user_name = Mapbender::session()->get("mb_user_name");
 $logged_user_id = Mapbender::session()->get("mb_user_id");
@@ -89,14 +89,14 @@ if($insert){
 		for($i=0; $i<count($selected_group); $i++){
 			$exists = false;
 			$sql_insert = "SELECT * from gui_mb_group where fkey_gui_id = $1 and fkey_mb_group_id = $2";
-			$v = array($selected_gui,$selected_group[$i]);
-			$t = array('s','i');
+			$v = [$selected_gui, $selected_group[$i]];
+			$t = ['s', 'i'];
 			$res_insert = db_prep_query($sql_insert,$v,$t);
 			while(db_fetch_row($res_insert)){$exists = true;}
 			if($exists == false){
 				$sql_insert = "INSERT INTO gui_mb_group(fkey_gui_id, fkey_mb_group_id) VALUES($1, $2)";
-				$v = array($selected_gui,$selected_group[$i]);
-				$t = array('s','i');
+				$v = [$selected_gui, $selected_group[$i]];
+				$t = ['s', 'i'];
 				$res_insert = db_prep_query($sql_insert,$v,$t);
 			}
 		}
@@ -106,8 +106,8 @@ if($remove){
 	if(count($remove_group)>0){
 		for($i=0; $i<count($remove_group); $i++){
 			$sql_remove = "DELETE FROM gui_mb_group WHERE fkey_mb_group_id = $1 and fkey_gui_id = $2";
-			$v = array($remove_group[$i],$selected_gui);
-			$t = array('i','s');
+			$v = [$remove_group[$i], $selected_gui];
+			$t = ['i', 's'];
 			db_prep_query($sql_remove,$v,$t);
 		}
 	}
@@ -117,8 +117,8 @@ if($remove){
 
 $arrayGuis=mb_getGUIs($logged_user_id);
 //$e = new mb_exception("/php/mb_getGUIs.php: count guis: ".count($arrayGuis));
-$v = array();
-$t = array();
+$v = [];
+$t = [];
 $sql_gui = "SELECT * FROM gui WHERE gui_id IN (";
 for($i=0; $i<count($arrayGuis); $i++){
 	if($i>0){ $sql_gui .= ",";}
@@ -150,9 +150,9 @@ $sql_gui_group .= "INNER JOIN mb_group ON gui_mb_group.fkey_mb_group_id = mb_gro
 $sql_gui_group .= "WHERE gui_mb_group.fkey_gui_id = $1 ";
 $sql_gui_group .= "ORDER BY mb_group.mb_group_name";
 
-if(!$selected_gui){$v = array($gui_id_array[0]);}
-if($selected_gui){$v = array($selected_gui);}
-$t = array('s');
+if(!$selected_gui){$v = [$gui_id_array[0]];}
+if($selected_gui){$v = [$selected_gui];}
+$t = ['s'];
 $res_gui_group = db_prep_query($sql_gui_group,$v,$t);
 while($row = db_fetch_array($res_gui_group)){
 	$group_id_gui[$cnt_gui_group] = $row["mb_group_id"];

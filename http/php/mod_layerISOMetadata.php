@@ -20,13 +20,13 @@
 
 // Script to generate a conformant ISO19139 view service metadata record for a wms layer which is registrated in the mapbender database. It works as a webservice
 // The record will be fulfill the demands of the INSPIRE metadata regulation from 03.12.2008 and the iso19139
-require_once (dirname ( __FILE__ ) . "/../../core/globalSettings.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_connector.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_administration.php");
-require_once (dirname ( __FILE__ ) . "/../php/mod_validateInspire.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_iso19139.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_owsConstraints.php");
-require_once (dirname ( __FILE__ ) . "/../classes/class_qualityReport.php");
+require_once (__DIR__ . "/../../core/globalSettings.php");
+require_once (__DIR__ . "/../classes/class_connector.php");
+require_once (__DIR__ . "/../classes/class_administration.php");
+require_once (__DIR__ . "/../php/mod_validateInspire.php");
+require_once (__DIR__ . "/../classes/class_iso19139.php");
+require_once (__DIR__ . "/../classes/class_owsConstraints.php");
+require_once (__DIR__ . "/../classes/class_qualityReport.php");
 
 // check for absolute url
 if (defined ( "MAPBENDER_PATH" ) && MAPBENDER_PATH != '') {
@@ -59,7 +59,7 @@ if (isset ( $_REQUEST ['ID'] ) & $_REQUEST ['ID'] != "") {
 	// validate integer
 	$testMatch = $_REQUEST ["ID"];
 	$pattern = '/^[\d]*$/';
-	if (! preg_match ( $pattern, $testMatch )) {
+	if (! preg_match ( $pattern, (string) $testMatch )) {
 		// echo 'Id: <b>'.$testMatch.'</b> is not valid.<br/>';
 		echo 'Id is not valid (integer).<br/>';
 		die ();
@@ -83,17 +83,11 @@ if ($_REQUEST ['OUTPUTFORMAT'] == "iso19139" || $_REQUEST ['OUTPUTFORMAT'] == "r
 
 if (! ($_REQUEST ['CN'] == "false")) {
 	// overwrite outputFormat for special headers:
-	switch ($_SERVER ["HTTP_ACCEPT"]) {
-		case "application/rdf+xml" :
-			$outputFormat = "rdf";
-			break;
-		case "text/html" :
-			$outputFormat = "html";
-			break;
-		default :
-			$outputFormat = "iso19139";
-			break;
-	}
+	$outputFormat = match ($_SERVER ["HTTP_ACCEPT"]) {
+     "application/rdf+xml" => "rdf",
+     "text/html" => "html",
+     default => "iso19139",
+ };
 }
 
 // if validation is requested
@@ -124,12 +118,8 @@ function fillISO19139($iso19139, $recordId) {
 		$sql .= "FROM wms, layer, layer_epsg WHERE layer_id = $1 and layer.fkey_wms_id = wms.wms_id";
 		$sql .= " and layer_epsg.fkey_layer_id=layer.layer_id and layer_epsg.epsg='EPSG:4326'";
 	}
-	$v = array (
-			( integer ) $recordId 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [( integer ) $recordId];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$mapbenderMetadata = db_fetch_array ( $res );
 	
@@ -138,12 +128,8 @@ function fillISO19139($iso19139, $recordId) {
 	if ($wmsView != '') {
 		$sql = "SELECT contactorganization, contactelectronicmailaddress ";
 		$sql .= "FROM wms WHERE wms_id = $1";
-		$v = array (
-				( integer ) $mapbenderMetadata ['wms_id'] 
-		);
-		$t = array (
-				'i' 
-		);
+		$v = [( integer ) $mapbenderMetadata ['wms_id']];
+		$t = ['i'];
 		$res = db_prep_query ( $sql, $v, $t );
 		$serviceMetadata = db_fetch_array ( $res );
 	}
@@ -468,17 +454,17 @@ function fillISO19139($iso19139, $recordId) {
 	$electronicMailAddress->appendChild ( $email_cs );
 	//add optional administrativeArea element - before email!
 	$sql = "SELECT keyword.keyword FROM keyword, layer_keyword WHERE layer_keyword.fkey_layer_id=$1 AND layer_keyword.fkey_keyword_id=keyword.keyword_id";
-	$v = array (( integer ) $recordId);
-	$t = array ('i');
+	$v = [( integer ) $recordId];
+	$t = ['i'];
 	$res = db_prep_query($sql, $v, $t);
-	$keywordsArray = array();
+	$keywordsArray = [];
 	while ($row = db_fetch_array($res)) {
 	    if (isset($row['keyword']) && $row['keyword'] != "") {
 	        $keywordsArray[] = $row['keyword'];
 	    }
 	}
 	if (defined('ADMINISTRATIVE_AREA') && ADMINISTRATIVE_AREA != '') {
-	    $adminAreaObj = json_decode(ADMINISTRATIVE_AREA);
+	    $adminAreaObj = json_decode((string) ADMINISTRATIVE_AREA);
 	    if (in_array($adminAreaObj->keyword, $keywordsArray)) {
 	        $administrativeArea = $iso19139->createElement("gmd:administrativeArea");
 	        $administrativeArea_cs = $iso19139->createElement("gco:CharacterString");
@@ -502,12 +488,8 @@ function fillISO19139($iso19139, $recordId) {
 	
 	// generate graphical overview part
 	$sql = "SELECT layer_preview.layer_map_preview_filename FROM layer_preview WHERE layer_preview.fkey_layer_id=$1";
-	$v = array (
-			( integer ) $mapbenderMetadata ["layer_id"] 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [( integer ) $mapbenderMetadata ["layer_id"]];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$row = db_fetch_array ( $res );
 	
@@ -580,12 +562,8 @@ function fillISO19139($iso19139, $recordId) {
 	// generate keyword part - for services the inspire themes are not applicable!!!
 	// read keywords for resource out of the database:
 	$sql = "SELECT keyword.keyword FROM keyword, layer_keyword WHERE layer_keyword.fkey_layer_id=$1 AND layer_keyword.fkey_keyword_id=keyword.keyword_id";
-	$v = array (
-			( integer ) $recordId 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [( integer ) $recordId];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$descriptiveKeywords = $iso19139->createElement ( "gmd:descriptiveKeywords" );
 	$MD_Keywords = $iso19139->createElement ( "gmd:MD_Keywords" );
@@ -604,8 +582,8 @@ function fillISO19139($iso19139, $recordId) {
 	    $sql = "SELECT wms_id, termsofuse.isopen from wms LEFT OUTER JOIN";
 	    $sql .= "  wms_termsofuse ON  (wms.wms_id = wms_termsofuse.fkey_wms_id) LEFT OUTER JOIN termsofuse ON";
 	    $sql .= " (wms_termsofuse.fkey_termsofuse_id=termsofuse.termsofuse_id) where wms.wms_id = $1";
-	    $v = array();
-	    $t = array();
+	    $v = [];
+	    $t = [];
 	    array_push($t, "i");
 	    array_push($v, (int)$mapbenderMetadata ['wms_id']);
 	    $res = db_prep_query($sql,$v,$t);
@@ -631,12 +609,8 @@ function fillISO19139($iso19139, $recordId) {
 	$MD_Keywords->appendChild ( $keyword );
 	// pull special keywords from custom categories:
 	$sql = "SELECT custom_category.custom_category_key FROM custom_category, layer_custom_category WHERE layer_custom_category.fkey_layer_id = $1 AND layer_custom_category.fkey_custom_category_id =  custom_category.custom_category_id AND custom_category_hidden = 0";
-	$v = array (
-			( integer ) $recordId 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [( integer ) $recordId];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$countCustom = 0;
 	while ( $row = db_fetch_array ( $res ) ) {
@@ -702,14 +676,14 @@ function fillISO19139($iso19139, $recordId) {
 	$SV_ServiceIdentification->appendChild ( $serviceTypeVersion );
 	
 	// Geographical Extent
-	$bbox = array ();
+	$bbox = [];
 	// initialize if no extent is defined in the database
 	$bbox [0] = - 180;
 	$bbox [1] = - 90;
 	$bbox [2] = 180;
 	$bbox [3] = 90;
 	if (isset ( $mapbenderMetadata ['bbox'] ) & ($mapbenderMetadata ['bbox'] != '')) {
-		$bbox = explode ( ',', $mapbenderMetadata ['bbox'] );
+		$bbox = explode ( ',', (string) $mapbenderMetadata ['bbox'] );
 	}
 	$extent = $iso19139->createElement ( "srv:extent" );
 	$EX_Extent = $iso19139->createElement ( "gmd:EX_Extent" );
@@ -874,7 +848,7 @@ SQL;
 					break;
 				case 'metador' :
 					$operatesOn = $iso19139->createElement ( "srv:operatesOn" );
-					$operatesOn->setAttribute ( "xlink:href", $mapbenderUrl . "/php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $row_metadata ['uuid'] . '#spatial_dataset_' . md5 ( $row_metadata ['uuid'] ) );
+					$operatesOn->setAttribute ( "xlink:href", $mapbenderUrl . "/php/mod_dataISOMetadata.php?outputFormat=iso19139&id=" . $row_metadata ['uuid'] . '#spatial_dataset_' . md5 ( (string) $row_metadata ['uuid'] ) );
 					$operatesOn->setAttribute ( "uuidref", $uniqueResourceIdentifierCodespace . $row_metadata ['uuid'] );
 					$SV_ServiceIdentification->appendChild ( $operatesOn );
 					break;
@@ -1022,7 +996,7 @@ SQL;
 }
 
 // function to give away the xml data
-function pushISO19139($iso19139Doc, $recordId, $outputFormat) {
+function pushISO19139($iso19139Doc, $recordId, $outputFormat): never {
 	$xml = fillISO19139 ( $iso19139Doc, $recordId );
 	proxyFile ( $xml, $outputFormat );
 	die ();
@@ -1065,12 +1039,8 @@ function proxyFile($iso19139str, $outputFormat) {
 function getEpsgByLayerId($layer_id) { // from merge_layer.php
 	$epsg_list = "";
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array (
-			$layer_id 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	while ( $row = db_fetch_array ( $res ) ) {
 		$epsg_list .= $row ['epsg'] . " ";
@@ -1079,14 +1049,10 @@ function getEpsgByLayerId($layer_id) { // from merge_layer.php
 }
 function getEpsgArrayByLayerId($layer_id) { // from merge_layer.php
                                              // $epsg_list = "";
-	$epsg_array = array ();
+	$epsg_array = [];
 	$sql = "SELECT DISTINCT epsg FROM layer_epsg WHERE fkey_layer_id = $1";
-	$v = array (
-			$layer_id 
-	);
-	$t = array (
-			'i' 
-	);
+	$v = [$layer_id];
+	$t = ['i'];
 	$res = db_prep_query ( $sql, $v, $t );
 	$cnt = 0;
 	while ( $row = db_fetch_array ( $res ) ) {
@@ -1100,7 +1066,7 @@ function guid() {
 		return com_create_guid ();
 	} else {
 		mt_srand ( ( double ) microtime () * 10000 ); // optional for php 4.2.0 and up.
-		$charid = strtoupper ( md5 ( uniqid ( rand (), true ) ) );
+		$charid = strtoupper ( md5 ( uniqid ( random_int (0, mt_getrandmax()), true ) ) );
 		$hyphen = chr ( 45 ); // "-"
 		$uuid = chr ( 123 ) . // "{"
 substr ( $charid, 0, 8 ) . $hyphen . substr ( $charid, 8, 4 ) . $hyphen . substr ( $charid, 12, 4 ) . $hyphen . substr ( $charid, 16, 4 ) . $hyphen . substr ( $charid, 20, 12 ) . chr ( 125 ); // "}"

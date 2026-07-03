@@ -17,8 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../classes/class_json.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../classes/class_json.php");
 
 $json = new Mapbender_JSON();
 
@@ -49,7 +49,7 @@ if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
 }
 echo "Mapbender.userId = '".Mapbender::session()->get("mb_user_id")."';\n";
 echo "var mb_myLogin = Mapbender.loginUrl;\n";
-echo "var mb_styleID = '".md5(Mapbender::session()->get("mb_user_name"))."';\n";
+echo "var mb_styleID = '".md5((string) Mapbender::session()->get("mb_user_name"))."';\n";
 echo "var mb_myBBOX = '".Mapbender::session()->get("mb_myBBOX")."';\n";
 echo "Mapbender.locale = '" . Mapbender::session()->get("mb_locale") . "';\n";
 echo "Mapbender.languageId = '" . Mapbender::session()->get("mb_lang") . "';\n";
@@ -71,8 +71,8 @@ echo "var django = '".Mapbender::session()->get("django")."';\n";
 //
 // Load external JavaScript libraries
 //
-$extPath = dirname(__FILE__) . "/../extensions/";
-$extFileArray = array();
+$extPath = __DIR__ . "/../extensions/";
+$extFileArray = [];
 if (!LOAD_JQUERY_FROM_GOOGLE) {
 	$extFileArray[]= "jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js";
 }
@@ -99,19 +99,8 @@ echo "var getParams = " . json_encode($_GET) . ";";
 //
 // Load internal JavaScript libraries
 //
-$libPath = dirname(__FILE__) . "/../../lib/";
-$libFileArray = array(
-	"exception.js",
-	"ajax.js",
-	"basic.js",
-	"div.js",
-	"list.js",
-	"point.js",
-	"button.js",
-	"extent.js",
-	"marker.js",
-	"backwards_compatibility_to_2.6.js"
-);
+$libPath = __DIR__ . "/../../lib/";
+$libFileArray = ["exception.js", "ajax.js", "basic.js", "div.js", "list.js", "point.js", "button.js", "extent.js", "marker.js", "backwards_compatibility_to_2.6.js"];
 
 for ($i = 0; $i < count($libFileArray); $i++) {
 	$currentFile = $libPath . $libFileArray[$i];
@@ -134,13 +123,13 @@ for ($i = 0; $i < count($libFileArray); $i++) {
 // Load JavaScript modules of GUI elements
 //
 $sql = "SELECT DISTINCT e_mb_mod, e_id, e_pos FROM gui_element WHERE e_public = 1 AND fkey_gui_id = $1 ORDER BY e_pos ";
-$v = array($gui_id);
-$t = array('s');
+$v = [$gui_id];
+$t = ['s'];
 $res = db_prep_query($sql, $v, $t);
-$moduleArray = array();
+$moduleArray = [];
 while($row = db_fetch_array($res)){
 	if($row["e_mb_mod"] != ""){
-		$moduleArray = array_merge($moduleArray, explode(",", $row["e_mb_mod"]));
+		$moduleArray = array_merge($moduleArray, explode(",", (string) $row["e_mb_mod"]));
 	}
 }
 
@@ -149,7 +138,7 @@ for ($moduleIndex = 0; $moduleIndex < count($moduleArray); $moduleIndex++) {
 		$fileFound = false;
 		$pathArray = explode(",", MODULE_SEARCH_PATHS);
 		foreach ($pathArray as $path) {
-			$currentFile = dirname(__FILE__) . "/" . $path . trim($moduleArray[$moduleIndex]);
+			$currentFile = __DIR__ . "/" . $path . trim($moduleArray[$moduleIndex]);
 			if (file_exists($currentFile)) {
 				$e = new mb_notice("LOADING module : " . $currentFile);
 				/*
@@ -180,16 +169,16 @@ $modulesNotRelyingOnGlobalsArray = explode(",", MODULES_NOT_RELYING_ON_GLOBALS);
 ?>
 Mapbender.modules = {};
 <?php
-$executeJsPluginsArray = array();
-$linkJsPluginsArray = array();
+$executeJsPluginsArray = [];
+$linkJsPluginsArray = [];
 //get language code
 $langCode = Mapbender::session()->get("mb_lang");
 $mb_sql = "SELECT DISTINCT e_js_file, e_id, e_src, e_target, e_pos, e_url, " .
 	"e_left, e_top, e_title, gettext($2, e_title) AS e_current_title, " .
 	"e_width, e_height, e_requires FROM gui_element WHERE e_public = 1 AND " .
 	"fkey_gui_id = $1 ORDER BY e_pos";
-$mb_v = array($gui_id, $langCode);
-$mb_t = array("s","s");
+$mb_v = [$gui_id, $langCode];
+$mb_t = ["s", "s"];
 $mb_res = db_prep_query($mb_sql, $mb_v, $mb_t);
 while ($row_js = db_fetch_array($mb_res)) {
 
@@ -202,7 +191,7 @@ while ($row_js = db_fetch_array($mb_res)) {
 	$e_require = $row_js["e_requires"];
 	$e_title = $row_js["e_title"];
 	$e_currentTitle = $row_js["e_current_title"];
-	$e_target = explode(",",$row_js["e_target"]);
+	$e_target = explode(",",(string) $row_js["e_target"]);
 	$e_width = intval($row_js["e_width"]);
 	$e_height = intval($row_js["e_height"]);
 	$e_top = intval($row_js["e_top"]);
@@ -233,7 +222,7 @@ while ($row_js = db_fetch_array($mb_res)) {
 	//
 	$jsFileString = $row_js["e_js_file"];
 	if ($jsFileString){
-		if (in_array($e_id, $modulesNotRelyingOnGlobalsArray) || preg_match("/\/plugins\//", $jsFileString)) {
+		if (in_array($e_id, $modulesNotRelyingOnGlobalsArray) || preg_match("/\/plugins\//", (string) $jsFileString)) {
 			//
 			// Create the jQuery plugin in output buffer
 			//
@@ -251,7 +240,7 @@ while ($row_js = db_fetch_array($mb_res)) {
 			echo "\n$.fn.$e_id = function (options) {\n" .
 				"\treturn this.each(function () {\n\n";
 
-			$jsArray = explode(",", $jsFileString);
+			$jsArray = explode(",", (string) $jsFileString);
 			for ($i = 0; $i < count($jsArray); $i++) {
 				$currentFile = trim($jsArray[$i]);
 
@@ -277,7 +266,7 @@ while ($row_js = db_fetch_array($mb_res)) {
 				"'};" . $elementVars . ";linkPlugins(options);";
 		}
 		else {
-			$jsArray = explode(",", $jsFileString);
+			$jsArray = explode(",", (string) $jsFileString);
 			for ($i = 0; $i < count($jsArray); $i++) {
 				$currentFile = trim($jsArray[$i]);
 

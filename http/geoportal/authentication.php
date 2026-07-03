@@ -1,6 +1,6 @@
 <?php
-include_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_user.php");
+include_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_user.php");
 
 $pw = $_REQUEST['password'];
 $name = $_REQUEST['name'];
@@ -62,7 +62,7 @@ if (is_array($isAuthenticated) != false) {
 	$sql .= 'WHERE mb_user_id = $1';
 	$res = db_prep_query($sql, $V, $T);
 	//UPDATE USER LOGIN DATE and TIME
-	require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+	require_once(__DIR__."/../php/mb_getGUIs.php");
 	$arrayGUIs = mb_getGUIs($isAuthenticated["mb_user_id"]);
 	Mapbender::session()->set("mb_user_guis",$arrayGUIs);
 
@@ -84,7 +84,7 @@ if (is_array($isAuthenticated) != false) {
 		header ("Location: http://".$_SERVER['HTTP_HOST']."/portal/success.html".$URLAdd);
 	}
 	session_write_close();
-} else if (strpos($isAuthenticated,'Account for user with name') !== false && (defined("DJANGO_PORTAL") && DJANGO_PORTAL === true)){
+} else if (str_contains((string) $isAuthenticated,'Account for user with name') && (defined("DJANGO_PORTAL") && DJANGO_PORTAL === true)){
 
 	$URLAdd="?status=notactive";
 	if($_SERVER["HTTPS"] != "on") {
@@ -93,7 +93,7 @@ if (is_array($isAuthenticated) != false) {
 		header ("Location: https://".$_SERVER['HTTP_HOST'].$URLAdd);
 	}
 
-} else if (strpos($isAuthenticated,'Password failed third time for') !== false && (defined("DJANGO_PORTAL") && DJANGO_PORTAL === true)){
+} else if (str_contains((string) $isAuthenticated,'Password failed third time for') && (defined("DJANGO_PORTAL") && DJANGO_PORTAL === true)){
 
 	$URLAdd="?status=fail3&name=".$name;
 	if($_SERVER["HTTPS"] != "on") {
@@ -118,7 +118,7 @@ if (is_array($isAuthenticated) != false) {
 
 function authenticate ($name,$pw){
 	$user = new User();
-	$returnObject = json_decode($user->authenticateUserByName($name, $pw));
+	$returnObject = json_decode((string) $user->authenticateUserByName($name, $pw));
 	if ($returnObject->success !== false) {
 		$returnObject = json_decode(json_encode($returnObject->result), JSON_OBJECT_AS_ARRAY);
 	} else {

@@ -1,14 +1,14 @@
 <?php 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_universal_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../classes/class_administration.php");
 $admin = new Administration();
 
 /*
  * https://stackoverflow.com/questions/797251/transposing-multidimensional-arrays-in-php
  * Apr 28, 2009 at 12:17
  */
-function transpose($array, &$out, $indices = array())
+function transpose($array, &$out, $indices = [])
 {
     if (is_array($array))
     {
@@ -34,9 +34,7 @@ function transpose($array, &$out, $indices = array())
  * https://www.php.net/manual/en/function.usort.php - Example #4
  */
 function build_sorter($key) {
-    return function ($a, $b) use ($key) {
-        return strnatcmp($a[$key], $b[$key]);
-    };
+    return fn($a, $b) => strnatcmp((string) $a[$key], (string) $b[$key]);
 }
 
 $json_conf = 
@@ -60,7 +58,7 @@ $user = new User(Mapbender::session()->get("mb_user_id"));
 $ajaxResponse = new AjaxResponse($_REQUEST);
 if ($ajaxResponse->getMethod() == 'getSelectField') {
     $data = $ajaxResponse->getParameter('data');
-    $wfs_select_conf = json_decode($data);
+    $wfs_select_conf = json_decode((string) $data);
     $myWfsFactory = new UniversalWfsFactory ();
     $wfs = $myWfsFactory->createFromDb ( $wfs_select_conf->wfs_id );
     $is_secured = $admin->getWFSOWSstring( $wfs_select_conf->wfs_id );
@@ -75,7 +73,7 @@ if ($ajaxResponse->getMethod() == 'getSelectField') {
         if (isset($wfs_select_conf->element_id_order) && is_int($wfs_select_conf->element_id_order)) {
             //transpose
             //https://stackoverflow.com/questions/797251/transposing-multidimensional-arrays-in-php
-            $resultT = array();
+            $resultT = [];
             transpose($result, $resultT);
             //https://www.php.net/manual/en/function.usort.php Example #4
             usort($resultT, build_sorter($elementInfo->element_names[$wfs_select_conf->element_id_order]));

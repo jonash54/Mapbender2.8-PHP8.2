@@ -12,8 +12,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__)."/../php/mb_listGUIs.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_listGUIs.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -66,7 +66,7 @@ $(document).ready(function () {
 echo "</head>";
 echo "<body onload='setFocus()'>";
 //get array of available guis
-require_once(dirname(__FILE__)."/../php/mb_getGUIs.php");
+require_once(__DIR__."/../php/mb_getGUIs.php");
 $arrayGUIs = mb_getGUIs(Mapbender::session()->get("mb_user_id"));
 mb_listGUIs($arrayGUIs);
 ?>

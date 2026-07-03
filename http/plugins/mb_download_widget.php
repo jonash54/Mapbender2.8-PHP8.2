@@ -33,7 +33,7 @@
  * test if layer should be invoked recursively to test coupling!
  */
  <?php 
- require_once dirname(__FILE__) . "/../classes/class_user.php";
+ require_once __DIR__ . "/../classes/class_user.php";
  
  ?>
  var $sdi_download = $(this);
@@ -69,7 +69,7 @@
 				echo nl2br(htmlentities(_mb("BETA: Module for download regional limited data as Geopackage. Actually the allowed region area is limited to ") . $areaLimit . _mb(" km2."), ENT_QUOTES, "UTF-8"));
 			?><br><a style='' href='https://www.geopackage.org/' target='_blank'><img src='../img/geopackage-2.png' width='25' height='25'></a></div>";
 		startDigitizeHtml = "<div id='start-digitize' ><?php 
-				echo nl2br(htmlentities(_mb("Click in the map and digitize the area of interest."), ENT_QUOTES, "UTF-8"));
+				echo nl2br(htmlentities((string) _mb("Click in the map and digitize the area of interest."), ENT_QUOTES, "UTF-8"));
 			?></div>";
 	    userInfoHtml = "<div id='identity'><?php
                 echo nl2br(htmlentities(_mb("Your logged in as") . ":", ENT_QUOTES, "UTF-8"));

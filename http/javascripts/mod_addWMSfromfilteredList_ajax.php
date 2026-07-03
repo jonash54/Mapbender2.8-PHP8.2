@@ -61,18 +61,18 @@
  * http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
  */
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
 
 $sql = "SELECT e_target FROM gui_element WHERE e_id = $1 AND fkey_gui_id = $2";
-$v = array($e_id, $gui_id);
-$t = array("s", "s");
+$v = [$e_id, $gui_id];
+$t = ["s", "s"];
 $res = db_prep_query($sql, $v, $t);
 $row = db_fetch_array($res);
 $e_target = explode(",", ((string) $row["e_target"]));
 
 $sql_css = "SELECT var_value FROM gui_element_vars WHERE var_name = 'jq_ui_theme' AND fkey_gui_id = $1";
-$v_css = array($gui_id);
-$t_css = array("s");
+$v_css = [$gui_id];
+$t_css = ["s"];
 $res_css = db_prep_query($sql_css, $v_css, $t_css);
 if ($res_css) {
 	$row_css = db_fetch_array($res_css);

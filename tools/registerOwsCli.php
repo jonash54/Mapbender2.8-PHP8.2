@@ -1,8 +1,8 @@
 <?php
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_wms.php");
-require_once(dirname(__FILE__)."/../http/classes/class_universal_wfs_factory.php");
-require_once(dirname(__FILE__)."/../http/classes/class_gui.php"); 
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_wms.php");
+require_once(__DIR__."/../http/classes/class_universal_wfs_factory.php");
+require_once(__DIR__."/../http/classes/class_gui.php"); 
 
 //require_once(dirname(__FILE__)."/../http/classes/class_administration.php");
 //require_once dirname(__FILE__) . "/../http/php/mb_validatePermission.php";

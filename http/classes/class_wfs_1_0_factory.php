@@ -17,12 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_1_0.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_featuretype.php");
-require_once(dirname(__FILE__)."/../classes/class_connector.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_wfs_factory.php");
+require_once(__DIR__."/../classes/class_wfs_1_0.php");
+require_once(__DIR__."/../classes/class_wfs_featuretype.php");
+require_once(__DIR__."/../classes/class_connector.php");
+require_once(__DIR__."/../classes/class_administration.php");
 
 /**
  * Creates WFS 1.0 objects from a capabilities documents.
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../classes/class_administration.php");
  */
 class Wfs_1_0_Factory extends WfsFactory {
 
-	protected function createFeatureTypeFromUrl ($aWfs, $featureTypeName) {
+	protected function createFeatureTypeFromUrl ($aWfs = null, $featureTypeName = null) {
 		$url = $aWfs->describeFeatureType . 
 			$aWfs->getConjunctionCharacter($aWfs->describeFeatureType) . 
 			"&SERVICE=WFS&VERSION=" . $aWfs->getVersion() . 
@@ -54,7 +54,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 
 		// populate a Namespaces Hashtable where we can use the namespace as a lookup for the prefix
 		// and also keep a 
-		$namespaces = array();
+		$namespaces = [];
 		$namespaceList = $xpath->query("//namespace::*");
 		$targetNamespace = $doc->documentElement->getAttribute("targetNamespace");
 		$targetNamespaceNode = null;
@@ -68,7 +68,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 		}
 	
 
-		list($ftLocalname,$ftTypePrefix) = array_reverse(explode(":",$featureTypeName));
+		[$ftLocalname, $ftTypePrefix] = array_reverse(explode(":",(string) $featureTypeName));
 		// for the sake of simplicity we only care about top level elements. Seems to have worked so far
 		$query = sprintf("/xs:schema/xs:element[@name='%s']",$ftLocalname);
 		$elementList = $xpath->query($query);
@@ -88,7 +88,7 @@ class Wfs_1_0_Factory extends WfsFactory {
                 		// if the prefix is in the targetNamespace, changces are good it's defined in this very document
                 		// if the prefix is not in the targetNamespace, it's likely not defined here, and we bail
 
-                		list($elementTypeLocalname,$elementTypePrefix) = array_reverse(explode(":",$elementType));
+                		[$elementTypeLocalname, $elementTypePrefix] = array_reverse(explode(":",(string) $elementType));
                 		$elementTypeNamespace = $doc->lookupNamespaceURI($elementTypePrefix);
                 		if($elementTypeNamespace !== $targetNamespaceNode->nodeValue){
                     			$e = new mb_warning("Tried to parse FeatureTypeName $featureTypeName : $elementType is not in the targetNamespace");	
@@ -117,7 +117,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 					</xs:element>*/
 					$query = "xs:simpleType/xs:restriction";
 					$restriction = $xpath->query($query,$subElement);
-						
+
 					if (gettype($restriction->item(0)) == 'object') {
 						$type = $restriction->item(0)->getAttribute('base');
 					} else {
@@ -209,7 +209,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 				$myWfs->transaction = $myWfs->transaction[0];
 
 				$capFeatureTypes = $wfs10Cap->xpath('/wfs:WFS_Capabilities/wfs:FeatureTypeList/wfs:FeatureType');
-				
+
 				foreach ($capFeatureTypes as $featureType) {
 
 					$featuretype_name = $this->stripEndlineAndCarriageReturn($featureType->Name[0]);
@@ -228,8 +228,8 @@ class Wfs_1_0_Factory extends WfsFactory {
 					$featuretype_latlon_maxy = $featuretype_latlon_maxy[0];
 					//NOTICE: for WFS 1.0.0 latlonbbox is given in featuretypes SRS and not in EPSG:4326 - it has to be reprojected ;-)
 					$n = new mb_notice("Calculation of BBOX for EPSG:4326");
-					$pointMin = new Mapbender_point($featuretype_latlon_minx, $featuretype_latlon_miny, preg_replace("/EPSG:/", "", $featuretype_srs));
-					$pointMax = new Mapbender_point($featuretype_latlon_maxx, $featuretype_latlon_maxy, preg_replace("/EPSG:/", "", $featuretype_srs));
+					$pointMin = new Mapbender_point($featuretype_latlon_minx, $featuretype_latlon_miny, preg_replace("/EPSG:/", "", (string) $featuretype_srs));
+					$pointMax = new Mapbender_point($featuretype_latlon_maxx, $featuretype_latlon_maxy, preg_replace("/EPSG:/", "", (string) $featuretype_srs));
 					$pointMin->transform("4326");	
 					$pointMax->transform("4326");
 					if($pointMin->epsg != '' && $pointMin->x != '' && $pointMin->y != '' 
@@ -245,7 +245,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 					}
 					//<wfs:MetadataURL type="FGDC" format="text/xml">http://www.ogccatservice.com/csw.cgi?service=CSW&amp;version=2.0.0&amp;request=GetRecords&amp;constraintlanguage=CQL&amp;constraint="recordid=urn:uuid:4ee8b2d3-9409-4a1d-b26b-6782e4fa3d59"</wfs:MetadataURL>
 					$metadataURLArray = $featureType->MetadataURL;
-					$featuretype_metadataUrl = array();
+					$featuretype_metadataUrl = [];
 					$i_mdu = 0;
 					foreach ($metadataURLArray as $metadataURL) {
 						//$e = new mb_exception("other srs: ".$otherSRS);
@@ -273,7 +273,7 @@ class Wfs_1_0_Factory extends WfsFactory {
 							$myWfs->addFeatureType($currentFeatureType);
 						}
 					}
-					catch (Exception $e) {
+					catch (Exception) {
 						new mb_exception("Failed to load featuretype " . $featuretype_name);
 					}		
 				} //end for each featuretype

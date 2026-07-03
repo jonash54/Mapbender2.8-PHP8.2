@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../php/mb_validateSession.php";
-require_once dirname(__FILE__) . "/../classes/class_gui.php";
-require_once dirname(__FILE__) . "/../classes/class_user.php";
+require_once __DIR__ . "/../php/mb_validateSession.php";
+require_once __DIR__ . "/../classes/class_gui.php";
+require_once __DIR__ . "/../classes/class_user.php";
 
 $ajaxResponse = new AjaxResponse($_POST);
 
@@ -20,9 +20,7 @@ switch ($ajaxResponse->getMethod()) {
 
 		if (in_array($application->id, $apps)) {
 			$sql = $application->toSql();
-			$resultObj = array(
-				"sql" => $sql
-			);
+			$resultObj = ["sql" => $sql];
 			$ajaxResponse->setResult($resultObj);
 			$ajaxResponse->setSuccess(true);
 			break;

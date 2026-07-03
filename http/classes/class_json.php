@@ -17,13 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/system.php");
+require_once(__DIR__."/../../core/system.php");
 
 define("JSON_PEAR", "json_pear");
 define("JSON_NATIVE", "json_native");
 
 if (!function_exists("json_encode")) {
-	require_once(dirname(__FILE__)."/../extensions/JSON.php");
+	require_once(__DIR__."/../extensions/JSON.php");
 }
 
 /**
@@ -67,19 +67,19 @@ class Mapbender_JSON {
         private function json_fix_charset($var)
         {
             if (is_array($var)) {
-                $new = array();
+                $new = [];
                 foreach ($var as $k => $v) {
                     $new[$this->json_fix_charset($k)] = $this->json_fix_charset($v);
                 }
                 $var = $new;
             } elseif (is_object($var)) {
-                $vars = get_object_vars(get_class($var));
+                $vars = get_object_vars($var::class);
                 foreach ($vars as $m => $v) {
                     $var->$m = $this->json_fix_charset($v);
                 }
             } elseif (is_string($var)) {
 				if(mb_detect_encoding($var) != "UTF-8"){
-                	$var = utf8_encode($var);
+                	$var = mb_convert_encoding($var, 'UTF-8', 'ISO-8859-1');
 				}
             }
             return $var;
@@ -117,7 +117,7 @@ class Mapbender_JSON {
 			return $pear->decode($aString);
 		}
 		$e = new mb_notice("using native JSON");
-		return json_decode($aString);
+		return json_decode((string) $aString);
 	}
 }
 ?>

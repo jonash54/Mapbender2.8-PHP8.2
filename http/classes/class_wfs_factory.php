@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../classes/class_administration.php");
-require_once(dirname(__FILE__)."/../classes/class_ows_factory.php");
-require_once(dirname(__FILE__)."/../classes/class_wfs_featuretype.php");
+require_once(__DIR__."/../../core/globalSettings.php");
+require_once(__DIR__."/../classes/class_administration.php");
+require_once(__DIR__."/../classes/class_ows_factory.php");
+require_once(__DIR__."/../classes/class_wfs_featuretype.php");
 /**
  * 
  * @return 
@@ -41,8 +41,8 @@ abstract class WfsFactory extends OwsFactory {
 		$values = $admin->parseXml($xml);
 		
 		foreach ($values as $element) {
-			if(strtoupper($element['tag']) == "WFS_CAPABILITIES" && $element['type'] == "open"){
-				return $element['attributes'][version];
+			if(strtoupper((string) $element['tag']) == "WFS_CAPABILITIES" && $element['type'] == "open"){
+				return $element['attributes']["VERSION"];
 			}
 		}
 		throw new Exception("WFS version could not be determined from XML.");
@@ -72,8 +72,8 @@ abstract class WfsFactory extends OwsFactory {
 		}*/
 		// WFS
 		$sql = "SELECT * FROM wfs WHERE wfs_id = $1;";
-		$v = array($id);
-		$t = array("i");
+		$v = [$id];
+		$t = ["i"];
 		$res = db_prep_query($sql, $v, $t);
 		$cnt = 0;
 		while(db_fetch_row($res)){
@@ -131,24 +131,24 @@ abstract class WfsFactory extends OwsFactory {
 			}
 			// pull outputFormats
 			$sql_of = "SELECT * FROM wfs_output_formats WHERE fkey_wfs_id = $1";
-			$v = array($aWfs->id);
-			$t = array("i");
+			$v = [$aWfs->id];
+			$t = ["i"];
 			$res_of = db_prep_query($sql_of, $v, $t);
 			while($row = db_fetch_array($res_of)){
 				$aWfs->wfsOutputFormatArray[] = $row["output_format"];
 			}
 			//pull stored query ids
 			$sql_sq = "SELECT stored_query_id FROM wfs_conf WHERE fkey_wfs_id = $1";
-			$v = array($aWfs->id);
-			$t = array("i");
+			$v = [$aWfs->id];
+			$t = ["i"];
 			$res_sq = db_prep_query($sql_sq, $v, $t);
 			while($row = db_fetch_array($res_sq)){
 			    $aWfs->storedQueriesArray[] = $row["stored_query_id"];
 			}
 			// Featuretypes
 			$sql_fe = "SELECT * FROM wfs_featuretype WHERE fkey_wfs_id = $1 ORDER BY featuretype_id";
-			$v = array($aWfs->id);
-			$t = array("i");
+			$v = [$aWfs->id];
+			$t = ["i"];
 			$res_fe = db_prep_query($sql_fe, $v, $t);
 			$cnt_fe = 0;
 			
@@ -168,7 +168,7 @@ abstract class WfsFactory extends OwsFactory {
 				$this->featureTypeArray[$fe_cnt]->srs = $row["featuretype_srs"];
 				$latLonBbox = $row["featuretype_latlon_bbox"];
 				$e = new mb_notice("class_wfs_factory: FT latlonbbox: ".$latLonBbox);
-				$latLonBboxArray = explode(",", $latLonBbox);
+				$latLonBboxArray = explode(",", (string) $latLonBbox);
 				$this->featureTypeArray[$fe_cnt]->latLonBboxArray['minx'] = $latLonBboxArray[0];
 				$this->featureTypeArray[$fe_cnt]->latLonBboxArray['miny'] = $latLonBboxArray[1];
 				$this->featureTypeArray[$fe_cnt]->latLonBboxArray['maxx'] = $latLonBboxArray[2];
@@ -177,8 +177,8 @@ abstract class WfsFactory extends OwsFactory {
 	
 				// Elements
 				$sql_el = "SELECT * FROM wfs_element WHERE fkey_featuretype_id = $1 ORDER BY element_id";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array("i");
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ["i"];
 				$res_el = db_prep_query($sql_el, $v, $t);
 				$cnt_el = 0;
 				while(db_fetch_row($res_el)){
@@ -193,8 +193,8 @@ abstract class WfsFactory extends OwsFactory {
 	
 				// Crs
 				$sql_crs = "SELECT epsg FROM wfs_featuretype_epsg WHERE fkey_featuretype_id = $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array("i");
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ["i"];
 				$res_crs = db_prep_query($sql_crs, $v, $t);
 				$cnt_crs = 0;
 				while(db_fetch_row($res_crs)){
@@ -206,8 +206,8 @@ abstract class WfsFactory extends OwsFactory {
 				}
 				// outputFormats
 				$sql_outputformats = "SELECT output_format FROM wfs_featuretype_output_formats WHERE fkey_featuretype_id = $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array("i");
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ["i"];
 				$res_outputformats = db_prep_query($sql_outputformats, $v, $t);
 				$cnt_outputformats = 0;
 				while(db_fetch_row($res_outputformats)){
@@ -220,8 +220,8 @@ abstract class WfsFactory extends OwsFactory {
 				//
 				### read out keywords
 				$sql = "SELECT keyword FROM keyword, wfs_featuretype_keyword WHERE keyword_id = fkey_keyword_id AND fkey_featuretype_id = $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array('i');
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ['i'];
 				$res_ft_keywords = db_prep_query($sql,$v,$t);
 					
 				$count_ft_keywords=0;
@@ -231,8 +231,8 @@ abstract class WfsFactory extends OwsFactory {
 				}
 				### read out wfs_featuretype_md_topic_category
 				$sql = "SELECT fkey_md_topic_category_id FROM wfs_featuretype_md_topic_category WHERE fkey_featuretype_id =  $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array('i');
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ['i'];
 				$res_ft_md_topic_category = db_prep_query($sql,$v,$t);
 								
 				$count_ft_md_topic_category=0;
@@ -242,8 +242,8 @@ abstract class WfsFactory extends OwsFactory {
 				}
 				### read out wfs_featuretype_inspire_category
 				$sql = "SELECT fkey_inspire_category_id FROM wfs_featuretype_inspire_category WHERE fkey_featuretype_id =  $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array('i');
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ['i'];
 				$res_ft_inspire_category = db_prep_query($sql,$v,$t);
 								
 				$count_ft_inspire_category=0;
@@ -253,8 +253,8 @@ abstract class WfsFactory extends OwsFactory {
 				}
 				### read out wfs_featuretype_custom_category
 				$sql = "SELECT fkey_custom_category_id FROM wfs_featuretype_custom_category WHERE fkey_featuretype_id =  $1";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array('i');
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ['i'];
 				$res_ft_custom_category = db_prep_query($sql,$v,$t);
 								
 				$count_ft_custom_category=0;
@@ -268,8 +268,8 @@ abstract class WfsFactory extends OwsFactory {
 				$sql_metadata .= "(SELECT metadata_id FROM mb_metadata INNER JOIN (SELECT * from ows_relation_metadata WHERE ";
 				$sql_metadata .= "fkey_featuretype_id = $1) as relation ON  mb_metadata.metadata_id = relation.fkey_metadata_id AND ";
 				$sql_metadata .= "mb_metadata.origin = 'capabilities')";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array("i");
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ["i"];
 				$res_metadata = db_prep_query($sql_metadata, $v, $t);
 				$cnt_metadata = 0;
 				while(db_fetch_row($res_metadata)){
@@ -282,8 +282,8 @@ abstract class WfsFactory extends OwsFactory {
 	
 				//Namespaces
 				$sql_ns = "SELECT * FROM wfs_featuretype_namespace WHERE fkey_featuretype_id = $1 ORDER BY namespace";
-				$v = array($this->featureTypeArray[$fe_cnt]->id);
-				$t = array("i");
+				$v = [$this->featureTypeArray[$fe_cnt]->id];
+				$t = ["i"];
 				$res_ns = db_prep_query($sql_ns, $v, $t);
 				$cnt_ns = 0;
 				while(db_fetch_row($res_ns)){

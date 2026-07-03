@@ -5,9 +5,9 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_georss.php";
-require_once dirname(__FILE__) . "/../classes/class_bbox.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_georss.php";
+require_once __DIR__ . "/../classes/class_bbox.php";
 
 class GeoRssItem extends RssItem {
 	private $bbox;
@@ -27,7 +27,7 @@ class GeoRssItem extends RssItem {
 	}
 	//to note georss defines lat/lon not lon/lat
 	protected function getItemString () {
-		$str = parent::getItemString();
+		$str = null;
 		if (is_a($this->bbox, "Mapbender_bbox")) {
 			$str .= "<georss:box>" . 
 					$this->bbox->min->y . " " . 

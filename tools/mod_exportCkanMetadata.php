@@ -1,7 +1,7 @@
 <?php
 //should be invoked from cli!
-require_once(dirname(__FILE__)."/../core/globalSettings.php");
-require_once(dirname(__FILE__)."/../http/classes/class_connector.php");
+require_once(__DIR__."/../core/globalSettings.php");
+require_once(__DIR__."/../http/classes/class_connector.php");
 
 $mapbenderBaseUrl = "https://www.geoportal.rlp.de/mapbender/";
 
@@ -10,8 +10,8 @@ $connector = new connector();
 
 $orgaListResult = $connector->load($mapbenderBaseUrl . "php/mod_showOrganizationList.php");
 
-$orgaListObject = json_decode($orgaListResult);
-$orgaIdArray = array();
+$orgaListObject = json_decode((string) $orgaListResult);
+$orgaIdArray = [];
 
 $maxOrgaCount = 300;
 $orgaCount = 1;

@@ -1,8 +1,8 @@
 <?php
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once(dirname(__FILE__) . "/../../conf/mimetype.conf");
-require_once(dirname(__FILE__) . "/../classes/class_user.php");
-require_once(dirname(__FILE__) . "/../classes/class_administration.php");
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once(__DIR__ . "/../../conf/mimetype.conf");
+require_once(__DIR__ . "/../classes/class_user.php");
+require_once(__DIR__ . "/../classes/class_administration.php");
 
 $admin = new administration();
 $mapviewers = $admin->listMapviewerTypes();
@@ -17,7 +17,7 @@ function displayCategories ($sql) {
     $res = db_query($sql);
     while ($row = db_fetch_assoc($res)) {
         $str .= "<option value='" . $row["id"] . "'>" . 
-            htmlentities($row["name"], ENT_QUOTES, CHARSET) . 
+            htmlentities((string) $row["name"], ENT_QUOTES, CHARSET) . 
             "</option>";
     }
     return $str;
@@ -69,7 +69,7 @@ $(function() {
 		<legend><?php echo _mb("Coordinate Reference System");?><img class="help-dialog" title="<?php echo _mb("Help");?>" help="{text:'<?php echo _mb("Description of the coordinate reference system which is used by default in the application.");?>'}" src="../img/questionmark.png" alt="" /></legend>
 		<?php
 		    if (defined('SRS_ARRAY')) {
-			$srs_array = explode(",", SRS_ARRAY);
+			$srs_array = explode(",", (string) SRS_ARRAY);
 			echo '<select class="required ref_system_selectbox" name="ref_system" id="ref_system">';
 			foreach ($srs_array as $epsg) {
 				echo "<option value='" . "EPSG:" .$epsg . "'>" . _mb("EPSG:".$epsg) . "</option>";
@@ -251,7 +251,7 @@ $(function() {
             <?php
 	        $sql = "SELECT termsofuse_id, name FROM termsofuse";
 		$res = db_query($sql);
-		$termsofuse = array();
+		$termsofuse = [];
 		while ($row = db_fetch_assoc($res)) {
 			$termsofuse[$row["termsofuse_id"]] = $row["name"];
 		}
@@ -262,7 +262,7 @@ $(function() {
 		    <option value='0'>...</option>
 		    <?php
 			foreach ($termsofuse as $key => $value) {
-			    echo "<option value='" . $key . "'>" . htmlentities($value, ENT_QUOTES, CHARSET) . "</option>";
+			    echo "<option value='" . $key . "'>" . htmlentities((string) $value, ENT_QUOTES, CHARSET) . "</option>";
 			}
 		    ?>
 		</select>
@@ -298,10 +298,10 @@ $(function() {
 		$sql = "SELECT fkey_mb_group_id, mb_group_name FROM (SELECT fkey_mb_group_id FROM mb_user_mb_group WHERE fkey_mb_user_id = $1 AND (mb_user_mb_group_type = 3 OR mb_user_mb_group_type = 2)) AS a LEFT JOIN mb_group ON a.fkey_mb_group_id = mb_group.mb_group_id";
 		$user = new User();
 		$userId = $user->id;
-		$v = array($userId);
-		$t = array('i');
+		$v = [$userId];
+		$t = ['i'];
 		$res = db_prep_query($sql,$v,$t);
-		$metadataGroup = array();
+		$metadataGroup = [];
 		while ($row = db_fetch_assoc($res)) {
 			$metadataGroup[$row["fkey_mb_group_id"]] = $row["mb_group_name"];
 		}
@@ -312,7 +312,7 @@ $(function() {
 			<option value="">...</option>
 <?php
 	foreach ($metadataGroup as $key => $value) {
-		echo "<option value='" . $key . "'>" . htmlentities($value, ENT_QUOTES, CHARSET) . "</option>";
+		echo "<option value='" . $key . "'>" . htmlentities((string) $value, ENT_QUOTES, CHARSET) . "</option>";
 	}
 ?>
 		    </select>

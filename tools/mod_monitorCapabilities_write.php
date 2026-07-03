@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__)."/../lib/class_Monitor.php");
-require_once(dirname(__FILE__)."/../http/classes/class_mb_exception.php");
+require_once(__DIR__."/../lib/class_Monitor.php");
+require_once(__DIR__."/../http/classes/class_mb_exception.php");
 /*
  * incoming parameters from command line
  */
@@ -16,7 +16,7 @@ $serviceType = $_SERVER["argv"][2];
 
 $autoUpdate = intval($_SERVER["argv"][3]);
 
-$monitor = new Monitor($reportFile, $autoUpdate, dirname(__FILE__)."/tmp/", $serviceType);
+$monitor = new Monitor($reportFile, $autoUpdate, __DIR__."/tmp/", $serviceType);
 
 $monitor->updateInXMLReport();
 ?>

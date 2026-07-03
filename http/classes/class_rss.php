@@ -5,29 +5,29 @@
 # and Simplified BSD license.  
 # http://svn.osgeo.org/mapbender/trunk/mapbender/license/license.txt
 
-require_once dirname(__FILE__) . "/../../core/globalSettings.php";
-require_once dirname(__FILE__) . "/../classes/class_administration.php";
-require_once dirname(__FILE__) . "/../classes/class_rss_item.php";
+require_once __DIR__ . "/../../core/globalSettings.php";
+require_once __DIR__ . "/../classes/class_administration.php";
+require_once __DIR__ . "/../classes/class_rss_item.php";
 
 /**
  * Creates an RSS Feed.
  */
-class Rss {
-    var $filename;
-    var $channel_url;
-    var $channel_title;
-    var $channel_description;
-    var $channel_lang;
-    var $channel_copyright;
-    var $channel_date;
-    var $channel_creator;
-    var $channel_subject;   
-    var $image_url;
+class Rss implements \Stringable {
+    public $filename;
+    public $channel_url;
+    public $channel_title;
+    public $channel_description;
+    public $channel_lang;
+    public $channel_copyright;
+    public $channel_date;
+    public $channel_creator;
+    public $channel_subject;   
+    public $image_url;
     //var $maxEntries;
 
     //$this->maxEntries = 10;
 
-    protected $items = array();
+    protected $items = [];
     protected $nritems;
 	
 	//const MAX_ENTRIES = 10;
@@ -159,7 +159,7 @@ class Rss {
 		return null;
 	}
 
-    public function __toString () {
+    public function __toString (): string {
         $output =  '<?xml version="1.0" encoding="' . CHARSET . '"?>'."\n";
         $output .= '<rss ' . $this->getNamespaceString() . ' version="2.0">'."\n";
 //        $output .= '<rdf:RDF ' . $this->getNamespaceString() . '>'."\n";
@@ -167,7 +167,7 @@ class Rss {
         $output .= '<channel>'."\n";
         $output .= '<title>'.$this->channel_title.'</title>'."\n";
         $output .= '<link>'.htmlentities(
-				$this->channel_url,
+				(string) $this->channel_url,
 				ENT_QUOTES,
 				CHARSET
 			).'</link>'."\n";

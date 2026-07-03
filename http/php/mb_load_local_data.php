@@ -16,8 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require_once(dirname(__FILE__)."/../php/mb_validateSession.php");
-require_once(dirname(__FILE__) . "/../classes/class_wmc.php");
+require_once(__DIR__."/../php/mb_validateSession.php");
+require_once(__DIR__ . "/../classes/class_wmc.php");
 
 $user_id = Mapbender::session()->get("mb_user_id");
 
@@ -29,8 +29,8 @@ $form_target = $self;
 
 $sql = 'select wmc from mb_user_wmc where wmc_serial_id = $1 and wmc_has_local_data = 1 and (fkey_user_id = $2 or wmc_local_data_public = 1);';
 
-$v = array($wmc_serial_id, $user_id);
-$t = array("i", "i");
+$v = [$wmc_serial_id, $user_id];
+$t = ["i", "i"];
 $res = db_prep_query($sql, $v, $t);
 
 header("Content-Type: application/json");
